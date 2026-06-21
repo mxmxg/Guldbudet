@@ -59,6 +59,7 @@ export default function Navbar() {
               </Link>
             )}
             <button
+              type="button"
               onClick={handleLogout}
               className="text-gold-400 hover:text-gold-200 transition cursor-pointer"
             >
