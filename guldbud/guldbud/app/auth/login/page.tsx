@@ -25,10 +25,13 @@ function LoginForm() {
     setLoading(true)
     setError('')
     if (mode === 'login') {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) { setError(error.message); setLoading(false); return }
-      const { data: { user } } = await supabase.auth.getUser()
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user!.id).single()
+      const { error, data } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) { 
+        setError('Inloggningsfel: ' + error.message + ' (status: ' + error.status + ')')
+        setLoading(false)
+        return 
+      }
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
       router.push(profile?.role === 'dealer' ? '/dealer/dashboard' : '/')
       router.refresh()
     } else {
@@ -36,7 +39,11 @@ function LoginForm() {
         email, password,
         options: { data: { full_name: fullName, role, company_name: company } }
       })
-      if (error) { setError(error.message); setLoading(false); return }
+      if (error) { 
+        setError('Registreringsfel: ' + error.message)
+        setLoading(false)
+        return 
+      }
       router.push(role === 'dealer' ? '/auth/pending' : '/customer/submit')
     }
     setLoading(false)
