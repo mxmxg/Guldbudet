@@ -44,9 +44,14 @@ export default function Navbar() {
               </Link>
             )}
             {role === 'customer' && (
-              <Link href="/customer/submit" className="text-gold-200 hover:text-gold-100 transition">
-                Lägg ut föremål
-              </Link>
+              <>
+                <Link href="/customer/my-items" className="text-gold-200 hover:text-gold-100 transition">
+                  Mina föremål
+                </Link>
+                <Link href="/customer/submit" className="text-gold-200 hover:text-gold-100 transition">
+                  Lägg ut föremål
+                </Link>
+              </>
             )}
             <button onClick={handleLogout} className="text-gold-400 hover:text-gold-200 transition">
               Logga ut
