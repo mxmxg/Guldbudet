@@ -62,4 +62,12 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16
+          <div className="text-center py-16 text-stone-400 border border-dashed border-stone-200 rounded-xl">
+            <p className="text-lg mb-2">Inga aktiva auktioner just nu</p>
+            <p className="text-sm">Var den första att lägga ut ett föremål!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
