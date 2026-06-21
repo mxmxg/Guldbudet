@@ -1,10 +1,11 @@
 'use client'
+import { Suspense } from 'react'
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const params = useSearchParams()
   const [mode, setMode] = useState<'login' | 'register'>('login')
@@ -23,11 +24,11 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
-
     if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) { setError(error.message); setLoading(false); return }
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', (await supabase.auth.getUser()).data.user!.id).single()
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user!.id).single()
       router.push(profile?.role === 'dealer' ? '/dealer/dashboard' : '/')
       router.refresh()
     } else {
@@ -36,12 +37,7 @@ export default function LoginPage() {
         options: { data: { full_name: fullName, role, company_name: company } }
       })
       if (error) { setError(error.message); setLoading(false); return }
-      if (role === 'dealer') {
-        setError('')
-        router.push('/auth/pending')
-      } else {
-        router.push('/customer/submit')
-      }
+      router.push(role === 'dealer' ? '/auth/pending' : '/customer/submit')
     }
     setLoading(false)
   }
@@ -52,9 +48,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="text-2xl font-medium text-gold-900">◆ GuldBud</Link>
         </div>
-
         <div className="bg-white border border-stone-200 rounded-2xl p-8">
-          {/* Mode tabs */}
           <div className="flex rounded-lg overflow-hidden border border-stone-200 mb-6">
             {(['login', 'register'] as const).map(m => (
               <button key={m} onClick={() => setMode(m)}
@@ -63,8 +57,6 @@ export default function LoginPage() {
               </button>
             ))}
           </div>
-
-          {/* Role selector (only on register) */}
           {mode === 'register' && (
             <div className="flex gap-3 mb-5">
               {(['customer', 'dealer'] as const).map(r => (
@@ -75,41 +67,31 @@ export default function LoginPage() {
               ))}
             </div>
           )}
-
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {mode === 'register' && (
               <div>
                 <label className="block text-sm text-stone-600 mb-1">Namn</label>
-                <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
-                  placeholder="Anna Andersson" className="w-full" />
+                <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Anna Andersson" className="w-full" />
               </div>
             )}
             {mode === 'register' && role === 'dealer' && (
               <div>
                 <label className="block text-sm text-stone-600 mb-1">Företagsnamn</label>
-                <input type="text" required value={company} onChange={e => setCompany(e.target.value)}
-                  placeholder="Stockholms Guldhandel AB" className="w-full" />
+                <input type="text" required value={company} onChange={e => setCompany(e.target.value)} placeholder="Stockholms Guldhandel AB" className="w-full" />
               </div>
             )}
             <div>
               <label className="block text-sm text-stone-600 mb-1">E-post</label>
-              <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="namn@exempel.se" className="w-full" />
+              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="namn@exempel.se" className="w-full" />
             </div>
             <div>
               <label className="block text-sm text-stone-600 mb-1">Lösenord</label>
-              <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="Minst 6 tecken" className="w-full" />
+              <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} placeholder="Minst 6 tecken" className="w-full" />
             </div>
-
             {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
-
             {mode === 'register' && role === 'dealer' && (
-              <p className="text-xs text-stone-400 bg-stone-50 p-3 rounded-lg">
-                Handlarkonton granskas manuellt av vårt team. Du får ett e-postmeddelande när ditt konto är godkänt.
-              </p>
+              <p className="text-xs text-stone-400 bg-stone-50 p-3 rounded-lg">Handlarkonton granskas manuellt. Du får ett e-postmeddelande när ditt konto är godkänt.</p>
             )}
-
             <button type="submit" disabled={loading} className="btn-gold mt-1">
               {loading ? 'Väntar...' : mode === 'login' ? 'Logga in' : 'Skapa konto'}
             </button>
@@ -117,5 +99,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Laddar...</div>}>
+      <LoginForm />
+    </Suspense>
   )
 }
