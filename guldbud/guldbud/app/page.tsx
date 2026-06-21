@@ -1,122 +1,65 @@
-'use client'
-import { Suspense } from 'react'
-import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase-server'
+import { Item } from '@/lib/types'
+import Navbar from '@/components/Navbar'
+import AuctionCard from '@/components/AuctionCard'
 
-function LoginForm() {
-  const router = useRouter()
-  const params = useSearchParams()
-  const [mode, setMode] = useState<'login' | 'register'>('login')
-  const [role, setRole] = useState<'customer' | 'dealer'>(
-    params.get('role') === 'dealer' ? 'dealer' : 'customer'
-  )
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [company, setCompany] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+export default async function HomePage() {
   const supabase = createClient()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    if (mode === 'login') {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) { setError(error.message); setLoading(false); return }
-      const { data: { user } } = await supabase.auth.getUser()
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user!.id).single()
-      router.push(profile?.role === 'dealer' ? '/dealer/dashboard' : '/')
-      router.refresh()
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email, password,
-        options: { data: { full_name: fullName, role, company_name: company } }
-      })
-      if (error) { setError(error.message); setLoading(false); return }
-      if (role === 'dealer') {
-        router.push('/auth/pending')
-      } else {
-        router.push('/customer/submit')
-      }
-    }
-    setLoading(false)
-  }
+  const { data: items } = await supabase
+    .from('items')
+    .select('*, profiles(full_name)')
+    .eq('status', 'active')
+    .order('auction_ends_at', { ascending: true })
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-medium text-gold-900">◆ GuldBud</Link>
-        </div>
-        <div className="bg-white border border-stone-200 rounded-2xl p-8">
-          <div className="flex rounded-lg overflow-hidden border border-stone-200 mb-6">
-            {(['login', 'register'] as const).map(m => (
-              <button key={m} onClick={() => setMode(m)}
-                className={`flex-1 py-2 text-sm font-medium transition ${mode === m ? 'bg-gold-900 text-white' : 'text-stone-500 hover:bg-stone-50'}`}>
-                {m === 'login' ? 'Logga in' : 'Registrera'}
-              </button>
-            ))}
+    <div className="min-h-screen">
+      <Navbar />
+      <div className="bg-gold-900 text-white py-16 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-gold-100 text-sm tracking-widest uppercase mb-3">Sveriges guldauktion</p>
+          <h1 className="text-4xl font-medium mb-4 text-gold-100">
+            Sälj ditt guld till rätt pris
+          </h1>
+          <p className="text-gold-200 text-lg mb-8">
+            Lägg ut ditt guldföremål – auktoriserade handlare budar direkt mot varandra.
+            Du får det bästa priset, enkelt och tryggt.
+          </p>
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Link href="/customer/submit" className="bg-gold-400 hover:bg-gold-500 text-white font-medium rounded-lg px-6 py-3 transition">
+              Lägg ut ett föremål
+            </Link>
+            <Link href="/auth/login?role=dealer" className="border border-gold-400 text-gold-100 hover:bg-gold-800 font-medium rounded-lg px-6 py-3 transition">
+              Logga in som handlare
+            </Link>
           </div>
-          {mode === 'register' && (
-            <div className="flex gap-3 mb-5">
-              {(['customer', 'dealer'] as const).map(r => (
-                <button key={r} onClick={() => setRole(r)}
-                  className={`flex-1 py-3 rounded-lg border text-sm font-medium transition ${role === r ? 'border-gold-400 bg-gold-50 text-gold-700' : 'border-stone-200 text-stone-500 hover:border-stone-300'}`}>
-                  {r === 'customer' ? '🏠 Privatperson' : '🏪 Guldhandlare'}
-                </button>
-              ))}
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {mode === 'register' && (
-              <div>
-                <label className="block text-sm text-stone-600 mb-1">Namn</label>
-                <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)}
-                  placeholder="Anna Andersson" className="w-full" />
-              </div>
-            )}
-            {mode === 'register' && role === 'dealer' && (
-              <div>
-                <label className="block text-sm text-stone-600 mb-1">Företagsnamn</label>
-                <input type="text" required value={company} onChange={e => setCompany(e.target.value)}
-                  placeholder="Stockholms Guldhandel AB" className="w-full" />
-              </div>
-            )}
-            <div>
-              <label className="block text-sm text-stone-600 mb-1">E-post</label>
-              <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="namn@exempel.se" className="w-full" />
-            </div>
-            <div>
-              <label className="block text-sm text-stone-600 mb-1">Lösenord</label>
-              <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="Minst 6 tecken" className="w-full" />
-            </div>
-            {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
-            {mode === 'register' && role === 'dealer' && (
-              <p className="text-xs text-stone-400 bg-stone-50 p-3 rounded-lg">
-                Handlarkonton granskas manuellt. Du får ett e-postmeddelande när ditt konto är godkänt.
-              </p>
-            )}
-            <button type="submit" disabled={loading} className="btn-gold mt-1">
-              {loading ? 'Väntar...' : mode === 'login' ? 'Logga in' : 'Skapa konto'}
-            </button>
-          </form>
         </div>
       </div>
-    </div>
-  )
-}
 
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Laddar...</div>}>
-      <LoginForm />
-    </Suspense>
-  )
-}
+      <div className="bg-white border-b border-stone-200 py-10 px-4">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          {[
+            { step: '1', title: 'Fotografera', desc: 'Ta bilder på föremålet och fyll i vikt och karat.' },
+            { step: '2', title: 'Handlare budar', desc: 'Anslutna guldhandlare ser ditt föremål och budar mot varandra.' },
+            { step: '3', title: 'Du väljer', desc: 'Du accepterar det bud du vill ha och kontaktas av handlaren.' },
+          ].map(s => (
+            <div key={s.step}>
+              <div className="w-10 h-10 rounded-full bg-gold-100 text-gold-700 font-medium text-lg flex items-center justify-center mx-auto mb-3">{s.step}</div>
+              <h3 className="font-medium text-stone-900 mb-1">{s.title}</h3>
+              <p className="text-stone-500 text-sm">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        <h2 className="text-xl font-medium text-stone-800 mb-6">Pågående auktioner</h2>
+        {items && items.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {items.map(item => (
+              <AuctionCard key={item.id} item={item as Item} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16
