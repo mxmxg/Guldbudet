@@ -31,7 +31,13 @@ function LoginForm() {
         return
       }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-      window.location.href = profile?.role === 'dealer' ? '/dealer/dashboard' : '/'
+      if (profile?.role === 'dealer') {
+        window.location.href = '/dealer/dashboard'
+      } else if (profile?.role === 'admin') {
+        window.location.href = '/admin'
+      } else {
+        window.location.href = '/'
+      }
     } else {
       const { error } = await supabase.auth.signUp({
         email, password,
