@@ -53,7 +53,15 @@ export default function Navbar() {
                 </Link>
               </>
             )}
-            <button onClick={handleLogout} className="text-gold-400 hover:text-gold-200 transition">
+            {role === 'admin' && (
+              <Link href="/admin" className="text-gold-200 hover:text-gold-100 transition">
+                Adminpanel
+              </Link>
+            )}
+            <button
+              onClick={handleLogout}
+              className="text-gold-400 hover:text-gold-200 transition cursor-pointer"
+            >
               Logga ut
             </button>
           </>
