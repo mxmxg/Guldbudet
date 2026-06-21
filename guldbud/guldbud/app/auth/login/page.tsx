@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 
 function LoginForm() {
-  const router = useRouter()
   const params = useSearchParams()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [role, setRole] = useState<'customer' | 'dealer'>(
@@ -26,25 +25,24 @@ function LoginForm() {
     setError('')
     if (mode === 'login') {
       const { error, data } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) { 
-        setError('Inloggningsfel: ' + error.message + ' (status: ' + error.status + ')')
+      if (error) {
+        setError('Fel: ' + error.message)
         setLoading(false)
-        return 
+        return
       }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-      router.push(profile?.role === 'dealer' ? '/dealer/dashboard' : '/')
-      router.refresh()
+      window.location.href = profile?.role === 'dealer' ? '/dealer/dashboard' : '/'
     } else {
       const { error } = await supabase.auth.signUp({
         email, password,
         options: { data: { full_name: fullName, role, company_name: company } }
       })
-      if (error) { 
-        setError('Registreringsfel: ' + error.message)
+      if (error) {
+        setError('Fel: ' + error.message)
         setLoading(false)
-        return 
+        return
       }
-      router.push(role === 'dealer' ? '/auth/pending' : '/customer/submit')
+      window.location.href = role === 'dealer' ? '/auth/pending' : '/customer/submit'
     }
     setLoading(false)
   }
