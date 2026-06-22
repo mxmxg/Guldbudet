@@ -1,4 +1,4 @@
-'use client' 
+'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import Image from 'next/image'
@@ -37,7 +37,8 @@ export default function AuctionDetails({ item }: { item: any }) {
 
   const topBid = bids[0]
   const topAmount = topBid?.amount || 0
-  const isOwner = user?.id === item.owner_id
+  const isOwner = user?.id === item.owner_id && profile?.role !== 'admin'
+  const isAdmin = profile?.role === 'admin'
   const isClosed = item.status === 'closed'
 
   return (
@@ -91,6 +92,13 @@ export default function AuctionDetails({ item }: { item: any }) {
             <p className="text-xs text-stone-400 mt-1">{bids.length} bud totalt</p>
           </div>
 
+          {/* Admin-vy */}
+          {isAdmin && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+              <p className="text-amber-700 text-sm font-medium">Adminvy — du kan inte buda eller acceptera</p>
+            </div>
+          )}
+
           {/* Acceptera bud — bara för ägaren när auktionen är aktiv och det finns bud */}
           {isOwner && !isClosed && topBid && (
             <AcceptBid
@@ -118,7 +126,7 @@ export default function AuctionDetails({ item }: { item: any }) {
           )}
 
           {/* Budformulär — bara för handlare */}
-          {!isOwner && !isClosed && profile?.role === 'dealer' && (
+          {!isOwner && !isAdmin && !isClosed && profile?.role === 'dealer' && (
             <BidSection itemId={item.id} currentTop={topAmount} />
           )}
 
