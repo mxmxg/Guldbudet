@@ -2,7 +2,6 @@
 import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import { useRouter } from 'next/navigation'
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null)
@@ -11,7 +10,6 @@ export default function Navbar() {
   const [showNotifs, setShowNotifs] = useState(false)
   const supabase = createClient()
   const notifRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -62,7 +60,7 @@ export default function Navbar() {
     await supabase.from('notifications').update({ read: true }).eq('id', n.id)
     setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))
     setShowNotifs(false)
-    if (n.item_id) router.push(`/auctions/${n.item_id}`)
+    if (n.item_id) window.location.href = `/auctions/${n.item_id}`
   }
 
   const markAllAsRead = async () => {
