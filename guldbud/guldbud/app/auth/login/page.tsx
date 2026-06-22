@@ -33,8 +33,6 @@ function LoginForm() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
       if (profile?.role === 'dealer') {
         window.location.href = '/dealer/dashboard'
-      } else if (profile?.role === 'admin') {
-        window.location.href = '/admin'
       } else {
         window.location.href = '/'
       }
