@@ -22,12 +22,20 @@ export default function Navbar() {
         setRole(profile?.role ?? null)
       }
     })
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        setUser(null)
+        setRole(null)
+      }
+    })
+
+    return () => listener.subscription.unsubscribe()
   }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    window.location.href = '/'
   }
 
   return (
