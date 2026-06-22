@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { useRouter } from 'next/navigation'
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null)
@@ -10,6 +11,7 @@ export default function Navbar() {
   const [showNotifs, setShowNotifs] = useState(false)
   const supabase = createClient()
   const notifRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -56,9 +58,11 @@ export default function Navbar() {
     setNotifications(data || [])
   }
 
-  const markAsRead = async (id: string) => {
-    await supabase.from('notifications').update({ read: true }).eq('id', id)
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+  const handleNotifClick = async (n: any) => {
+    await supabase.from('notifications').update({ read: true }).eq('id', n.id)
+    setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))
+    setShowNotifs(false)
+    if (n.item_id) router.push(`/auctions/${n.item_id}`)
   }
 
   const markAllAsRead = async () => {
@@ -146,7 +150,7 @@ export default function Navbar() {
                         notifications.map(n => (
                           <div
                             key={n.id}
-                            onClick={() => markAsRead(n.id)}
+                            onClick={() => handleNotifClick(n)}
                             className={`px-4 py-3 border-b border-stone-50 cursor-pointer hover:bg-stone-50 transition ${!n.read ? 'bg-amber-50' : ''}`}
                           >
                             <p className={`text-sm font-medium ${!n.read ? 'text-stone-900' : 'text-stone-500'}`}>
@@ -156,6 +160,9 @@ export default function Navbar() {
                             <p className="text-xs text-stone-300 mt-1">
                               {new Date(n.created_at).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                             </p>
+                            {n.item_id && (
+                              <p className="text-xs text-[#B8860B] mt-1">Klicka för att se auktionen →</p>
+                            )}
                           </div>
                         ))
                       )}
