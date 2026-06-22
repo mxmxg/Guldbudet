@@ -5,32 +5,62 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 
-function validateForm(fields: any, role: string): string | null {
-  const { fullName, phone, personalNumber, address, postalCode, city, company, orgNumber } = fields
-
-  const nameParts = fullName.trim().split(' ').filter(Boolean)
-  if (nameParts.length < 2) return 'Ange både förnamn och efternamn.'
-  if (/\d/.test(fullName)) return 'Namnet får inte innehålla siffror.'
-
-  const phoneClean = phone.replace(/[\s-]/g, '')
-  if (!/^07\d{8}$/.test(phoneClean)) return 'Telefonnummer måste börja med 07 och ha 10 siffror, t.ex. 0701234567.'
-
-  const pnClean = personalNumber.replace('-', '')
-  if (!/^\d{6}\d{4}$/.test(pnClean)) return 'Personnummer måste ha formatet ÅÅMMDD-XXXX.'
-
-  if (address.trim().length < 5) return 'Ange en giltig gatuadress.'
-
-  if (!/^\d{3}\s?\d{2}$/.test(postalCode.trim())) return 'Postnummer måste ha formatet 123 45.'
-
-  if (city.trim().length < 2) return 'Ange en giltig stad.'
-
-  if (role === 'dealer') {
-    if (company.trim().length < 2) return 'Ange ett giltigt företagsnamn.'
-    const orgClean = orgNumber.replace('-', '')
-    if (!/^\d{6}\d{4}$/.test(orgClean)) return 'Organisationsnummer måste ha formatet 556789-1234.'
+function validateField(name: string, value: string, role: string): string {
+  switch (name) {
+    case 'fullName': {
+      const parts = value.trim().split(' ').filter(Boolean)
+      if (parts.length < 2) return 'Ange både förnamn och efternamn.'
+      if (/\d/.test(value)) return 'Namnet får inte innehålla siffror.'
+      return ''
+    }
+    case 'phone': {
+      const clean = value.replace(/[\s-]/g, '')
+      if (!/^07\d{8}$/.test(clean)) return 'Måste börja med 07 och ha 10 siffror.'
+      return ''
+    }
+    case 'personalNumber': {
+      const clean = value.replace('-', '')
+      if (!/^\d{10}$/.test(clean)) return 'Format: ÅÅMMDD-XXXX.'
+      return ''
+    }
+    case 'address':
+      if (value.trim().length < 5) return 'Ange en giltig gatuadress.'
+      return ''
+    case 'postalCode':
+      if (!/^\d{3}\s?\d{2}$/.test(value.trim())) return 'Format: 123 45.'
+      return ''
+    case 'city':
+      if (value.trim().length < 2) return 'Ange en giltig stad.'
+      return ''
+    case 'company':
+      if (role === 'dealer' && value.trim().length < 2) return 'Ange ett giltigt företagsnamn.'
+      return ''
+    case 'orgNumber': {
+      if (role !== 'dealer') return ''
+      const clean = value.replace('-', '')
+      if (!/^\d{10}$/.test(clean)) return 'Format: 556789-1234.'
+      return ''
+    }
+    default:
+      return ''
   }
+}
 
-  return null
+function Field({ label, name, type = 'text', value, onChange, onBlur, error, placeholder }: any) {
+  return (
+    <div>
+      <label className="block text-sm text-stone-600 mb-1">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        placeholder={placeholder}
+        className={`w-full border rounded-lg px-3 py-2 text-sm outline-none transition ${error ? 'border-red-400 bg-red-50 focus:border-red-400' : 'border-stone-200 focus:border-gold-400'}`}
+      />
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+  )
 }
 
 function LoginForm() {
@@ -39,17 +69,12 @@ function LoginForm() {
   const [role, setRole] = useState<'customer' | 'dealer'>(
     params.get('role') === 'dealer' ? 'dealer' : 'customer'
   )
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [personalNumber, setPersonalNumber] = useState('')
-  const [address, setAddress] = useState('')
-  const [postalCode, setPostalCode] = useState('')
-  const [city, setCity] = useState('')
-  const [company, setCompany] = useState('')
-  const [orgNumber, setOrgNumber] = useState('')
-  const [error, setError] = useState('')
+  const [fields, setFields] = useState({
+    fullName: '', phone: '', personalNumber: '', address: '',
+    postalCode: '', city: '', company: '', orgNumber: '', email: '', password: ''
+  })
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [submitError, setSubmitError] = useState('')
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
@@ -57,56 +82,66 @@ function LoginForm() {
     if (params.get('mode') === 'register') setMode('register')
   }, [])
 
+  const set = (name: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setFields(f => ({ ...f, [name]: e.target.value }))
+
+  const blur = (name: string) => () =>
+    setTouched(t => ({ ...t, [name]: true }))
+
+  const err = (name: string) =>
+    touched[name] ? validateField(name, fields[name], role) : ''
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
+    setSubmitError('')
 
     if (mode === 'register') {
-      const validationError = validateForm(
-        { fullName, phone, personalNumber, address, postalCode, city, company, orgNumber },
-        role
-      )
-      if (validationError) {
-        setError(validationError)
+      const registerFields = ['fullName', 'phone', 'personalNumber', 'address', 'postalCode', 'city']
+      if (role === 'dealer') registerFields.push('company', 'orgNumber')
+      
+      const allTouched = Object.fromEntries(registerFields.map(f => [f, true]))
+      setTouched(t => ({ ...t, ...allTouched }))
+      
+      const hasErrors = registerFields.some(f => validateField(f, fields[f], role))
+      if (hasErrors) {
+        setSubmitError('Kontrollera fälten ovan.')
         setLoading(false)
         return
       }
     }
 
     if (mode === 'login') {
-      const { error, data } = await supabase.auth.signInWithPassword({ email, password })
+      const { error, data } = await supabase.auth.signInWithPassword({
+        email: fields.email, password: fields.password
+      })
       if (error) {
-        setError('Fel e-post eller lösenord.')
+        setSubmitError('Fel e-post eller lösenord.')
         setLoading(false)
         return
       }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-      if (profile?.role === 'dealer') {
-        window.location.href = '/dealer/dashboard'
-      } else {
-        window.location.href = '/'
-      }
+      window.location.href = profile?.role === 'dealer' ? '/dealer/dashboard' : '/'
     } else {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: fields.email,
+        password: fields.password,
         options: {
           data: {
-            full_name: fullName,
+            full_name: fields.fullName,
             role,
-            phone,
-            personal_number: personalNumber,
-            address,
-            postal_code: postalCode,
-            city,
-            company_name: company,
-            org_number: orgNumber,
+            phone: fields.phone,
+            personal_number: fields.personalNumber,
+            address: fields.address,
+            postal_code: fields.postalCode,
+            city: fields.city,
+            company_name: fields.company,
+            org_number: fields.orgNumber,
           }
         }
       })
       if (error) {
-        setError('Fel: ' + error.message)
+        setSubmitError('Fel: ' + error.message)
         setLoading(false)
         return
       }
@@ -145,42 +180,22 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {mode === 'register' && (
               <>
-                <div>
-                  <label className="block text-sm text-stone-600 mb-1">Namn</label>
-                  <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Anna Andersson" className="w-full" />
-                </div>
-                <div>
-                  <label className="block text-sm text-stone-600 mb-1">Telefon</label>
-                  <input type="tel" required value={phone} onChange={e => setPhone(e.target.value)} placeholder="0701234567" className="w-full" />
-                </div>
-                <div>
-                  <label className="block text-sm text-stone-600 mb-1">Personnummer</label>
-                  <input type="text" required value={personalNumber} onChange={e => setPersonalNumber(e.target.value)} placeholder="ÅÅMMDD-XXXX" className="w-full" />
-                </div>
-                <div>
-                  <label className="block text-sm text-stone-600 mb-1">Adress</label>
-                  <input type="text" required value={address} onChange={e => setAddress(e.target.value)} placeholder="Storgatan 1" className="w-full" />
-                </div>
+                <Field label="Namn" name="fullName" value={fields.fullName} onChange={set('fullName')} onBlur={blur('fullName')} error={err('fullName')} placeholder="Anna Andersson" />
+                <Field label="Telefon" name="phone" type="tel" value={fields.phone} onChange={set('phone')} onBlur={blur('phone')} error={err('phone')} placeholder="0701234567" />
+                <Field label="Personnummer" name="personalNumber" value={fields.personalNumber} onChange={set('personalNumber')} onBlur={blur('personalNumber')} error={err('personalNumber')} placeholder="ÅÅMMDD-XXXX" />
+                <Field label="Adress" name="address" value={fields.address} onChange={set('address')} onBlur={blur('address')} error={err('address')} placeholder="Storgatan 1" />
                 <div className="flex gap-3">
                   <div className="w-1/3">
-                    <label className="block text-sm text-stone-600 mb-1">Postnummer</label>
-                    <input type="text" required value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="123 45" className="w-full" />
+                    <Field label="Postnummer" name="postalCode" value={fields.postalCode} onChange={set('postalCode')} onBlur={blur('postalCode')} error={err('postalCode')} placeholder="123 45" />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-sm text-stone-600 mb-1">Stad</label>
-                    <input type="text" required value={city} onChange={e => setCity(e.target.value)} placeholder="Stockholm" className="w-full" />
+                    <Field label="Stad" name="city" value={fields.city} onChange={set('city')} onBlur={blur('city')} error={err('city')} placeholder="Stockholm" />
                   </div>
                 </div>
                 {role === 'dealer' && (
                   <>
-                    <div>
-                      <label className="block text-sm text-stone-600 mb-1">Företagsnamn</label>
-                      <input type="text" required value={company} onChange={e => setCompany(e.target.value)} placeholder="Stockholms Guldhandel AB" className="w-full" />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-stone-600 mb-1">Organisationsnummer</label>
-                      <input type="text" required value={orgNumber} onChange={e => setOrgNumber(e.target.value)} placeholder="556789-1234" className="w-full" />
-                    </div>
+                    <Field label="Företagsnamn" name="company" value={fields.company} onChange={set('company')} onBlur={blur('company')} error={err('company')} placeholder="Stockholms Guldhandel AB" />
+                    <Field label="Organisationsnummer" name="orgNumber" value={fields.orgNumber} onChange={set('orgNumber')} onBlur={blur('orgNumber')} error={err('orgNumber')} placeholder="556789-1234" />
                   </>
                 )}
               </>
@@ -188,14 +203,16 @@ function LoginForm() {
 
             <div>
               <label className="block text-sm text-stone-600 mb-1">E-post</label>
-              <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="namn@exempel.se" className="w-full" />
+              <input type="email" required value={fields.email} onChange={set('email')} placeholder="namn@exempel.se"
+                className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-gold-400 transition" />
             </div>
             <div>
               <label className="block text-sm text-stone-600 mb-1">Lösenord</label>
-              <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} placeholder="Minst 6 tecken" className="w-full" />
+              <input type="password" required minLength={6} value={fields.password} onChange={set('password')} placeholder="Minst 6 tecken"
+                className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-gold-400 transition" />
             </div>
 
-            {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
+            {submitError && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{submitError}</p>}
 
             {mode === 'register' && role === 'dealer' && (
               <p className="text-xs text-stone-400 bg-stone-50 p-3 rounded-lg">
