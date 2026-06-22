@@ -179,6 +179,9 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              <Link href="/how-it-works" className="text-[#c9a84c] hover:text-[#D4AF37] transition">
+                Så fungerar det
+              </Link>
               <Link href="/auth/login" className="text-[#c9a84c] hover:text-[#D4AF37] transition">
                 Logga in
               </Link>
