@@ -101,14 +101,9 @@ export default function Navbar() {
                 </>
               )}
               {role === 'dealer' && (
-                <>
-                  <Link href="/dealer/dashboard" className="text-[#c9a84c] hover:text-[#D4AF37] transition">
-                    Auktioner
-                  </Link>
-                  <Link href="/dealer/my-bids" className="text-[#c9a84c] hover:text-[#D4AF37] transition">
-                    Mina bud
-                  </Link>
-                </>
+                <Link href="/dealer/dashboard" className="text-[#c9a84c] hover:text-[#D4AF37] transition">
+                  Auktioner
+                </Link>
               )}
               {role === 'admin' && (
                 <>
