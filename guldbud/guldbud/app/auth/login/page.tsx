@@ -5,6 +5,34 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 
+function validateForm(fields: any, role: string): string | null {
+  const { fullName, phone, personalNumber, address, postalCode, city, company, orgNumber } = fields
+
+  const nameParts = fullName.trim().split(' ').filter(Boolean)
+  if (nameParts.length < 2) return 'Ange både förnamn och efternamn.'
+  if (/\d/.test(fullName)) return 'Namnet får inte innehålla siffror.'
+
+  const phoneClean = phone.replace(/[\s-]/g, '')
+  if (!/^07\d{8}$/.test(phoneClean)) return 'Telefonnummer måste börja med 07 och ha 10 siffror, t.ex. 0701234567.'
+
+  const pnClean = personalNumber.replace('-', '')
+  if (!/^\d{6}\d{4}$/.test(pnClean)) return 'Personnummer måste ha formatet ÅÅMMDD-XXXX.'
+
+  if (address.trim().length < 5) return 'Ange en giltig gatuadress.'
+
+  if (!/^\d{3}\s?\d{2}$/.test(postalCode.trim())) return 'Postnummer måste ha formatet 123 45.'
+
+  if (city.trim().length < 2) return 'Ange en giltig stad.'
+
+  if (role === 'dealer') {
+    if (company.trim().length < 2) return 'Ange ett giltigt företagsnamn.'
+    const orgClean = orgNumber.replace('-', '')
+    if (!/^\d{6}\d{4}$/.test(orgClean)) return 'Organisationsnummer måste ha formatet 556789-1234.'
+  }
+
+  return null
+}
+
 function LoginForm() {
   const params = useSearchParams()
   const [mode, setMode] = useState<'login' | 'register'>('login')
@@ -33,6 +61,18 @@ function LoginForm() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    if (mode === 'register') {
+      const validationError = validateForm(
+        { fullName, phone, personalNumber, address, postalCode, city, company, orgNumber },
+        role
+      )
+      if (validationError) {
+        setError(validationError)
+        setLoading(false)
+        return
+      }
+    }
 
     if (mode === 'login') {
       const { error, data } = await supabase.auth.signInWithPassword({ email, password })
@@ -111,7 +151,7 @@ function LoginForm() {
                 </div>
                 <div>
                   <label className="block text-sm text-stone-600 mb-1">Telefon</label>
-                  <input type="tel" required value={phone} onChange={e => setPhone(e.target.value)} placeholder="070-123 45 67" className="w-full" />
+                  <input type="tel" required value={phone} onChange={e => setPhone(e.target.value)} placeholder="0701234567" className="w-full" />
                 </div>
                 <div>
                   <label className="block text-sm text-stone-600 mb-1">Personnummer</label>
