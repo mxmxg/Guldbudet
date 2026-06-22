@@ -1,6 +1,6 @@
 'use client'
 import { Suspense } from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
@@ -25,6 +25,10 @@ function LoginForm() {
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
+  useEffect(() => {
+    if (params.get('mode') === 'register') setMode('register')
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -33,7 +37,7 @@ function LoginForm() {
     if (mode === 'login') {
       const { error, data } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
-        setError('Fel: ' + error.message)
+        setError('Fel e-post eller lösenord.')
         setLoading(false)
         return
       }
@@ -161,7 +165,8 @@ function LoginForm() {
 
             {mode === 'register' && (
               <p className="text-xs text-stone-400">
-                Dina personuppgifter hanteras säkert och delas aldrig med tredje part. <Link href="/privacy" className="underline">Integritetspolicy</Link>
+                Dina personuppgifter hanteras säkert och delas aldrig med tredje part.{' '}
+                <Link href="/privacy" className="underline">Integritetspolicy</Link>
               </p>
             )}
 
