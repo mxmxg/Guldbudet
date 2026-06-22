@@ -52,7 +52,7 @@ export default function HowItWorksPage() {
               step: '5',
               time: 'Samma dag',
               title: 'Skicka med rekommenderad försäkrad post',
-              desc: 'Vi skickar en förbetald fraktetikett direkt till din e-post. Paketet ska skickas som rekommenderat och försäkrat brev — vi täcker fraktkostnaden.',
+              desc: 'Säljaren ansvarar för att skicka föremålet med rekommenderat och försäkrat brev. Vi hjälper dig välja rätt fraktalternativ baserat på föremålets värde.',
               color: 'bg-orange-100 text-orange-700 border-orange-200',
             },
             {
@@ -66,8 +66,8 @@ export default function HowItWorksPage() {
               step: '7',
               time: 'Samma dag',
               title: 'Pengarna på ditt konto',
-              desc: 'Utbetalning sker via banköverföring samma dag som vi verifierat föremålet. Totalt tar hela processen 4–5 dagar.',
-              color: 'bg-gold-100 text-amber-700 border-amber-200',
+              desc: 'Utbetalning sker via Swish samma dag som vi verifierat föremålet. Totalt tar hela processen 4–5 dagar.',
+              color: 'bg-amber-100 text-amber-700 border-amber-200',
             },
           ].map((s, i) => (
             <div key={i} className="bg-white border border-stone-200 rounded-xl p-6 flex gap-5">
@@ -113,7 +113,7 @@ export default function HowItWorksPage() {
               },
               {
                 q: 'Hur skickar jag föremålet på ett säkert sätt?',
-                a: 'Vi skickar en förbetald fraktetikett för rekommenderat och försäkrat brev. Paketet är försäkrat upp till 50 000 kr under transporten.',
+                a: 'Säljaren ansvarar för att skicka föremålet med rekommenderat och försäkrat brev. Vi hjälper dig välja rätt fraktalternativ baserat på föremålets värde så att det är fullt försäkrat under transporten.',
               },
             ].map((faq, i) => (
               <div key={i} className="bg-white border border-stone-200 rounded-xl p-5">
