@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
+import Navbar from '@/components/Navbar'
 
 export default function AdminPage() {
   const [pendingDealers, setPendingDealers] = useState<any[]>([])
@@ -52,6 +53,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-stone-50">
+      <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-10">
         <h1 className="text-2xl font-medium text-stone-900 mb-8">⚙️ Adminpanel</h1>
 
