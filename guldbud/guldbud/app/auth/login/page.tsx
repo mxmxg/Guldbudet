@@ -1,7 +1,7 @@
 'use client'
 import { Suspense } from 'react'
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 
@@ -14,7 +14,13 @@ function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [personalNumber, setPersonalNumber] = useState('')
+  const [address, setAddress] = useState('')
+  const [postalCode, setPostalCode] = useState('')
+  const [city, setCity] = useState('')
   const [company, setCompany] = useState('')
+  const [orgNumber, setOrgNumber] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
@@ -23,6 +29,7 @@ function LoginForm() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
     if (mode === 'login') {
       const { error, data } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
@@ -38,8 +45,21 @@ function LoginForm() {
       }
     } else {
       const { error } = await supabase.auth.signUp({
-        email, password,
-        options: { data: { full_name: fullName, role, company_name: company } }
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role,
+            phone,
+            personal_number: personalNumber,
+            address,
+            postal_code: postalCode,
+            city,
+            company_name: company,
+            org_number: orgNumber,
+          }
+        }
       })
       if (error) {
         setError('Fel: ' + error.message)
@@ -52,7 +72,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="text-2xl font-medium text-gold-900">◆ GuldBud</Link>
@@ -66,6 +86,7 @@ function LoginForm() {
               </button>
             ))}
           </div>
+
           {mode === 'register' && (
             <div className="flex gap-3 mb-5">
               {(['customer', 'dealer'] as const).map(r => (
@@ -76,19 +97,51 @@ function LoginForm() {
               ))}
             </div>
           )}
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {mode === 'register' && (
-              <div>
-                <label className="block text-sm text-stone-600 mb-1">Namn</label>
-                <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Anna Andersson" className="w-full" />
-              </div>
+              <>
+                <div>
+                  <label className="block text-sm text-stone-600 mb-1">Namn</label>
+                  <input type="text" required value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Anna Andersson" className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm text-stone-600 mb-1">Telefon</label>
+                  <input type="tel" required value={phone} onChange={e => setPhone(e.target.value)} placeholder="070-123 45 67" className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm text-stone-600 mb-1">Personnummer</label>
+                  <input type="text" required value={personalNumber} onChange={e => setPersonalNumber(e.target.value)} placeholder="ÅÅMMDD-XXXX" className="w-full" />
+                </div>
+                <div>
+                  <label className="block text-sm text-stone-600 mb-1">Adress</label>
+                  <input type="text" required value={address} onChange={e => setAddress(e.target.value)} placeholder="Storgatan 1" className="w-full" />
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-1/3">
+                    <label className="block text-sm text-stone-600 mb-1">Postnummer</label>
+                    <input type="text" required value={postalCode} onChange={e => setPostalCode(e.target.value)} placeholder="123 45" className="w-full" />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm text-stone-600 mb-1">Stad</label>
+                    <input type="text" required value={city} onChange={e => setCity(e.target.value)} placeholder="Stockholm" className="w-full" />
+                  </div>
+                </div>
+                {role === 'dealer' && (
+                  <>
+                    <div>
+                      <label className="block text-sm text-stone-600 mb-1">Företagsnamn</label>
+                      <input type="text" required value={company} onChange={e => setCompany(e.target.value)} placeholder="Stockholms Guldhandel AB" className="w-full" />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-stone-600 mb-1">Organisationsnummer</label>
+                      <input type="text" required value={orgNumber} onChange={e => setOrgNumber(e.target.value)} placeholder="556789-1234" className="w-full" />
+                    </div>
+                  </>
+                )}
+              </>
             )}
-            {mode === 'register' && role === 'dealer' && (
-              <div>
-                <label className="block text-sm text-stone-600 mb-1">Företagsnamn</label>
-                <input type="text" required value={company} onChange={e => setCompany(e.target.value)} placeholder="Stockholms Guldhandel AB" className="w-full" />
-              </div>
-            )}
+
             <div>
               <label className="block text-sm text-stone-600 mb-1">E-post</label>
               <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="namn@exempel.se" className="w-full" />
@@ -97,10 +150,21 @@ function LoginForm() {
               <label className="block text-sm text-stone-600 mb-1">Lösenord</label>
               <input type="password" required minLength={6} value={password} onChange={e => setPassword(e.target.value)} placeholder="Minst 6 tecken" className="w-full" />
             </div>
+
             {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
+
             {mode === 'register' && role === 'dealer' && (
-              <p className="text-xs text-stone-400 bg-stone-50 p-3 rounded-lg">Handlarkonton granskas manuellt. Du får ett e-postmeddelande när ditt konto är godkänt.</p>
+              <p className="text-xs text-stone-400 bg-stone-50 p-3 rounded-lg">
+                Handlarkonton granskas manuellt. Du får ett e-postmeddelande när ditt konto är godkänt.
+              </p>
             )}
+
+            {mode === 'register' && (
+              <p className="text-xs text-stone-400">
+                Dina personuppgifter hanteras säkert och delas aldrig med tredje part. <Link href="/privacy" className="underline">Integritetspolicy</Link>
+              </p>
+            )}
+
             <button type="submit" disabled={loading} className="btn-gold mt-1">
               {loading ? 'Väntar...' : mode === 'login' ? 'Logga in' : 'Skapa konto'}
             </button>
