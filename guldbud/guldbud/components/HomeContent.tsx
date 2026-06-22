@@ -13,6 +13,11 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   rejected: { label: 'Avvisad', color: 'bg-red-100 text-red-600' },
 }
 
+function capitalize(name: string) {
+  if (!name) return ''
+  return name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+}
+
 export default function HomeContent({ items }: { items: Item[] }) {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
@@ -54,6 +59,9 @@ export default function HomeContent({ items }: { items: Item[] }) {
             <div className="flex gap-3 justify-center flex-wrap">
               <Link href="/auth/login" className="bg-[#B8860B] hover:bg-[#D4AF37] text-white font-medium rounded-lg px-6 py-3 transition">
                 Lägg ut ett föremål
+              </Link>
+              <Link href="/auth/login?mode=register" className="border border-[#B8860B] text-[#D4AF37] hover:bg-[#2d1f0a] font-medium rounded-lg px-6 py-3 transition">
+                Registrera dig
               </Link>
             </div>
           </div>
@@ -98,7 +106,7 @@ export default function HomeContent({ items }: { items: Item[] }) {
           <div className="max-w-5xl mx-auto flex items-center justify-between">
             <div>
               <p className="text-[#8B6914] text-xs tracking-widest uppercase mb-1">Välkommen tillbaka</p>
-              <h1 className="text-2xl text-[#D4AF37] font-medium">{profile.full_name}</h1>
+              <h1 className="text-2xl text-[#D4AF37] font-medium">{capitalize(profile.full_name)}</h1>
             </div>
             <Link href="/customer/submit" className="bg-[#B8860B] hover:bg-[#D4AF37] text-white text-sm font-medium px-5 py-2.5 rounded-lg transition">
               + Lägg ut föremål
@@ -129,7 +137,7 @@ export default function HomeContent({ items }: { items: Item[] }) {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-stone-900">{item.title}</h3>
+                          <h3 className="font-medium text-stone-900">{capitalize(item.title)}</h3>
                           <span className={`text-xs px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>
                         </div>
                         <p className="text-xs text-stone-400">{item.weight_grams} g · {item.karat}</p>
@@ -165,7 +173,7 @@ export default function HomeContent({ items }: { items: Item[] }) {
         <div className="bg-[#1a1208] px-4 py-8">
           <div className="max-w-5xl mx-auto">
             <p className="text-[#8B6914] text-xs tracking-widest uppercase mb-1">Välkommen tillbaka</p>
-            <h1 className="text-2xl text-[#D4AF37] font-medium">{profile.full_name}</h1>
+            <h1 className="text-2xl text-[#D4AF37] font-medium">{capitalize(profile.full_name)}</h1>
             <p className="text-[#8B6914] text-sm mt-1">{items.length} aktiva auktioner att buda på</p>
           </div>
         </div>
@@ -192,7 +200,7 @@ export default function HomeContent({ items }: { items: Item[] }) {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div>
             <p className="text-[#8B6914] text-xs tracking-widest uppercase mb-1">Administratör</p>
-            <h1 className="text-2xl text-[#D4AF37] font-medium">{profile?.full_name}</h1>
+            <h1 className="text-2xl text-[#D4AF37] font-medium">{capitalize(profile?.full_name || '')}</h1>
           </div>
           <Link href="/admin" className="bg-[#B8860B] hover:bg-[#D4AF37] text-white text-sm font-medium px-5 py-2.5 rounded-lg transition">
             Öppna adminpanel
