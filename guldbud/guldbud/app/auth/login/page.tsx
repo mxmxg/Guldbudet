@@ -49,16 +49,27 @@ function validateField(name: string, value: string, role: string): string {
 function Field({ label, name, type = 'text', value, onChange, onBlur, error, placeholder }: any) {
   return (
     <div>
-      <label className="block text-sm text-stone-600 mb-1">{label}</label>
+      <label className="block text-sm mb-1" style={{ color: '#c9a84c' }}>{label}</label>
       <input
         type={type}
         value={value}
         onChange={onChange}
         onBlur={onBlur}
         placeholder={placeholder}
-        className={`w-full border rounded-lg px-3 py-2 text-sm outline-none transition ${error ? 'border-red-400 bg-red-50 focus:border-red-400' : 'border-stone-200 focus:border-gold-400'}`}
+        style={{
+          width: '100%',
+          background: error ? '#2a1a0a' : '#1a1208',
+          border: `1px solid ${error ? '#ef4444' : '#3d2d0f'}`,
+          borderRadius: '8px',
+          padding: '10px 12px',
+          fontSize: '14px',
+          color: '#f5e6c8',
+          outline: 'none',
+          boxSizing: 'border-box',
+        }}
+        onFocus={e => e.target.style.borderColor = '#D4AF37'}
       />
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px' }}>{error}</p>}
     </div>
   )
 }
@@ -99,10 +110,8 @@ function LoginForm() {
     if (mode === 'register') {
       const registerFields = ['fullName', 'phone', 'personalNumber', 'address', 'postalCode', 'city']
       if (role === 'dealer') registerFields.push('company', 'orgNumber')
-
       const allTouched = Object.fromEntries(registerFields.map(f => [f, true]))
       setTouched(t => ({ ...t, ...allTouched }))
-
       const hasErrors = registerFields.some(f => validateField(f, fields[f], role))
       if (hasErrors) {
         setSubmitError('Kontrollera fälten ovan.')
@@ -151,95 +160,127 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-medium text-gold-900">◆ GuldBud</Link>
-        </div>
-        <div className="bg-white border border-stone-200 rounded-2xl p-8">
-          <div className="flex rounded-lg overflow-hidden border border-stone-200 mb-6">
-            {(['login', 'register'] as const).map(m => (
-              <button key={m} onClick={() => setMode(m)}
-                className={`flex-1 py-2 text-sm font-medium transition ${mode === m ? 'bg-gold-900 text-white' : 'text-stone-500 hover:bg-stone-50'}`}>
-                {m === 'login' ? 'Logga in' : 'Registrera'}
-              </button>
-            ))}
+    <>
+      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+      <div style={{ minHeight: '100vh', background: '#0f0a04', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
+        <div style={{ width: '100%', maxWidth: '440px' }}>
+
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <Link href="/">
+              <span style={{ fontFamily: "'Great Vibes', cursive", fontSize: '48px', color: '#D4AF37', lineHeight: 1 }}>
+                GuldBud
+              </span>
+            </Link>
+            <p style={{ color: '#8B6914', fontSize: '10px', letterSpacing: '4px', marginTop: '4px' }}>SVERIGES GULDAUKTION</p>
           </div>
 
-          {mode === 'register' && (
-            <div className="flex gap-3 mb-5">
-              {(['customer', 'dealer'] as const).map(r => (
-                <button key={r} onClick={() => setRole(r)}
-                  className={`flex-1 py-3 rounded-lg border text-sm font-medium transition ${role === r ? 'border-gold-400 bg-gold-50 text-gold-700' : 'border-stone-200 text-stone-500 hover:border-stone-300'}`}>
-                  {r === 'customer' ? '🏠 Privatperson' : '🏪 Guldhandlare'}
+          {/* Kort */}
+          <div style={{ background: '#1a1208', border: '1px solid #3d2d0f', borderRadius: '16px', padding: '32px' }}>
+
+            {/* Flikar */}
+            <div style={{ display: 'flex', background: '#0f0a04', borderRadius: '8px', marginBottom: '24px', overflow: 'hidden' }}>
+              {(['login', 'register'] as const).map(m => (
+                <button key={m} onClick={() => setMode(m)} style={{
+                  flex: 1, padding: '10px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', border: 'none', transition: 'all 0.2s',
+                  background: mode === m ? '#B8860B' : 'transparent',
+                  color: mode === m ? 'white' : '#8B6914',
+                  borderRadius: mode === m ? '6px' : '0',
+                }}>
+                  {m === 'login' ? 'Logga in' : 'Registrera'}
                 </button>
               ))}
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Roll-väljare */}
             {mode === 'register' && (
-              <>
-                <Field label="Namn" name="fullName" value={fields.fullName} onChange={set('fullName')} onBlur={blur('fullName')} error={err('fullName')} placeholder="Anna Andersson" />
-                <Field label="Telefon" name="phone" type="tel" value={fields.phone} onChange={set('phone')} onBlur={blur('phone')} error={err('phone')} placeholder="0701234567" />
-                <Field label="Personnummer" name="personalNumber" value={fields.personalNumber} onChange={set('personalNumber')} onBlur={blur('personalNumber')} error={err('personalNumber')} placeholder="ÅÅMMDD-XXXX" />
-                <Field label="Adress" name="address" value={fields.address} onChange={set('address')} onBlur={blur('address')} error={err('address')} placeholder="Storgatan 1" />
-                <div className="flex gap-3">
-                  <div className="w-1/3">
-                    <Field label="Postnummer" name="postalCode" value={fields.postalCode} onChange={set('postalCode')} onBlur={blur('postalCode')} error={err('postalCode')} placeholder="123 45" />
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+                {(['customer', 'dealer'] as const).map(r => (
+                  <button key={r} onClick={() => setRole(r)} style={{
+                    flex: 1, padding: '12px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', borderRadius: '8px', transition: 'all 0.2s',
+                    background: role === r ? '#2d1f0a' : 'transparent',
+                    border: `1px solid ${role === r ? '#B8860B' : '#3d2d0f'}`,
+                    color: role === r ? '#D4AF37' : '#8B6914',
+                  }}>
+                    {r === 'customer' ? '🏠 Privatperson' : '🏪 Guldhandlare'}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {mode === 'register' && (
+                <>
+                  <Field label="Namn" name="fullName" value={fields.fullName} onChange={set('fullName')} onBlur={blur('fullName')} error={err('fullName')} placeholder="Anna Andersson" />
+                  <Field label="Telefon" name="phone" type="tel" value={fields.phone} onChange={set('phone')} onBlur={blur('phone')} error={err('phone')} placeholder="0701234567" />
+                  <Field label="Personnummer" name="personalNumber" value={fields.personalNumber} onChange={set('personalNumber')} onBlur={blur('personalNumber')} error={err('personalNumber')} placeholder="ÅÅMMDD-XXXX" />
+                  <Field label="Adress" name="address" value={fields.address} onChange={set('address')} onBlur={blur('address')} error={err('address')} placeholder="Storgatan 1" />
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ width: '35%' }}>
+                      <Field label="Postnummer" name="postalCode" value={fields.postalCode} onChange={set('postalCode')} onBlur={blur('postalCode')} error={err('postalCode')} placeholder="123 45" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <Field label="Stad" name="city" value={fields.city} onChange={set('city')} onBlur={blur('city')} error={err('city')} placeholder="Stockholm" />
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <Field label="Stad" name="city" value={fields.city} onChange={set('city')} onBlur={blur('city')} error={err('city')} placeholder="Stockholm" />
-                  </div>
-                </div>
-                {role === 'dealer' && (
-                  <>
-                    <Field label="Företagsnamn" name="company" value={fields.company} onChange={set('company')} onBlur={blur('company')} error={err('company')} placeholder="Stockholms Guldhandel AB" />
-                    <Field label="Organisationsnummer" name="orgNumber" value={fields.orgNumber} onChange={set('orgNumber')} onBlur={blur('orgNumber')} error={err('orgNumber')} placeholder="556789-1234" />
-                  </>
-                )}
-              </>
-            )}
+                  {role === 'dealer' && (
+                    <>
+                      <Field label="Företagsnamn" name="company" value={fields.company} onChange={set('company')} onBlur={blur('company')} error={err('company')} placeholder="Stockholms Guldhandel AB" />
+                      <Field label="Organisationsnummer" name="orgNumber" value={fields.orgNumber} onChange={set('orgNumber')} onBlur={blur('orgNumber')} error={err('orgNumber')} placeholder="556789-1234" />
+                    </>
+                  )}
+                </>
+              )}
 
-            <div>
-              <label className="block text-sm text-stone-600 mb-1">E-post</label>
-              <input type="email" required value={fields.email} onChange={set('email')} placeholder="namn@exempel.se"
-                className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-gold-400 transition" />
-            </div>
-            <div>
-              <label className="block text-sm text-stone-600 mb-1">Lösenord</label>
-              <input type="password" required minLength={6} value={fields.password} onChange={set('password')} placeholder="Minst 6 tecken"
-                className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-gold-400 transition" />
-            </div>
+              <Field label="E-post" name="email" type="email" value={fields.email} onChange={set('email')} onBlur={blur('email')} error="" placeholder="namn@exempel.se" />
+              <Field label="Lösenord" name="password" type="password" value={fields.password} onChange={set('password')} onBlur={blur('password')} error="" placeholder="Minst 6 tecken" />
 
-            {submitError && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{submitError}</p>}
+              {submitError && (
+                <p style={{ color: '#ef4444', fontSize: '13px', background: '#2a0a0a', padding: '10px 12px', borderRadius: '8px', border: '1px solid #7f1d1d' }}>
+                  {submitError}
+                </p>
+              )}
 
-            {mode === 'register' && role === 'dealer' && (
-              <p className="text-xs text-stone-400 bg-stone-50 p-3 rounded-lg">
-                Handlarkonton granskas manuellt. Du får ett e-postmeddelande när ditt konto är godkänt.
-              </p>
-            )}
+              {mode === 'register' && role === 'dealer' && (
+                <p style={{ color: '#8B6914', fontSize: '12px', background: '#0f0a04', padding: '10px 12px', borderRadius: '8px', border: '1px solid #3d2d0f' }}>
+                  Handlarkonton granskas manuellt. Du får ett e-postmeddelande när ditt konto är godkänt.
+                </p>
+              )}
 
-            {mode === 'register' && (
-              <p className="text-xs text-stone-400">
-                Dina personuppgifter hanteras säkert och delas aldrig med tredje part.{' '}
-                <Link href="/privacy" className="underline">Integritetspolicy</Link>
-              </p>
-            )}
+              {mode === 'register' && (
+                <p style={{ color: '#5a4020', fontSize: '11px' }}>
+                  Dina personuppgifter hanteras säkert och delas aldrig med tredje part.{' '}
+                  <Link href="/privacy" style={{ color: '#B8860B' }}>Integritetspolicy</Link>
+                </p>
+              )}
 
-            <button type="submit" disabled={loading} className="btn-gold mt-1">
-              {loading ? 'Väntar...' : mode === 'login' ? 'Logga in' : 'Skapa konto'}
-            </button>
-          </form>
+              <button type="submit" disabled={loading} style={{
+                background: loading ? '#5a4020' : '#B8860B',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px',
+                fontSize: '15px',
+                fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                marginTop: '4px',
+                transition: 'background 0.2s',
+              }}>
+                {loading ? 'Väntar...' : mode === 'login' ? 'Logga in' : 'Skapa konto'}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Laddar...</div>}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0f0a04', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span style={{ fontFamily: "'Great Vibes', cursive", fontSize: '48px', color: '#D4AF37' }}>GuldBud</span>
+    </div>}>
       <LoginForm />
     </Suspense>
   )
