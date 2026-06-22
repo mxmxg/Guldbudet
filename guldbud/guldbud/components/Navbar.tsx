@@ -8,7 +8,6 @@ export default function Navbar() {
   const [user, setUser] = useState<any>(null)
   const [role, setRole] = useState<string | null>(null)
   const supabase = createClient()
-  const router = useRouter()
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -46,11 +45,6 @@ export default function Navbar() {
       <div className="flex items-center gap-4 text-sm">
         {user ? (
           <>
-            {role === 'dealer' && (
-              <Link href="/dealer/dashboard" className="text-gold-200 hover:text-gold-100 transition">
-                Dashboard
-              </Link>
-            )}
             {role === 'customer' && (
               <>
                 <Link href="/customer/my-items" className="text-gold-200 hover:text-gold-100 transition">
@@ -61,10 +55,25 @@ export default function Navbar() {
                 </Link>
               </>
             )}
+            {role === 'dealer' && (
+              <>
+                <Link href="/dealer/dashboard" className="text-gold-200 hover:text-gold-100 transition">
+                  Auktioner
+                </Link>
+                <Link href="/dealer/my-bids" className="text-gold-200 hover:text-gold-100 transition">
+                  Mina bud
+                </Link>
+              </>
+            )}
             {role === 'admin' && (
-              <Link href="/admin" className="text-gold-200 hover:text-gold-100 transition">
-                Adminpanel
-              </Link>
+              <>
+                <Link href="/customer/my-items" className="text-gold-200 hover:text-gold-100 transition">
+                  Föremål
+                </Link>
+                <Link href="/admin" className="text-gold-200 hover:text-gold-100 transition">
+                  Adminpanel
+                </Link>
+              </>
             )}
             <button
               type="button"
