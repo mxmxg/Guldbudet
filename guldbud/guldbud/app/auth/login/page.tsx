@@ -99,10 +99,10 @@ function LoginForm() {
     if (mode === 'register') {
       const registerFields = ['fullName', 'phone', 'personalNumber', 'address', 'postalCode', 'city']
       if (role === 'dealer') registerFields.push('company', 'orgNumber')
-      
+
       const allTouched = Object.fromEntries(registerFields.map(f => [f, true]))
       setTouched(t => ({ ...t, ...allTouched }))
-      
+
       const hasErrors = registerFields.some(f => validateField(f, fields[f], role))
       if (hasErrors) {
         setSubmitError('Kontrollera fälten ovan.')
@@ -145,7 +145,7 @@ function LoginForm() {
         setLoading(false)
         return
       }
-      window.location.href = role === 'dealer' ? '/auth/pending' : '/customer/submit'
+      window.location.href = role === 'dealer' ? '/auth/pending' : '/auth/verify'
     }
     setLoading(false)
   }
