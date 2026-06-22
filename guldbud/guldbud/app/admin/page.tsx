@@ -40,7 +40,10 @@ export default function AdminPage() {
   }
 
   const approveItem = async (id: string) => {
-    await supabase.from('items').update({ status: 'active', auction_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }).eq('id', id)
+    await supabase.from('items').update({
+      status: 'active',
+      auction_ends_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+    }).eq('id', id)
     setPendingItems(prev => prev.filter(i => i.id !== id))
   }
 
@@ -60,7 +63,7 @@ export default function AdminPage() {
         <section className="mb-10">
           <h2 className="text-lg font-medium text-stone-800 mb-4">
             Handlare som väntar på godkännande
-            <span className="ml-2 bg-gold-100 text-gold-700 text-sm px-2 py-0.5 rounded-full">{pendingDealers.length}</span>
+            <span className="ml-2 bg-amber-100 text-amber-700 text-sm px-2 py-0.5 rounded-full">{pendingDealers.length}</span>
           </h2>
           {pendingDealers.length === 0 ? (
             <p className="text-stone-400 text-sm">Inga väntande handlare.</p>
@@ -87,7 +90,7 @@ export default function AdminPage() {
         <section>
           <h2 className="text-lg font-medium text-stone-800 mb-4">
             Föremål som väntar på granskning
-            <span className="ml-2 bg-gold-100 text-gold-700 text-sm px-2 py-0.5 rounded-full">{pendingItems.length}</span>
+            <span className="ml-2 bg-amber-100 text-amber-700 text-sm px-2 py-0.5 rounded-full">{pendingItems.length}</span>
           </h2>
           {pendingItems.length === 0 ? (
             <p className="text-stone-400 text-sm">Inga väntande föremål.</p>
