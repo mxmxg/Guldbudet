@@ -83,9 +83,14 @@ export default function Navbar() {
             </button>
           </>
         ) : (
-          <Link href="/auth/login" className="bg-gold-400 hover:bg-gold-500 text-white rounded-lg px-4 py-1.5 transition">
-            Logga in
-          </Link>
+          <>
+            <Link href="/auth/login" className="text-gold-200 hover:text-gold-100 transition">
+              Logga in
+            </Link>
+            <Link href="/auth/login?mode=register" className="bg-gold-400 hover:bg-gold-500 text-white rounded-lg px-4 py-1.5 transition">
+              Registrera
+            </Link>
+          </>
         )}
       </div>
     </nav>
