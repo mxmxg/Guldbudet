@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase-server'
 import { Item } from '@/lib/types'
 import Navbar from '@/components/Navbar'
@@ -7,8 +6,6 @@ import HeroButtons from '@/components/HeroButtons'
 
 export default async function HomePage() {
   const supabase = createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
 
   const { data: items } = await supabase
     .from('items')
@@ -29,7 +26,7 @@ export default async function HomePage() {
             Lägg ut ditt guldföremål – auktoriserade handlare budar direkt mot varandra.
             Du får det bästa priset, enkelt och tryggt.
           </p>
-          <HeroButtons isLoggedIn={!!user} />
+          <HeroButtons />
         </div>
       </div>
       <div className="bg-white border-b border-stone-200 py-10 px-4">
