@@ -2,160 +2,349 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import Image from 'next/image'
+import Link from 'next/link'
 import BidSection from '@/components/BidSection'
 import AcceptBid from '@/components/AcceptBid'
+import CountdownTimer from '@/components/CountdownTimer'
+import Footer from '@/components/Footer'
+import { estimateRange, formatSEK } from '@/lib/gold'
+
+function relTime(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const m = Math.floor(diff / 60000)
+  if (m < 1) return 'nyss'
+  if (m < 60) return `${m} min sedan`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h} h sedan`
+  return `${Math.floor(h / 24)} d sedan`
+}
 
 export default function AuctionDetails({ item }: { item: any }) {
   const [bids, setBids] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [checked, setChecked] = useState(false)
+  const [activeImg, setActiveImg] = useState(0)
+  const [flash, setFlash] = useState(false)
   const supabase = createClient()
+
+  const loadBids = async () => {
+    const { data: b } = await supabase
+      .from('bids')
+      .select('id, amount, created_at, profiles(company_name, full_name)')
+      .eq('item_id', item.id)
+      .order('amount', { ascending: false })
+      .limit(20)
+    setBids(b || [])
+  }
 
   useEffect(() => {
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (user) {
         setUser(user)
-        const { data: p } = await supabase.from('profiles').select('role, approved').eq('id', user.id).single()
+        const { data: p } = await supabase
+          .from('profiles')
+          .select('role, approved')
+          .eq('id', user.id)
+          .single()
         setProfile(p)
       }
-
-      const { data: b } = await supabase
-        .from('bids')
-        .select('id, amount, created_at, profiles(company_name, full_name)')
-        .eq('item_id', item.id)
-        .order('amount', { ascending: false })
-        .limit(10)
-      setBids(b || [])
+      await loadBids()
       setChecked(true)
     }
     load()
+
+    // Realtime — refresh bids when a new one lands on this item.
+    const channel = supabase
+      .channel(`bids-${item.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'bids', filter: `item_id=eq.${item.id}` },
+        async () => {
+          await loadBids()
+          setFlash(true)
+          setTimeout(() => setFlash(false), 1200)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
-  if (!checked) return null
+  if (!checked)
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="aspect-square rounded-2xl skeleton" />
+          <div className="space-y-4">
+            <div className="h-8 w-2/3 rounded skeleton" />
+            <div className="h-4 w-1/3 rounded skeleton" />
+            <div className="h-28 rounded-2xl skeleton" />
+          </div>
+        </div>
+      </div>
+    )
 
   const topBid = bids[0]
   const topAmount = topBid?.amount || 0
   const isOwner = user?.id === item.owner_id && profile?.role !== 'admin'
   const isAdmin = profile?.role === 'admin'
   const isClosed = item.status === 'closed'
+  const images: string[] = item.image_urls?.length ? item.image_urls : []
+  const est = estimateRange(item.weight_grams || 0, item.karat || '')
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        <nav className="mb-6 text-sm text-espresso-400">
+          <Link href="/" className="hover:text-gold-600 transition">
+            Auktioner
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-espresso-600">{item.title}</span>
+        </nav>
 
-        {/* Bilder */}
-        <div>
-          <div className="aspect-square rounded-xl overflow-hidden bg-stone-200 relative mb-3">
-            {item.image_urls?.[0] ? (
-              <Image src={item.image_urls[0]} alt={item.title} fill className="object-cover" />
-            ) : (
-              <div className="flex items-center justify-center h-full text-6xl opacity-40">◆</div>
-            )}
-          </div>
-          {item.image_urls?.length > 1 && (
-            <div className="grid grid-cols-4 gap-2">
-              {item.image_urls.slice(1, 5).map((url: string, i: number) => (
-                <div key={i} className="aspect-square rounded-lg overflow-hidden relative">
-                  <Image src={url} alt="" fill className="object-cover" />
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+          {/* ===== Gallery ===== */}
+          <div className="md:sticky md:top-24 md:self-start">
+            <div className="aspect-square rounded-2xl overflow-hidden bg-espresso-100 relative shadow-soft">
+              {images[activeImg] ? (
+                <Image
+                  src={images[activeImg]}
+                  alt={item.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-7xl text-gold-500/30 animate-float">
+                  ◆
                 </div>
-              ))}
+              )}
+              {!isClosed && (
+                <span className="absolute top-4 left-4 chip bg-espresso-900/85 backdrop-blur text-gold-200 border border-gold-500/25">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-pulse-ring" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+                  </span>
+                  Live auktion
+                </span>
+              )}
             </div>
-          )}
-        </div>
-
-        {/* Detaljer */}
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-medium text-stone-900">{item.title}</h1>
-            {isClosed && (
-              <span className="text-xs bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full">Avslutad</span>
-            )}
-          </div>
-          <p className="text-stone-400 text-sm mb-4">{item.weight_grams} g · {item.karat}</p>
-
-          {item.description && (
-            <p className="text-stone-600 text-sm mb-6 leading-relaxed">{item.description}</p>
-          )}
-
-          <div className="bg-white border border-stone-200 rounded-xl p-4 mb-4">
-            <p className="text-xs text-stone-400 mb-1">Högsta bud</p>
-            <p className="text-3xl font-medium text-[#B8860B]">
-              {topAmount ? topAmount.toLocaleString('sv-SE') + ' kr' : 'Inga bud ännu'}
-            </p>
-            {topBid && (
-              <p className="text-xs text-stone-400 mt-1">
-                från {topBid.profiles?.company_name || topBid.profiles?.full_name || 'Handlare'}
-              </p>
-            )}
-            <p className="text-xs text-stone-400 mt-1">{bids.length} bud totalt</p>
-          </div>
-
-          {/* Admin-vy */}
-          {isAdmin && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-              <p className="text-amber-700 text-sm font-medium">Adminvy — du kan inte buda eller acceptera</p>
-            </div>
-          )}
-
-          {/* Acceptera bud — bara för ägaren när auktionen är aktiv och det finns bud */}
-          {isOwner && !isClosed && topBid && (
-            <AcceptBid
-              itemId={item.id}
-              bidId={topBid.id}
-              amount={topAmount}
-              dealerName={topBid.profiles?.company_name || topBid.profiles?.full_name || 'Handlare'}
-              isOwner={isOwner}
-            />
-          )}
-
-          {/* Avslutad auktion — instruktioner till ägaren */}
-          {isOwner && isClosed && item.accepted_bid_id && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-5 mt-4">
-              <p className="font-medium text-green-800 mb-1">Bud accepterat</p>
-              <p className="text-sm text-stone-500 mb-4">Skicka föremålet till oss så betalar vi ut via Swish efter verifiering.</p>
-              <div className="bg-[#1a1208] rounded-lg p-4 text-center">
-                <p className="text-[#8B6914] text-xs tracking-widest uppercase mb-1">Skicka till</p>
-                <p className="text-[#D4AF37] font-medium">GuldBud AB</p>
-                <p className="text-[#c9a84c] text-sm">Storgatan 1</p>
-                <p className="text-[#c9a84c] text-sm">111 22 Stockholm</p>
-                <p className="text-[#8B6914] text-xs mt-2">Vid frågor: info@guldbud.com</p>
-              </div>
-            </div>
-          )}
-
-          {/* Budformulär — bara för handlare */}
-          {!isOwner && !isAdmin && !isClosed && profile?.role === 'dealer' && (
-            <BidSection itemId={item.id} currentTop={topAmount} />
-          )}
-
-          {/* Inte inloggad */}
-          {!user && (
-            <div className="bg-stone-50 rounded-xl p-4 text-center mt-4">
-              <p className="text-stone-500 text-sm mb-3">Logga in för att lägga bud</p>
-              <a href="/auth/login" className="bg-[#B8860B] hover:bg-[#D4AF37] text-white text-sm font-medium px-5 py-2 rounded-lg transition inline-block">
-                Logga in
-              </a>
-            </div>
-          )}
-
-          {/* Budhistorik */}
-          {bids.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-sm font-medium text-stone-700 mb-3">Budhistorik</h3>
-              <div className="flex flex-col gap-2">
-                {bids.map((bid: any, i: number) => (
-                  <div key={i} className={`flex justify-between items-center py-2 border-b border-stone-100 text-sm ${i === 0 ? 'text-[#B8860B] font-medium' : 'text-stone-500'}`}>
-                    <span>{(bid.profiles?.company_name || bid.profiles?.full_name || 'Handlare').slice(0, 20)}</span>
-                    <span>{bid.amount.toLocaleString('sv-SE')} kr</span>
-                  </div>
+            {images.length > 1 && (
+              <div className="grid grid-cols-5 gap-2 mt-3">
+                {images.slice(0, 5).map((url, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImg(i)}
+                    className={`aspect-square rounded-xl overflow-hidden relative border-2 transition ${
+                      activeImg === i ? 'border-gold-400 shadow-gold' : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <Image src={url} alt="" fill className="object-cover" />
+                  </button>
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* ===== Details ===== */}
+          <div>
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <span className="chip bg-gold-50 text-gold-700">{item.karat}</span>
+              <span className="chip bg-espresso-100 text-espresso-600">{item.weight_grams} g</span>
+              {isClosed && <span className="chip bg-espresso-100 text-espresso-500">Avslutad</span>}
             </div>
-          )}
+            <h1 className="font-display text-3xl sm:text-4xl text-espresso-900 leading-tight">
+              {item.title}
+            </h1>
+            {item.profiles?.full_name && (
+              <p className="text-espresso-400 text-sm mt-2">
+                Utlagt av {item.profiles.full_name.split(' ')[0]}
+              </p>
+            )}
+
+            {item.description && (
+              <p className="text-espresso-600 mt-5 leading-relaxed">{item.description}</p>
+            )}
+
+            {/* Bid panel */}
+            <div
+              className={`mt-6 rounded-2xl border p-5 transition-colors duration-500 ${
+                flash ? 'border-gold-400 bg-gold-50/60' : 'border-espresso-100 bg-white'
+              } shadow-soft`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="eyebrow text-espresso-400 mb-1">Högsta bud</p>
+                  <p className="font-display text-4xl text-gradient-gold tabular-nums">
+                    {topAmount ? formatSEK(topAmount) : '—'}
+                  </p>
+                  {topBid ? (
+                    <p className="text-xs text-espresso-400 mt-1">
+                      {topBid.profiles?.company_name || topBid.profiles?.full_name || 'Handlare'} ·{' '}
+                      {bids.length} {bids.length === 1 ? 'bud' : 'bud'}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-espresso-400 mt-1">Var först att buda</p>
+                  )}
+                </div>
+                {!isClosed && item.auction_ends_at && (
+                  <div className="text-right">
+                    <p className="eyebrow text-espresso-400 mb-2">Avslutas om</p>
+                    <CountdownTimer endsAt={item.auction_ends_at} variant="blocks" />
+                  </div>
+                )}
+              </div>
+
+              {/* indicative value */}
+              <div className="mt-4 pt-4 border-t border-espresso-100 flex items-center gap-2 text-xs text-espresso-500">
+                <SparkIcon />
+                Indikativt metallvärde:{' '}
+                <span className="font-medium text-espresso-700">
+                  {formatSEK(est.low)} – {formatSEK(est.high)}
+                </span>
+              </div>
+            </div>
+
+            {/* Admin note */}
+            {isAdmin && (
+              <div className="mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+                <p className="text-amber-700 text-sm font-medium">
+                  Adminvy — du kan inte buda eller acceptera.
+                </p>
+              </div>
+            )}
+
+            {/* Accept bid (owner) */}
+            {isOwner && !isClosed && topBid && (
+              <AcceptBid
+                itemId={item.id}
+                bidId={topBid.id}
+                amount={topAmount}
+                dealerName={topBid.profiles?.company_name || topBid.profiles?.full_name || 'Handlare'}
+                isOwner={isOwner}
+              />
+            )}
+
+            {/* Owner waiting for bids */}
+            {isOwner && !isClosed && !topBid && (
+              <div className="mt-4 rounded-2xl bg-white border border-espresso-100 p-5 text-center shadow-soft">
+                <div className="text-2xl mb-2">⏳</div>
+                <p className="text-espresso-600 text-sm">
+                  Auktionen är live. Så fort en handlare budar dyker det upp här — du får en
+                  notifiering direkt.
+                </p>
+              </div>
+            )}
+
+            {/* Closed — shipping instructions */}
+            {isOwner && isClosed && item.accepted_bid_id && (
+              <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
+                <p className="font-medium text-emerald-800 mb-1">Bud accepterat ✓</p>
+                <p className="text-sm text-espresso-500 mb-4">
+                  Skicka föremålet till oss så betalar vi ut via Swish efter verifiering.
+                </p>
+                <ShippingCard />
+              </div>
+            )}
+
+            {/* Dealer bid form */}
+            {!isOwner && !isAdmin && !isClosed && profile?.role === 'dealer' && (
+              <div className="mt-4">
+                <BidSection itemId={item.id} currentTop={topAmount} onPlaced={loadBids} />
+              </div>
+            )}
+
+            {/* Not logged in */}
+            {!user && (
+              <div className="mt-4 rounded-2xl bg-espresso-900 p-6 text-center relative overflow-hidden">
+                <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
+                <div className="relative">
+                  <p className="text-gold-100 font-medium mb-1">Vill du buda på det här föremålet?</p>
+                  <p className="text-espresso-100/60 text-sm mb-4">
+                    Endast auktoriserade guldhandlare kan lägga bud.
+                  </p>
+                  <Link href="/auth/login" className="btn-gold">
+                    Logga in som handlare
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Bid history */}
+            {bids.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-sm font-semibold text-espresso-700 mb-3 flex items-center gap-2">
+                  Budhistorik
+                  <span className="chip bg-espresso-100 text-espresso-500">{bids.length}</span>
+                </h3>
+                <div className="rounded-2xl border border-espresso-100 overflow-hidden bg-white">
+                  {bids.map((bid: any, i: number) => (
+                    <div
+                      key={bid.id || i}
+                      className={`flex items-center justify-between px-4 py-3 text-sm ${
+                        i > 0 ? 'border-t border-espresso-50' : ''
+                      } ${i === 0 ? 'bg-gold-50/50' : ''}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
+                            i === 0 ? 'bg-gold-sheen text-espresso-900' : 'bg-espresso-100 text-espresso-500'
+                          }`}
+                        >
+                          {(bid.profiles?.company_name || bid.profiles?.full_name || 'H').charAt(0)}
+                        </div>
+                        <div>
+                          <p className={`${i === 0 ? 'font-medium text-espresso-900' : 'text-espresso-600'}`}>
+                            {(bid.profiles?.company_name || bid.profiles?.full_name || 'Handlare').slice(0, 24)}
+                            {i === 0 && <span className="ml-2 chip bg-emerald-100 text-emerald-700">Ledande</span>}
+                          </p>
+                          <p className="text-[11px] text-espresso-300">{relTime(bid.created_at)}</p>
+                        </div>
+                      </div>
+                      <span className={`tabular-nums ${i === 0 ? 'font-semibold text-gold-700' : 'text-espresso-600'}`}>
+                        {bid.amount.toLocaleString('sv-SE')} kr
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+      <Footer />
+    </>
+  )
+}
+
+function ShippingCard() {
+  return (
+    <div className="bg-espresso-900 rounded-xl p-5 text-center relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
+      <div className="relative">
+        <p className="eyebrow text-gold-500/70 mb-1">Skicka till</p>
+        <p className="text-gold-200 font-medium">GuldBud AB</p>
+        <p className="text-gold-500/80 text-sm">Storgatan 1</p>
+        <p className="text-gold-500/80 text-sm">111 22 Stockholm</p>
+        <p className="text-gold-500/60 text-xs mt-2">Vid frågor: info@guldbud.se</p>
+      </div>
     </div>
+  )
+}
+
+function SparkIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="shrink-0">
+      <path d="M12 3l1.6 5L18 9.5 13.6 11 12 16l-1.6-5L6 9.5 10.4 8 12 3z" fill="#d9ab3c" />
+    </svg>
   )
 }

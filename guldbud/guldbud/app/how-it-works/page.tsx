@@ -1,19 +1,24 @@
 import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
 import Link from 'next/link'
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
 
       {/* Hero */}
-      <div className="bg-[#1a1208] px-4 py-16 text-center">
-        <p className="text-[#8B6914] text-xs tracking-widest uppercase mb-3">Enkelt och tryggt</p>
-        <h1 className="text-3xl font-medium text-[#D4AF37] mb-4">Så fungerar GuldBud</h1>
-        <p className="text-[#c9a84c] max-w-xl mx-auto text-sm leading-relaxed">
+      <div className="relative overflow-hidden bg-espresso-900 px-4 py-20 text-center">
+        <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
+        <div className="pointer-events-none absolute -top-24 left-1/3 w-72 h-72 rounded-full bg-gold-500/10 blur-3xl" />
+        <div className="relative">
+        <p className="eyebrow text-gold-500/80 mb-3">Enkelt och tryggt</p>
+        <h1 className="font-display text-4xl text-gold-100 mb-4">Så fungerar GuldBud</h1>
+        <p className="text-gold-200/70 max-w-xl mx-auto text-sm leading-relaxed">
           Från uppladdning till pengarna på kontot — vi guidar dig genom hela processen.
           Allt sker tryggt, snabbt och med full kontroll.
         </p>
+        </div>
       </div>
 
       {/* Steg */}
@@ -125,14 +130,19 @@ export default function HowItWorksPage() {
         </div>
 
         {/* CTA */}
-        <div className="mt-12 bg-[#1a1208] rounded-2xl p-8 text-center">
-          <h3 className="text-xl text-[#D4AF37] font-medium mb-2">Redo att sälja ditt guld?</h3>
-          <p className="text-[#8B6914] text-sm mb-6">Det tar under 5 minuter att lägga ut ditt första föremål.</p>
-          <Link href="/auth/login?mode=register" className="bg-[#B8860B] hover:bg-[#D4AF37] text-white font-medium px-8 py-3 rounded-lg transition inline-block">
-            Kom igång gratis
-          </Link>
+        <div className="relative overflow-hidden mt-12 bg-espresso-900 rounded-2xl p-10 text-center">
+          <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
+          <div className="pointer-events-none absolute -top-16 right-1/4 w-56 h-56 rounded-full bg-gold-500/15 blur-3xl" />
+          <div className="relative">
+            <h3 className="font-display text-2xl text-gold-100 mb-2">Redo att sälja ditt guld?</h3>
+            <p className="text-gold-500/70 text-sm mb-6">Det tar under 5 minuter att lägga ut ditt första föremål.</p>
+            <Link href="/auth/login?mode=register" className="btn-gold">
+              Kom igång gratis
+            </Link>
+          </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

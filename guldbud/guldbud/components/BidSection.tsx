@@ -4,10 +4,21 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 
-export default function BidSection({ itemId, currentTop }: { itemId: string; currentTop: number }) {
+const INCREMENTS = [100, 250, 500, 1000]
+
+export default function BidSection({
+  itemId,
+  currentTop,
+  onPlaced,
+}: {
+  itemId: string
+  currentTop: number
+  onPlaced?: () => void | Promise<void>
+}) {
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
+  const [ok, setOk] = useState(false)
   const [role, setRole] = useState<string | null>(null)
   const [approved, setApproved] = useState(false)
   const [checked, setChecked] = useState(false)
@@ -17,7 +28,11 @@ export default function BidSection({ itemId, currentTop }: { itemId: string; cur
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
-        const { data: prof } = await supabase.from('profiles').select('role, approved').eq('id', data.user.id).single()
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('role, approved')
+          .eq('id', data.user.id)
+          .single()
         setRole(prof?.role ?? null)
         setApproved(prof?.approved ?? false)
       }
@@ -25,41 +40,59 @@ export default function BidSection({ itemId, currentTop }: { itemId: string; cur
     })
   }, [])
 
+  const minNext = currentTop + 100
+  const quickSet = (inc: number) => setAmount(String(Math.max(minNext, (currentTop || 0) + inc)))
+
   const place = async () => {
     const val = parseInt(amount)
+    setOk(false)
     if (!val || val <= currentTop) {
       setMsg(`Budet måste vara högre än ${currentTop.toLocaleString('sv-SE')} kr`)
       return
     }
     setLoading(true)
-    const { error } = await supabase.from('bids').insert({ item_id: itemId, dealer_id: (await supabase.auth.getUser()).data.user?.id, amount: val })
-    if (error) setMsg(error.message)
-    else { setMsg('Budet är lagt! ✓'); setAmount(''); router.refresh() }
+    setMsg('')
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    const { error } = await supabase.from('bids').insert({ item_id: itemId, dealer_id: user?.id, amount: val })
+    if (error) {
+      setMsg(error.message)
+      setOk(false)
+    } else {
+      setMsg('Ditt bud är lagt!')
+      setOk(true)
+      setAmount('')
+      if (onPlaced) await onPlaced()
+      router.refresh()
+    }
     setLoading(false)
   }
 
-  if (!checked) return null
+  if (!checked) return <div className="h-24 rounded-2xl skeleton" />
 
   if (!role) {
     return (
-      <div className="bg-stone-50 rounded-xl p-4 text-center">
-        <p className="text-stone-500 text-sm mb-3">Logga in för att lägga bud</p>
-        <Link href="/auth/login" className="btn-gold inline-block">Logga in</Link>
+      <div className="rounded-2xl bg-white border border-espresso-100 p-5 text-center shadow-soft">
+        <p className="text-espresso-500 text-sm mb-3">Logga in för att lägga bud</p>
+        <Link href="/auth/login" className="btn-gold">
+          Logga in
+        </Link>
       </div>
     )
   }
 
   if (role === 'customer' || role === 'admin') {
     return (
-      <div className="bg-stone-50 rounded-xl p-4">
-        <p className="text-stone-500 text-sm">Endast auktoriserade guldhandlare kan lägga bud.</p>
+      <div className="rounded-2xl bg-espresso-50 border border-espresso-100 p-4">
+        <p className="text-espresso-500 text-sm">Endast auktoriserade guldhandlare kan lägga bud.</p>
       </div>
     )
   }
 
   if (!approved) {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+      <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
         <p className="text-amber-700 text-sm font-medium">Ditt handlarkonto väntar på godkännande.</p>
         <p className="text-amber-600 text-xs mt-1">Du får ett mejl när du är godkänd och kan börja buda.</p>
       </div>
@@ -67,20 +100,45 @@ export default function BidSection({ itemId, currentTop }: { itemId: string; cur
   }
 
   return (
-    <div>
+    <div className="rounded-2xl bg-white border border-espresso-100 p-5 shadow-soft">
+      <p className="text-sm font-medium text-espresso-800 mb-3">Lägg ditt bud</p>
+      <div className="flex flex-wrap gap-2 mb-3">
+        {INCREMENTS.map((inc) => (
+          <button
+            key={inc}
+            type="button"
+            onClick={() => quickSet(inc)}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-espresso-200 text-espresso-600 hover:border-gold-400 hover:text-gold-700 hover:bg-gold-50 transition"
+          >
+            +{inc.toLocaleString('sv-SE')}
+          </button>
+        ))}
+      </div>
       <div className="flex gap-2">
-        <input
-          type="number"
-          value={amount}
-          onChange={e => setAmount(e.target.value)}
-          placeholder={`Bud över ${(currentTop + 100).toLocaleString('sv-SE')} kr`}
-          className="flex-1"
-        />
-        <button onClick={place} disabled={loading} className="btn-gold">
+        <div className="relative flex-1">
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder={`Minst ${minNext.toLocaleString('sv-SE')}`}
+            className="w-full !pr-10"
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-sm">kr</span>
+        </div>
+        <button onClick={place} disabled={loading} className="btn-gold whitespace-nowrap">
           {loading ? '...' : 'Lägg bud'}
         </button>
       </div>
-      {msg && <p className={`text-sm mt-2 ${msg.includes('✓') ? 'text-green-600' : 'text-red-500'}`}>{msg}</p>}
+      {msg && (
+        <p className={`text-sm mt-2 flex items-center gap-1.5 ${ok ? 'text-emerald-600' : 'text-red-500'}`}>
+          {ok && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+          {msg}
+        </p>
+      )}
     </div>
   )
 }
