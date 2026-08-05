@@ -7,6 +7,12 @@ export interface Profile {
   role: Role
   company_name?: string
   approved: boolean
+  phone?: string
+  personal_number?: string
+  address?: string
+  postal_code?: string
+  city?: string
+  org_number?: string
   created_at: string
 }
 
@@ -22,6 +28,8 @@ export interface Item {
   image_urls: string[]
   created_at: string
   auction_ends_at?: string
+  accepted_bid_id?: string
+  accepted_at?: string
   profiles?: Profile
 }
 
@@ -32,4 +40,14 @@ export interface Bid {
   amount: number
   created_at: string
   profiles?: Profile
+}
+
+export interface Notification {
+  id: string
+  user_id: string
+  title: string
+  message?: string
+  item_id?: string
+  read: boolean
+  created_at: string
 }

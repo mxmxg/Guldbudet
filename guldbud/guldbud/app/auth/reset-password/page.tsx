@@ -25,13 +25,17 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
+    <>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+    <div className="min-h-screen bg-cream flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-medium text-gold-900">◆ GuldBud</Link>
+          <Link href="/" style={{ fontFamily: "'Great Vibes', cursive", fontSize: '40px' }} className="text-gold-700">
+            GuldBud
+          </Link>
         </div>
-        <div className="bg-white border border-stone-200 rounded-2xl p-8">
-          <h1 className="text-lg font-medium text-stone-900 mb-6">Välj nytt lösenord</h1>
+        <div className="card p-8">
+          <h1 className="font-display text-xl text-espresso-900 mb-6">Välj nytt lösenord</h1>
           {success ? (
             <p className="text-green-600 text-center">Lösenordet är uppdaterat! Omdirigerar...</p>
           ) : (
@@ -55,5 +59,6 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

@@ -2,9 +2,13 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
-import { Item, Bid } from '@/lib/types'
+import { Item } from '@/lib/types'
 import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
+import CountdownTimer from '@/components/CountdownTimer'
 import Image from 'next/image'
+import Link from 'next/link'
+import { estimateRange, formatSEK } from '@/lib/gold'
 
 export default function DealerDashboard() {
   const router = useRouter()
@@ -12,42 +16,65 @@ export default function DealerDashboard() {
   const [items, setItems] = useState<Item[]>([])
   const [myBids, setMyBids] = useState<Record<string, number>>({})
   const [topBids, setTopBids] = useState<Record<string, number>>({})
+  const [bidCounts, setBidCounts] = useState<Record<string, number>>({})
   const [bidInputs, setBidInputs] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [bidding, setBidding] = useState<string | null>(null)
   const [profile, setProfile] = useState<any>(null)
-  const [tab, setTab] = useState<'active' | 'mybids'>('active')
+  const [tab, setTab] = useState<'active' | 'mybids' | 'winning'>('active')
 
   useEffect(() => {
     init()
   }, [])
 
   const init = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/auth/login?role=dealer'); return }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/auth/login?role=dealer')
+      return
+    }
 
     const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-    if (!prof || prof.role !== 'dealer') { router.push('/'); return }
-    if (!prof.approved) { router.push('/auth/pending'); return }
+    if (!prof || prof.role !== 'dealer') {
+      router.push('/')
+      return
+    }
+    if (!prof.approved) {
+      router.push('/auth/pending')
+      return
+    }
     setProfile(prof)
 
     const { data: activeItems } = await supabase
-      .from('items').select('*, profiles(full_name)')
-      .eq('status', 'active').order('auction_ends_at', { ascending: true })
+      .from('items')
+      .select('*, profiles(full_name)')
+      .eq('status', 'active')
+      .order('auction_ends_at', { ascending: true })
     setItems(activeItems || [])
 
-    // Top bids per item
     if (activeItems && activeItems.length > 0) {
       const itemIds = activeItems.map((i: Item) => i.id)
-      const { data: bids } = await supabase.from('bids').select('item_id, amount').in('item_id', itemIds).order('amount', { ascending: false })
+      const { data: bids } = await supabase
+        .from('bids')
+        .select('item_id, amount')
+        .in('item_id', itemIds)
+        .order('amount', { ascending: false })
       const top: Record<string, number> = {}
-      bids?.forEach((b: any) => { if (!top[b.item_id] || b.amount > top[b.item_id]) top[b.item_id] = b.amount })
+      const counts: Record<string, number> = {}
+      bids?.forEach((b: any) => {
+        counts[b.item_id] = (counts[b.item_id] || 0) + 1
+        if (!top[b.item_id] || b.amount > top[b.item_id]) top[b.item_id] = b.amount
+      })
       setTopBids(top)
+      setBidCounts(counts)
 
-      // My bids
       const { data: mine } = await supabase.from('bids').select('item_id, amount').eq('dealer_id', user.id)
       const my: Record<string, number> = {}
-      mine?.forEach((b: any) => { if (!my[b.item_id] || b.amount > my[b.item_id]) my[b.item_id] = b.amount })
+      mine?.forEach((b: any) => {
+        if (!my[b.item_id] || b.amount > my[b.item_id]) my[b.item_id] = b.amount
+      })
       setMyBids(my)
     }
     setLoading(false)
@@ -61,83 +88,177 @@ export default function DealerDashboard() {
       return
     }
     setBidding(itemId)
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
     const { error } = await supabase.from('bids').insert({ item_id: itemId, dealer_id: user!.id, amount })
-    if (error) { alert(error.message) }
-    else {
-      setTopBids(prev => ({ ...prev, [itemId]: amount }))
-      setMyBids(prev => ({ ...prev, [itemId]: amount }))
-      setBidInputs(prev => ({ ...prev, [itemId]: '' }))
+    if (error) {
+      alert(error.message)
+    } else {
+      setTopBids((prev) => ({ ...prev, [itemId]: amount }))
+      setMyBids((prev) => ({ ...prev, [itemId]: amount }))
+      setBidCounts((prev) => ({ ...prev, [itemId]: (prev[itemId] || 0) + 1 }))
+      setBidInputs((prev) => ({ ...prev, [itemId]: '' }))
     }
     setBidding(null)
   }
 
-  const displayItems = tab === 'mybids' ? items.filter(i => myBids[i.id]) : items
+  const winningCount = items.filter((i) => myBids[i.id] && myBids[i.id] === topBids[i.id]).length
+  const displayItems =
+    tab === 'mybids'
+      ? items.filter((i) => myBids[i.id])
+      : tab === 'winning'
+      ? items.filter((i) => myBids[i.id] && myBids[i.id] === topBids[i.id])
+      : items
+
+  const tabs: { key: typeof tab; label: string; count?: number }[] = [
+    { key: 'active', label: 'Alla auktioner', count: items.length },
+    { key: 'mybids', label: 'Mina bud', count: Object.keys(myBids).length },
+    { key: 'winning', label: 'Ledande', count: winningCount },
+  ]
 
   return (
-    <div className="min-h-screen"><Navbar />
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-xl font-medium text-stone-900">Dashboard</h1>
-            {profile && <p className="text-stone-500 text-sm">{profile.company_name || profile.full_name}</p>}
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+
+      {/* Header */}
+      <div className="relative overflow-hidden bg-espresso-900">
+        <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
+        <div className="pointer-events-none absolute -top-20 right-10 w-72 h-72 rounded-full bg-gold-500/10 blur-3xl" />
+        <div className="relative max-w-5xl mx-auto px-4 py-10">
+          <p className="eyebrow text-gold-500/80 mb-1">Handlarpanel</p>
+          <h1 className="font-display text-3xl text-gold-100">
+            {profile?.company_name || profile?.full_name || 'Budpanel'}
+          </h1>
+          <div className="mt-4 flex flex-wrap gap-6 text-sm">
+            <HeaderStat value={items.length} label="Aktiva auktioner" />
+            <HeaderStat value={Object.keys(myBids).length} label="Dina bud" />
+            <HeaderStat value={winningCount} label="Ledande bud" accent />
           </div>
-          <div className="flex gap-1 bg-stone-100 p-1 rounded-lg">
-            {(['active', 'mybids'] as const).map(t => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${tab === t ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}>
-                {t === 'active' ? 'Alla auktioner' : 'Mina bud'}
-              </button>
-            ))}
-          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+        {/* Tabs */}
+        <div className="flex gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-fit mb-6 shadow-soft">
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
+                tab === t.key ? 'bg-gold-sheen text-espresso-900 shadow-gold' : 'text-espresso-500 hover:text-espresso-800'
+              }`}
+            >
+              {t.label}
+              {t.count !== undefined && (
+                <span
+                  className={`text-xs px-1.5 py-0.5 rounded-full ${
+                    tab === t.key ? 'bg-espresso-900/15' : 'bg-espresso-100 text-espresso-500'
+                  }`}
+                >
+                  {t.count}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
 
         {loading ? (
-          <div className="text-center py-16 text-stone-400">Laddar auktioner...</div>
+          <div className="grid gap-4">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-32 rounded-2xl skeleton" />
+            ))}
+          </div>
         ) : displayItems.length === 0 ? (
-          <div className="text-center py-16 text-stone-400 border border-dashed border-stone-200 rounded-xl">
-            {tab === 'mybids' ? 'Du har inte lagt några bud ännu.' : 'Inga aktiva auktioner just nu.'}
+          <div className="card p-16 text-center text-espresso-400">
+            <div className="text-3xl mb-3 opacity-40 animate-float">◆</div>
+            <p>
+              {tab === 'mybids'
+                ? 'Du har inte lagt några bud ännu.'
+                : tab === 'winning'
+                ? 'Du leder inte i någon auktion just nu.'
+                : 'Inga aktiva auktioner just nu.'}
+            </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            {displayItems.map(item => {
+          <div className="grid gap-4">
+            {displayItems.map((item) => {
               const top = topBids[item.id] || 0
               const mine = myBids[item.id]
               const isWinning = mine && mine === top
+              const count = bidCounts[item.id] || 0
+              const est = estimateRange(item.weight_grams || 0, item.karat || '')
               return (
-                <div key={item.id} className={`bg-white border rounded-xl overflow-hidden flex ${isWinning ? 'border-green-300' : 'border-stone-200'}`}>
-                  <div className="w-28 h-28 flex-shrink-0 bg-gradient-to-br from-gold-900 to-gold-700 relative">
-                    {item.image_urls?.[0] && <Image src={item.image_urls[0]} alt={item.title} fill className="object-cover" />}
-                  </div>
-                  <div className="flex-1 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-stone-900">{item.title}</h3>
-                        {isWinning && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Bästa bud</span>}
-                        {mine && !isWinning && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Överbudat</span>}
+                <div
+                  key={item.id}
+                  className={`card overflow-hidden flex flex-col sm:flex-row transition ${
+                    isWinning ? 'ring-2 ring-emerald-300' : ''
+                  }`}
+                >
+                  <Link
+                    href={`/auctions/${item.id}`}
+                    className="w-full sm:w-40 h-40 sm:h-auto flex-shrink-0 bg-gradient-to-br from-espresso-800 to-espresso-600 relative group"
+                  >
+                    {item.image_urls?.[0] ? (
+                      <Image src={item.image_urls[0]} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-4xl text-gold-500/40">◆</div>
+                    )}
+                    {item.auction_ends_at && (
+                      <div className="absolute top-2 left-2">
+                        <CountdownTimer endsAt={item.auction_ends_at} variant="chip" className="backdrop-blur" />
                       </div>
-                      <p className="text-xs text-stone-400 mb-2">{item.weight_grams} g · {item.karat}</p>
-                      <div className="flex gap-4 text-sm">
-                        <div>
-                          <span className="text-stone-400">Högsta: </span>
-                          <span className="font-medium text-gold-600">{top ? top.toLocaleString('sv-SE') + ' kr' : '—'}</span>
-                        </div>
+                    )}
+                  </Link>
+
+                  <div className="flex-1 p-5 flex flex-col lg:flex-row lg:items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <Link href={`/auctions/${item.id}`} className="font-display text-lg text-espresso-900 hover:text-gold-700 transition">
+                          {item.title}
+                        </Link>
+                        {isWinning && <span className="chip bg-emerald-100 text-emerald-700">✓ Ledande</span>}
+                        {mine && !isWinning && <span className="chip bg-amber-100 text-amber-700">Överbjuden</span>}
+                      </div>
+                      <p className="text-xs text-espresso-400 mb-3">
+                        {item.weight_grams} g · {item.karat} · {count} bud
+                      </p>
+                      <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+                        <span>
+                          <span className="text-espresso-400">Högsta: </span>
+                          <span className="font-semibold text-gold-700 tabular-nums">
+                            {top ? formatSEK(top) : '—'}
+                          </span>
+                        </span>
                         {mine && (
-                          <div>
-                            <span className="text-stone-400">Mitt: </span>
-                            <span className="font-medium">{mine.toLocaleString('sv-SE')} kr</span>
-                          </div>
+                          <span>
+                            <span className="text-espresso-400">Ditt: </span>
+                            <span className="font-medium tabular-nums">{formatSEK(mine)}</span>
+                          </span>
                         )}
+                        <span className="text-espresso-400 text-xs">
+                          Metallvärde {formatSEK(est.low)}–{formatSEK(est.high)}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex gap-2 items-center">
-                      <input type="number" value={bidInputs[item.id] || ''}
-                        onChange={e => setBidInputs(prev => ({ ...prev, [item.id]: e.target.value }))}
-                        placeholder={`Min ${(top + 100).toLocaleString('sv-SE')} kr`}
-                        className="w-36 text-sm" />
-                      <button onClick={() => placeBid(item.id)} disabled={bidding === item.id}
-                        className="btn-gold whitespace-nowrap">
-                        {bidding === item.id ? '...' : 'Lägg bud'}
+
+                    <div className="flex gap-2 items-center lg:w-auto">
+                      <div className="relative flex-1 lg:flex-initial">
+                        <input
+                          type="number"
+                          value={bidInputs[item.id] || ''}
+                          onChange={(e) => setBidInputs((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                          placeholder={`Min ${(top + 100).toLocaleString('sv-SE')}`}
+                          className="w-full lg:w-40 !pr-8 text-sm"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-xs">kr</span>
+                      </div>
+                      <button
+                        onClick={() => placeBid(item.id)}
+                        disabled={bidding === item.id}
+                        className="btn-gold whitespace-nowrap !px-5 !py-2.5"
+                      >
+                        {bidding === item.id ? '...' : 'Buda'}
                       </button>
                     </div>
                   </div>
@@ -147,6 +268,16 @@ export default function DealerDashboard() {
           </div>
         )}
       </div>
+      <Footer />
+    </div>
+  )
+}
+
+function HeaderStat({ value, label, accent }: { value: number; label: string; accent?: boolean }) {
+  return (
+    <div>
+      <div className={`font-display text-2xl ${accent ? 'text-emerald-400' : 'text-gold-100'}`}>{value}</div>
+      <div className="text-xs text-gold-500/60">{label}</div>
     </div>
   )
 }

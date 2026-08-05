@@ -62,7 +62,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
           <p className="text-[#D4AF37] font-medium">GuldBud AB</p>
           <p className="text-[#c9a84c] text-sm">Storgatan 1</p>
           <p className="text-[#c9a84c] text-sm">111 22 Stockholm</p>
-          <p className="text-[#8B6914] text-xs mt-2">Vid frågor: info@guldbud.com</p>
+          <p className="text-[#8B6914] text-xs mt-2">Vid frågor: info@guldbud.se</p>
         </div>
       </div>
     )
@@ -80,7 +80,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
           <button
             onClick={accept}
             disabled={loading}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-lg transition text-sm"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-5 py-2 rounded-lg transition text-sm"
           >
             {loading ? 'Bekräftar...' : 'Ja, acceptera budet'}
           </button>
@@ -98,7 +98,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
   return (
     <button
       onClick={() => setStep('confirm')}
-      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-xl transition mt-4 text-sm"
+      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-xl transition mt-4 text-sm"
     >
       Acceptera detta bud — {amount.toLocaleString('sv-SE')} kr
     </button>
