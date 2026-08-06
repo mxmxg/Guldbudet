@@ -1,17 +1,37 @@
 import Link from 'next/link'
+import AuthShell from '@/components/AuthShell'
 import { HourglassIcon } from '@/components/Icons'
 
 export default function PendingPage() {
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4">
-      <div className="text-center max-w-md">
-        <div className="w-16 h-16 bg-gold-100 text-gold-700 rounded-full flex items-center justify-center mx-auto mb-5"><HourglassIcon size={28} /></div>
-        <h1 className="text-xl font-medium text-stone-900 mb-3">Tack för din registrering!</h1>
-        <p className="text-stone-500 mb-6">
-          Ditt handlarkonto granskas av vårt team. Du får ett e-postmeddelande inom 1–2 arbetsdagar när du är godkänd att börja buda.
+    <AuthShell>
+      <div style={{ textAlign: 'center' }}>
+        <div
+          style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '9999px',
+            background: '#2d1f0a',
+            color: '#D4AF37',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 20px',
+          }}
+        >
+          <HourglassIcon size={26} />
+        </div>
+        <h1 style={{ color: '#f5e6c8', fontSize: '20px', fontWeight: 600, marginBottom: '10px' }}>
+          Tack för din registrering!
+        </h1>
+        <p style={{ color: '#8B6914', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px' }}>
+          Ditt handlarkonto granskas av vårt team. Du får ett e-postmeddelande inom 1–2 arbetsdagar när du är
+          godkänd att börja buda.
         </p>
-        <Link href="/" className="btn-outline inline-block">Tillbaka till startsidan</Link>
+        <Link href="/" style={{ color: '#B8860B', fontSize: '14px', fontWeight: 500 }}>
+          Tillbaka till startsidan
+        </Link>
       </div>
-    </div>
+    </AuthShell>
   )
 }

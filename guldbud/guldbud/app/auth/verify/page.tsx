@@ -1,27 +1,40 @@
 import Link from 'next/link'
+import AuthShell from '@/components/AuthShell'
 import { MailIcon } from '@/components/Icons'
 
 export default function VerifyPage() {
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4">
-      <div className="w-full max-w-md text-center">
-        <div className="bg-white border border-stone-200 rounded-2xl p-10">
-          <div className="w-16 h-16 bg-gold-100 text-gold-700 rounded-full flex items-center justify-center mx-auto mb-5">
-            <MailIcon size={30} />
-          </div>
-          <h1 className="text-xl font-medium text-stone-900 mb-3">Bekräfta din e-post</h1>
-          <p className="text-stone-500 text-sm mb-6">
-            Vi har skickat ett bekräftelsemejl till din e-postadress. 
-            Klicka på länken i mejlet för att aktivera ditt konto.
-          </p>
-          <p className="text-stone-400 text-xs mb-6">
-            Hittar du inte mejlet? Kolla skräpposten.
-          </p>
-          <Link href="/" className="text-gold-600 hover:text-gold-700 text-sm font-medium transition">
-            Tillbaka till startsidan
-          </Link>
+    <AuthShell>
+      <div style={{ textAlign: 'center' }}>
+        <div
+          style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '9999px',
+            background: '#2d1f0a',
+            color: '#D4AF37',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 20px',
+          }}
+        >
+          <MailIcon size={28} />
         </div>
+        <h1 style={{ color: '#f5e6c8', fontSize: '20px', fontWeight: 600, marginBottom: '10px' }}>
+          Bekräfta din e-post
+        </h1>
+        <p style={{ color: '#8B6914', fontSize: '14px', lineHeight: 1.6, marginBottom: '12px' }}>
+          Vi har skickat ett bekräftelsemejl till din e-postadress. Klicka på länken i mejlet för att aktivera
+          ditt konto.
+        </p>
+        <p style={{ color: '#5a4020', fontSize: '12px', marginBottom: '24px' }}>
+          Hittar du inte mejlet? Kolla skräpposten.
+        </p>
+        <Link href="/" style={{ color: '#B8860B', fontSize: '14px', fontWeight: 500 }}>
+          Tillbaka till startsidan
+        </Link>
       </div>
-    </div>
+    </AuthShell>
   )
 }
