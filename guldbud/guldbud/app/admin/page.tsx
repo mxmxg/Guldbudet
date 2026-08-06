@@ -210,7 +210,7 @@ export default function AdminPage() {
                   <div key={item.id} className="card p-5 flex gap-4 flex-wrap sm:flex-nowrap">
                     {item.image_urls?.[0] && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.image_urls[0]} alt={item.title} className="w-24 h-24 object-cover rounded-xl shrink-0" />
+                      <img src={item.image_urls[0]} alt={item.title} className="w-24 h-24 object-contain rounded-xl shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-espresso-900">{item.title}</p>
@@ -269,7 +269,7 @@ export default function AdminPage() {
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative shrink-0">
                     {item.image_urls?.[0] && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.image_urls[0]} alt={item.title} className="w-full h-full object-cover" />
+                      <img src={item.image_urls[0]} alt={item.title} className="w-full h-full object-contain" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

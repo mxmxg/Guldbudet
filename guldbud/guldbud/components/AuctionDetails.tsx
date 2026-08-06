@@ -122,7 +122,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                   alt={item.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover"
+                  className="object-contain"
                   priority
                 />
               ) : (
@@ -146,11 +146,11 @@ export default function AuctionDetails({ item }: { item: any }) {
                   <button
                     key={i}
                     onClick={() => setActiveImg(i)}
-                    className={`aspect-square rounded-xl overflow-hidden relative border-2 transition ${
+                    className={`aspect-square rounded-xl overflow-hidden relative border-2 bg-espresso-100 transition ${
                       activeImg === i ? 'border-gold-400 shadow-gold' : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
-                    <Image src={url} alt="" fill className="object-cover" />
+                    <Image src={url} alt="" fill className="object-contain" />
                   </button>
                 ))}
               </div>

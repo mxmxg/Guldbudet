@@ -138,7 +138,7 @@ export default function HomeContent({ items }: { items: EnrichedItem[] }) {
                     <div key={item.id} className="card p-4 flex gap-4 items-center card-hover">
                       <div className="w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden relative bg-espresso-100">
                         {item.image_urls?.[0] && (
-                          <Image src={item.image_urls[0]} alt={item.title} fill className="object-cover" />
+                          <Image src={item.image_urls[0]} alt={item.title} fill className="object-contain" />
                         )}
                       </div>
                       <div className="flex-1">
@@ -664,11 +664,11 @@ function FeaturedAuction({ items }: { items: EnrichedItem[] }) {
             <span className="chip bg-gold-500/15 text-gold-100">{count} bud</span>
           )}
         </div>
-        <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-5 relative bg-gradient-to-br from-gold-300 via-gold-500 to-gold-700 flex items-center justify-center">
+        <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-5 relative bg-espresso-900 flex items-center justify-center">
           {img ? (
-            <Image src={img} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+            <Image src={img} alt={item.title} fill className="object-contain transition-transform duration-700 group-hover:scale-105" />
           ) : (
-            <CategoryIcon category={item.category} size={70} className="text-espresso-900/30" strokeWidth={1} />
+            <CategoryIcon category={item.category} size={70} className="text-gold-500/40" strokeWidth={1} />
           )}
         </div>
         <p className="font-display text-lg text-gold-100 leading-tight mb-3 truncate">{item.title}</p>
