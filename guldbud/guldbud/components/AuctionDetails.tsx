@@ -196,10 +196,10 @@ export default function AuctionDetails({ item }: { item: any }) {
                 flash ? 'border-gold-400 bg-gold-50/60' : 'border-espresso-100 bg-white'
               } shadow-soft`}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>
                   <p className="eyebrow text-espresso-400 mb-1">Högsta bud</p>
-                  <p className="font-display text-4xl text-gradient-gold tabular-nums">
+                  <p className="font-display text-3xl sm:text-4xl text-gradient-gold tabular-nums whitespace-nowrap">
                     {topAmount ? formatSEK(topAmount) : 'Öppet för bud'}
                   </p>
                   {topBid ? (
@@ -212,7 +212,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                   )}
                 </div>
                 {!isClosed && item.auction_ends_at && (
-                  <div className="text-right">
+                  <div className="sm:text-right">
                     <p className="eyebrow text-espresso-400 mb-2">Avslutas om</p>
                     <CountdownTimer endsAt={item.auction_ends_at} variant="blocks" />
                   </div>

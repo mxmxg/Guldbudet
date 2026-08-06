@@ -84,6 +84,10 @@ module.exports = {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
         },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
         'fade-up': 'fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both',
@@ -93,6 +97,7 @@ module.exports = {
         float: 'float 6s ease-in-out infinite',
         'pulse-ring': 'pulse-ring 2s cubic-bezier(0.16, 1, 0.3, 1) infinite',
         'spin-slow': 'spin-slow 22s linear infinite',
+        marquee: 'marquee 20s linear infinite',
       },
     },
   },
