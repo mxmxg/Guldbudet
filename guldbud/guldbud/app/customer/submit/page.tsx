@@ -170,8 +170,8 @@ export default function SubmitPage() {
               </label>
               <div className="grid grid-cols-3 gap-3 mb-3">
                 {previews.map((src, i) => (
-                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-espresso-100 group">
-                    <Image src={src} alt="" fill className="object-cover" />
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-espresso-100 bg-espresso-100 group">
+                    <Image src={src} alt="" fill className="object-contain" />
                     {i === 0 && (
                       <span className="absolute bottom-1 left-1 chip bg-espresso-900/80 text-gold-200 !text-[10px] !px-1.5 !py-0.5">
                         Huvudbild

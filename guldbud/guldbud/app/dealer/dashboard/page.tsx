@@ -202,7 +202,7 @@ export default function DealerDashboard() {
                     className="w-full sm:w-40 h-40 sm:h-auto flex-shrink-0 bg-gradient-to-br from-espresso-800 to-espresso-600 relative group"
                   >
                     {item.image_urls?.[0] ? (
-                      <Image src={item.image_urls[0]} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <Image src={item.image_urls[0]} alt={item.title} fill className="object-contain group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="flex items-center justify-center h-full"><CategoryIcon category={item.category} size={40} className="text-gold-500/40" strokeWidth={1.2} /></div>
                     )}

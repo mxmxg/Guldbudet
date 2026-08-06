@@ -23,14 +23,14 @@ export default function AuctionCard({ item }: { item: CardItem }) {
   return (
     <Link href={`/auctions/${item.id}`} className="group relative block card card-hover overflow-hidden">
       {/* Image */}
-      <div className="h-52 relative overflow-hidden">
+      <div className="h-52 relative overflow-hidden bg-espresso-900">
         {img ? (
           <Image
             src={img}
             alt={item.title}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            className="object-contain transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-espresso-800 to-espresso-600 flex items-center justify-center">
