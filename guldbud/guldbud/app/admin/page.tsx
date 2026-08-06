@@ -7,12 +7,14 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { TrashIcon } from '@/components/Icons'
 import { estimateRange, formatSEK } from '@/lib/gold'
+import { commission } from '@/lib/fees'
 
 export default function AdminPage() {
   const [pendingDealers, setPendingDealers] = useState<any[]>([])
   const [pendingItems, setPendingItems] = useState<any[]>([])
   const [liveItems, setLiveItems] = useState<any[]>([])
   const [openOrders, setOpenOrders] = useState(0)
+  const [analytics, setAnalytics] = useState({ gmv: 0, commission: 0, completed: 0 })
   const [adminError, setAdminError] = useState('')
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -58,6 +60,14 @@ export default function AdminPage() {
         .select('id', { count: 'exact', head: true })
         .in('status', ['accepted', 'shipped_by_seller', 'received', 'verified_paid', 'shipped_to_dealer'])
 
+      const { data: allOrders } = await supabase.from('orders').select('amount, status')
+      const settled = (allOrders || []).filter((o: any) => o.status !== 'cancelled')
+      setAnalytics({
+        gmv: settled.reduce((s: number, o: any) => s + (o.amount || 0), 0),
+        commission: settled.reduce((s: number, o: any) => s + commission(o.amount || 0), 0),
+        completed: (allOrders || []).filter((o: any) => o.status === 'completed').length,
+      })
+
       setPendingDealers(dealers || [])
       setPendingItems(items || [])
       setLiveItems(active || [])
@@ -79,6 +89,19 @@ export default function AdminPage() {
     setPendingItems((prev) => prev.filter((i) => i.id !== id))
     setDeletingId(null)
     setConfirmId(null)
+  }
+
+  const extendAuction = async (item: any) => {
+    const base = item.auction_ends_at ? new Date(item.auction_ends_at).getTime() : Date.now()
+    const newEnd = new Date(Math.max(base, Date.now()) + 24 * 60 * 60 * 1000).toISOString()
+    await supabase.from('items').update({ auction_ends_at: newEnd, ended_notified: false }).eq('id', item.id)
+    setLiveItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, auction_ends_at: newEnd } : i)))
+  }
+
+  const endAuctionNow = async (item: any) => {
+    const now = new Date().toISOString()
+    await supabase.from('items').update({ auction_ends_at: now }).eq('id', item.id)
+    setLiveItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, auction_ends_at: now } : i)))
   }
 
   const viewDoc = async (path: string) => {
@@ -169,6 +192,22 @@ export default function AdminPage() {
             </button>
           </div>
         )}
+
+        {/* Analytics overview */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+          <div className="card p-4">
+            <p className="font-display text-2xl text-espresso-900 tabular-nums">{formatSEK(analytics.gmv)}</p>
+            <p className="text-xs text-espresso-400 mt-0.5">Affärsvolym</p>
+          </div>
+          <div className="card p-4">
+            <p className="font-display text-2xl text-emerald-600 tabular-nums">{formatSEK(analytics.commission)}</p>
+            <p className="text-xs text-espresso-400 mt-0.5">Provisionsintäkt</p>
+          </div>
+          <div className="card p-4">
+            <p className="font-display text-2xl text-espresso-900 tabular-nums">{analytics.completed}</p>
+            <p className="text-xs text-espresso-400 mt-0.5">Slutförda affärer</p>
+          </div>
+        </div>
 
         {/* Orders */}
         <Link
@@ -344,7 +383,23 @@ export default function AdminPage() {
                       {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
                     </p>
                   </div>
-                  <div className="shrink-0">
+                  <div className="shrink-0 flex items-center gap-2 flex-wrap justify-end">
+                    {item.status === 'active' && confirmId !== item.id && (
+                      <>
+                        <button
+                          onClick={() => extendAuction(item)}
+                          className="text-sm text-espresso-600 hover:text-gold-700 border border-espresso-200 hover:border-gold-300 px-3 py-2 rounded-xl transition"
+                        >
+                          Förläng 24h
+                        </button>
+                        <button
+                          onClick={() => endAuctionNow(item)}
+                          className="text-sm text-espresso-600 hover:text-espresso-900 border border-espresso-200 px-3 py-2 rounded-xl transition"
+                        >
+                          Avsluta nu
+                        </button>
+                      </>
+                    )}
                     {confirmId === item.id ? (
                       <div className="flex items-center gap-2">
                         <button
