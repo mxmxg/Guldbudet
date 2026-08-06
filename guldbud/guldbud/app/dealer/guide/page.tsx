@@ -23,7 +23,7 @@ const STEPS = [
   {
     n: '4',
     title: 'Vinn budgivningen',
-    desc: 'När auktionen avslutas har den med högsta budet vunnit. Säljaren bekräftar ditt bud, och en affär skapas som du följer under "Mina affärer". Du får besked direkt.',
+    desc: 'När auktionen avslutas har den med högsta budet vunnit. En affär skapas under "Mina affärer". Du behöver inte göra något just nu – vi hör av oss när föremålet är hos oss och kontrollerat.',
   },
   {
     n: '5',
@@ -32,8 +32,13 @@ const STEPS = [
   },
   {
     n: '6',
+    title: 'Du betalar för föremålet',
+    desc: 'Först när föremålet är mottaget och kontrollerat får du en faktura på bud + 8% provision. Du har 3 arbetsdagar på dig att betala. Föremålet ligger tryggt hos oss under tiden – ingen stress.',
+  },
+  {
+    n: '7',
     title: 'Föremålet skickas till dig',
-    desc: 'När kontrollen är godkänd och säljaren är utbetald skickar vi föremålet försäkrat till dig med spårningsnummer. Du bekräftar mottagandet och affären är slutförd.',
+    desc: 'När din betalning är registrerad betalar vi säljaren och skickar föremålet försäkrat till dig med spårningsnummer. Du bekräftar mottagandet och affären är slutförd.',
   },
 ]
 
