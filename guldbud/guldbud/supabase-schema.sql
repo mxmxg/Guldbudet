@@ -159,10 +159,12 @@ drop policy if exists "admins manage all profiles" on public.profiles;
 create policy "admins manage all profiles" on public.profiles
   for all using (public.is_admin());
 
--- Handlare måste vara synliga så att bud kan visa företagsnamn
+-- SÄKERHET: Tidigare fanns en policy "public reads dealer names" som gjorde
+-- HELA handlarraden (personnummer, adress, telefon, e-post, org.nr) läsbar för
+-- vem som helst – RLS kan inte begränsa kolumner. Vi tar bort den. Handlare
+-- visas ändå bara som anonyma kundnummer publikt, så ingen behöver läsa
+-- handlarprofiler. Admin läser allt via is_admin, handlaren läser sin egen.
 drop policy if exists "public reads dealer names" on public.profiles;
-create policy "public reads dealer names" on public.profiles
-  for select using (role = 'dealer');
 
 -- ---- Items ----
 -- Ägaren hanterar sina egna föremål, MEN får inte själv aktivera dem
@@ -206,6 +208,26 @@ create policy "public sees bids on active items" on public.bids
     exists (select 1 from public.items i where i.id = item_id and i.status in ('active','closed'))
   );
 
+-- Serverskydd: bud måste vara positiva OCH högre än nuvarande högsta bud, så
+-- att ett direkt API-anrop inte kan lägga ett lägre/negativt bud (klienten
+-- kollar detta men RLS gjorde det inte tidigare).
+alter table public.bids drop constraint if exists bids_amount_positive;
+alter table public.bids add constraint bids_amount_positive check (amount > 0);
+
+create or replace function public.enforce_bid_higher()
+returns trigger language plpgsql security definer as $$
+begin
+  if new.amount <= coalesce((select max(amount) from public.bids where item_id = new.item_id), 0) then
+    raise exception 'Budet måste vara högre än nuvarande högsta bud.';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_bid_enforce_higher on public.bids;
+create trigger on_bid_enforce_higher
+  before insert on public.bids
+  for each row execute procedure public.enforce_bid_higher();
+
 -- ---- Notifications ----
 drop policy if exists "own notifications" on public.notifications;
 create policy "own notifications" on public.notifications
@@ -238,9 +260,12 @@ begin
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
-    coalesce(new.raw_user_meta_data->>'role', 'customer'),
+    -- SÄKERHET: acceptera bara 'dealer' eller 'customer' från signup-metadata.
+    -- Aldrig 'admin' (annars kan vem som helst självregistrera sig som admin).
+    -- Admin sätts endast manuellt i SQL.
+    case when new.raw_user_meta_data->>'role' = 'dealer' then 'dealer' else 'customer' end,
     new.raw_user_meta_data->>'company_name',
-    case when coalesce(new.raw_user_meta_data->>'role', 'customer') = 'customer' then true else false end,
+    case when new.raw_user_meta_data->>'role' = 'dealer' then false else true end,
     new.raw_user_meta_data->>'phone',
     new.raw_user_meta_data->>'personal_number',
     new.raw_user_meta_data->>'address',
@@ -439,7 +464,7 @@ begin
     select b.id, b.dealer_id, b.amount into v_top
     from public.bids b
     where b.item_id = r.id
-    order by b.amount desc
+    order by b.amount desc, b.created_at asc
     limit 1;
 
     if v_top.id is null then

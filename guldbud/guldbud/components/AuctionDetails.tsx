@@ -35,10 +35,13 @@ export default function AuctionDetails({ item }: { item: any }) {
   const loadBids = async () => {
     const { data: b } = await supabase
       .from('bids')
-      .select('id, amount, created_at, dealer_id, profiles(company_name, full_name)')
+      // No profiles() embed: dealers are shown anonymously (Kund NNNNNN) and
+      // their profiles are not publicly readable. Tie-break by earliest bid.
+      .select('id, amount, created_at, dealer_id')
       .eq('item_id', item.id)
       .order('amount', { ascending: false })
-      .limit(20)
+      .order('created_at', { ascending: true })
+      .limit(100)
     setBids(b || [])
   }
 
@@ -282,7 +285,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                 itemId={item.id}
                 bidId={topBid.id}
                 amount={topAmount}
-                dealerName={topBid.profiles?.company_name || topBid.profiles?.full_name || 'Handlare'}
+                dealerName={dealerLabel(topBid)}
                 isOwner={isOwner}
               />
             )}

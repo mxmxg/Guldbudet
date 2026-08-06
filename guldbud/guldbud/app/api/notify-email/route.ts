@@ -112,21 +112,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, skipped: 'no record' })
   }
 
+  const uuid = /^[0-9a-f-]{36}$/i
+  const userId = String(record.user_id)
+  if (!uuid.test(userId)) return NextResponse.json({ ok: true, skipped: 'bad user_id' })
+
   // Recipient e-mail.
-  const profiles = await (await sb(`profiles?id=eq.${record.user_id}&select=email`)).json()
+  const profiles = await (await sb(`profiles?id=eq.${encodeURIComponent(userId)}&select=email`)).json()
   const email = Array.isArray(profiles) && profiles[0]?.email
   if (!email) return NextResponse.json({ ok: true, skipped: 'no email' })
 
   // Enrich with the related item + current top bid, if any.
   let item: Item | null = null
   let topBid: number | null = null
-  if (record.item_id) {
+  if (record.item_id && uuid.test(String(record.item_id))) {
+    const itemId = encodeURIComponent(String(record.item_id))
     const items = await (
-      await sb(`items?id=eq.${record.item_id}&select=id,title,image_urls,weight_grams,karat,category`)
+      await sb(`items?id=eq.${itemId}&select=id,title,image_urls,weight_grams,karat,category`)
     ).json()
     item = Array.isArray(items) && items[0] ? items[0] : null
     const bids = await (
-      await sb(`bids?item_id=eq.${record.item_id}&select=amount&order=amount.desc&limit=1`)
+      await sb(`bids?item_id=eq.${itemId}&select=amount&order=amount.desc&limit=1`)
     ).json()
     if (Array.isArray(bids) && bids[0]) topBid = bids[0].amount
   }

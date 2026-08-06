@@ -259,7 +259,7 @@ export default function DealerDashboard() {
                           </span>
                         )}
                         <span className="text-espresso-400 text-xs">
-                          Metallvärde {formatSEK(est.low)}–{formatSEK(est.high)}
+                          Est. utbetalning {formatSEK(est.low)}–{formatSEK(est.high)}
                         </span>
                       </div>
                     </div>

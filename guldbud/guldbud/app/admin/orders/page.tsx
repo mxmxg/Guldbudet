@@ -6,10 +6,10 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ORDER_STATUS_LABEL, OrderStatus, stepIndex } from '@/lib/orders'
+import { ORDER_STATUS_LABEL, ORDER_STEPS, OrderStatus, stepIndex } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
 
-const OPEN_STATES: OrderStatus[] = ['accepted', 'shipped_by_seller', 'received', 'verified_paid', 'shipped_to_dealer']
+const OPEN_STATES: OrderStatus[] = ['accepted', 'shipped_by_seller', 'received', 'dealer_paid', 'verified_paid', 'shipped_to_dealer']
 
 export default function AdminOrdersPage() {
   const router = useRouter()
@@ -84,7 +84,7 @@ export default function AdminOrdersPage() {
           <div className="grid gap-3">
             {shown.map((o) => {
               const idx = stepIndex(o.status as OrderStatus)
-              const pct = o.status === 'cancelled' ? 0 : Math.round(((idx + 1) / 6) * 100)
+              const pct = o.status === 'cancelled' ? 0 : Math.round(((idx + 1) / ORDER_STEPS.length) * 100)
               return (
                 <Link key={o.id} href={`/admin/orders/${o.id}`} className="card card-hover p-4 flex gap-4 items-center">
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
