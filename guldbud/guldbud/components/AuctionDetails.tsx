@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import BidSection from '@/components/BidSection'
 import AcceptBid from '@/components/AcceptBid'
+import WatchButton from '@/components/WatchButton'
 import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
 import Footer from '@/components/Footer'
@@ -28,6 +29,7 @@ export default function AuctionDetails({ item }: { item: any }) {
   const [checked, setChecked] = useState(false)
   const [activeImg, setActiveImg] = useState(0)
   const [flash, setFlash] = useState(false)
+  const [zoom, setZoom] = useState(false)
   const supabase = createClient()
 
   const loadBids = async () => {
@@ -137,8 +139,9 @@ export default function AuctionDetails({ item }: { item: any }) {
                   alt={item.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-contain"
+                  className="object-contain cursor-zoom-in"
                   priority
+                  onClick={() => setZoom(true)}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">
@@ -325,13 +328,14 @@ export default function AuctionDetails({ item }: { item: any }) {
                   </div>
                 )
               ) : (
-                <div className="mt-4">
+                <div className="mt-4 space-y-3">
                   <BidSection
                     itemId={item.id}
                     currentTop={topAmount}
                     endsAt={item.auction_ends_at}
                     onPlaced={loadBids}
                   />
+                  <WatchButton itemId={item.id} />
                 </div>
               ))}
 
@@ -393,6 +397,37 @@ export default function AuctionDetails({ item }: { item: any }) {
           </div>
         </div>
       </div>
+      {zoom && images[activeImg] && (
+        <div
+          onClick={() => setZoom(false)}
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out animate-fade-in"
+        >
+          <button
+            onClick={() => setZoom(false)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+            aria-label="Stäng"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+          <div className="relative w-full h-full max-w-4xl max-h-[85vh]">
+            <Image src={images[activeImg]} alt={item.title} fill className="object-contain" sizes="100vw" />
+          </div>
+          {images.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2" onClick={(e) => e.stopPropagation()}>
+              {images.slice(0, 5).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveImg(i)}
+                  className={`w-2.5 h-2.5 rounded-full transition ${activeImg === i ? 'bg-gold-400' : 'bg-white/40 hover:bg-white/70'}`}
+                  aria-label={`Bild ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <Footer />
     </>
   )

@@ -127,7 +127,7 @@ export default function AdminPage() {
         <div className="relative max-w-4xl mx-auto px-4 py-10">
           <p className="eyebrow text-gold-500/80 mb-1">Kontrollrum</p>
           <h1 className="font-display text-3xl text-gold-100">Adminpanel</h1>
-          <div className="mt-4 flex gap-6 text-sm">
+          <div className="mt-4 flex flex-wrap gap-6 text-sm">
             <div>
               <div className="font-display text-2xl text-gold-100">{pendingDealers.length}</div>
               <div className="text-xs text-gold-500/60">Väntande handlare</div>
@@ -135,6 +135,16 @@ export default function AdminPage() {
             <div>
               <div className="font-display text-2xl text-gold-100">{pendingItems.length}</div>
               <div className="text-xs text-gold-500/60">Väntande föremål</div>
+            </div>
+            <div>
+              <div className="font-display text-2xl text-gold-100">
+                {liveItems.filter((i) => i.status === 'active').length}
+              </div>
+              <div className="text-xs text-gold-500/60">Aktiva auktioner</div>
+            </div>
+            <div>
+              <div className="font-display text-2xl text-emerald-400">{openOrders}</div>
+              <div className="text-xs text-gold-500/60">Pågående affärer</div>
             </div>
           </div>
         </div>

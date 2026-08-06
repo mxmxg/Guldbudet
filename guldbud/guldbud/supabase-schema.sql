@@ -672,3 +672,51 @@ begin
   begin alter publication supabase_realtime add table public.order_messages;
   exception when duplicate_object then null; end;
 end $$;
+
+-- ============================================================
+-- Bevakningslista: handlare sparar auktioner och får en påminnelse
+-- när de snart avslutas.
+-- ============================================================
+create table if not exists public.watchlist (
+  dealer_id uuid references public.profiles on delete cascade not null,
+  item_id uuid references public.items on delete cascade not null,
+  created_at timestamptz not null default now(),
+  primary key (dealer_id, item_id)
+);
+alter table public.watchlist enable row level security;
+drop policy if exists "dealer manages own watchlist" on public.watchlist;
+create policy "dealer manages own watchlist" on public.watchlist
+  for all using (auth.uid() = dealer_id) with check (auth.uid() = dealer_id);
+
+alter table public.items add column if not exists ending_soon_notified boolean not null default false;
+
+-- Notifiera bevakare när en auktion har mindre än en timme kvar (en gång).
+create or replace function public.notify_ending_soon()
+returns void language plpgsql security definer as $$
+declare r record;
+begin
+  for r in
+    select i.* from public.items i
+    where i.status = 'active'
+      and i.auction_ends_at is not null
+      and i.auction_ends_at > now()
+      and i.auction_ends_at <= now() + interval '1 hour'
+      and i.ending_soon_notified = false
+  loop
+    insert into public.notifications (user_id, title, message, item_id, link)
+    select w.dealer_id, 'Auktion avslutas snart',
+           '"' || r.title || '" avslutas inom en timme. Lägg ett bud innan det är för sent.',
+           r.id, '/auctions/' || r.id
+    from public.watchlist w where w.item_id = r.id;
+    update public.items set ending_soon_notified = true where id = r.id;
+  end loop;
+end; $$;
+
+do $$
+begin
+  create extension if not exists pg_cron;
+  perform cron.unschedule('notify-ending-soon') from cron.job where jobname = 'notify-ending-soon';
+  perform cron.schedule('notify-ending-soon', '* * * * *', 'select public.notify_ending_soon();');
+exception when others then
+  raise notice 'pg_cron ej konfigurerat för notify-ending-soon: %', sqlerrm;
+end $$;
