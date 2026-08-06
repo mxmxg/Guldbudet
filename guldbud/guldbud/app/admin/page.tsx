@@ -144,31 +144,46 @@ export default function AdminPage() {
           ) : (
             <div className="space-y-3">
               {pendingDealers.map((dealer) => (
-                <div key={dealer.id} className="card p-5 flex items-center justify-between gap-4 flex-wrap">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-gold-sheen flex items-center justify-center text-espresso-900 font-semibold">
-                        {(dealer.company_name || dealer.full_name || '?').charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-medium text-espresso-900">{dealer.company_name || dealer.full_name}</p>
-                        <p className="text-sm text-espresso-500">{dealer.email}</p>
-                      </div>
+                <div key={dealer.id} className="card p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-11 h-11 rounded-full bg-gold-sheen flex items-center justify-center text-espresso-900 font-semibold shrink-0">
+                      {(dealer.company_name || dealer.full_name || '?').charAt(0).toUpperCase()}
                     </div>
-                    <p className="text-xs text-espresso-300 mt-2">
-                      {dealer.full_name} · Registrerad {new Date(dealer.created_at).toLocaleDateString('sv-SE')}
-                    </p>
+                    <div className="min-w-0">
+                      <p className="font-medium text-espresso-900 truncate">
+                        {dealer.company_name || dealer.full_name || 'Handlare'}
+                      </p>
+                      <p className="text-xs text-espresso-400">
+                        Guldhandlare · registrerad {new Date(dealer.created_at).toLocaleDateString('sv-SE')}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex gap-2 shrink-0">
+
+                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                    <Info label="Företag" value={dealer.company_name} />
+                    <Info label="Org.nummer" value={dealer.org_number} />
+                    <Info label="Kontaktperson" value={dealer.full_name} />
+                    <Info label="Personnummer" value={dealer.personal_number} />
+                    <Info label="E-post" value={dealer.email} />
+                    <Info label="Telefon" value={dealer.phone} />
+                    <Info
+                      label="Adress"
+                      value={[dealer.address, [dealer.postal_code, dealer.city].filter(Boolean).join(' ')]
+                        .filter(Boolean)
+                        .join(', ')}
+                    />
+                  </dl>
+
+                  <div className="flex gap-2 mt-5">
                     <button
                       onClick={() => approveDealer(dealer.id)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
+                      className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition"
                     >
                       Godkänn
                     </button>
                     <button
                       onClick={() => rejectDealer(dealer.id)}
-                      className="bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium px-4 py-2 rounded-xl transition"
+                      className="flex-1 sm:flex-initial bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium px-5 py-2.5 rounded-xl transition"
                     >
                       Neka
                     </button>
@@ -303,6 +318,15 @@ export default function AdminPage() {
         </section>
       </div>
       <Footer />
+    </div>
+  )
+}
+
+function Info({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div>
+      <dt className="text-[11px] uppercase tracking-wide text-espresso-400">{label}</dt>
+      <dd className="text-espresso-800 break-words">{value || '—'}</dd>
     </div>
   )
 }
