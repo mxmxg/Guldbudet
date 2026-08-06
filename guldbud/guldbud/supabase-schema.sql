@@ -315,6 +315,8 @@ begin
 end;
 $$;
 
+-- Städa bort en äldre dubblett-trigger som annars skapar två "överbjuden"-notiser.
+drop trigger if exists on_outbid on public.bids;
 drop trigger if exists on_bid_created on public.bids;
 create trigger on_bid_created
   after insert on public.bids
