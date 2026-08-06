@@ -7,7 +7,7 @@ export default function PrivacyPage() {
     <LegalPage
       eyebrow="Din integritet"
       title="Integritetspolicy"
-      intro="Vi värnar om din personliga integritet. Här beskriver vi vilka uppgifter vi samlar in, varför, och vilka rättigheter du har."
+      intro="Kort sagt: vi samlar bara in det som behövs för att du ska kunna sälja tryggt, vi säljer aldrig dina uppgifter vidare, och du bestämmer själv över dem. Här är detaljerna."
       updated="6 augusti 2026"
       sections={[
         {
