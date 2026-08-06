@@ -106,13 +106,14 @@ export default function DealerProfilePage() {
   const save = async () => {
     setSaving(true)
     setMsg(null)
+    // company_name and org_number are verification details and cannot be
+    // changed by the dealer (locked in the UI and by RLS). Contact GuldBud to
+    // update them.
     const { error } = await supabase
       .from('profiles')
       .update({
-        company_name: form.company_name || null,
         full_name: form.full_name,
         phone: form.phone || null,
-        org_number: form.org_number || null,
         address: form.address || null,
         postal_code: form.postal_code || null,
         city: form.city || null,
@@ -186,13 +187,14 @@ export default function DealerProfilePage() {
               <h2 className="font-display text-xl text-espresso-900 mb-1">Företags- och kontaktuppgifter</h2>
               <p className="text-xs text-espresso-400 mb-5">
                 Dessa uppgifter visas aldrig publikt. I budgivningen syns du bara som ett anonymt handlarnummer.
+                Företagsnamn och organisationsnummer är låsta efter verifieringen – kontakta GuldBud om något behöver ändras.
               </p>
               <div className="grid sm:grid-cols-2 gap-4">
-                <Field label="Företagsnamn">
-                  <input value={form.company_name} onChange={(e) => setForm({ ...form, company_name: e.target.value })} />
+                <Field label="Företagsnamn (kan ej ändras)">
+                  <input value={form.company_name} disabled className="!bg-espresso-50 !text-espresso-400" />
                 </Field>
-                <Field label="Organisationsnummer">
-                  <input value={form.org_number} onChange={(e) => setForm({ ...form, org_number: e.target.value })} placeholder="XXXXXX-XXXX" />
+                <Field label="Organisationsnummer (kan ej ändras)">
+                  <input value={form.org_number} disabled className="!bg-espresso-50 !text-espresso-400" />
                 </Field>
                 <Field label="Kontaktperson">
                   <input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
@@ -261,9 +263,9 @@ export default function DealerProfilePage() {
                 <p className="font-medium text-espresso-900 group-hover:text-gold-700 transition">Till budpanelen</p>
                 <p className="text-xs text-espresso-400 mt-1">Se aktiva auktioner och lägg bud.</p>
               </Link>
-              <Link href="/how-it-works" className="card p-5 hover:shadow-gold transition group">
+              <Link href="/dealer/guide" className="card p-5 hover:shadow-gold transition group">
                 <p className="font-medium text-espresso-900 group-hover:text-gold-700 transition">Så fungerar budgivningen</p>
-                <p className="text-xs text-espresso-400 mt-1">Regler, frakt och utbetalning.</p>
+                <p className="text-xs text-espresso-400 mt-1">Från bud till vunnet föremål – steg för steg.</p>
               </Link>
             </section>
 

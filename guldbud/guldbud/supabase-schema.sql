@@ -147,6 +147,10 @@ create policy "own profile update" on public.profiles
     auth.uid() = id
     and role = (select role from public.profiles where id = auth.uid())
     and approved = (select approved from public.profiles where id = auth.uid())
+    -- Företagsnamn och org.nr är verifieringsuppgifter och får inte ändras av
+    -- handlaren själv (endast admin). null hanteras med "is not distinct from".
+    and company_name is not distinct from (select company_name from public.profiles where id = auth.uid())
+    and org_number is not distinct from (select org_number from public.profiles where id = auth.uid())
   );
 
 -- Admins får se OCH hantera alla profiler (t.ex. godkänna handlare).
