@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
+import AuthShell, { AuthInput, AuthButton } from '@/components/AuthShell'
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
@@ -54,46 +55,58 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
-    <div className="min-h-screen bg-cream flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" style={{ fontFamily: "'Great Vibes', cursive", fontSize: '40px' }} className="text-gold-700">
-            GuldBud
-          </Link>
+    <AuthShell>
+      <h1 style={{ color: '#D4AF37', fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>
+        Välj nytt lösenord
+      </h1>
+      {ready === false && (
+        <div
+          style={{
+            marginBottom: '16px',
+            fontSize: '13px',
+            background: '#2a1f0a',
+            border: '1px solid #7a5a1a',
+            color: '#d9b45a',
+            padding: '10px 12px',
+            borderRadius: '8px',
+            lineHeight: 1.5,
+          }}
+        >
+          Vi hittar ingen aktiv återställningslänk. Öppna länken från mejlet igen, eller begär en ny via{' '}
+          <Link href="/auth/login" style={{ color: '#D4AF37', textDecoration: 'underline' }}>
+            Glömt lösenord?
+          </Link>{' '}
+          på inloggningssidan.
         </div>
-        <div className="card p-8">
-          <h1 className="font-display text-xl text-espresso-900 mb-6">Välj nytt lösenord</h1>
-          {ready === false && (
-            <div className="mb-4 text-sm bg-amber-50 border border-amber-200 text-amber-700 p-3 rounded-xl">
-              Vi hittar ingen aktiv återställningslänk. Öppna länken från mejlet igen, eller begär en ny via{' '}
-              <Link href="/auth/login" className="underline font-medium">Glömt lösenord?</Link> på inloggningssidan.
-            </div>
+      )}
+      {success ? (
+        <p style={{ color: '#34d399', textAlign: 'center', fontSize: '14px' }}>
+          Lösenordet är uppdaterat! Omdirigerar...
+        </p>
+      ) : (
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', color: '#c9a84c', marginBottom: '4px' }}>
+              Nytt lösenord
+            </label>
+            <AuthInput type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minst 6 tecken" />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', color: '#c9a84c', marginBottom: '4px' }}>
+              Bekräfta lösenord
+            </label>
+            <AuthInput type="password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Upprepa lösenordet" />
+          </div>
+          {error && (
+            <p style={{ color: '#ef4444', fontSize: '13px', background: '#2a0a0a', padding: '10px 12px', borderRadius: '8px', border: '1px solid #7f1d1d' }}>
+              {error}
+            </p>
           )}
-          {success ? (
-            <p className="text-green-600 text-center">Lösenordet är uppdaterat! Omdirigerar...</p>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-sm text-stone-600 mb-1">Nytt lösenord</label>
-                <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                  placeholder="Minst 6 tecken" className="w-full" />
-              </div>
-              <div>
-                <label className="block text-sm text-stone-600 mb-1">Bekräfta lösenord</label>
-                <input type="password" required value={confirm} onChange={e => setConfirm(e.target.value)}
-                  placeholder="Upprepa lösenordet" className="w-full" />
-              </div>
-              {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
-              <button type="submit" disabled={loading} className="btn-gold mt-1">
-                {loading ? 'Sparar...' : 'Spara nytt lösenord'}
-              </button>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
-    </>
+          <AuthButton type="submit" disabled={loading}>
+            {loading ? 'Sparar...' : 'Spara nytt lösenord'}
+          </AuthButton>
+        </form>
+      )}
+    </AuthShell>
   )
 }
