@@ -406,7 +406,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
 
         {items.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((item, i) => (
+            {items.slice(0, 9).map((item, i) => (
               <Reveal key={item.id} delay={(i % 3) * 90}>
                 <AuctionCard item={item} />
               </Reveal>
@@ -575,7 +575,7 @@ function AuctionsSection({ items, title }: { items: EnrichedItem[]; title: strin
       <h2 className="font-display text-2xl text-espresso-900 mb-5">{title}</h2>
       {items.length > 0 ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
+          {items.slice(0, 9).map((item) => (
             <AuctionCard key={item.id} item={item} />
           ))}
         </div>

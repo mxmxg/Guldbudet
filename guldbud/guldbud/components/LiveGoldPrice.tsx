@@ -1,21 +1,21 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { GOLD_SPOT_SEK_PER_GRAM } from '@/lib/gold'
+import { useGoldPrice } from '@/lib/useGoldPrice'
 
-// Produces a gently drifting, indicative spot price + sparkline so the market
-// feels alive. Deterministic base + small time-based wander (client-only, so no
-// hydration mismatch). This is indicative UI, not a financial feed.
-function priceAt(t: number) {
+// Produces a gently drifting spot price + sparkline around the live 24K base so
+// the market feels alive. The base comes from /api/gold-price; the small wander
+// is a client-only visual (no hydration mismatch).
+function priceAt(t: number, base: number) {
   const wave =
     Math.sin(t / 42000) * 3.4 +
     Math.sin(t / 130000) * 5.1 +
     Math.sin(t / 17000) * 1.2
-  return GOLD_SPOT_SEK_PER_GRAM + wave
+  return base + wave
 }
 
-function buildHistory(now: number, n: number) {
+function buildHistory(now: number, n: number, base: number) {
   const arr: number[] = []
-  for (let i = n - 1; i >= 0; i--) arr.push(priceAt(now - i * 60000))
+  for (let i = n - 1; i >= 0; i--) arr.push(priceAt(now - i * 60000, base))
   return arr
 }
 
@@ -26,6 +26,7 @@ export default function LiveGoldPrice({
   variant?: 'card' | 'mini'
   className?: string
 }) {
+  const { price: base } = useGoldPrice()
   const [now, setNow] = useState<number | null>(null)
   const [history, setHistory] = useState<number[]>([])
 
@@ -33,12 +34,12 @@ export default function LiveGoldPrice({
     const tick = () => {
       const t = Date.now()
       setNow(t)
-      setHistory(buildHistory(t, 32))
+      setHistory(buildHistory(t, 32, base))
     }
     tick()
     const id = setInterval(tick, 3000)
     return () => clearInterval(id)
-  }, [])
+  }, [base])
 
   if (now === null) {
     // Placeholder to avoid layout shift / hydration mismatch
@@ -52,10 +53,10 @@ export default function LiveGoldPrice({
     )
   }
 
-  const price = history[history.length - 1] ?? priceAt(now)
+  const price = history[history.length - 1] ?? priceAt(now, base)
   const prev = history[history.length - 2] ?? price
   const up = price >= prev
-  const changePct = (((price - GOLD_SPOT_SEK_PER_GRAM) / GOLD_SPOT_SEK_PER_GRAM) * 100)
+  const changePct = ((price - base) / base) * 100
 
   if (variant === 'mini') {
     return (

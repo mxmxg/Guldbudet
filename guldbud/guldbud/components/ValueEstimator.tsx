@@ -1,7 +1,8 @@
 'use client'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { KARAT_PURITY, estimateRange, formatSEK, GOLD_SPOT_SEK_PER_GRAM } from '@/lib/gold'
+import { KARAT_PURITY, estimateRange, formatSEK } from '@/lib/gold'
+import { useGoldPrice } from '@/lib/useGoldPrice'
 
 const KARATS = [
   { key: '24K / 999', short: '24K' },
@@ -19,8 +20,9 @@ const KARATS = [
 export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
   const [weight, setWeight] = useState(12)
   const [karat, setKarat] = useState('18K / 750')
+  const { price: spot } = useGoldPrice()
 
-  const { low, high, melt } = useMemo(() => estimateRange(weight, karat), [weight, karat])
+  const { low, high, melt } = useMemo(() => estimateRange(weight, karat, spot), [weight, karat, spot])
   const purityPct = Math.round((KARAT_PURITY[karat] ?? 0.585) * 100)
 
   return (
@@ -107,7 +109,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-espresso-100/60">
             <span>Renhet: <span className="text-gold-200">{purityPct}%</span></span>
             <span>Metallvärde: <span className="text-gold-200">{formatSEK(melt)}</span></span>
-            <span>Guldpris: <span className="text-gold-200">{GOLD_SPOT_SEK_PER_GRAM} kr/g</span></span>
+            <span>Guldpris: <span className="text-gold-200">{spot.toLocaleString('sv-SE')} kr/g</span></span>
           </div>
         </div>
 
