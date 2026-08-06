@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-browser'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import NotifToggle from '@/components/NotifToggle'
 
 export default function CustomerProfilePage() {
   const router = useRouter()
@@ -141,6 +142,22 @@ export default function CustomerProfilePage() {
                 </button>
                 {msg && <span className={`text-sm ${msg.ok ? 'text-emerald-600' : 'text-red-500'}`}>{msg.text}</span>}
               </div>
+            </section>
+
+            <section className="card p-6 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display text-lg text-espresso-900">Notiser</h2>
+                <p className="text-xs text-espresso-400 mt-0.5">
+                  E-post om bud, godkännande och affärer. Notiser i appen visas alltid.
+                </p>
+              </div>
+              <NotifToggle
+                on={profile.email_notifications !== false}
+                onToggle={async (v) => {
+                  await supabase.from('profiles').update({ email_notifications: v }).eq('id', profile.id)
+                  setProfile((p: any) => ({ ...p, email_notifications: v }))
+                }}
+              />
             </section>
 
             <section className="grid sm:grid-cols-2 gap-4">

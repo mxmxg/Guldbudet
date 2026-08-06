@@ -32,6 +32,7 @@ alter table public.profiles add column if not exists postal_code text;
 alter table public.profiles add column if not exists city text;
 alter table public.profiles add column if not exists org_number text;
 alter table public.profiles add column if not exists verification_doc_path text;
+alter table public.profiles add column if not exists email_notifications boolean not null default true;
 
 -- ------------------------------------------------------------
 -- Föremål som kunder lägger ut
