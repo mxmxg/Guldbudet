@@ -54,13 +54,13 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-espresso-100/45">
           <p>© {new Date().getFullYear()} GuldBud AB. Alla rättigheter förbehållna.</p>
           <div className="flex gap-5">
-            <Link href="/how-it-works" className="hover:text-gold-300 transition">
+            <Link href="/terms" className="hover:text-gold-300 transition">
               Villkor
             </Link>
-            <Link href="/how-it-works" className="hover:text-gold-300 transition">
+            <Link href="/privacy" className="hover:text-gold-300 transition">
               Integritetspolicy
             </Link>
-            <Link href="/how-it-works" className="hover:text-gold-300 transition">
+            <Link href="/privacy" className="hover:text-gold-300 transition">
               Cookies
             </Link>
           </div>

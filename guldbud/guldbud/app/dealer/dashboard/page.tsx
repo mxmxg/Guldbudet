@@ -53,6 +53,7 @@ export default function DealerDashboard() {
       .from('items')
       .select('*')
       .eq('status', 'active')
+      .or(`auction_ends_at.is.null,auction_ends_at.gt.${new Date().toISOString()}`)
       .order('auction_ends_at', { ascending: true })
     setItems(activeItems || [])
 
@@ -85,6 +86,11 @@ export default function DealerDashboard() {
   const placeBid = async (itemId: string) => {
     const amount = parseInt(bidInputs[itemId] || '0')
     const currentTop = topBids[itemId] || 0
+    const item = items.find((i) => i.id === itemId)
+    if (item?.auction_ends_at && new Date(item.auction_ends_at).getTime() < Date.now()) {
+      alert('Auktionen är avslutad – det går inte längre att buda.')
+      return
+    }
     if (!amount || amount <= currentTop) {
       alert(`Budet måste vara minst ${(currentTop + 1).toLocaleString('sv-SE')} kr`)
       return

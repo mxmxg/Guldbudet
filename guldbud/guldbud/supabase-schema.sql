@@ -149,9 +149,13 @@ create policy "public reads dealer names" on public.profiles
   for select using (role = 'dealer');
 
 -- ---- Items ----
+-- Ägaren hanterar sina egna föremål, MEN får inte själv aktivera dem
+-- (kringgå granskning). with check tillåter bara 'pending' (utkast/redigering)
+-- och 'closed' (när ägaren accepterar ett bud). Admin sätter 'active'/'rejected'.
 drop policy if exists "owner manages own items" on public.items;
 create policy "owner manages own items" on public.items
-  for all using (auth.uid() = owner_id);
+  for all using (auth.uid() = owner_id)
+  with check (auth.uid() = owner_id and status in ('pending', 'closed'));
 
 drop policy if exists "active items are public" on public.items;
 create policy "active items are public" on public.items
@@ -162,10 +166,18 @@ create policy "admins manage all items" on public.items
   for all using (public.is_admin());
 
 -- ---- Bids ----
+-- Endast godkända handlare får buda, och bara på aktiva auktioner vars
+-- sluttid inte passerat. Stoppar bud efter auktionens slut på servernivå.
 drop policy if exists "dealers can bid" on public.bids;
 create policy "dealers can bid" on public.bids
   for insert with check (
     exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'dealer' and p.approved = true)
+    and exists (
+      select 1 from public.items i
+      where i.id = item_id
+        and i.status = 'active'
+        and (i.auction_ends_at is null or i.auction_ends_at > now())
+    )
   );
 
 drop policy if exists "dealers see own bids" on public.bids;

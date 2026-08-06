@@ -8,7 +8,7 @@ import AcceptBid from '@/components/AcceptBid'
 import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
 import Footer from '@/components/Footer'
-import { GemIcon } from '@/components/Icons'
+import { GemIcon, HourglassIcon } from '@/components/Icons'
 import { estimateRange, formatSEK } from '@/lib/gold'
 
 function relTime(iso: string) {
@@ -33,7 +33,7 @@ export default function AuctionDetails({ item }: { item: any }) {
   const loadBids = async () => {
     const { data: b } = await supabase
       .from('bids')
-      .select('id, amount, created_at, profiles(company_name, full_name)')
+      .select('id, amount, created_at, dealer_id, profiles(company_name, full_name)')
       .eq('item_id', item.id)
       .order('amount', { ascending: false })
       .limit(20)
@@ -97,8 +97,22 @@ export default function AuctionDetails({ item }: { item: any }) {
   const isOwner = user?.id === item.owner_id && profile?.role !== 'admin'
   const isAdmin = profile?.role === 'admin'
   const isClosed = item.status === 'closed'
+  const ended = !!item.auction_ends_at && new Date(item.auction_ends_at).getTime() < Date.now()
+  const reserveMet = !item.min_price || topAmount >= item.min_price
   const images: string[] = item.image_urls?.length ? item.image_urls : []
   const est = estimateRange(item.weight_grams || 0, item.karat || '')
+
+  // Anonymise dealers publicly ("Handlare #N") to prevent collusion; the real
+  // name is revealed to the owner only when accepting a bid (in AcceptBid).
+  const dealerNumbers: Record<string, number> = {}
+  let dealerCounter = 0
+  bids.forEach((b: any) => {
+    if (b.dealer_id && !(b.dealer_id in dealerNumbers)) {
+      dealerCounter += 1
+      dealerNumbers[b.dealer_id] = dealerCounter
+    }
+  })
+  const dealerLabel = (b: any) => `Handlare #${dealerNumbers[b.dealer_id] || '?'}`
 
   return (
     <>
@@ -204,23 +218,22 @@ export default function AuctionDetails({ item }: { item: any }) {
                   </p>
                   {topBid ? (
                     <p className="text-xs text-espresso-400 mt-1">
-                      {topBid.profiles?.company_name || topBid.profiles?.full_name || 'Handlare'} ·{' '}
-                      {bids.length} {bids.length === 1 ? 'bud' : 'bud'}
+                      {dealerLabel(topBid)} · {bids.length} {bids.length === 1 ? 'bud' : 'bud'}
                     </p>
                   ) : (
                     <p className="text-xs text-espresso-400 mt-1">Var först att buda</p>
                   )}
                 </div>
-                {!isClosed && item.auction_ends_at && (
+                {item.auction_ends_at && (
                   <div className="shrink-0 sm:text-right">
-                    <p className="eyebrow text-espresso-400 mb-2">Avslutas om</p>
+                    <p className="eyebrow text-espresso-400 mb-2">{ended || isClosed ? 'Status' : 'Avslutas om'}</p>
                     <CountdownTimer endsAt={item.auction_ends_at} variant="blocks" />
                   </div>
                 )}
               </div>
 
-              {/* indicative value */}
-              <div className="mt-4 pt-4 border-t border-espresso-100 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-espresso-500">
+              {/* indicative value + reserve */}
+              <div className="mt-4 pt-4 border-t border-espresso-100 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-espresso-500">
                 <span className="flex items-center gap-2">
                   <SparkIcon />
                   Metallvärde vid dagens kurs:{' '}
@@ -229,6 +242,14 @@ export default function AuctionDetails({ item }: { item: any }) {
                 <span className="text-espresso-400">
                   Uppskattad utbetalning {formatSEK(est.low)}–{formatSEK(est.high)}
                 </span>
+                {item.min_price ? (
+                  <span
+                    className={`chip ${reserveMet ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}
+                  >
+                    {reserveMet ? 'Reservationspris uppnått' : 'Reservationspris ej uppnått'}
+                    {isOwner ? ` (${formatSEK(item.min_price)})` : ''}
+                  </span>
+                ) : null}
               </div>
             </div>
 
@@ -241,7 +262,19 @@ export default function AuctionDetails({ item }: { item: any }) {
               </div>
             )}
 
-            {/* Accept bid (owner) */}
+            {/* Owner: auction ended */}
+            {isOwner && ended && !isClosed && (
+              <div className="mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+                <p className="text-amber-800 text-sm font-medium">Auktionen är avslutad</p>
+                <p className="text-amber-700 text-xs mt-1">
+                  {topBid
+                    ? 'Välj det bud du vill acceptera nedan.'
+                    : 'Inga bud kom in den här gången.'}
+                </p>
+              </div>
+            )}
+
+            {/* Accept bid (owner) — works while active or after end, until accepted */}
             {isOwner && !isClosed && topBid && (
               <AcceptBid
                 itemId={item.id}
@@ -252,10 +285,10 @@ export default function AuctionDetails({ item }: { item: any }) {
               />
             )}
 
-            {/* Owner waiting for bids */}
-            {isOwner && !isClosed && !topBid && (
+            {/* Owner waiting for bids (live, not ended) */}
+            {isOwner && !isClosed && !topBid && !ended && (
               <div className="mt-4 rounded-2xl bg-white border border-espresso-100 p-5 text-center shadow-soft">
-                <div className="text-2xl mb-2">⏳</div>
+                <div className="flex justify-center text-gold-500 mb-2"><HourglassIcon size={26} /></div>
                 <p className="text-espresso-600 text-sm">
                   Auktionen är live. Så fort en handlare budar dyker det upp här, och du får en
                   notifiering direkt.
@@ -274,12 +307,23 @@ export default function AuctionDetails({ item }: { item: any }) {
               </div>
             )}
 
-            {/* Dealer bid form */}
-            {!isOwner && !isAdmin && !isClosed && profile?.role === 'dealer' && (
-              <div className="mt-4">
-                <BidSection itemId={item.id} currentTop={topAmount} onPlaced={loadBids} />
-              </div>
-            )}
+            {/* Dealer bid form (blocked after end) */}
+            {!isOwner && !isAdmin && !isClosed && profile?.role === 'dealer' &&
+              (ended ? (
+                <div className="mt-4 rounded-2xl bg-espresso-50 border border-espresso-100 p-4 text-center">
+                  <p className="text-espresso-600 text-sm font-medium">Auktionen är avslutad</p>
+                  <p className="text-espresso-400 text-xs mt-1">Det går inte längre att lägga bud.</p>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <BidSection
+                    itemId={item.id}
+                    currentTop={topAmount}
+                    endsAt={item.auction_ends_at}
+                    onPlaced={loadBids}
+                  />
+                </div>
+              ))}
 
             {/* Not logged in */}
             {!user && (
@@ -318,11 +362,11 @@ export default function AuctionDetails({ item }: { item: any }) {
                             i === 0 ? 'bg-gold-sheen text-espresso-900' : 'bg-espresso-100 text-espresso-500'
                           }`}
                         >
-                          {(bid.profiles?.company_name || bid.profiles?.full_name || 'H').charAt(0)}
+                          {dealerNumbers[bid.dealer_id] || '?'}
                         </div>
                         <div>
                           <p className={`${i === 0 ? 'font-medium text-espresso-900' : 'text-espresso-600'}`}>
-                            {(bid.profiles?.company_name || bid.profiles?.full_name || 'Handlare').slice(0, 24)}
+                            {dealerLabel(bid)}
                             {i === 0 && <span className="ml-2 chip bg-emerald-100 text-emerald-700">Ledande</span>}
                           </p>
                           <p className="text-[11px] text-espresso-300">{relTime(bid.created_at)}</p>

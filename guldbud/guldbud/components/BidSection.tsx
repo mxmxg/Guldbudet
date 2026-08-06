@@ -9,10 +9,12 @@ const INCREMENTS = [100, 250, 500, 1000]
 export default function BidSection({
   itemId,
   currentTop,
+  endsAt,
   onPlaced,
 }: {
   itemId: string
   currentTop: number
+  endsAt?: string | null
   onPlaced?: () => void | Promise<void>
 }) {
   const [amount, setAmount] = useState('')
@@ -46,6 +48,10 @@ export default function BidSection({
   const place = async () => {
     const val = parseInt(amount)
     setOk(false)
+    if (endsAt && new Date(endsAt).getTime() < Date.now()) {
+      setMsg('Auktionen är avslutad – det går inte längre att buda.')
+      return
+    }
     if (!val || val <= currentTop) {
       setMsg(`Budet måste vara högre än ${currentTop.toLocaleString('sv-SE')} kr`)
       return
