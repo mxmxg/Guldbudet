@@ -288,21 +288,27 @@ begin
   select owner_id, title into v_owner, v_title from public.items where id = new.item_id;
 
   -- Notify owner
-  insert into public.notifications (user_id, title, message, item_id)
+  insert into public.notifications (user_id, title, message, item_id, link)
   values (v_owner, 'Nytt bud',
-          'Ett nytt bud på ' || new.amount || ' kr lades på "' || v_title || '".', new.item_id);
+          'Ett nytt bud på ' || new.amount || ' kr lades på "' || v_title || '".',
+          new.item_id, '/auctions/' || new.item_id);
 
-  -- Find previous highest bidder (before this bid) and notify them if outbid
+  -- Find the previous highest bidder (before this bid), EXCLUDING the person
+  -- who just bid, and notify them only if they were actually outbid. This is
+  -- what prevents a dealer from being told they outbid themselves.
   select dealer_id into v_prev_dealer
   from public.bids
-  where item_id = new.item_id and id <> new.id and amount < new.amount
+  where item_id = new.item_id
+    and dealer_id <> new.dealer_id
+    and amount < new.amount
   order by amount desc
   limit 1;
 
-  if v_prev_dealer is not null and v_prev_dealer <> new.dealer_id then
-    insert into public.notifications (user_id, title, message, item_id)
+  if v_prev_dealer is not null then
+    insert into public.notifications (user_id, title, message, item_id, link)
     values (v_prev_dealer, 'Du är överbjuden',
-            'Någon har lagt ett högre bud på "' || v_title || '". Lägg ett nytt bud för att ta ledningen.', new.item_id);
+            'Någon har lagt ett högre bud på "' || v_title || '". Lägg ett nytt bud för att ta ledningen.',
+            new.item_id, '/auctions/' || new.item_id);
   end if;
 
   return new;
