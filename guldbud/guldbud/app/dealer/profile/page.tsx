@@ -21,6 +21,36 @@ export default function DealerProfilePage() {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [stats, setStats] = useState<Stats>({ bids: 0, items: 0, leading: 0, won: 0 })
   const [orders, setOrders] = useState<any[]>([])
+  const [docUploading, setDocUploading] = useState(false)
+  const [docMsg, setDocMsg] = useState('')
+
+  const uploadDoc = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !profile) return
+    setDocMsg('')
+    if (file.size > 10 * 1024 * 1024) {
+      setDocMsg('Filen är för stor (max 10 MB).')
+      return
+    }
+    setDocUploading(true)
+    const ext = file.name.split('.').pop() || 'dat'
+    const path = `${profile.id}/verification.${ext}`
+    const { error: upErr } = await supabase.storage
+      .from('dealer-docs')
+      .upload(path, file, { upsert: true, contentType: file.type })
+    if (upErr) {
+      setDocMsg(upErr.message)
+      setDocUploading(false)
+      return
+    }
+    const { error: pErr } = await supabase
+      .from('profiles')
+      .update({ verification_doc_path: path })
+      .eq('id', profile.id)
+    if (pErr) setDocMsg(pErr.message)
+    else setProfile((p: any) => ({ ...p, verification_doc_path: path }))
+    setDocUploading(false)
+  }
   const [form, setForm] = useState({
     company_name: '',
     full_name: '',
@@ -223,6 +253,32 @@ export default function DealerProfilePage() {
                   <span className={`text-sm ${msg.ok ? 'text-emerald-600' : 'text-red-500'}`}>{msg.text}</span>
                 )}
               </div>
+            </section>
+
+            {/* Verifieringsdokument */}
+            <section className="card p-6">
+              <h2 className="font-display text-xl text-espresso-900 mb-1">Verifieringsdokument</h2>
+              <p className="text-xs text-espresso-400 mb-4">
+                Ladda upp t.ex. registreringsbevis eller F-skattebevis så går godkännandet snabbare. Dokumentet är
+                privat och ses bara av GuldBuds granskare.
+              </p>
+              {profile.verification_doc_path ? (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="chip bg-emerald-100 text-emerald-700 inline-flex items-center gap-1">
+                    <CheckIcon size={13} strokeWidth={3} /> Dokument uppladdat
+                  </span>
+                  <label className="text-sm text-gold-600 hover:text-gold-700 cursor-pointer">
+                    {docUploading ? 'Laddar upp…' : 'Byt ut dokument'}
+                    <input type="file" accept="image/*,application/pdf" className="hidden" onChange={uploadDoc} />
+                  </label>
+                </div>
+              ) : (
+                <label className="btn-ghost-gold inline-flex cursor-pointer">
+                  {docUploading ? 'Laddar upp…' : 'Ladda upp dokument'}
+                  <input type="file" accept="image/*,application/pdf" className="hidden" onChange={uploadDoc} />
+                </label>
+              )}
+              {docMsg && <p className="text-sm text-red-500 mt-2">{docMsg}</p>}
             </section>
 
             {/* Mina affärer */}
