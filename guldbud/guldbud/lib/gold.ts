@@ -22,6 +22,20 @@ export const KARAT_PURITY: Record<string, number> = {
 
 export const KARAT_OPTIONS = Object.keys(KARAT_PURITY)
 
+// Karat tiers for the live price breakdown (highest to lowest purity).
+export const KARAT_TIERS: { label: string; purity: number }[] = [
+  { label: '24K', purity: 0.999 },
+  { label: '22K', purity: 0.916 },
+  { label: '18K', purity: 0.75 },
+  { label: '14K', purity: 0.585 },
+  { label: '9K', purity: 0.375 },
+]
+
+/** Price per gram for each karat tier at the given 24K spot. */
+export function karatPrices(spot: number): { label: string; purity: number; perGram: number }[] {
+  return KARAT_TIERS.map((t) => ({ ...t, perGram: Math.round(spot * t.purity) }))
+}
+
 /** Pure metal value of an item at spot, before any dealer margin. */
 export function meltValue(weightGrams: number, karat: string, spot = GOLD_SPOT_SEK_PER_GRAM): number {
   const purity = KARAT_PURITY[karat] ?? 0.585
