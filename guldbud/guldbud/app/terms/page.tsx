@@ -62,7 +62,7 @@ export default function TermsPage() {
           body: [
             'Det slutliga priset motsvarar det accepterade budet, men kan justeras om äkthetskontrollen visar att föremålet väsentligt avviker från de uppgifter som angavs. Priset påverkas av bland annat guldmängd samt ädelstenars vikt, klarhet, färg och slipning.',
             'När kontrollen är godkänd betalar GuldBud ut till säljaren, normalt inom 1–2 bankdagar. Utbetalning sker till det konto som säljaren anger i inloggat läge. Säljaren ansvarar för att angivna konto- och clearinguppgifter är korrekta; GuldBud ansvarar inte för utbetalning till felaktigt angivet konto.',
-            'GuldBud tar inte ut någon avgift av säljaren för att lägga ut eller sälja ett föremål.',
+            'GuldBud tar inte ut någon avgift av säljaren – säljaren får hela det vinnande budbeloppet. GuldBud tar i stället ut en köparprovision av den vinnande handlaren. Provisionen är för närvarande 8 % av det vinnande budet och läggs ovanpå budet, vilket innebär att handlaren betalar bud plus provision. Handlaren ser sitt totalpris inklusive provision innan budet läggs.',
           ],
         },
         {

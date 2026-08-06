@@ -10,6 +10,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
+import { DEALER_COMMISSION_LABEL, commission, totalWithCommission } from '@/lib/fees'
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -173,16 +174,35 @@ function SellerPanel({ order }: { order: any }) {
 
 function DealerPanel({ order }: { order: any }) {
   return (
-    <div className="card p-6">
-      <h2 className="font-display text-lg text-espresso-900 mb-1">Status</h2>
-      <p className="text-sm text-espresso-500">
-        {(order.status === 'accepted' || order.status === 'shipped_by_seller' || order.status === 'received') &&
-          'GuldBud tar emot och äkthetskontrollerar föremålet innan det skickas vidare till dig.'}
-        {order.status === 'verified_paid' && 'Föremålet är godkänt och packas för leverans till dig.'}
-        {order.status === 'shipped_to_dealer' &&
-          `Föremålet är skickat till dig.${order.tracking_dealer ? ` Spårningsnummer: ${order.tracking_dealer}.` : ''}`}
-        {order.status === 'completed' && 'Affären är slutförd. Tack!'}
-      </p>
-    </div>
+    <>
+      <div className="card p-6">
+        <h2 className="font-display text-lg text-espresso-900 mb-3">Att betala</h2>
+        <div className="flex flex-col gap-1 text-sm">
+          <div className="flex justify-between text-espresso-600">
+            <span>Vinnande bud</span>
+            <span className="tabular-nums">{formatSEK(order.amount)}</span>
+          </div>
+          <div className="flex justify-between text-espresso-600">
+            <span>Provision {DEALER_COMMISSION_LABEL}</span>
+            <span className="tabular-nums">+{formatSEK(commission(order.amount))}</span>
+          </div>
+          <div className="flex justify-between font-semibold text-espresso-900 pt-2 mt-1 border-t border-espresso-100">
+            <span>Ditt totalpris</span>
+            <span className="tabular-nums">{formatSEK(totalWithCommission(order.amount))}</span>
+          </div>
+        </div>
+      </div>
+      <div className="card p-6">
+        <h2 className="font-display text-lg text-espresso-900 mb-1">Status</h2>
+        <p className="text-sm text-espresso-500">
+          {(order.status === 'accepted' || order.status === 'shipped_by_seller' || order.status === 'received') &&
+            'GuldBud tar emot och äkthetskontrollerar föremålet innan det skickas vidare till dig.'}
+          {order.status === 'verified_paid' && 'Föremålet är godkänt och packas för leverans till dig.'}
+          {order.status === 'shipped_to_dealer' &&
+            `Föremålet är skickat till dig.${order.tracking_dealer ? ` Spårningsnummer: ${order.tracking_dealer}.` : ''}`}
+          {order.status === 'completed' && 'Affären är slutförd. Tack!'}
+        </p>
+      </div>
+    </>
   )
 }

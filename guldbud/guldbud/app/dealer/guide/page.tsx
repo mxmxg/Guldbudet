@@ -71,11 +71,16 @@ export default function DealerGuidePage() {
         </div>
 
         <div className="mt-10 rounded-2xl bg-espresso-50 border border-espresso-100 p-6">
-          <h3 className="font-display text-lg text-espresso-900 mb-2">Betalning och avgifter</h3>
+          <h3 className="font-display text-lg text-espresso-900 mb-2">Provision och betalning</h3>
           <p className="text-sm text-espresso-500 leading-relaxed">
-            Utbetalning till säljaren sköts av GuldBud efter godkänd kontroll – du betalar för det vunna
-            föremålet enligt de villkor som gäller för din affär. All kommunikation med säljaren går via
-            GuldBud i affärsvyn, så att båda parter förblir skyddade.
+            GuldBud tar en köparprovision på <span className="font-semibold text-espresso-800">8&nbsp;%</span> av
+            det vinnande budet. Provisionen läggs <span className="font-semibold text-espresso-800">ovanpå</span> ditt
+            bud – säljaren får hela budbeloppet, du betalar bud + provision. När du lägger ett bud ser du alltid
+            ditt totalpris direkt i budpanelen.
+          </p>
+          <p className="text-sm text-espresso-500 leading-relaxed mt-3">
+            Exempel: vinnande bud 40&nbsp;000 kr → provision 3&nbsp;200 kr → ditt totalpris 43&nbsp;200 kr.
+            All kommunikation med säljaren går via GuldBud i affärsvyn, så att båda parter förblir skyddade.
           </p>
         </div>
 

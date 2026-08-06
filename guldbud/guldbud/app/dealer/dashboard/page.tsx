@@ -11,6 +11,7 @@ import { GemIcon } from '@/components/Icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
+import { DEALER_COMMISSION_LABEL, totalWithCommission } from '@/lib/fees'
 
 export default function DealerDashboard() {
   const router = useRouter()
@@ -263,24 +264,31 @@ export default function DealerDashboard() {
                       </div>
                     </div>
 
-                    <div className="flex gap-2 items-center lg:w-auto">
-                      <div className="relative flex-1 lg:flex-initial">
-                        <input
-                          type="number"
-                          value={bidInputs[item.id] || ''}
-                          onChange={(e) => setBidInputs((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                          placeholder={`Min ${(top + 100).toLocaleString('sv-SE')}`}
-                          className="w-full lg:w-40 !pr-8 text-sm"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-xs">kr</span>
+                    <div className="lg:w-auto">
+                      <div className="flex gap-2 items-center">
+                        <div className="relative flex-1 lg:flex-initial">
+                          <input
+                            type="number"
+                            value={bidInputs[item.id] || ''}
+                            onChange={(e) => setBidInputs((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                            placeholder={`Min ${(top + 100).toLocaleString('sv-SE')}`}
+                            className="w-full lg:w-40 !pr-8 text-sm"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-xs">kr</span>
+                        </div>
+                        <button
+                          onClick={() => placeBid(item.id)}
+                          disabled={bidding === item.id}
+                          className="btn-gold whitespace-nowrap !px-5 !py-2.5"
+                        >
+                          {bidding === item.id ? '...' : 'Buda'}
+                        </button>
                       </div>
-                      <button
-                        onClick={() => placeBid(item.id)}
-                        disabled={bidding === item.id}
-                        className="btn-gold whitespace-nowrap !px-5 !py-2.5"
-                      >
-                        {bidding === item.id ? '...' : 'Buda'}
-                      </button>
+                      <p className="text-[11px] text-espresso-400 mt-1.5 lg:text-right">
+                        {parseInt(bidInputs[item.id] || '0') > 0
+                          ? `Totalpris inkl. ${DEALER_COMMISSION_LABEL} provision: ${formatSEK(totalWithCommission(parseInt(bidInputs[item.id])))}`
+                          : `Provision ${DEALER_COMMISSION_LABEL} tillkommer`}
+                      </p>
                     </div>
                   </div>
                 </div>
