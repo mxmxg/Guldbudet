@@ -6,16 +6,27 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { TrashIcon } from '@/components/Icons'
+import CountdownTimer from '@/components/CountdownTimer'
 import { estimateRange, formatSEK } from '@/lib/gold'
 import { commission } from '@/lib/fees'
+
+function toLocalInput(iso?: string | null) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 export default function AdminPage() {
   const [pendingDealers, setPendingDealers] = useState<any[]>([])
   const [pendingItems, setPendingItems] = useState<any[]>([])
   const [liveItems, setLiveItems] = useState<any[]>([])
+  const [topBids, setTopBids] = useState<Record<string, number>>({})
+  const [bidCounts, setBidCounts] = useState<Record<string, number>>({})
   const [openOrders, setOpenOrders] = useState(0)
   const [analytics, setAnalytics] = useState({ gmv: 0, commission: 0, completed: 0 })
   const [adminError, setAdminError] = useState('')
+  const [adminNotice, setAdminNotice] = useState('')
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -71,6 +82,18 @@ export default function AdminPage() {
       setPendingDealers(dealers || [])
       setPendingItems(items || [])
       setLiveItems(active || [])
+      if (active && active.length > 0) {
+        const ids = active.map((i: any) => i.id)
+        const { data: bids } = await supabase.from('bids').select('item_id, amount').in('item_id', ids)
+        const top: Record<string, number> = {}
+        const counts: Record<string, number> = {}
+        bids?.forEach((b: any) => {
+          counts[b.item_id] = (counts[b.item_id] || 0) + 1
+          if (!top[b.item_id] || b.amount > top[b.item_id]) top[b.item_id] = b.amount
+        })
+        setTopBids(top)
+        setBidCounts(counts)
+      }
       setOpenOrders(ordersCount || 0)
       setLoading(false)
     }
@@ -91,17 +114,33 @@ export default function AdminPage() {
     setConfirmId(null)
   }
 
-  const extendAuction = async (item: any) => {
-    const base = item.auction_ends_at ? new Date(item.auction_ends_at).getTime() : Date.now()
-    const newEnd = new Date(Math.max(base, Date.now()) + 24 * 60 * 60 * 1000).toISOString()
-    await supabase.from('items').update({ auction_ends_at: newEnd, ended_notified: false }).eq('id', item.id)
-    setLiveItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, auction_ends_at: newEnd } : i)))
+  const applyEnd = async (item: any, iso: string, notice: string) => {
+    setAdminError('')
+    setAdminNotice('')
+    const { error } = await supabase
+      .from('items')
+      .update({ auction_ends_at: iso, ended_notified: false })
+      .eq('id', item.id)
+    if (error) {
+      setAdminError('Kunde inte ändra sluttiden: ' + error.message)
+      return
+    }
+    setLiveItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, auction_ends_at: iso } : i)))
+    setAdminNotice(notice)
   }
 
-  const endAuctionNow = async (item: any) => {
-    const now = new Date().toISOString()
-    await supabase.from('items').update({ auction_ends_at: now }).eq('id', item.id)
-    setLiveItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, auction_ends_at: now } : i)))
+  const extendAuction = (item: any) => {
+    const base = item.auction_ends_at ? new Date(item.auction_ends_at).getTime() : Date.now()
+    const newEnd = new Date(Math.max(base, Date.now()) + 24 * 60 * 60 * 1000).toISOString()
+    applyEnd(item, newEnd, `"${item.title}" förlängdes 24 timmar.`)
+  }
+
+  const endAuctionNow = (item: any) => applyEnd(item, new Date().toISOString(), `"${item.title}" avslutas nu.`)
+
+  const setSpecificEnd = (item: any, localValue: string) => {
+    if (!localValue) return
+    const iso = new Date(localValue).toISOString()
+    applyEnd(item, iso, `Ny sluttid satt för "${item.title}".`)
   }
 
   const viewDoc = async (path: string) => {
@@ -188,6 +227,14 @@ export default function AdminPage() {
           <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 flex items-start justify-between gap-3">
             <p className="text-sm text-red-600">{adminError}</p>
             <button onClick={() => setAdminError('')} className="text-red-400 hover:text-red-600 text-sm shrink-0">
+              Stäng
+            </button>
+          </div>
+        )}
+        {adminNotice && (
+          <div className="mb-6 rounded-xl bg-emerald-50 border border-emerald-200 p-4 flex items-start justify-between gap-3">
+            <p className="text-sm text-emerald-700">{adminNotice}</p>
+            <button onClick={() => setAdminNotice('')} className="text-emerald-400 hover:text-emerald-600 text-sm shrink-0">
               Stäng
             </button>
           </div>
@@ -382,6 +429,15 @@ export default function AdminPage() {
                       {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
                       {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
                     </p>
+                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                      <span className="text-sm font-semibold text-gold-700 tabular-nums">
+                        {topBids[item.id] ? formatSEK(topBids[item.id]) : 'Inga bud'}
+                      </span>
+                      <span className="text-xs text-espresso-400">{bidCounts[item.id] || 0} bud</span>
+                      {item.status === 'active' && item.auction_ends_at && (
+                        <CountdownTimer endsAt={item.auction_ends_at} variant="chip" />
+                      )}
+                    </div>
                   </div>
                   <div className="shrink-0 flex items-center gap-2 flex-wrap justify-end">
                     {item.status === 'active' && confirmId !== item.id && (
@@ -398,6 +454,13 @@ export default function AdminPage() {
                         >
                           Avsluta nu
                         </button>
+                        <input
+                          type="datetime-local"
+                          defaultValue={toLocalInput(item.auction_ends_at)}
+                          onChange={(e) => setSpecificEnd(item, e.target.value)}
+                          className="text-sm !py-2 !px-2"
+                          title="Sätt specifik sluttid"
+                        />
                       </>
                     )}
                     {confirmId === item.id ? (
