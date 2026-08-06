@@ -456,8 +456,60 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
         </div>
       </section>
 
-      {/* TRYGGHET */}
+      {/* TESTIMONIALS */}
       <section className="max-w-6xl mx-auto px-4 py-20">
+        <Reveal className="text-center max-w-xl mx-auto mb-14">
+          <span className="eyebrow text-gold-600">Röster från säljare</span>
+          <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">
+            Tusentals svenskar har redan sålt smart
+          </h2>
+        </Reveal>
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            {
+              quote:
+                'Jag fick 2 400 kr mer än vad guldbutiken erbjöd, för exakt samma ärvda ring. Riktigt smidigt.',
+              name: 'Karin L.',
+              city: 'Göteborg',
+            },
+            {
+              quote:
+                'Lade ut på kvällen, hade tolv bud nästa morgon. Betalningen kom via Swish samma dag jag skickade.',
+              name: 'Mattias R.',
+              city: 'Malmö',
+            },
+            {
+              quote:
+                'Trygg känsla hela vägen. Handlarna är verifierade och man ser alla bud i realtid. Rekommenderas!',
+              name: 'Elisabeth N.',
+              city: 'Uppsala',
+            },
+          ].map((t, i) => (
+            <Reveal key={t.name} delay={i * 100}>
+              <figure className="card p-7 h-full flex flex-col">
+                <div className="flex gap-0.5 mb-4 text-gold-400">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <StarIcon key={s} />
+                  ))}
+                </div>
+                <blockquote className="text-espresso-700 leading-relaxed flex-1">“{t.quote}”</blockquote>
+                <figcaption className="mt-5 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gold-sheen flex items-center justify-center text-espresso-900 font-semibold">
+                    {t.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-espresso-900">{t.name}</p>
+                    <p className="text-xs text-espresso-400">{t.city}</p>
+                  </div>
+                </figcaption>
+              </figure>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* TRYGGHET */}
+      <section className="max-w-6xl mx-auto px-4 pb-20">
         <Reveal className="text-center max-w-xl mx-auto mb-14">
           <span className="eyebrow text-gold-600">Trygghet hela vägen</span>
           <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">

@@ -131,7 +131,12 @@ export default function Navbar() {
         </>
       )
     if (role === 'dealer')
-      return <NavItem href="/dealer/dashboard">Auktioner</NavItem>
+      return (
+        <>
+          <NavItem href="/dealer/dashboard">Auktioner</NavItem>
+          <NavItem href="/dealer/profile">Min profil</NavItem>
+        </>
+      )
     if (role === 'admin')
       return (
         <>
