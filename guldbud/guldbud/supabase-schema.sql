@@ -351,6 +351,28 @@ create trigger on_bid_created
   after insert on public.bids
   for each row execute procedure public.notify_new_bid();
 
+-- Anti-sniping ("soft close"): läggs ett bud när mindre än 2 minuter återstår
+-- förlängs auktionen till 2 minuter från nu, så att ingen kan vinna genom att
+-- lägga ett bud i sista sekunden utan att andra hinner svara.
+create or replace function public.extend_auction_on_late_bid()
+returns trigger language plpgsql security definer as $$
+declare
+  v_ends timestamptz;
+begin
+  select auction_ends_at into v_ends from public.items where id = new.item_id;
+  if v_ends is not null and v_ends > now() and v_ends < now() + interval '2 minutes' then
+    update public.items
+      set auction_ends_at = now() + interval '2 minutes'
+      where id = new.item_id;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_bid_extend_auction on public.bids;
+create trigger on_bid_extend_auction
+  after insert on public.bids
+  for each row execute procedure public.extend_auction_on_late_bid();
+
 -- ============================================================
 -- Notifiering: när ett bud accepteras (auktion stängs)
 --  - vinnande handlaren får besked

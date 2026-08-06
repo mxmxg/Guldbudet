@@ -30,6 +30,8 @@ export default function AuctionDetails({ item }: { item: any }) {
   const [activeImg, setActiveImg] = useState(0)
   const [flash, setFlash] = useState(false)
   const [zoom, setZoom] = useState(false)
+  // Kept in state so anti-sniping extensions (server-side) reflect live.
+  const [endsAt, setEndsAt] = useState<string | null>(item.auction_ends_at)
   const supabase = createClient()
 
   const loadBids = async () => {
@@ -43,6 +45,9 @@ export default function AuctionDetails({ item }: { item: any }) {
       .order('created_at', { ascending: true })
       .limit(100)
     setBids(b || [])
+    // Refresh the end time too, so a late-bid extension shows immediately.
+    const { data: it } = await supabase.from('items').select('auction_ends_at').eq('id', item.id).single()
+    if (it) setEndsAt(it.auction_ends_at)
   }
 
   useEffect(() => {
@@ -105,7 +110,7 @@ export default function AuctionDetails({ item }: { item: any }) {
   const isOwner = user?.id === item.owner_id && profile?.role !== 'admin'
   const isAdmin = profile?.role === 'admin'
   const isClosed = item.status === 'closed'
-  const ended = !!item.auction_ends_at && new Date(item.auction_ends_at).getTime() < Date.now()
+  const ended = !!endsAt && new Date(endsAt).getTime() < Date.now()
   const reserveMet = !item.min_price || topAmount >= item.min_price
   const images: string[] = item.image_urls?.length ? item.image_urls : []
   const est = estimateRange(item.weight_grams || 0, item.karat || '')
@@ -229,10 +234,10 @@ export default function AuctionDetails({ item }: { item: any }) {
                     <p className="text-xs text-espresso-400 mt-1">Var först att buda</p>
                   )}
                 </div>
-                {item.auction_ends_at && (
+                {endsAt && (
                   <div className="shrink-0 sm:text-right">
                     <p className="eyebrow text-espresso-400 mb-2">{ended || isClosed ? 'Status' : 'Avslutas om'}</p>
-                    <CountdownTimer endsAt={item.auction_ends_at} variant="blocks" />
+                    <CountdownTimer endsAt={endsAt} variant="blocks" />
                   </div>
                 )}
               </div>
@@ -349,7 +354,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                   <BidSection
                     itemId={item.id}
                     currentTop={topAmount}
-                    endsAt={item.auction_ends_at}
+                    endsAt={endsAt}
                     onPlaced={loadBids}
                   />
                   <WatchButton itemId={item.id} />
