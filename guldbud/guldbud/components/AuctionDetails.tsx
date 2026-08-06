@@ -9,7 +9,7 @@ import WatchButton from '@/components/WatchButton'
 import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
 import Footer from '@/components/Footer'
-import { GemIcon, HourglassIcon } from '@/components/Icons'
+import { GemIcon, HourglassIcon, CheckIcon } from '@/components/Icons'
 import { estimateRange, formatSEK } from '@/lib/gold'
 
 function relTime(iso: string) {
@@ -96,6 +96,9 @@ export default function AuctionDetails({ item }: { item: any }) {
 
   const topBid = bids[0]
   const topAmount = topBid?.amount || 0
+  const myTopBid = user ? bids.filter((b: any) => b.dealer_id === user.id).reduce((m: number, b: any) => Math.max(m, b.amount), 0) : 0
+  const hasBid = myTopBid > 0
+  const isLeading = hasBid && !!topBid && topBid.dealer_id === user?.id
   const isOwner = user?.id === item.owner_id && profile?.role !== 'admin'
   const isAdmin = profile?.role === 'admin'
   const isClosed = item.status === 'closed'
@@ -324,6 +327,22 @@ export default function AuctionDetails({ item }: { item: any }) {
                 )
               ) : (
                 <div className="mt-4 space-y-3">
+                  {isLeading ? (
+                    <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                        <CheckIcon size={13} strokeWidth={3} />
+                      </span>
+                      <p className="text-sm text-emerald-800">
+                        <span className="font-semibold">Du leder just nu</span> med {formatSEK(myTopBid)}.
+                      </p>
+                    </div>
+                  ) : hasBid ? (
+                    <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+                      <p className="text-sm text-amber-800">
+                        <span className="font-semibold">Du är överbjuden.</span> Ditt bud: {formatSEK(myTopBid)}. Höj för att ta ledningen igen.
+                      </p>
+                    </div>
+                  ) : null}
                   <BidSection
                     itemId={item.id}
                     currentTop={topAmount}
