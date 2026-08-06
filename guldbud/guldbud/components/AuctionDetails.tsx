@@ -311,10 +311,19 @@ export default function AuctionDetails({ item }: { item: any }) {
             {/* Dealer bid form (blocked after end) */}
             {!isOwner && !isAdmin && !isClosed && profile?.role === 'dealer' &&
               (ended ? (
-                <div className="mt-4 rounded-2xl bg-espresso-50 border border-espresso-100 p-4 text-center">
-                  <p className="text-espresso-600 text-sm font-medium">Auktionen är avslutad</p>
-                  <p className="text-espresso-400 text-xs mt-1">Det går inte längre att lägga bud.</p>
-                </div>
+                topBid && topBid.dealer_id === user?.id ? (
+                  <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-center">
+                    <p className="text-emerald-800 text-sm font-medium">Du hade det högsta budet</p>
+                    <p className="text-emerald-700 text-xs mt-1">
+                      Auktionen är avslutad. Inväntar säljarens bekräftelse – du får en notis så snart budet accepteras.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-2xl bg-espresso-50 border border-espresso-100 p-4 text-center">
+                    <p className="text-espresso-600 text-sm font-medium">Auktionen är avslutad</p>
+                    <p className="text-espresso-400 text-xs mt-1">Det går inte längre att lägga bud.</p>
+                  </div>
+                )
               ) : (
                 <div className="mt-4">
                   <BidSection

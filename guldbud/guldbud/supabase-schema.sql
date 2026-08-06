@@ -400,3 +400,81 @@ begin
   exception when duplicate_object then null;
   end;
 end $$;
+
+-- ============================================================
+-- Auto-avslut: när en auktions sluttid passerats notifieras
+-- säljaren (bekräfta högsta budet) och den vinnande handlaren.
+-- Statusen lämnas som 'active' tills säljaren accepterar ett bud
+-- (då sätts accepted_bid_id och status='closed' via befintligt
+-- flöde). Föremålet är redan bortfiltrerat ur listorna via
+-- auction_ends_at, så budgivningen är i praktiken stängd.
+-- ============================================================
+alter table public.items add column if not exists ended_notified boolean not null default false;
+
+create or replace function public.settle_ended_auctions()
+returns void language plpgsql security definer as $$
+declare
+  r record;
+  v_top record;
+begin
+  for r in
+    select * from public.items
+    where status = 'active'
+      and auction_ends_at is not null
+      and auction_ends_at <= now()
+      and ended_notified = false
+  loop
+    select b.id, b.dealer_id, b.amount into v_top
+    from public.bids b
+    where b.item_id = r.id
+    order by b.amount desc
+    limit 1;
+
+    if v_top.id is null then
+      -- Inga bud
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (r.owner_id, 'Din auktion avslutades utan bud',
+              'Inga bud kom in på "' || r.title || '". Du kan lägga ut föremålet igen.',
+              r.id, '/auctions/' || r.id);
+    elsif r.min_price is not null and v_top.amount < r.min_price then
+      -- Reservationspris ej uppnått
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (r.owner_id, 'Auktionen nådde inte ditt minimipris',
+              'Högsta bud blev ' || v_top.amount || ' kr på "' || r.title ||
+              '", under ditt minimipris. Du kan ändå välja att acceptera.',
+              r.id, '/auctions/' || r.id);
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (v_top.dealer_id, 'Auktionen är avslutad',
+              'Du hade det högsta budet på "' || r.title || '". Inväntar säljarens besked.',
+              r.id, '/auctions/' || r.id);
+    else
+      -- Vinnare korad, inväntar säljarens bekräftelse
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (r.owner_id, 'Din auktion har avslutats',
+              'Högsta bud blev ' || v_top.amount || ' kr på "' || r.title ||
+              '". Bekräfta budet för att slutföra affären.',
+              r.id, '/auctions/' || r.id);
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (v_top.dealer_id, 'Du hade det högsta budet',
+              'Auktionen på "' || r.title || '" är avslutad. Inväntar säljarens bekräftelse.',
+              r.id, '/auctions/' || r.id);
+    end if;
+
+    update public.items set ended_notified = true where id = r.id;
+  end loop;
+end;
+$$;
+
+-- Schemalägg funktionen varje minut via pg_cron. Om tillägget inte
+-- kan aktiveras automatiskt: aktivera "pg_cron" under
+-- Database > Extensions i Supabase och kör detta block igen.
+do $$
+begin
+  create extension if not exists pg_cron;
+  perform cron.unschedule('settle-ended-auctions')
+    from cron.job where jobname = 'settle-ended-auctions';
+  perform cron.schedule('settle-ended-auctions', '* * * * *',
+    'select public.settle_ended_auctions();');
+exception when others then
+  raise notice 'pg_cron kunde inte konfigureras automatiskt (%). Aktivera pg_cron under Database > Extensions och kör blocket igen.', sqlerrm;
+end $$;
