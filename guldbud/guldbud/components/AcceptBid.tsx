@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 
 export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }: {
@@ -11,6 +12,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
 }) {
   const [step, setStep] = useState<'idle' | 'confirm' | 'done'>('idle')
   const [loading, setLoading] = useState(false)
+  const [orderId, setOrderId] = useState<string | null>(null)
   const supabase = createClient()
 
   if (!isOwner) return null
@@ -22,6 +24,9 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
       accepted_at: new Date().toISOString(),
       status: 'closed'
     }).eq('id', itemId)
+    // The order is created by a DB trigger; fetch its id so we can link to it.
+    const { data: order } = await supabase.from('orders').select('id').eq('item_id', itemId).single()
+    setOrderId(order?.id ?? null)
     setLoading(false)
     setStep('done')
   }
@@ -64,6 +69,11 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
           <p className="text-[#c9a84c] text-sm">111 22 Stockholm</p>
           <p className="text-[#8B6914] text-xs mt-2">Vid frågor: info@guldbud.se</p>
         </div>
+        {orderId && (
+          <Link href={`/orders/${orderId}`} className="btn-gold w-full mt-4 justify-center">
+            Följ affären och kontakta oss →
+          </Link>
+        )}
       </div>
     )
   }

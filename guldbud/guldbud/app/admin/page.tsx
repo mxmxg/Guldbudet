@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { TrashIcon } from '@/components/Icons'
@@ -11,6 +12,7 @@ export default function AdminPage() {
   const [pendingDealers, setPendingDealers] = useState<any[]>([])
   const [pendingItems, setPendingItems] = useState<any[]>([])
   const [liveItems, setLiveItems] = useState<any[]>([])
+  const [openOrders, setOpenOrders] = useState(0)
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -50,9 +52,15 @@ export default function AdminPage() {
         .in('status', ['active', 'closed'])
         .order('created_at', { ascending: false })
 
+      const { count: ordersCount } = await supabase
+        .from('orders')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['accepted', 'shipped_by_seller', 'received', 'verified_paid', 'shipped_to_dealer'])
+
       setPendingDealers(dealers || [])
       setPendingItems(items || [])
       setLiveItems(active || [])
+      setOpenOrders(ordersCount || 0)
       setLoading(false)
     }
     load()
@@ -133,6 +141,21 @@ export default function AdminPage() {
       </div>
 
       <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-10">
+        {/* Orders */}
+        <Link
+          href="/admin/orders"
+          className="card card-hover p-5 mb-10 flex items-center justify-between gap-4"
+        >
+          <div>
+            <p className="font-display text-lg text-espresso-900">Affärer</p>
+            <p className="text-sm text-espresso-400">Hantera vunna auktioner: status, spårning och meddelanden.</p>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            {openOrders > 0 && <span className="chip bg-amber-100 text-amber-700">{openOrders} pågående</span>}
+            <span className="text-gold-600 text-sm">Öppna →</span>
+          </div>
+        </Link>
+
         {/* Dealers */}
         <section className="mb-12">
           <h2 className="font-display text-xl text-espresso-900 mb-4 flex items-center gap-2">

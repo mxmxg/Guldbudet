@@ -20,6 +20,7 @@ export default function MyItemsPage() {
   const supabase = createClient()
   const router = useRouter()
   const [items, setItems] = useState<any[]>([])
+  const [orderByItem, setOrderByItem] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -37,6 +38,12 @@ export default function MyItemsPage() {
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false })
       setItems(data || [])
+
+      const { data: orders } = await supabase.from('orders').select('id, item_id').eq('seller_id', user.id)
+      const map: Record<string, string> = {}
+      orders?.forEach((o: any) => (map[o.item_id] = o.id))
+      setOrderByItem(map)
+
       setLoading(false)
     }
     load()
@@ -79,12 +86,14 @@ export default function MyItemsPage() {
                 label: item.status,
                 color: 'bg-espresso-100 text-espresso-500',
               }
+              const orderId = orderByItem[item.id]
               const clickable = item.status === 'active' || item.status === 'closed'
+              const href = orderId ? `/orders/${orderId}` : `/auctions/${item.id}`
               const Wrapper: any = clickable ? Link : 'div'
               return (
                 <Wrapper
                   key={item.id}
-                  {...(clickable ? { href: `/auctions/${item.id}` } : {})}
+                  {...(clickable ? { href } : {})}
                   className={`card p-4 flex gap-4 items-center ${clickable ? 'card-hover' : ''}`}
                 >
                   <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative">
@@ -111,7 +120,9 @@ export default function MyItemsPage() {
                     </p>
                   </div>
                   {clickable && (
-                    <span className="text-sm text-gold-600 shrink-0 hidden sm:inline">Se auktion →</span>
+                    <span className="text-sm text-gold-600 shrink-0 hidden sm:inline">
+                      {orderId ? 'Följ affären →' : 'Se auktion →'}
+                    </span>
                   )}
                 </Wrapper>
               )

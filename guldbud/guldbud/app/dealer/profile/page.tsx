@@ -5,7 +5,10 @@ import { createClient } from '@/lib/supabase-browser'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import Image from 'next/image'
 import { CheckIcon } from '@/components/Icons'
+import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
+import { formatSEK } from '@/lib/gold'
 
 type Stats = { bids: number; items: number; leading: number; won: number }
 
@@ -17,6 +20,7 @@ export default function DealerProfilePage() {
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [stats, setStats] = useState<Stats>({ bids: 0, items: 0, leading: 0, won: 0 })
+  const [orders, setOrders] = useState<any[]>([])
   const [form, setForm] = useState({
     company_name: '',
     full_name: '',
@@ -88,6 +92,14 @@ export default function DealerProfilePage() {
       if (leading < 0) leading = 0
     }
     setStats({ bids: myBids.length, items: itemIds.length, leading, won })
+
+    const { data: myOrders } = await supabase
+      .from('orders')
+      .select('id, amount, status, items(title, image_urls)')
+      .eq('dealer_id', user.id)
+      .order('created_at', { ascending: false })
+    setOrders(myOrders || [])
+
     setLoading(false)
   }
 
@@ -210,6 +222,38 @@ export default function DealerProfilePage() {
                 )}
               </div>
             </section>
+
+            {/* Mina affärer */}
+            {orders.length > 0 && (
+              <section className="card p-6">
+                <h2 className="font-display text-xl text-espresso-900 mb-1">Mina affärer</h2>
+                <p className="text-xs text-espresso-400 mb-4">Auktioner du vunnit och deras status.</p>
+                <div className="grid gap-3">
+                  {orders.map((o) => (
+                    <Link
+                      key={o.id}
+                      href={`/orders/${o.id}`}
+                      className="flex items-center gap-3 rounded-xl border border-espresso-100 p-3 hover:border-gold-300 hover:bg-gold-50/40 transition"
+                    >
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
+                        {o.items?.image_urls?.[0] && (
+                          <Image src={o.items.image_urls[0]} alt="" fill className="object-contain" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-espresso-900 truncate">{o.items?.title}</p>
+                        <span className="chip bg-espresso-100 text-espresso-600 mt-0.5">
+                          {ORDER_STATUS_LABEL[o.status as OrderStatus]}
+                        </span>
+                      </div>
+                      <span className="text-sm font-semibold text-gold-700 tabular-nums shrink-0">
+                        {formatSEK(o.amount)}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Quick links */}
             <section className="grid sm:grid-cols-2 gap-4">
