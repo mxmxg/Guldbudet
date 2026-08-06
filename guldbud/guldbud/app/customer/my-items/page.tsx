@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
 import Link from 'next/link'
+import { GemIcon } from '@/components/Icons'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   pending: { label: 'Väntar på granskning', color: 'bg-amber-100 text-amber-700' },
@@ -63,8 +64,8 @@ export default function MyItemsPage() {
           </div>
         ) : items.length === 0 ? (
           <div className="card p-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-gold-50 flex items-center justify-center mx-auto mb-4 text-3xl animate-float">
-              ✨
+            <div className="w-16 h-16 rounded-full bg-gold-50 text-gold-500 flex items-center justify-center mx-auto mb-4 animate-float">
+              <GemIcon size={30} strokeWidth={1.2} />
             </div>
             <p className="text-espresso-500 mb-5">Du har inte lagt ut några föremål ännu.</p>
             <Link href="/customer/submit" className="btn-gold">
@@ -97,7 +98,8 @@ export default function MyItemsPage() {
                       <span className={`chip ${s.color}`}>{s.label}</span>
                     </div>
                     <p className="text-xs text-espresso-400 mb-1.5">
-                      {item.weight_grams} g · {item.karat}
+                      {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
+                      {item.gemstone ? ` · ${item.gemstone}` : ''}
                     </p>
                     {item.min_price && (
                       <p className="text-xs text-espresso-500">

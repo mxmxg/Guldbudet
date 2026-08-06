@@ -176,7 +176,8 @@ export default function AdminPage() {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-espresso-900">{item.title}</p>
                       <p className="text-sm text-espresso-500">
-                        {item.weight_grams} g · {item.karat}
+                        {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
+                        {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
                       </p>
                       <p className="text-xs text-gold-600 mt-0.5">
                         Metallvärde {formatSEK(est.low)}–{formatSEK(est.high)}

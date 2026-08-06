@@ -6,6 +6,8 @@ import { Item } from '@/lib/types'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import CountdownTimer from '@/components/CountdownTimer'
+import CategoryIcon from '@/components/CategoryIcon'
+import { GemIcon } from '@/components/Icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
@@ -171,7 +173,7 @@ export default function DealerDashboard() {
           </div>
         ) : displayItems.length === 0 ? (
           <div className="card p-16 text-center text-espresso-400">
-            <div className="text-3xl mb-3 opacity-40 animate-float">◆</div>
+            <div className="flex justify-center mb-3 text-gold-500/50 animate-float"><GemIcon size={30} strokeWidth={1.2} /></div>
             <p>
               {tab === 'mybids'
                 ? 'Du har inte lagt några bud ännu.'
@@ -202,7 +204,7 @@ export default function DealerDashboard() {
                     {item.image_urls?.[0] ? (
                       <Image src={item.image_urls[0]} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <div className="flex items-center justify-center h-full text-4xl text-gold-500/40">◆</div>
+                      <div className="flex items-center justify-center h-full"><CategoryIcon category={item.category} size={40} className="text-gold-500/40" strokeWidth={1.2} /></div>
                     )}
                     {item.auction_ends_at && (
                       <div className="absolute top-2 left-2">
@@ -221,13 +223,14 @@ export default function DealerDashboard() {
                         {mine && !isWinning && <span className="chip bg-amber-100 text-amber-700">Överbjuden</span>}
                       </div>
                       <p className="text-xs text-espresso-400 mb-3">
-                        {item.weight_grams} g · {item.karat} · {count} bud
+                        {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
+                        {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''} · {count} bud
                       </p>
                       <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
                         <span>
                           <span className="text-espresso-400">Högsta: </span>
                           <span className="font-semibold text-gold-700 tabular-nums">
-                            {top ? formatSEK(top) : '—'}
+                            {top ? formatSEK(top) : 'Inga bud'}
                           </span>
                         </span>
                         {mine && (

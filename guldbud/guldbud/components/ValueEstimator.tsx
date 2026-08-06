@@ -36,7 +36,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
         </div>
         <h3 className="font-display text-2xl text-gold-100 mb-1">Vad är ditt guld värt?</h3>
         <p className="text-espresso-100/70 text-sm mb-7">
-          Dra i reglaget och välj karat — se ett direktvärde baserat på dagens guldpris.
+          Dra i reglaget och välj karat, se ett direktvärde baserat på dagens guldpris.
         </p>
 
         {/* Weight */}
@@ -119,7 +119,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
           <ArrowIcon />
         </Link>
         <p className="text-center text-[11px] text-espresso-200/45 mt-3">
-          Indikativt värde. Slutpriset avgörs av handlarnas bud — ofta högre.
+          Indikativt värde. Slutpriset avgörs av handlarnas bud, ofta högre.
         </p>
       </div>
 

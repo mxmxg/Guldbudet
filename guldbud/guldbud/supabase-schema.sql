@@ -40,8 +40,11 @@ create table if not exists public.items (
   owner_id uuid references public.profiles not null,
   title text not null,
   description text,
+  category text,
   weight_grams numeric(8,2),
   karat text,
+  diamond_carat numeric(6,2),
+  gemstone text,
   min_price integer,
   status text not null default 'pending'
     check (status in ('pending','approved','active','closed','rejected')),
@@ -54,6 +57,9 @@ create table if not exists public.items (
 
 alter table public.items add column if not exists accepted_bid_id uuid;
 alter table public.items add column if not exists accepted_at timestamptz;
+alter table public.items add column if not exists category text;
+alter table public.items add column if not exists diamond_carat numeric(6,2);
+alter table public.items add column if not exists gemstone text;
 
 -- ------------------------------------------------------------
 -- Bud från guldhandlare
@@ -226,7 +232,7 @@ returns trigger language plpgsql security definer as $$
 begin
   if new.status = 'active' and coalesce(old.status, '') <> 'active' then
     insert into public.notifications (user_id, title, message, item_id)
-    values (new.owner_id, 'Din auktion är live! 🔔',
+    values (new.owner_id, 'Din auktion är live',
             'Budgivningen på "' || new.title || '" har öppnat.', new.id);
   end if;
   return new;
@@ -254,7 +260,7 @@ begin
 
   -- Notify owner
   insert into public.notifications (user_id, title, message, item_id)
-  values (v_owner, 'Nytt bud! 💰',
+  values (v_owner, 'Nytt bud',
           'Ett nytt bud på ' || new.amount || ' kr lades på "' || v_title || '".', new.item_id);
 
   -- Find previous highest bidder (before this bid) and notify them if outbid
@@ -293,7 +299,7 @@ begin
     select dealer_id into v_dealer from public.bids where id = new.accepted_bid_id;
     if v_dealer is not null then
       insert into public.notifications (user_id, title, message, item_id)
-      values (v_dealer, 'Ditt bud accepterades! 🎉',
+      values (v_dealer, 'Ditt bud accepterades',
               'Säljaren accepterade ditt bud på "' || new.title || '".', new.id);
     end if;
   end if;

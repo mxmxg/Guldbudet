@@ -21,8 +21,11 @@ export interface Item {
   owner_id: string
   title: string
   description: string
+  category?: string
   weight_grams: number
   karat: string
+  diamond_carat?: number
+  gemstone?: string
   min_price?: number
   status: 'pending' | 'approved' | 'active' | 'closed' | 'rejected'
   image_urls: string[]
