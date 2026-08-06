@@ -85,9 +85,12 @@ create table if not exists public.notifications (
   title text not null,
   message text,
   item_id uuid references public.items on delete cascade,
+  link text,
   read boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+alter table public.notifications add column if not exists link text;
 
 create index if not exists notifications_user_idx on public.notifications (user_id, created_at desc);
 
@@ -331,6 +334,30 @@ drop trigger if exists on_dealer_approved on public.profiles;
 create trigger on_dealer_approved
   after update on public.profiles
   for each row execute procedure public.notify_dealer_approved();
+
+-- ============================================================
+-- Notifiering: när en ny handlare registrerar sig -> alla admins
+-- ============================================================
+create or replace function public.notify_admins_new_dealer()
+returns trigger language plpgsql security definer as $$
+begin
+  if new.role = 'dealer' and coalesce(new.approved, false) = false then
+    insert into public.notifications (user_id, title, message, link)
+    select p.id,
+           'Ny handlare väntar på godkännande',
+           coalesce(new.company_name, new.full_name, 'En handlare') || ' har registrerat sig.',
+           '/admin'
+    from public.profiles p
+    where p.role = 'admin';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_new_dealer_registered on public.profiles;
+create trigger on_new_dealer_registered
+  after insert on public.profiles
+  for each row execute procedure public.notify_admins_new_dealer();
 
 -- ============================================================
 -- Realtime: publicera bud och notifieringar så att UI:t

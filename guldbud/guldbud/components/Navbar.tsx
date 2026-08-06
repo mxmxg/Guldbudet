@@ -26,6 +26,7 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
+    let channel: any = null
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
         setUser(data.user)
@@ -36,6 +37,15 @@ export default function Navbar() {
           .single()
         setRole(profile?.role ?? null)
         loadNotifications(data.user.id)
+        // Live-uppdatera notisklockan när en ny notis kommer in.
+        channel = supabase
+          .channel(`notifs-${data.user.id}`)
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${data.user.id}` },
+            () => loadNotifications(data.user.id)
+          )
+          .subscribe()
       }
     })
 
@@ -51,7 +61,10 @@ export default function Navbar() {
       }
     })
 
-    return () => listener.subscription.unsubscribe()
+    return () => {
+      listener.subscription.unsubscribe()
+      if (channel) supabase.removeChannel(channel)
+    }
   }, [])
 
   useEffect(() => {
@@ -85,7 +98,8 @@ export default function Navbar() {
     await supabase.from('notifications').update({ read: true }).eq('id', n.id)
     setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)))
     setShowNotifs(false)
-    if (n.item_id) window.location.href = `/auctions/${n.item_id}`
+    const dest = n.link || (n.item_id ? `/auctions/${n.item_id}` : null)
+    if (dest) window.location.href = dest
   }
 
   const markAllAsRead = async () => {
