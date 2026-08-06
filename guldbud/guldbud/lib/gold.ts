@@ -29,9 +29,11 @@ export function meltValue(weightGrams: number, karat: string, spot = GOLD_SPOT_S
 }
 
 /**
- * Indicative auction range. Dealers on GuldBud compete, so the realised price
- * typically lands between a conservative floor and a competitive ceiling of the
- * melt value. Returns rounded, nicely-stepped numbers.
+ * Indicative payout range for a seller. Dealers buy below spot to leave margin,
+ * but competition on GuldBud pushes the realised price up toward the metal
+ * value. The estimate therefore sits clearly *below* the melt value: a
+ * conservative floor and a competitive ceiling. `melt` is returned separately
+ * as the reference metal value. Numbers are rounded to nice steps.
  */
 export function estimateRange(
   weightGrams: number,
@@ -39,8 +41,8 @@ export function estimateRange(
   spot = GOLD_SPOT_SEK_PER_GRAM
 ): { low: number; high: number; melt: number } {
   const melt = meltValue(weightGrams, karat, spot)
-  const low = roundTo(melt * 0.9, 10)
-  const high = roundTo(melt * 1.06, 10)
+  const low = roundTo(melt * 0.8, 10)
+  const high = roundTo(melt * 0.92, 10)
   return { low, high, melt }
 }
 

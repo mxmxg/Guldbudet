@@ -357,8 +357,8 @@ export default function SubmitPage() {
                     </p>
                     <p className="text-espresso-100/50 text-xs mt-2">
                       {hasGem
-                        ? 'Baserat på guldvärdet. Diamanter och ädelstenar höjer värdet ytterligare.'
-                        : 'Metallvärde vid dagens guldpris. Handlarnas bud landar ofta högre.'}
+                        ? 'Uppskattad utbetalning utifrån guldvärdet. Diamanter och ädelstenar höjer värdet ytterligare.'
+                        : 'Uppskattad utbetalning, något under metallvärdet vid dagens guldpris. Handlarna budar i konkurrens om slutpriset.'}
                     </p>
                   </>
                 ) : (

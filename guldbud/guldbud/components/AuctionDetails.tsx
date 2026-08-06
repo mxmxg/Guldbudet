@@ -220,11 +220,14 @@ export default function AuctionDetails({ item }: { item: any }) {
               </div>
 
               {/* indicative value */}
-              <div className="mt-4 pt-4 border-t border-espresso-100 flex items-center gap-2 text-xs text-espresso-500">
-                <SparkIcon />
-                Indikativt metallvärde:{' '}
-                <span className="font-medium text-espresso-700">
-                  {formatSEK(est.low)} – {formatSEK(est.high)}
+              <div className="mt-4 pt-4 border-t border-espresso-100 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-espresso-500">
+                <span className="flex items-center gap-2">
+                  <SparkIcon />
+                  Metallvärde vid dagens kurs:{' '}
+                  <span className="font-medium text-espresso-700">{formatSEK(est.melt)}</span>
+                </span>
+                <span className="text-espresso-400">
+                  Uppskattad utbetalning {formatSEK(est.low)}–{formatSEK(est.high)}
                 </span>
               </div>
             </div>

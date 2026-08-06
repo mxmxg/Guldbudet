@@ -121,7 +121,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
           <ArrowIcon />
         </Link>
         <p className="text-center text-[11px] text-espresso-200/45 mt-3">
-          Indikativt värde. Slutpriset avgörs av handlarnas bud, ofta högre.
+          Uppskattad utbetalning, något under metallvärdet. Konkurrensen mellan handlare avgör slutpriset.
         </p>
       </div>
 
