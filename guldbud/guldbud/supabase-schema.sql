@@ -511,6 +511,11 @@ create table if not exists public.orders (
   updated_at timestamptz not null default now(),
   unique (item_id)
 );
+-- Lägg till betalningssteget (dealer_paid) även om tabellen redan finns sedan tidigare.
+alter table public.orders drop constraint if exists orders_status_check;
+alter table public.orders add constraint orders_status_check
+  check (status in ('accepted','shipped_by_seller','received','dealer_paid','verified_paid','shipped_to_dealer','completed','cancelled'));
+
 create index if not exists orders_seller_idx on public.orders (seller_id);
 create index if not exists orders_dealer_idx on public.orders (dealer_id);
 
@@ -615,14 +620,24 @@ begin
   select title into v_title from public.items where id = new.item_id;
   if new.status is distinct from old.status then
     if new.status = 'received' then
+      -- Säljaren: mottaget. Handlaren: kontrollerat, dags att betala.
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.seller_id, 'Vi har tagit emot ditt föremål',
-              'GuldBud har mottagit "' || v_title || '" och påbörjar äkthetskontrollen.',
+              'GuldBud har mottagit "' || v_title || '" och kontrollerar det nu.',
+              new.item_id, '/orders/' || new.id);
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (new.dealer_id, 'Föremålet är kontrollerat – dags att betala',
+              '"' || v_title || '" är mottaget och kontrollerat. Betala bud + provision så skickar vi det till dig.',
+              new.item_id, '/orders/' || new.id);
+    elsif new.status = 'dealer_paid' then
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (new.seller_id, 'Betalning på väg',
+              'Handlaren har betalat för "' || v_title || '". Din utbetalning förbereds nu.',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'verified_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.seller_id, 'Godkänt och utbetalt',
-              'Äktheten är godkänd och betalningen för "' || v_title || '" är på väg via Swish.',
+      values (new.seller_id, 'Du har fått betalt',
+              'Betalningen för "' || v_title || '" är på väg till ditt konto.',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'shipped_to_dealer' then
       insert into public.notifications (user_id, title, message, item_id, link)

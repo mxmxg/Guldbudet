@@ -10,7 +10,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, commission, totalWithCommission } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, commission, totalWithCommission, PAYMENT_WINDOW_LABEL } from '@/lib/fees'
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -173,9 +173,11 @@ function SellerPanel({ order }: { order: any }) {
 }
 
 function DealerPanel({ order }: { order: any }) {
+  const awaitingPayment = order.status === 'received'
+  const paid = ['dealer_paid', 'verified_paid', 'shipped_to_dealer', 'completed'].includes(order.status)
   return (
     <>
-      <div className="card p-6">
+      <div className={`card p-6 ${awaitingPayment ? 'ring-2 ring-gold-300' : ''}`}>
         <h2 className="font-display text-lg text-espresso-900 mb-3">Att betala</h2>
         <div className="flex flex-col gap-1 text-sm">
           <div className="flex justify-between text-espresso-600">
@@ -191,13 +193,25 @@ function DealerPanel({ order }: { order: any }) {
             <span className="tabular-nums">{formatSEK(totalWithCommission(order.amount))}</span>
           </div>
         </div>
+        {awaitingPayment && (
+          <div className="mt-4 rounded-xl bg-gold-50 border border-gold-200 p-4 text-sm">
+            <p className="font-medium text-gold-800">Dags att betala</p>
+            <p className="text-espresso-600 mt-1 leading-relaxed">
+              Föremålet är mottaget och kontrollerat. Betala inom <span className="font-medium">{PAYMENT_WINDOW_LABEL}</span> så
+              skickar vi det till dig. Betalningsinstruktioner finns i meddelandena nedan – hör av dig där om något är oklart.
+            </p>
+          </div>
+        )}
+        {paid && <p className="mt-3 text-sm text-emerald-700">Betalning registrerad ✓</p>}
       </div>
       <div className="card p-6">
         <h2 className="font-display text-lg text-espresso-900 mb-1">Status</h2>
         <p className="text-sm text-espresso-500">
-          {(order.status === 'accepted' || order.status === 'shipped_by_seller' || order.status === 'received') &&
-            'GuldBud tar emot och äkthetskontrollerar föremålet innan det skickas vidare till dig.'}
-          {order.status === 'verified_paid' && 'Föremålet är godkänt och packas för leverans till dig.'}
+          {(order.status === 'accepted' || order.status === 'shipped_by_seller') &&
+            'Inget du behöver göra just nu – vi hör av oss så fort föremålet är mottaget och kontrollerat.'}
+          {order.status === 'received' && 'Föremålet är kontrollerat. Betala så skickar vi det vidare till dig.'}
+          {order.status === 'dealer_paid' && 'Tack för din betalning! Vi förbereder leverans till dig.'}
+          {order.status === 'verified_paid' && 'Säljaren är utbetald och föremålet packas för leverans till dig.'}
           {order.status === 'shipped_to_dealer' &&
             `Föremålet är skickat till dig.${order.tracking_dealer ? ` Spårningsnummer: ${order.tracking_dealer}.` : ''}`}
           {order.status === 'completed' && 'Affären är slutförd. Tack!'}

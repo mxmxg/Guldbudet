@@ -5,6 +5,7 @@ export type OrderStatus =
   | 'accepted'
   | 'shipped_by_seller'
   | 'received'
+  | 'dealer_paid'
   | 'verified_paid'
   | 'shipped_to_dealer'
   | 'completed'
@@ -21,8 +22,9 @@ export type OrderStep = {
 export const ORDER_STEPS: OrderStep[] = [
   { key: 'accepted', label: 'Accepterad', desc: 'Budet är accepterat och affären skapad.' },
   { key: 'shipped_by_seller', label: 'Inskickad', desc: 'Säljaren har skickat föremålet till GuldBud.' },
-  { key: 'received', label: 'Mottagen', desc: 'GuldBud har tagit emot föremålet och kontrollerar äktheten.' },
-  { key: 'verified_paid', label: 'Godkänd & utbetald', desc: 'Äktheten är godkänd och säljaren är utbetald via Swish.' },
+  { key: 'received', label: 'Mottagen & kontrollerad', desc: 'GuldBud har tagit emot och äkthetskontrollerat föremålet. Handlaren faktureras.' },
+  { key: 'dealer_paid', label: 'Betald av handlare', desc: 'Handlaren har betalat bud + provision till GuldBud.' },
+  { key: 'verified_paid', label: 'Utbetald till säljare', desc: 'Säljaren har fått betalt.' },
   { key: 'shipped_to_dealer', label: 'Vidareskickad', desc: 'Föremålet har skickats till den vinnande handlaren.' },
   { key: 'completed', label: 'Slutförd', desc: 'Handlaren har mottagit föremålet. Affären är avslutad.' },
 ]
@@ -30,8 +32,9 @@ export const ORDER_STEPS: OrderStep[] = [
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   accepted: 'Accepterad',
   shipped_by_seller: 'Inskickad',
-  received: 'Mottagen',
-  verified_paid: 'Godkänd & utbetald',
+  received: 'Mottagen & kontrollerad',
+  dealer_paid: 'Betald av handlare',
+  verified_paid: 'Utbetald till säljare',
   shipped_to_dealer: 'Vidareskickad',
   completed: 'Slutförd',
   cancelled: 'Avbruten',

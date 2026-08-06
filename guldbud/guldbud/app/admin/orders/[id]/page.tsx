@@ -10,6 +10,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STEPS, ORDER_STATUS_LABEL, OrderStatus, nextStatus, stepIndex } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
+import { DEALER_COMMISSION_LABEL, commission, totalWithCommission } from '@/lib/fees'
 
 export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -186,6 +187,25 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             <button onClick={saveTracking} disabled={saving} className="btn-gold !py-2">
               {saving ? 'Sparar...' : 'Spara spårning'}
             </button>
+          </div>
+
+          {/* Economy */}
+          <div className="card p-6">
+            <h2 className="font-display text-lg text-espresso-900 mb-4">Ekonomi</h2>
+            <div className="flex flex-col gap-1.5 text-sm">
+              <div className="flex justify-between text-espresso-600">
+                <span>Handlaren betalar (bud + provision)</span>
+                <span className="tabular-nums font-medium">{formatSEK(totalWithCommission(order.amount))}</span>
+              </div>
+              <div className="flex justify-between text-espresso-600">
+                <span>Säljaren får (hela budet)</span>
+                <span className="tabular-nums">{formatSEK(order.amount)}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-emerald-700 pt-2 mt-1 border-t border-espresso-100">
+                <span>GuldBuds provision ({DEALER_COMMISSION_LABEL})</span>
+                <span className="tabular-nums">{formatSEK(commission(order.amount))}</span>
+              </div>
+            </div>
           </div>
 
           {/* Parties (real details, admin only) */}
