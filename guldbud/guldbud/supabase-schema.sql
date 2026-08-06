@@ -112,6 +112,17 @@ alter table public.items enable row level security;
 alter table public.bids enable row level security;
 alter table public.notifications enable row level security;
 
+-- Non-recursive admin-check. SECURITY DEFINER kör som ägaren och kringgår RLS
+-- internt, så vi undviker "infinite recursion" när en profiles-policy annars
+-- skulle fråga profiles-tabellen igen.
+create or replace function public.is_admin()
+returns boolean
+language sql security definer stable
+set search_path = public
+as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
+$$;
+
 -- ---- Profiles ----
 drop policy if exists "own profile" on public.profiles;
 create policy "own profile" on public.profiles
@@ -119,9 +130,7 @@ create policy "own profile" on public.profiles
 
 drop policy if exists "admins see all profiles" on public.profiles;
 create policy "admins see all profiles" on public.profiles
-  for select using (
-    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
-  );
+  for select using (public.is_admin());
 
 -- Handlare måste vara synliga så att bud kan visa företagsnamn
 drop policy if exists "public reads dealer names" on public.profiles;
@@ -139,9 +148,7 @@ create policy "active items are public" on public.items
 
 drop policy if exists "admins manage all items" on public.items;
 create policy "admins manage all items" on public.items
-  for all using (
-    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
-  );
+  for all using (public.is_admin());
 
 -- ---- Bids ----
 drop policy if exists "dealers can bid" on public.bids;
