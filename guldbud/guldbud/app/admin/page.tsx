@@ -4,11 +4,15 @@ import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { TrashIcon } from '@/components/Icons'
 import { estimateRange, formatSEK } from '@/lib/gold'
 
 export default function AdminPage() {
   const [pendingDealers, setPendingDealers] = useState<any[]>([])
   const [pendingItems, setPendingItems] = useState<any[]>([])
+  const [liveItems, setLiveItems] = useState<any[]>([])
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
   const router = useRouter()
@@ -40,13 +44,33 @@ export default function AdminPage() {
         .select('*, profiles(full_name, email)')
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
+      const { data: active } = await supabase
+        .from('items')
+        .select('*')
+        .in('status', ['active', 'closed'])
+        .order('created_at', { ascending: false })
 
       setPendingDealers(dealers || [])
       setPendingItems(items || [])
+      setLiveItems(active || [])
       setLoading(false)
     }
     load()
   }, [])
+
+  const deleteItem = async (id: string) => {
+    setDeletingId(id)
+    const { error } = await supabase.from('items').delete().eq('id', id)
+    if (error) {
+      alert('Kunde inte radera: ' + error.message)
+      setDeletingId(null)
+      return
+    }
+    setLiveItems((prev) => prev.filter((i) => i.id !== id))
+    setPendingItems((prev) => prev.filter((i) => i.id !== id))
+    setDeletingId(null)
+    setConfirmId(null)
+  }
 
   const approveDealer = async (id: string) => {
     await supabase.from('profiles').update({ approved: true }).eq('id', id)
@@ -180,7 +204,7 @@ export default function AdminPage() {
                         {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
                       </p>
                       <p className="text-xs text-gold-600 mt-0.5">
-                        Metallvärde {formatSEK(est.low)}–{formatSEK(est.high)}
+                        Metallvärde {formatSEK(est.melt)}
                       </p>
                       {item.min_price && (
                         <p className="text-sm text-espresso-500">
@@ -211,6 +235,69 @@ export default function AdminPage() {
                   </div>
                 )
               })}
+            </div>
+          )}
+        </section>
+
+        {/* Active / closed auctions — manage & delete */}
+        <section className="mt-12">
+          <h2 className="font-display text-xl text-espresso-900 mb-4 flex items-center gap-2">
+            Auktioner
+            <span className="chip bg-espresso-100 text-espresso-500">{liveItems.length}</span>
+          </h2>
+          {liveItems.length === 0 ? (
+            <div className="card p-8 text-center text-espresso-400 text-sm">Inga auktioner ännu.</div>
+          ) : (
+            <div className="space-y-3">
+              {liveItems.map((item) => (
+                <div key={item.id} className="card p-4 flex gap-4 items-center flex-wrap sm:flex-nowrap">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative shrink-0">
+                    {item.image_urls?.[0] && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.image_urls[0]} alt={item.title} className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium text-espresso-900">{item.title}</p>
+                      <span className={`chip ${item.status === 'closed' ? 'bg-espresso-100 text-espresso-500' : 'bg-emerald-100 text-emerald-700'}`}>
+                        {item.status === 'closed' ? 'Avslutad' : 'Aktiv'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-espresso-400 mt-0.5">
+                      {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
+                      {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
+                    </p>
+                  </div>
+                  <div className="shrink-0">
+                    {confirmId === item.id ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => deleteItem(item.id)}
+                          disabled={deletingId === item.id}
+                          className="text-sm font-medium px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition"
+                        >
+                          {deletingId === item.id ? 'Raderar...' : 'Ja, radera'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmId(null)}
+                          className="text-sm font-medium px-3 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
+                        >
+                          Avbryt
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmId(item.id)}
+                        className="inline-flex items-center gap-1.5 text-sm text-espresso-500 hover:text-red-600 border border-espresso-200 hover:border-red-200 px-3 py-2 rounded-xl transition"
+                      >
+                        <TrashIcon size={15} />
+                        Radera
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </section>

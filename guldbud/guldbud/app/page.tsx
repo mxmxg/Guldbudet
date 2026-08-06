@@ -9,9 +9,12 @@ export type EnrichedItem = Item & { top_bid: number; bid_count: number }
 
 export default async function HomePage() {
   const supabase = createClient()
+  // Select items without embedding profiles — the homepage cards don't use the
+  // owner name, and dropping the join removes a profiles-RLS failure mode that
+  // could otherwise empty the whole list.
   const { data: items } = await supabase
     .from('items')
-    .select('*, profiles(full_name)')
+    .select('*')
     .eq('status', 'active')
     .order('auction_ends_at', { ascending: true })
 

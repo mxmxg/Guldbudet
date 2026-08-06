@@ -92,7 +92,7 @@ export default function MyItemsPage() {
                       <Image src={item.image_urls[0]} alt={item.title} fill className="object-cover" />
                     )}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h3 className="font-medium text-espresso-900">{item.title}</h3>
                       <span className={`chip ${s.color}`}>{s.label}</span>

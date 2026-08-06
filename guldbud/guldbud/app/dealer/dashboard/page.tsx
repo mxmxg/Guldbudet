@@ -51,7 +51,7 @@ export default function DealerDashboard() {
 
     const { data: activeItems } = await supabase
       .from('items')
-      .select('*, profiles(full_name)')
+      .select('*')
       .eq('status', 'active')
       .order('auction_ends_at', { ascending: true })
     setItems(activeItems || [])
