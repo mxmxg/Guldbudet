@@ -266,9 +266,9 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
 
             <Reveal delay={320}>
               <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-                <Stat value={<CountUp end={2400} suffix="+" />} label="Nöjda säljare" />
+                <Stat value="0 kr" label="Avgift att lägga ut" />
                 <div className="w-px h-10 bg-espresso-700" />
-                <Stat value={<CountUp end={98} suffix="%" />} label="Rekommenderar oss" />
+                <Stat value={<><CountUp end={100} />%</>} label="Verifierade handlare" />
                 <div className="w-px h-10 bg-espresso-700" />
                 <Stat value={<><CountUp end={24} />h</>} label="Utbetalning" />
               </div>
@@ -456,53 +456,43 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
+      {/* TRYGGHET */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <Reveal className="text-center max-w-xl mx-auto mb-14">
-          <span className="eyebrow text-gold-600">Röster från säljare</span>
+          <span className="eyebrow text-gold-600">Trygghet hela vägen</span>
           <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">
-            Tusentals svenskar har redan sålt smart
+            Så håller vi din affär säker
           </h2>
         </Reveal>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 gap-6">
           {[
             {
-              quote:
-                'Jag fick 2 400 kr mer än vad guldbutiken erbjöd, för exakt samma ärvda ring. Riktigt smidigt.',
-              name: 'Karin L.',
-              city: 'Göteborg',
+              title: 'Manuellt verifierade handlare',
+              desc: 'Varje guldhandlare granskas med organisationsnummer och legitimation innan de får buda. Inga anonyma köpare.',
             },
             {
-              quote:
-                'Lade ut på kvällen, hade tolv bud nästa morgon. Betalningen kom via Swish samma dag jag skickade.',
-              name: 'Mattias R.',
-              city: 'Malmö',
+              title: 'Försäkrad transport',
+              desc: 'Föremålet skickas rekommenderat och försäkrat. Vi hjälper dig välja rätt fraktalternativ efter värdet.',
             },
             {
-              quote:
-                'Trygg känsla hela vägen. Handlarna är verifierade och man ser alla bud i realtid. Rekommenderas!',
-              name: 'Elisabeth N.',
-              city: 'Uppsala',
+              title: 'Betalt efter äkthetskontroll',
+              desc: 'När vi mottagit och verifierat föremålet betalas pengarna ut via Swish – ofta samma dag.',
             },
-          ].map((t, i) => (
-            <Reveal key={t.name} delay={i * 100}>
-              <figure className="card p-7 h-full flex flex-col">
-                <div className="flex gap-0.5 mb-4 text-gold-400">
-                  {Array.from({ length: 5 }).map((_, s) => (
-                    <StarIcon key={s} />
-                  ))}
+            {
+              title: 'Du bestämmer',
+              desc: 'Sätt ett minimipris, följ buden i realtid och tacka nej när du vill. Ingen press, inga dolda avgifter.',
+            },
+          ].map((f, i) => (
+            <Reveal key={f.title} delay={(i % 2) * 90}>
+              <div className="card p-6 h-full flex gap-4">
+                <span className="mt-0.5 shrink-0 w-9 h-9 rounded-xl bg-gold-50 text-gold-600 flex items-center justify-center">
+                  <CheckIcon size={18} strokeWidth={2.4} />
+                </span>
+                <div>
+                  <h3 className="font-semibold text-espresso-900 mb-1">{f.title}</h3>
+                  <p className="text-sm text-espresso-500 leading-relaxed">{f.desc}</p>
                 </div>
-                <blockquote className="text-espresso-700 leading-relaxed flex-1">“{t.quote}”</blockquote>
-                <figcaption className="mt-5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gold-sheen flex items-center justify-center text-espresso-900 font-semibold">
-                    {t.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-espresso-900">{t.name}</p>
-                    <p className="text-xs text-espresso-400">{t.city}</p>
-                  </div>
-                </figcaption>
-              </figure>
+              </div>
             </Reveal>
           ))}
         </div>

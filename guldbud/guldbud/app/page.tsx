@@ -12,10 +12,12 @@ export default async function HomePage() {
   // Select items without embedding profiles — the homepage cards don't use the
   // owner name, and dropping the join removes a profiles-RLS failure mode that
   // could otherwise empty the whole list.
+  const nowIso = new Date().toISOString()
   const { data: items } = await supabase
     .from('items')
     .select('*')
     .eq('status', 'active')
+    .or(`auction_ends_at.is.null,auction_ends_at.gt.${nowIso}`)
     .order('auction_ends_at', { ascending: true })
 
   const list = (items || []) as Item[]
