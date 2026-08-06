@@ -81,6 +81,15 @@ export default function AdminPage() {
     setConfirmId(null)
   }
 
+  const viewDoc = async (path: string) => {
+    const { data, error } = await supabase.storage.from('dealer-docs').createSignedUrl(path, 120)
+    if (error || !data?.signedUrl) {
+      setAdminError('Kunde inte öppna dokumentet: ' + (error?.message || 'okänt fel'))
+      return
+    }
+    window.open(data.signedUrl, '_blank')
+  }
+
   const approveDealer = async (id: string) => {
     await supabase.from('profiles').update({ approved: true }).eq('id', id)
     setPendingDealers((prev) => prev.filter((d) => d.id !== id))
@@ -217,7 +226,7 @@ export default function AdminPage() {
                     />
                   </dl>
 
-                  <div className="flex gap-2 mt-5">
+                  <div className="flex gap-2 mt-5 flex-wrap">
                     <button
                       onClick={() => approveDealer(dealer.id)}
                       className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition"
@@ -230,6 +239,14 @@ export default function AdminPage() {
                     >
                       Neka
                     </button>
+                    {dealer.verification_doc_path && (
+                      <button
+                        onClick={() => viewDoc(dealer.verification_doc_path)}
+                        className="flex-1 sm:flex-initial bg-espresso-100 hover:bg-espresso-200 text-espresso-700 text-sm font-medium px-5 py-2.5 rounded-xl transition"
+                      >
+                        Visa dokument
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

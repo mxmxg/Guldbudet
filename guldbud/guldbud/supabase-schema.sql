@@ -31,6 +31,7 @@ alter table public.profiles add column if not exists address text;
 alter table public.profiles add column if not exists postal_code text;
 alter table public.profiles add column if not exists city text;
 alter table public.profiles add column if not exists org_number text;
+alter table public.profiles add column if not exists verification_doc_path text;
 
 -- ------------------------------------------------------------
 -- Föremål som kunder lägger ut
@@ -111,6 +112,12 @@ alter table public.notifications
 -- ------------------------------------------------------------
 insert into storage.buckets (id, name, public)
 values ('item-images', 'item-images', true)
+on conflict (id) do nothing;
+
+-- Privat bucket för handlarnas verifieringsdokument (företagsbevis/ID).
+-- Endast handlaren själv (sin egen mapp) och admin kan läsa dem.
+insert into storage.buckets (id, name, public)
+values ('dealer-docs', 'dealer-docs', false)
 on conflict (id) do nothing;
 
 -- ============================================================
@@ -245,6 +252,21 @@ create policy "authenticated upload" on storage.objects
 drop policy if exists "public read" on storage.objects;
 create policy "public read" on storage.objects
   for select using (bucket_id = 'item-images');
+
+-- Verifieringsdokument: handlaren laddar upp i sin egen mapp (namn = uid/fil),
+-- och bara handlaren själv eller admin får läsa dem.
+drop policy if exists "dealer uploads own docs" on storage.objects;
+create policy "dealer uploads own docs" on storage.objects
+  for insert with check (
+    bucket_id = 'dealer-docs' and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "dealer reads own docs" on storage.objects;
+create policy "dealer reads own docs" on storage.objects
+  for select using (
+    bucket_id = 'dealer-docs'
+    and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin())
+  );
 
 -- ============================================================
 -- Trigger: skapa profil automatiskt vid registrering
