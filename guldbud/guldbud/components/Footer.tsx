@@ -29,7 +29,7 @@ export default function Footer() {
             <FooterLink href="/customer/submit">Lägg ut föremål</FooterLink>
             <FooterLink href="/how-it-works">Så fungerar det</FooterLink>
             <FooterLink href="/#estimator">Värderingskalkylator</FooterLink>
-            <FooterLink href="/#auctions">Pågående auktioner</FooterLink>
+            <FooterLink href="/auctions">Pågående auktioner</FooterLink>
           </FooterCol>
 
           <FooterCol title="För handlare">

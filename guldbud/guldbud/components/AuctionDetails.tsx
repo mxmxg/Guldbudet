@@ -120,7 +120,7 @@ export default function AuctionDetails({ item }: { item: any }) {
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm text-espresso-400">
-          <Link href="/" className="hover:text-gold-600 transition">
+          <Link href="/auctions" className="hover:text-gold-600 transition">
             Auktioner
           </Link>
           <span className="mx-2">/</span>

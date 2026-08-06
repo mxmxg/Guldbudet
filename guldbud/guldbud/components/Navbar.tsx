@@ -120,7 +120,7 @@ export default function Navbar() {
       return (
         <>
           <NavItem href="/how-it-works">Så fungerar det</NavItem>
-          <NavItem href="/#auctions">Auktioner</NavItem>
+          <NavItem href="/auctions">Auktioner</NavItem>
         </>
       )
     if (role === 'customer')

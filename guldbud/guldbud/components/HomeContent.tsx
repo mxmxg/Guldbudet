@@ -405,13 +405,20 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
         </Reveal>
 
         {items.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.slice(0, 9).map((item, i) => (
-              <Reveal key={item.id} delay={(i % 3) * 90}>
-                <AuctionCard item={item} />
-              </Reveal>
-            ))}
-          </div>
+          <>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.slice(0, 9).map((item, i) => (
+                <Reveal key={item.id} delay={(i % 3) * 90}>
+                  <AuctionCard item={item} />
+                </Reveal>
+              ))}
+            </div>
+            <div className="mt-10 text-center">
+              <Link href="/auctions" className="btn-ghost-gold !px-8 !py-3.5">
+                Visa alla auktioner
+              </Link>
+            </div>
+          </>
         ) : (
           <div className="card p-16 text-center">
             <div className="w-16 h-16 rounded-full bg-gold-50 text-gold-500 flex items-center justify-center mx-auto mb-4 animate-float">
