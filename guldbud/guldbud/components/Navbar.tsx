@@ -154,7 +154,7 @@ export default function Navbar() {
       <header className="sticky top-0 z-50">
         <GoldTicker />
         <nav
-          className={`transition-all duration-300 ${
+          className={`relative transition-all duration-300 ${
             scrolled
               ? 'bg-espresso-900/90 backdrop-blur-xl border-b border-gold-500/15 shadow-lg'
               : 'bg-espresso-900 border-b border-espresso-800'
@@ -280,32 +280,39 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile menu */}
+          {/* Mobile menu — overlay that floats over the page instead of
+              pushing the hero down. */}
           {mobileOpen && (
-            <div className="md:hidden border-t border-espresso-800 bg-espresso-900 px-4 py-4 flex flex-col gap-1 animate-fade-in">
-              <div onClick={() => setMobileOpen(false)} className="flex flex-col gap-1">
-                {navLinks()}
-              </div>
-              <div className="h-px bg-espresso-800 my-2" />
-              {user ? (
-                <button onClick={handleLogout} className="text-left text-sm text-gold-500/80 hover:text-gold-300 px-3 py-2">
-                  Logga ut
-                </button>
-              ) : (
-                <div className="flex gap-2 pt-1">
-                  <Link href="/auth/login" className="btn-dark flex-1 !py-2.5" onClick={() => setMobileOpen(false)}>
-                    Logga in
-                  </Link>
-                  <Link
-                    href="/auth/login?mode=register"
-                    className="btn-gold flex-1 !py-2.5"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Registrera
-                  </Link>
+            <>
+              <div
+                className="md:hidden fixed inset-0 top-0 z-40 bg-black/40"
+                onClick={() => setMobileOpen(false)}
+              />
+              <div className="md:hidden absolute top-full inset-x-0 z-50 border-t border-espresso-800 bg-espresso-900 shadow-xl px-4 py-4 flex flex-col gap-1 animate-fade-in">
+                <div onClick={() => setMobileOpen(false)} className="flex flex-col gap-1">
+                  {navLinks()}
                 </div>
-              )}
-            </div>
+                <div className="h-px bg-espresso-800 my-2" />
+                {user ? (
+                  <button onClick={handleLogout} className="text-left text-sm text-gold-500/80 hover:text-gold-300 px-3 py-2">
+                    Logga ut
+                  </button>
+                ) : (
+                  <div className="flex gap-2 pt-1">
+                    <Link href="/auth/login" className="btn-dark flex-1 !py-2.5" onClick={() => setMobileOpen(false)}>
+                      Logga in
+                    </Link>
+                    <Link
+                      href="/auth/login?mode=register"
+                      className="btn-gold flex-1 !py-2.5"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Registrera
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </nav>
       </header>

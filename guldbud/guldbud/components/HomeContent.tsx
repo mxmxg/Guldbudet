@@ -433,6 +433,70 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
         )}
       </section>
 
+      {/* HONEST / NO BAIT PRICING */}
+      <section className="max-w-6xl mx-auto px-4 py-20">
+        <Reveal className="text-center max-w-2xl mx-auto mb-14">
+          <span className="eyebrow text-gold-600">Schysst mot dig</span>
+          <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">
+            Inga lockpriser. Bara riktiga bud.
+          </h2>
+          <p className="mt-4 text-espresso-500 leading-relaxed">
+            Många guldköpare lockar med ett högt gram-pris på förstasidan – men betalar bara ut det om du
+            skickar in stora mängder. Hos GuldBud finns ingen dold värdetrappa. Priset sätts av att flera
+            verifierade handlare budar mot varandra, i realtid, framför dina ögon.
+          </p>
+        </Reveal>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <Reveal>
+            <div className="card p-7 h-full border-espresso-100">
+              <p className="text-sm font-semibold text-espresso-500 mb-5 uppercase tracking-wide">
+                Vanlig guldköpare
+              </p>
+              <ul className="flex flex-col gap-4">
+                {[
+                  'Lockpris på förstasidan som bara gäller vid stora mängder',
+                  'En enda värdering du inte kan påverka',
+                  'Du skickar in innan du vet vad du får',
+                  'Villkoren göms i det finstilta',
+                ].map((t) => (
+                  <li key={t} className="flex gap-3 text-sm text-espresso-500">
+                    <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-espresso-100 text-espresso-400 flex items-center justify-center">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                      </svg>
+                    </span>
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+
+          <Reveal delay={90}>
+            <div className="card p-7 h-full ring-2 ring-gold-300 bg-gradient-to-br from-white to-gold-50/40">
+              <p className="text-sm font-semibold text-gold-700 mb-5 uppercase tracking-wide">GuldBud</p>
+              <ul className="flex flex-col gap-4">
+                {[
+                  'Flera verifierade handlare budar mot varandra',
+                  'Du ser alla bud i realtid – innan du bestämmer dig',
+                  'Konkurrensen pressar priset uppåt, inte nedåt',
+                  'Metallvärdet visas ärligt, oavsett vikt',
+                  'Kostnadsfritt att lägga ut, och du säger ja först när du är nöjd',
+                ].map((t) => (
+                  <li key={t} className="flex gap-3 text-sm text-espresso-800">
+                    <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                      <CheckIcon size={12} strokeWidth={3} />
+                    </span>
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* WHY US */}
       <section className="bg-white/60 border-y border-espresso-100">
         <div className="max-w-6xl mx-auto px-4 py-20">
