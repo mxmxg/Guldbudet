@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import LiveGoldPrice from '@/components/LiveGoldPrice'
+import GoldTicker from '@/components/GoldTicker'
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null)
@@ -117,6 +117,7 @@ export default function Navbar() {
     <>
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <header className="sticky top-0 z-50">
+        <GoldTicker />
         <nav
           className={`transition-all duration-300 ${
             scrolled
@@ -145,8 +146,6 @@ export default function Navbar() {
 
             {/* Right */}
             <div className="flex items-center gap-3">
-              <LiveGoldPrice variant="mini" className="hidden lg:inline-flex" />
-
               {user ? (
                 <>
                   {/* Notifications */}
