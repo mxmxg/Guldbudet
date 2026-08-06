@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
+import { DEALER_COMMISSION_LABEL, commission, totalWithCommission } from '@/lib/fees'
 
 const INCREMENTS = [100, 250, 500, 1000]
 
@@ -135,6 +136,29 @@ export default function BidSection({
           {loading ? '...' : 'Lägg bud'}
         </button>
       </div>
+
+      {/* Buyer's premium — always visible, live total when a bid is entered */}
+      <div className="mt-3 rounded-xl bg-espresso-50 border border-espresso-100 px-3 py-2 text-xs text-espresso-500">
+        {parseInt(amount) > 0 ? (
+          <div className="flex flex-col gap-0.5">
+            <div className="flex justify-between">
+              <span>Ditt bud</span>
+              <span className="tabular-nums">{parseInt(amount).toLocaleString('sv-SE')} kr</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Provision {DEALER_COMMISSION_LABEL}</span>
+              <span className="tabular-nums">+{commission(parseInt(amount)).toLocaleString('sv-SE')} kr</span>
+            </div>
+            <div className="flex justify-between font-semibold text-espresso-800 pt-1 mt-1 border-t border-espresso-100">
+              <span>Ditt totalpris</span>
+              <span className="tabular-nums">{totalWithCommission(parseInt(amount)).toLocaleString('sv-SE')} kr</span>
+            </div>
+          </div>
+        ) : (
+          <span>Provision {DEALER_COMMISSION_LABEL} tillkommer på ditt bud. Säljaren får hela budbeloppet.</span>
+        )}
+      </div>
+
       {msg && (
         <p className={`text-sm mt-2 flex items-center gap-1.5 ${ok ? 'text-emerald-600' : 'text-red-500'}`}>
           {ok && (
