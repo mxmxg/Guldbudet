@@ -20,6 +20,9 @@ const SORTS: { key: Sort; label: string }[] = [
 export default function AuctionsBrowser({ items }: { items: CardItem[] }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<string | null>(null)
+  const [karat, setKarat] = useState<string>('')
+  const [wMin, setWMin] = useState('')
+  const [wMax, setWMax] = useState('')
   const [sort, setSort] = useState<Sort>('ending')
 
   // Only show categories that actually have live auctions.
@@ -27,6 +30,20 @@ export default function AuctionsBrowser({ items }: { items: CardItem[] }) {
     const set = new Set(items.map((i) => i.category).filter(Boolean) as string[])
     return CATEGORIES.filter((c) => set.has(c))
   }, [items])
+
+  const availableKarats = useMemo(() => {
+    const set = new Set(items.map((i) => i.karat).filter(Boolean) as string[])
+    return Array.from(set).sort()
+  }, [items])
+
+  const hasFilter = !!(query || category || karat || wMin || wMax)
+  const clearAll = () => {
+    setQuery('')
+    setCategory(null)
+    setKarat('')
+    setWMin('')
+    setWMax('')
+  }
 
   const counts = useMemo(() => {
     const m: Record<string, number> = {}
@@ -38,8 +55,13 @@ export default function AuctionsBrowser({ items }: { items: CardItem[] }) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
+    const min = parseFloat(wMin)
+    const max = parseFloat(wMax)
     let list = items.filter((i) => {
       if (category && i.category !== category) return false
+      if (karat && i.karat !== karat) return false
+      if (!isNaN(min) && (i.weight_grams || 0) < min) return false
+      if (!isNaN(max) && (i.weight_grams || 0) > max) return false
       if (q) {
         const hay = `${i.title} ${i.description || ''} ${i.category || ''} ${i.karat || ''}`.toLowerCase()
         if (!hay.includes(q)) return false
@@ -61,7 +83,7 @@ export default function AuctionsBrowser({ items }: { items: CardItem[] }) {
       }
     })
     return list
-  }, [items, query, category, sort])
+  }, [items, query, category, karat, wMin, wMax, sort])
 
   return (
     <>
@@ -128,6 +150,42 @@ export default function AuctionsBrowser({ items }: { items: CardItem[] }) {
               ))}
             </div>
           )}
+
+          {/* Karat + weight filters */}
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            {availableKarats.length > 0 && (
+              <div className="relative">
+                <select
+                  value={karat}
+                  onChange={(e) => setKarat(e.target.value)}
+                  className="appearance-none !py-1.5 !pr-8 text-sm cursor-pointer"
+                >
+                  <option value="">Alla karat</option>
+                  {availableKarats.map((k) => (
+                    <option key={k} value={k}>{k}</option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-espresso-400 text-xs">▼</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5">
+              <input
+                type="number"
+                value={wMin}
+                onChange={(e) => setWMin(e.target.value)}
+                placeholder="Vikt min"
+                className="w-24 !py-1.5 text-sm"
+              />
+              <span className="text-espresso-300 text-sm">–</span>
+              <input
+                type="number"
+                value={wMax}
+                onChange={(e) => setWMax(e.target.value)}
+                placeholder="max (g)"
+                className="w-24 !py-1.5 text-sm"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Results */}
@@ -137,14 +195,8 @@ export default function AuctionsBrowser({ items }: { items: CardItem[] }) {
             {filtered.length === 1 ? 'auktion' : 'auktioner'}
             {category ? ` i ${category}` : ''}
           </p>
-          {(query || category) && (
-            <button
-              onClick={() => {
-                setQuery('')
-                setCategory(null)
-              }}
-              className="text-sm text-gold-600 hover:text-gold-700 transition"
-            >
+          {hasFilter && (
+            <button onClick={clearAll} className="text-sm text-gold-600 hover:text-gold-700 transition">
               Rensa filter
             </button>
           )}
