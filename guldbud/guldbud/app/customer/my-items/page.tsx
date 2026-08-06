@@ -22,6 +22,33 @@ export default function MyItemsPage() {
   const [items, setItems] = useState<any[]>([])
   const [orderByItem, setOrderByItem] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
+  const [relisting, setRelisting] = useState<string | null>(null)
+
+  const relist = async (item: any) => {
+    setRelisting(item.id)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    const { data: created } = await supabase
+      .from('items')
+      .insert({
+        owner_id: user!.id,
+        title: item.title,
+        category: item.category,
+        description: item.description,
+        karat: item.karat,
+        weight_grams: item.weight_grams,
+        diamond_carat: item.diamond_carat,
+        gemstone: item.gemstone,
+        min_price: item.min_price,
+        image_urls: item.image_urls,
+        status: 'pending',
+      })
+      .select('*')
+      .single()
+    setRelisting(null)
+    if (created) setItems((prev) => [created, ...prev])
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -123,6 +150,23 @@ export default function MyItemsPage() {
                     <span className="text-sm text-gold-600 shrink-0 hidden sm:inline">
                       {orderId ? 'Följ affären →' : 'Se auktion →'}
                     </span>
+                  )}
+                  {item.status === 'pending' && (
+                    <Link
+                      href={`/customer/items/${item.id}/edit`}
+                      className="text-sm text-gold-600 hover:text-gold-700 shrink-0 whitespace-nowrap"
+                    >
+                      Redigera →
+                    </Link>
+                  )}
+                  {item.status === 'rejected' && (
+                    <button
+                      onClick={() => relist(item)}
+                      disabled={relisting === item.id}
+                      className="text-sm text-gold-600 hover:text-gold-700 shrink-0 whitespace-nowrap disabled:opacity-50"
+                    >
+                      {relisting === item.id ? '...' : 'Lägg ut igen →'}
+                    </button>
                   )}
                 </Wrapper>
               )
