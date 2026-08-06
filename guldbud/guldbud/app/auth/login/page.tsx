@@ -87,8 +87,26 @@ function LoginForm() {
   })
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitError, setSubmitError] = useState('')
+  const [resetMsg, setResetMsg] = useState('')
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
+
+  const handleForgot = async () => {
+    setResetMsg('')
+    setSubmitError('')
+    if (!fields.email || !/\S+@\S+\.\S+/.test(fields.email)) {
+      setSubmitError('Fyll i din e-post ovan först, så skickar vi en återställningslänk.')
+      return
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(fields.email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    })
+    if (error) {
+      setSubmitError('Kunde inte skicka återställningsmejl: ' + error.message)
+      return
+    }
+    setResetMsg('Klart! Kolla din e-post för en länk att sätta nytt lösenord.')
+  }
 
   useEffect(() => {
     if (params.get('mode') === 'register') setMode('register')
@@ -237,6 +255,24 @@ function LoginForm() {
 
               <Field label="E-post" name="email" type="email" value={fields.email} onChange={set('email')} onBlur={blur('email')} error="" placeholder="namn@exempel.se" />
               <Field label="Lösenord" name="password" type="password" value={fields.password} onChange={set('password')} onBlur={blur('password')} error="" placeholder="Minst 6 tecken" />
+
+              {mode === 'login' && (
+                <div style={{ textAlign: 'right', marginTop: '-6px' }}>
+                  <button
+                    type="button"
+                    onClick={handleForgot}
+                    style={{ background: 'none', border: 'none', color: '#B8860B', fontSize: '12px', cursor: 'pointer', padding: 0 }}
+                  >
+                    Glömt lösenord?
+                  </button>
+                </div>
+              )}
+
+              {resetMsg && (
+                <p style={{ color: '#34d399', fontSize: '13px', background: '#0a2a1a', padding: '10px 12px', borderRadius: '8px', border: '1px solid #14532d' }}>
+                  {resetMsg}
+                </p>
+              )}
 
               {submitError && (
                 <p style={{ color: '#ef4444', fontSize: '13px', background: '#2a0a0a', padding: '10px 12px', borderRadius: '8px', border: '1px solid #7f1d1d' }}>

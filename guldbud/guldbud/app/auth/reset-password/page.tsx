@@ -10,8 +10,29 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [ready, setReady] = useState<boolean | null>(null)
   const router = useRouter()
   const supabase = createClient()
+
+  // The browser client processes the recovery token in the URL automatically
+  // (detectSessionInUrl). Give it a moment, then confirm a session exists.
+  useEffect(() => {
+    let active = true
+    const check = async () => {
+      const { data } = await supabase.auth.getSession()
+      if (active) setReady(!!data.session)
+    }
+    check()
+    const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (active && session) setReady(true)
+    })
+    const t = setTimeout(check, 1200)
+    return () => {
+      active = false
+      clearTimeout(t)
+      listener.subscription.unsubscribe()
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,7 +40,15 @@ export default function ResetPasswordPage() {
     if (password.length < 6) { setError('Lösenordet måste vara minst 6 tecken'); return }
     setLoading(true)
     const { error } = await supabase.auth.updateUser({ password })
-    if (error) { setError(error.message); setLoading(false); return }
+    if (error) {
+      setError(
+        error.message.toLowerCase().includes('session')
+          ? 'Länken har gått ut eller är ogiltig. Begär en ny återställningslänk från inloggningssidan.'
+          : error.message
+      )
+      setLoading(false)
+      return
+    }
     setSuccess(true)
     setTimeout(() => router.push('/auth/login'), 2000)
   }
@@ -36,6 +65,12 @@ export default function ResetPasswordPage() {
         </div>
         <div className="card p-8">
           <h1 className="font-display text-xl text-espresso-900 mb-6">Välj nytt lösenord</h1>
+          {ready === false && (
+            <div className="mb-4 text-sm bg-amber-50 border border-amber-200 text-amber-700 p-3 rounded-xl">
+              Vi hittar ingen aktiv återställningslänk. Öppna länken från mejlet igen, eller begär en ny via{' '}
+              <Link href="/auth/login" className="underline font-medium">Glömt lösenord?</Link> på inloggningssidan.
+            </div>
+          )}
           {success ? (
             <p className="text-green-600 text-center">Lösenordet är uppdaterat! Omdirigerar...</p>
           ) : (
