@@ -313,6 +313,26 @@ create trigger on_bid_accepted
   for each row execute procedure public.notify_bid_accepted();
 
 -- ============================================================
+-- Notifiering: när en handlare godkänns
+-- ============================================================
+create or replace function public.notify_dealer_approved()
+returns trigger language plpgsql security definer as $$
+begin
+  if new.role = 'dealer' and new.approved = true and coalesce(old.approved, false) = false then
+    insert into public.notifications (user_id, title, message)
+    values (new.id, 'Ditt handlarkonto är godkänt',
+            'Välkommen! Du kan nu logga in och lägga bud på auktionerna.');
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_dealer_approved on public.profiles;
+create trigger on_dealer_approved
+  after update on public.profiles
+  for each row execute procedure public.notify_dealer_approved();
+
+-- ============================================================
 -- Realtime: publicera bud och notifieringar så att UI:t
 -- uppdateras live (budhistorik + notisklockan).
 -- ============================================================
