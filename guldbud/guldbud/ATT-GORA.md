@@ -33,10 +33,16 @@ kunna skapa konto eller återställa lösenord.
 
 ---
 
+## 🟠 Just nu avstängt för test — måste återställas
+
+- [ ] **"Confirm email" är AVSTÄNGD** i Supabase (Authentication → Providers →
+      Email). Det gjordes för att kunna testa registrering utan att strypas av
+      e-postgränsen. **Slå på den igen innan lansering** — annars kan vem som
+      helst registrera sig utan att äga e-postadressen. Gör det tillsammans med
+      SMTP-steget ovan så att bekräftelsemejlen faktiskt går fram.
+
 ## Övriga saker att komma ihåg
 
-- [ ] **Slå på "Confirm email" igen** i Supabase (Authentication → Providers →
-      Email) *efter* att SMTP fungerar, om den stängts av tillfälligt.
 - [ ] **Kör `supabase-schema.sql` en sista gång** i Supabase så att alla nya
       kolumner, `is_admin`, FK-cascade och realtid garanterat är aktiva.
 - [ ] **Byt ut adress/kontaktuppgifter** (Storgatan 1, info@guldbud.se) mot
