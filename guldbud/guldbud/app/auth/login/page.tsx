@@ -88,6 +88,7 @@ function LoginForm() {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [submitError, setSubmitError] = useState('')
   const [resetMsg, setResetMsg] = useState('')
+  const [forgot, setForgot] = useState(false)
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
@@ -95,12 +96,14 @@ function LoginForm() {
     setResetMsg('')
     setSubmitError('')
     if (!fields.email || !/\S+@\S+\.\S+/.test(fields.email)) {
-      setSubmitError('Fyll i din e-post ovan först, så skickar vi en återställningslänk.')
+      setSubmitError('Fyll i din e-post så skickar vi en återställningslänk.')
       return
     }
+    setLoading(true)
     const { error } = await supabase.auth.resetPasswordForEmail(fields.email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     })
+    setLoading(false)
     if (error) {
       setSubmitError('Kunde inte skicka återställningsmejl: ' + error.message)
       return
@@ -123,6 +126,10 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (forgot) {
+      await handleForgot()
+      return
+    }
     setLoading(true)
     setSubmitError('')
 
@@ -198,18 +205,30 @@ function LoginForm() {
           <div style={{ background: '#1a1208', border: '1px solid #3d2d0f', borderRadius: '16px', padding: '32px' }}>
 
             {/* Flikar */}
-            <div style={{ display: 'flex', background: '#0f0a04', borderRadius: '8px', marginBottom: '24px', overflow: 'hidden' }}>
-              {(['login', 'register'] as const).map(m => (
-                <button key={m} onClick={() => setMode(m)} style={{
-                  flex: 1, padding: '10px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', border: 'none', transition: 'all 0.2s',
-                  background: mode === m ? '#B8860B' : 'transparent',
-                  color: mode === m ? 'white' : '#8B6914',
-                  borderRadius: mode === m ? '6px' : '0',
-                }}>
-                  {m === 'login' ? 'Logga in' : 'Registrera'}
-                </button>
-              ))}
-            </div>
+            {!forgot && (
+              <div style={{ display: 'flex', background: '#0f0a04', borderRadius: '8px', marginBottom: '24px', overflow: 'hidden' }}>
+                {(['login', 'register'] as const).map(m => (
+                  <button key={m} onClick={() => setMode(m)} style={{
+                    flex: 1, padding: '10px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', border: 'none', transition: 'all 0.2s',
+                    background: mode === m ? '#B8860B' : 'transparent',
+                    color: mode === m ? 'white' : '#8B6914',
+                    borderRadius: mode === m ? '6px' : '0',
+                  }}>
+                    {m === 'login' ? 'Logga in' : 'Registrera'}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Återställ-läge rubrik */}
+            {forgot && (
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ color: '#D4AF37', fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>Återställ lösenord</h2>
+                <p style={{ color: '#8B6914', fontSize: '13px' }}>
+                  Fyll i din e-post så skickar vi en länk för att sätta ett nytt lösenord.
+                </p>
+              </div>
+            )}
 
             {/* Roll-väljare */}
             {mode === 'register' && (
@@ -254,16 +273,30 @@ function LoginForm() {
               )}
 
               <Field label="E-post" name="email" type="email" value={fields.email} onChange={set('email')} onBlur={blur('email')} error="" placeholder="namn@exempel.se" />
-              <Field label="Lösenord" name="password" type="password" value={fields.password} onChange={set('password')} onBlur={blur('password')} error="" placeholder="Minst 6 tecken" />
+              {!forgot && (
+                <Field label="Lösenord" name="password" type="password" value={fields.password} onChange={set('password')} onBlur={blur('password')} error="" placeholder="Minst 6 tecken" />
+              )}
 
-              {mode === 'login' && (
+              {mode === 'login' && !forgot && (
                 <div style={{ textAlign: 'right', marginTop: '-6px' }}>
                   <button
                     type="button"
-                    onClick={handleForgot}
+                    onClick={() => { setForgot(true); setSubmitError(''); setResetMsg('') }}
                     style={{ background: 'none', border: 'none', color: '#B8860B', fontSize: '12px', cursor: 'pointer', padding: 0 }}
                   >
                     Glömt lösenord?
+                  </button>
+                </div>
+              )}
+
+              {forgot && (
+                <div style={{ textAlign: 'left', marginTop: '-6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => { setForgot(false); setSubmitError(''); setResetMsg('') }}
+                    style={{ background: 'none', border: 'none', color: '#8B6914', fontSize: '12px', cursor: 'pointer', padding: 0 }}
+                  >
+                    ← Tillbaka till inloggning
                   </button>
                 </div>
               )}
@@ -305,7 +338,7 @@ function LoginForm() {
                 marginTop: '4px',
                 transition: 'background 0.2s',
               }}>
-                {loading ? 'Väntar...' : mode === 'login' ? 'Logga in' : 'Skapa konto'}
+                {loading ? 'Väntar...' : forgot ? 'Skicka återställningslänk' : mode === 'login' ? 'Logga in' : 'Skapa konto'}
               </button>
             </form>
           </div>
