@@ -536,6 +536,9 @@ create table if not exists public.orders (
   updated_at timestamptz not null default now(),
   unique (item_id)
 );
+-- Löpnummer per affär (läsbart fakturanummer, t.ex. GB-000123).
+alter table public.orders add column if not exists order_no bigserial;
+
 -- Lägg till betalningssteget (dealer_paid) även om tabellen redan finns sedan tidigare.
 alter table public.orders drop constraint if exists orders_status_check;
 alter table public.orders add constraint orders_status_check
