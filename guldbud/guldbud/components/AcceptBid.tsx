@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { CheckIcon } from '@/components/Icons'
 
 export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }: {
   itemId: string
@@ -33,41 +34,37 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
 
   if (step === 'done') {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl p-6 mt-6">
+      <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-6 mt-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xl">✓</div>
+          <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white">
+            <CheckIcon size={18} strokeWidth={3} />
+          </div>
           <div>
-            <p className="font-medium text-green-800">Bud accepterat!</p>
-            <p className="text-sm text-green-600">{amount.toLocaleString('sv-SE')} kr från {dealerName}</p>
+            <p className="font-medium text-emerald-800">Bud accepterat!</p>
+            <p className="text-sm text-emerald-700">{amount.toLocaleString('sv-SE')} kr från {dealerName}</p>
           </div>
         </div>
-        <div className="bg-white border border-green-100 rounded-lg p-4 mb-4">
-          <p className="font-medium text-stone-800 mb-3">Nästa steg: skicka föremålet till oss</p>
-          <div className="flex flex-col gap-2 text-sm text-stone-600">
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">1.</span>
-              <span>Packa föremålet omsorgsfullt i en liten ask eller bubbla.</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">2.</span>
-              <span>Skicka som rekommenderat och försäkrat brev till vår adress.</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">3.</span>
-              <span>Vi verifierar äktheten inom 24 timmar efter mottagning.</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-green-500 font-bold">4.</span>
-              <span>Du får betalning via Swish samma dag som vi verifierat.</span>
-            </div>
-          </div>
+        <div className="rounded-xl bg-white border border-espresso-100 p-4 mb-4">
+          <p className="font-medium text-espresso-800 mb-3">Nästa steg: skicka föremålet till oss</p>
+          <ol className="flex flex-col gap-2 text-sm text-espresso-600">
+            {[
+              'Packa föremålet omsorgsfullt i en liten ask eller bubbelpåse.',
+              'Skicka som rekommenderat och försäkrat brev till vår adress.',
+              'Vi verifierar äktheten så snart vi mottagit föremålet.',
+              'När allt är klart betalas du ut, normalt inom 1–2 bankdagar.',
+            ].map((t, i) => (
+              <li key={i} className="flex gap-2">
+                <span className="text-gold-600 font-semibold">{i + 1}.</span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ol>
         </div>
-        <div className="bg-[#1a1208] rounded-lg p-4 text-center">
-          <p className="text-[#8B6914] text-xs tracking-widest uppercase mb-1">Skicka till</p>
-          <p className="text-[#D4AF37] font-medium">GuldBud AB</p>
-          <p className="text-[#c9a84c] text-sm">Storgatan 1</p>
-          <p className="text-[#c9a84c] text-sm">111 22 Stockholm</p>
-          <p className="text-[#8B6914] text-xs mt-2">Vid frågor: info@guldbud.com</p>
+        <div className="rounded-xl bg-espresso-900 p-4 text-center">
+          <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Skicka till</p>
+          <p className="text-gold-200 font-medium">GuldBud AB</p>
+          <p className="text-gold-200/80 text-sm">Storgatan 1, 111 22 Stockholm</p>
+          <p className="text-gold-500/70 text-xs mt-2">Vid frågor: info@guldbud.com</p>
         </div>
         {orderId && (
           <Link href={`/orders/${orderId}`} className="btn-gold w-full mt-4 justify-center">
@@ -80,23 +77,24 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
 
   if (step === 'confirm') {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mt-6">
-        <p className="font-medium text-stone-800 mb-1">Bekräfta att du accepterar</p>
-        <p className="text-sm text-stone-500 mb-4">
-          Du accepterar budet på <span className="font-medium text-stone-800">{amount.toLocaleString('sv-SE')} kr</span> från <span className="font-medium text-stone-800">{dealerName}</span>. 
-          Auktionen stängs och du instrueras om hur du skickar föremålet till oss.
+      <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5 mt-6">
+        <p className="font-medium text-espresso-800 mb-1">Bekräfta att du accepterar</p>
+        <p className="text-sm text-espresso-500 mb-4">
+          Du accepterar budet på <span className="font-medium text-espresso-800">{amount.toLocaleString('sv-SE')} kr</span> från{' '}
+          <span className="font-medium text-espresso-800">{dealerName}</span>. Auktionen stängs och du instrueras
+          om hur du skickar föremålet till oss.
         </p>
         <div className="flex gap-3">
           <button
             onClick={accept}
             disabled={loading}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-5 py-2 rounded-lg transition text-sm"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-5 py-2.5 rounded-xl transition text-sm"
           >
             {loading ? 'Bekräftar...' : 'Ja, acceptera budet'}
           </button>
           <button
             onClick={() => setStep('idle')}
-            className="bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium px-5 py-2 rounded-lg transition text-sm"
+            className="bg-espresso-100 hover:bg-espresso-200 text-espresso-700 font-medium px-5 py-2.5 rounded-xl transition text-sm"
           >
             Avbryt
           </button>

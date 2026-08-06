@@ -218,8 +218,16 @@ export default function Navbar() {
                             notifications.map((n) => (
                               <div
                                 key={n.id}
+                                role="button"
+                                tabIndex={0}
                                 onClick={() => handleNotifClick(n)}
-                                className={`px-4 py-3 border-b border-espresso-50 cursor-pointer hover:bg-gold-50/60 transition ${
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    handleNotifClick(n)
+                                  }
+                                }}
+                                className={`px-4 py-3 border-b border-espresso-50 cursor-pointer hover:bg-gold-50/60 focus:bg-gold-50/60 focus:outline-none transition ${
                                   !n.read ? 'bg-gold-50/40' : ''
                                 }`}
                               >
