@@ -1,0 +1,239 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase-browser'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
+import OrderStepper from '@/components/OrderStepper'
+import OrderChat from '@/components/OrderChat'
+import Image from 'next/image'
+import Link from 'next/link'
+import { ORDER_STEPS, ORDER_STATUS_LABEL, OrderStatus, nextStatus, stepIndex } from '@/lib/orders'
+import { formatSEK } from '@/lib/gold'
+
+export default function AdminOrderPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
+  const supabase = createClient()
+  const [order, setOrder] = useState<any>(null)
+  const [item, setItem] = useState<any>(null)
+  const [seller, setSeller] = useState<any>(null)
+  const [dealer, setDealer] = useState<any>(null)
+  const [me, setMe] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [trackingSeller, setTrackingSeller] = useState('')
+  const [trackingDealer, setTrackingDealer] = useState('')
+
+  useEffect(() => {
+    init()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const init = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/auth/login')
+      return
+    }
+    setMe(user.id)
+    const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (prof?.role !== 'admin') {
+      router.push('/')
+      return
+    }
+    await loadOrder()
+    setLoading(false)
+  }
+
+  const loadOrder = async () => {
+    const { data: o } = await supabase.from('orders').select('*').eq('id', params.id).single()
+    if (!o) return
+    setOrder(o)
+    setTrackingSeller(o.tracking_seller || '')
+    setTrackingDealer(o.tracking_dealer || '')
+    const [{ data: it }, { data: s }, { data: d }] = await Promise.all([
+      supabase.from('items').select('*').eq('id', o.item_id).single(),
+      supabase.from('profiles').select('*').eq('id', o.seller_id).single(),
+      supabase.from('profiles').select('*').eq('id', o.dealer_id).single(),
+    ])
+    setItem(it)
+    setSeller(s)
+    setDealer(d)
+  }
+
+  const advance = async () => {
+    const next = nextStatus(order.status as OrderStatus)
+    if (!next) return
+    setSaving(true)
+    await supabase.from('orders').update({ status: next, updated_at: new Date().toISOString() }).eq('id', order.id)
+    await loadOrder()
+    setSaving(false)
+  }
+
+  const setStatus = async (status: OrderStatus) => {
+    setSaving(true)
+    await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', order.id)
+    await loadOrder()
+    setSaving(false)
+  }
+
+  const saveTracking = async () => {
+    setSaving(true)
+    await supabase
+      .from('orders')
+      .update({
+        tracking_seller: trackingSeller || null,
+        tracking_dealer: trackingDealer || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', order.id)
+    await loadOrder()
+    setSaving(false)
+  }
+
+  if (loading || !order) {
+    return (
+      <div className="min-h-screen bg-cream flex flex-col">
+        <Navbar />
+        <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-10">
+          <div className="h-64 rounded-2xl skeleton" />
+        </div>
+        <Footer />
+      </div>
+    )
+  }
+
+  const status = order.status as OrderStatus
+  const next = nextStatus(status)
+  const isFinalOrCancelled = status === 'completed' || status === 'cancelled'
+
+  return (
+    <div className="min-h-screen bg-cream flex flex-col">
+      <Navbar />
+
+      <div className="relative overflow-hidden bg-espresso-900 px-4 py-8">
+        <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
+        <div className="relative max-w-4xl mx-auto">
+          <Link href="/admin/orders" className="text-gold-500/80 text-sm hover:text-gold-300 transition">
+            ← Alla affärer
+          </Link>
+          <h1 className="font-display text-2xl text-gold-100 mt-2">{item?.title}</h1>
+          <div className="mt-2 flex flex-wrap gap-3 items-center text-sm">
+            <span className="chip bg-gold-500/15 text-gold-200 border border-gold-400/25">
+              {ORDER_STATUS_LABEL[status]}
+            </span>
+            <span className="text-gold-200/70">{formatSEK(order.amount)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 grid lg:grid-cols-2 gap-6">
+        {/* Left: status + controls + parties */}
+        <div className="grid gap-6">
+          <div className="card p-6">
+            <div className="flex gap-4 mb-5">
+              <div className="w-24 h-24 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
+                {item?.image_urls?.[0] && (
+                  <Image src={item.image_urls[0]} alt={item.title} fill className="object-contain" />
+                )}
+              </div>
+              <div className="text-sm text-espresso-500">
+                <p>{item?.category ? `${item.category} · ` : ''}{item?.weight_grams} g · {item?.karat}</p>
+                {item?.gemstone && <p>{item.gemstone}{item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}</p>}
+                <Link href={`/auctions/${item?.id}`} className="text-gold-600 hover:text-gold-700 transition">
+                  Visa auktionen →
+                </Link>
+              </div>
+            </div>
+            <OrderStepper status={status} />
+
+            {!isFinalOrCancelled && (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {next && (
+                  <button onClick={advance} disabled={saving} className="btn-gold !py-2">
+                    {saving ? '...' : `Markera som ${ORDER_STATUS_LABEL[next]} →`}
+                  </button>
+                )}
+                <button
+                  onClick={() => setStatus('cancelled')}
+                  disabled={saving}
+                  className="text-sm text-red-500 hover:text-red-600 px-3 py-2 transition"
+                >
+                  Avbryt affär
+                </button>
+              </div>
+            )}
+            {status === 'cancelled' && (
+              <button onClick={() => setStatus('accepted')} disabled={saving} className="btn-ghost-gold !py-2 mt-5">
+                Återöppna affär
+              </button>
+            )}
+          </div>
+
+          {/* Tracking */}
+          <div className="card p-6">
+            <h2 className="font-display text-lg text-espresso-900 mb-4">Spårningsnummer</h2>
+            <label className="block mb-3">
+              <span className="block text-xs font-medium text-espresso-500 mb-1.5">Säljare → GuldBud</span>
+              <input value={trackingSeller} onChange={(e) => setTrackingSeller(e.target.value)} placeholder="Spårningsnr" />
+            </label>
+            <label className="block mb-4">
+              <span className="block text-xs font-medium text-espresso-500 mb-1.5">GuldBud → handlare</span>
+              <input value={trackingDealer} onChange={(e) => setTrackingDealer(e.target.value)} placeholder="Spårningsnr" />
+            </label>
+            <button onClick={saveTracking} disabled={saving} className="btn-gold !py-2">
+              {saving ? 'Sparar...' : 'Spara spårning'}
+            </button>
+          </div>
+
+          {/* Parties (real details, admin only) */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <PartyCard title="Säljare" p={seller} />
+            <PartyCard title="Vinnande handlare" p={dealer} />
+          </div>
+        </div>
+
+        {/* Right: both chat threads */}
+        <div className="grid gap-6 content-start">
+          <OrderChat
+            orderId={order.id}
+            party="seller"
+            meId={me}
+            isAdmin
+            counterpartLabel={seller?.full_name || 'säljaren'}
+          />
+          <OrderChat
+            orderId={order.id}
+            party="dealer"
+            meId={me}
+            isAdmin
+            counterpartLabel={dealer?.company_name || dealer?.full_name || 'handlaren'}
+          />
+        </div>
+      </div>
+      <Footer />
+    </div>
+  )
+}
+
+function PartyCard({ title, p }: { title: string; p: any }) {
+  if (!p) return null
+  return (
+    <div className="card p-4 text-sm">
+      <p className="text-xs font-semibold text-gold-600 uppercase tracking-wide mb-2">{title}</p>
+      <p className="font-medium text-espresso-900">{p.company_name || p.full_name}</p>
+      {p.company_name && <p className="text-espresso-500">{p.full_name}</p>}
+      {p.org_number && <p className="text-espresso-500">Org.nr: {p.org_number}</p>}
+      {p.email && <p className="text-espresso-500 break-all">{p.email}</p>}
+      {p.phone && <p className="text-espresso-500">{p.phone}</p>}
+      {(p.address || p.city) && (
+        <p className="text-espresso-500">
+          {p.address}
+          {p.postal_code || p.city ? `, ${p.postal_code || ''} ${p.city || ''}` : ''}
+        </p>
+      )}
+    </div>
+  )
+}

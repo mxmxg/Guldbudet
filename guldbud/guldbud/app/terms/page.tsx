@@ -40,7 +40,7 @@ export default function TermsPage() {
         {
           heading: 'Frakt, kontroll och betalning',
           body: [
-            'Efter avslutad auktion skickas föremålet försäkrat till den vinnande handlaren för äkthetskontroll. När kontrollen är godkänd betalas beloppet ut till säljaren.',
+            'Efter avslutad auktion skickar säljaren föremålet försäkrat till GuldBud, som kontrollerar äktheten. När kontrollen är godkänd betalas beloppet ut till säljaren och föremålet skickas vidare till den vinnande handlaren.',
             'GuldBud tar inte ut någon avgift av säljaren för att lägga ut eller sälja ett föremål.',
           ],
         },
