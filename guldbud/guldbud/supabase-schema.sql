@@ -85,6 +85,18 @@ create table if not exists public.notifications (
 
 create index if not exists notifications_user_idx on public.notifications (user_id, created_at desc);
 
+-- Säkerställ att kopplingarna städas bort automatiskt även om tabellen redan
+-- fanns sedan tidigare (create table ovan hoppas över då och lämnar gamla FK-regler).
+alter table public.notifications
+  drop constraint if exists notifications_item_id_fkey,
+  add constraint notifications_item_id_fkey
+    foreign key (item_id) references public.items(id) on delete cascade;
+
+alter table public.notifications
+  drop constraint if exists notifications_user_id_fkey,
+  add constraint notifications_user_id_fkey
+    foreign key (user_id) references public.profiles(id) on delete cascade;
+
 -- ------------------------------------------------------------
 -- Storage bucket för bilder
 -- ------------------------------------------------------------
