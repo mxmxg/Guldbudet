@@ -14,6 +14,17 @@ export default function Navbar() {
   const supabase = createClient()
   const notifRef = useRef<HTMLDivElement>(null)
 
+  // Password-recovery links land on the Site URL (this page) with the token in
+  // the URL. Forward to the reset-password page so the user can set a new one.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const hash = window.location.hash
+    const isRecovery = hash.includes('type=recovery')
+    if (isRecovery && !window.location.pathname.startsWith('/auth/reset-password')) {
+      window.location.replace('/auth/reset-password' + hash)
+    }
+  }, [])
+
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
@@ -29,6 +40,10 @@ export default function Navbar() {
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' && !window.location.pathname.startsWith('/auth/reset-password')) {
+        window.location.replace('/auth/reset-password')
+        return
+      }
       if (!session) {
         setUser(null)
         setRole(null)
