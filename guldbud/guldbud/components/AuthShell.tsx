@@ -7,6 +7,7 @@ export default function AuthShell({ children }: { children: React.ReactNode }) {
     <>
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <div
+        className="auth-scope"
         style={{
           minHeight: '100vh',
           background: '#0f0a04',
