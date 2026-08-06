@@ -50,8 +50,10 @@ function validateField(name: string, value: string, role: string): string {
 function Field({ label, name, type = 'text', value, onChange, onBlur, error, placeholder }: any) {
   return (
     <div>
-      <label className="block text-sm mb-1" style={{ color: '#c9a84c' }}>{label}</label>
+      <label htmlFor={name} className="block text-sm mb-1" style={{ color: '#c9a84c' }}>{label}</label>
       <input
+        id={name}
+        name={name}
         type={type}
         value={value}
         onChange={onChange}

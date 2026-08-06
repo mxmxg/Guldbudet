@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
+import CookieConsent from '@/components/CookieConsent'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="sv" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans bg-cream text-espresso-900 antialiased selection:bg-gold-200 selection:text-espresso-900">
         {children}
+        <CookieConsent />
       </body>
     </html>
   )

@@ -23,6 +23,7 @@ export default function DealerDashboard() {
   const [bidInputs, setBidInputs] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [bidding, setBidding] = useState<string | null>(null)
+  const [bidError, setBidError] = useState<Record<string, string>>({})
   const [profile, setProfile] = useState<any>(null)
   const [watchedIds, setWatchedIds] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<'active' | 'mybids' | 'winning' | 'watched'>('active')
@@ -93,12 +94,14 @@ export default function DealerDashboard() {
     const amount = parseInt(bidInputs[itemId] || '0')
     const currentTop = topBids[itemId] || 0
     const item = items.find((i) => i.id === itemId)
+    const setErr = (m: string) => setBidError((p) => ({ ...p, [itemId]: m }))
+    setBidError((p) => ({ ...p, [itemId]: '' }))
     if (item?.auction_ends_at && new Date(item.auction_ends_at).getTime() < Date.now()) {
-      alert('Auktionen är avslutad – det går inte längre att buda.')
+      setErr('Auktionen är avslutad – det går inte längre att buda.')
       return
     }
     if (!amount || amount <= currentTop) {
-      alert(`Budet måste vara minst ${(currentTop + 1).toLocaleString('sv-SE')} kr`)
+      setErr(`Budet måste vara minst ${(currentTop + 1).toLocaleString('sv-SE')} kr.`)
       return
     }
     setBidding(itemId)
@@ -107,7 +110,7 @@ export default function DealerDashboard() {
     } = await supabase.auth.getUser()
     const { error } = await supabase.from('bids').insert({ item_id: itemId, dealer_id: user!.id, amount })
     if (error) {
-      alert(error.message)
+      setErr(error.message)
     } else {
       setTopBids((prev) => ({ ...prev, [itemId]: amount }))
       setMyBids((prev) => ({ ...prev, [itemId]: amount }))
@@ -289,6 +292,9 @@ export default function DealerDashboard() {
                           ? `Totalpris inkl. ${DEALER_COMMISSION_LABEL} provision: ${formatSEK(totalWithCommission(parseInt(bidInputs[item.id])))}`
                           : `Provision ${DEALER_COMMISSION_LABEL} tillkommer`}
                       </p>
+                      {bidError[item.id] && (
+                        <p className="text-[11px] text-red-500 mt-1 lg:text-right">{bidError[item.id]}</p>
+                      )}
                     </div>
                   </div>
                 </div>

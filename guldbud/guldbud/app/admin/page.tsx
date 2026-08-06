@@ -13,6 +13,7 @@ export default function AdminPage() {
   const [pendingItems, setPendingItems] = useState<any[]>([])
   const [liveItems, setLiveItems] = useState<any[]>([])
   const [openOrders, setOpenOrders] = useState(0)
+  const [adminError, setAdminError] = useState('')
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -70,7 +71,7 @@ export default function AdminPage() {
     setDeletingId(id)
     const { error } = await supabase.from('items').delete().eq('id', id)
     if (error) {
-      alert('Kunde inte radera: ' + error.message)
+      setAdminError('Kunde inte radera: ' + error.message)
       setDeletingId(null)
       return
     }
@@ -151,6 +152,15 @@ export default function AdminPage() {
       </div>
 
       <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-10">
+        {adminError && (
+          <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 flex items-start justify-between gap-3">
+            <p className="text-sm text-red-600">{adminError}</p>
+            <button onClick={() => setAdminError('')} className="text-red-400 hover:text-red-600 text-sm shrink-0">
+              Stäng
+            </button>
+          </div>
+        )}
+
         {/* Orders */}
         <Link
           href="/admin/orders"
