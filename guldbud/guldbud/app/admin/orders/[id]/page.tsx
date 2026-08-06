@@ -206,6 +206,9 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 <span className="tabular-nums">{formatSEK(commission(order.amount))}</span>
               </div>
             </div>
+            <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-4 text-sm text-gold-600 hover:text-gold-700">
+              Visa handlarens faktura →
+            </Link>
           </div>
 
           {/* Parties (real details, admin only) */}

@@ -167,6 +167,11 @@ function SellerPanel({ order }: { order: any }) {
             {(order.status === 'shipped_to_dealer' || order.status === 'completed') &&
               'Affären är klar. Tack för att du sålde via GuldBud!'}
           </p>
+          {['verified_paid', 'shipped_to_dealer', 'completed'].includes(order.status) && (
+            <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
+              Visa utbetalningsspecifikation →
+            </Link>
+          )}
         </>
       )}
     </div>
@@ -204,6 +209,11 @@ function DealerPanel({ order }: { order: any }) {
           </div>
         )}
         {paid && <p className="mt-3 text-sm text-emerald-700">Betalning registrerad ✓</p>}
+        {(awaitingPayment || paid) && (
+          <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
+            Visa faktura →
+          </Link>
+        )}
       </div>
       <div className="card p-6">
         <h2 className="font-display text-lg text-espresso-900 mb-1">Status</h2>
