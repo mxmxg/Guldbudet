@@ -158,7 +158,7 @@ function LoginForm() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
       window.location.href = profile?.role === 'dealer' ? '/dealer/dashboard' : '/'
     } else {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: fields.email,
         password: fields.password,
         options: {
@@ -180,7 +180,16 @@ function LoginForm() {
         setLoading(false)
         return
       }
-      window.location.href = role === 'dealer' ? '/auth/pending' : '/auth/verify'
+      if (role === 'dealer') {
+        // Dealers always wait for admin approval.
+        window.location.href = '/auth/pending'
+      } else if (data.session) {
+        // Email confirmation is off -> already logged in, go straight in.
+        window.location.href = '/'
+      } else {
+        // Email confirmation is on -> ask them to verify.
+        window.location.href = '/auth/verify'
+      }
     }
     setLoading(false)
   }
