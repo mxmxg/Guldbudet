@@ -91,6 +91,13 @@ export const CheckIcon = ({ size, className, strokeWidth }: P) => (
   </svg>
 )
 
+export const SearchIcon = ({ size, className, strokeWidth }: P) => (
+  <svg {...base(size)} className={className}>
+    <circle cx="11" cy="11" r="7" {...s(strokeWidth || 1.8)} />
+    <path d="M20 20l-3.5-3.5" {...s(strokeWidth || 1.8)} />
+  </svg>
+)
+
 export const ArrowRightIcon = ({ size, className, strokeWidth }: P) => (
   <svg {...base(size)} className={className}>
     <path d="M5 12h14M13 6l6 6-6 6" {...s(strokeWidth || 2)} />
