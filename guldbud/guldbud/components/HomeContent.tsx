@@ -445,6 +445,9 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
             skickar in stora mängder. Hos GuldBud finns ingen dold värdetrappa. Priset sätts av att flera
             verifierade handlare budar mot varandra, i realtid, framför dina ögon.
           </p>
+          <Link href="/resultat" className="inline-block mt-4 text-sm text-gold-700 hover:text-gold-800 font-medium">
+            Se vad andra fått betalt →
+          </Link>
         </Reveal>
 
         <div className="grid md:grid-cols-2 gap-6">
