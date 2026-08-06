@@ -47,7 +47,7 @@ export default function TermsPage() {
         {
           heading: 'Ångerrätt',
           body: [
-            'Som privatperson kan du ha ångerrätt enligt distansavtalslagen fram till dess att en bindande affär genomförts. Kontakta oss på info@guldbud.se om du vill dra tillbaka ett föremål innan budgivningen avslutats.',
+            'Som privatperson kan du ha ångerrätt enligt distansavtalslagen fram till dess att en bindande affär genomförts. Kontakta oss på info@guldbud.com om du vill dra tillbaka ett föremål innan budgivningen avslutats.',
           ],
         },
         {

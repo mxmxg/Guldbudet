@@ -8,8 +8,11 @@ export const dynamic = 'force-dynamic'
 // notification via Resend. Configure the webhook to send the header
 // `x-webhook-secret: <EMAIL_WEBHOOK_SECRET>`.
 
-const FROM = 'GuldBud <no-reply@guldbud.se>'
-const SITE = 'https://guldbud.se'
+// Avsändaradress och sajt-URL styrs av miljövariabler så vi kan köra i
+// testläge (onboarding@resend.dev) innan en egen domän är verifierad, och
+// byta till no-reply@guldbud.com sedan – utan kodändring.
+const FROM = process.env.EMAIL_FROM || 'GuldBud <onboarding@resend.dev>'
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
 
 function emailHtml(title: string, message: string, link?: string | null) {
   const button = link

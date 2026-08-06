@@ -16,7 +16,7 @@ kunna skapa konto eller återställa lösenord.
 
 1. Skapa ett gratiskonto hos **[Resend](https://resend.com)** (gratis nivå räcker
    för start).
-2. Lägg till och verifiera domänen `guldbud.se` (eller `guldbud.com`) i Resend
+2. Lägg till och verifiera domänen `guldbud.com` i Resend
    (DNS-poster: SPF/DKIM).
 3. Skapa en **API-nyckel / SMTP-uppgifter** i Resend.
 4. I Supabase: **Authentication → Emails → SMTP Settings** → slå på **Custom SMTP**
@@ -25,7 +25,7 @@ kunna skapa konto eller återställa lösenord.
    - Port: `465` (eller `587`)
    - Username: `resend`
    - Password: din Resend API-nyckel
-   - Sender: t.ex. `noreply@guldbud.se`
+   - Sender: t.ex. `noreply@guldbud.com`
 5. Testa: registrera ett testkonto och begär lösenordsåterställning — mejlen ska
    komma direkt.
 
@@ -45,7 +45,7 @@ kunna skapa konto eller återställa lösenord.
 
 - [ ] **Kör `supabase-schema.sql` en sista gång** i Supabase så att alla nya
       kolumner, `is_admin`, FK-cascade och realtid garanterat är aktiva.
-- [ ] **Byt ut adress/kontaktuppgifter** (Storgatan 1, info@guldbud.se) mot
+- [ ] **Byt ut adress/kontaktuppgifter** (Storgatan 1, info@guldbud.com) mot
       riktiga uppgifter i footern och på auktions-/accept-sidorna.
 - [ ] **Provision/villkor**: fyll i riktiga villkor, integritetspolicy och
       cookies (länkar finns redan i footern men pekar på platshållare).

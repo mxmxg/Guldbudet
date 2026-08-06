@@ -15,7 +15,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://guldbud.se'),
+  metadataBase: new URL('https://guldbud.com'),
   title: {
     default: 'GuldBud · Sveriges guldauktion',
     template: '%s · GuldBud',
