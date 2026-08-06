@@ -23,7 +23,8 @@ export default function DealerDashboard() {
   const [loading, setLoading] = useState(true)
   const [bidding, setBidding] = useState<string | null>(null)
   const [profile, setProfile] = useState<any>(null)
-  const [tab, setTab] = useState<'active' | 'mybids' | 'winning'>('active')
+  const [watchedIds, setWatchedIds] = useState<Set<string>>(new Set())
+  const [tab, setTab] = useState<'active' | 'mybids' | 'winning' | 'watched'>('active')
 
   useEffect(() => {
     init()
@@ -80,6 +81,10 @@ export default function DealerDashboard() {
       })
       setMyBids(my)
     }
+
+    const { data: watch } = await supabase.from('watchlist').select('item_id').eq('dealer_id', user.id)
+    setWatchedIds(new Set((watch || []).map((w: any) => w.item_id)))
+
     setLoading(false)
   }
 
@@ -117,12 +122,15 @@ export default function DealerDashboard() {
       ? items.filter((i) => myBids[i.id])
       : tab === 'winning'
       ? items.filter((i) => myBids[i.id] && myBids[i.id] === topBids[i.id])
+      : tab === 'watched'
+      ? items.filter((i) => watchedIds.has(i.id))
       : items
 
   const tabs: { key: typeof tab; label: string; count?: number }[] = [
     { key: 'active', label: 'Alla auktioner', count: items.length },
     { key: 'mybids', label: 'Mina bud', count: Object.keys(myBids).length },
     { key: 'winning', label: 'Ledande', count: winningCount },
+    { key: 'watched', label: 'Bevakade', count: watchedIds.size },
   ]
 
   return (
@@ -185,6 +193,8 @@ export default function DealerDashboard() {
                 ? 'Du har inte lagt några bud ännu.'
                 : tab === 'winning'
                 ? 'Du leder inte i någon auktion just nu.'
+                : tab === 'watched'
+                ? 'Du bevakar inga auktioner. Öppna en auktion och tryck "Bevaka" så påminner vi dig innan den slutar.'
                 : 'Inga aktiva auktioner just nu.'}
             </p>
           </div>

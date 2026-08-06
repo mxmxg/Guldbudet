@@ -128,6 +128,7 @@ export default function Navbar() {
         <>
           <NavItem href="/customer/my-items">Mina föremål</NavItem>
           <NavItem href="/customer/submit">Lägg ut föremål</NavItem>
+          <NavItem href="/customer/profile">Min profil</NavItem>
         </>
       )
     if (role === 'dealer')
