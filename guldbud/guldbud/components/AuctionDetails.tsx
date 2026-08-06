@@ -102,17 +102,18 @@ export default function AuctionDetails({ item }: { item: any }) {
   const images: string[] = item.image_urls?.length ? item.image_urls : []
   const est = estimateRange(item.weight_grams || 0, item.karat || '')
 
-  // Anonymise dealers publicly with a stable six-digit customer number derived
-  // from their id. Because it is hashed (not sequential) it hides both the
-  // dealer's identity and how many dealers are connected. The real name is
-  // shown to the owner only when accepting a bid (in AcceptBid).
+  // Anonymise bidders publicly with a stable six-digit customer number derived
+  // from their id (e.g. "Kund 015648"). Because it is hashed (not sequential)
+  // and carries no "dealer" wording, it hides both the identity and how many
+  // dealers are connected. The real name is shown to the owner only when
+  // accepting a bid (in AcceptBid).
   const dealerCode = (id: string | null | undefined) => {
     if (!id) return '000000'
     let h = 0
     for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
-    return String(h % 900000 + 100000)
+    return String(h % 1000000).padStart(6, '0')
   }
-  const dealerLabel = (b: any) => `Handlare ${dealerCode(b.dealer_id)}`
+  const dealerLabel = (b: any) => `Kund ${dealerCode(b.dealer_id)}`
 
   return (
     <>
