@@ -137,9 +137,11 @@ drop policy if exists "own profile" on public.profiles;
 create policy "own profile" on public.profiles
   for all using (auth.uid() = id);
 
+-- Admins får se OCH hantera alla profiler (t.ex. godkänna handlare).
 drop policy if exists "admins see all profiles" on public.profiles;
-create policy "admins see all profiles" on public.profiles
-  for select using (public.is_admin());
+drop policy if exists "admins manage all profiles" on public.profiles;
+create policy "admins manage all profiles" on public.profiles
+  for all using (public.is_admin());
 
 -- Handlare måste vara synliga så att bud kan visa företagsnamn
 drop policy if exists "public reads dealer names" on public.profiles;
