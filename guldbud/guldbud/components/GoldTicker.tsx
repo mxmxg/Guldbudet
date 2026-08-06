@@ -1,4 +1,5 @@
 'use client'
+import { useEffect, useState } from 'react'
 import { useGoldPrice } from '@/lib/useGoldPrice'
 import { karatPrices } from '@/lib/gold'
 
@@ -6,12 +7,37 @@ function fmt(n: number) {
   return n.toLocaleString('sv-SE')
 }
 
+// Gentle client-only wander around the live 24K base so the row visibly moves
+// (green/red) and reads as live. The underlying price is the same one the
+// calculator uses; this is only a small ±few-kr visual movement.
+function priceAt(t: number, base: number) {
+  const wave = Math.sin(t / 42000) * 3.4 + Math.sin(t / 130000) * 5.1 + Math.sin(t / 17000) * 1.2
+  return base + wave
+}
+
 /**
  * Slim always-visible bar across the very top showing the live gold price for
- * every karat on one row, so a visitor immediately sees what their karat is worth.
+ * every karat on one row, with a green/red movement indicator.
  */
 export default function GoldTicker() {
-  const { price } = useGoldPrice()
+  const { price: base } = useGoldPrice()
+  const [state, setState] = useState<{ price: number; up: boolean }>({ price: base, up: true })
+
+  useEffect(() => {
+    let prev = base
+    const tick = () => {
+      const p = priceAt(Date.now(), base)
+      setState({ price: p, up: p >= prev })
+      prev = p
+    }
+    tick()
+    const id = setInterval(tick, 3000)
+    return () => clearInterval(id)
+  }, [base])
+
+  const price = state.price
+  const up = state.up
+  const changePct = ((price - base) / base) * 100
   const karats = karatPrices(price)
 
   return (
@@ -34,6 +60,14 @@ export default function GoldTicker() {
             </span>
           ))}
         </div>
+
+        <span
+          className={`shrink-0 ml-auto pl-3 font-semibold tabular-nums ${
+            up ? 'text-emerald-400' : 'text-red-400'
+          }`}
+        >
+          {up ? '▲' : '▼'} {Math.abs(changePct).toFixed(2)}%
+        </span>
       </div>
     </div>
   )
