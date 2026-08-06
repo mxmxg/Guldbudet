@@ -116,10 +116,14 @@ export async function POST(req: NextRequest) {
   const userId = String(record.user_id)
   if (!uuid.test(userId)) return NextResponse.json({ ok: true, skipped: 'bad user_id' })
 
-  // Recipient e-mail.
-  const profiles = await (await sb(`profiles?id=eq.${encodeURIComponent(userId)}&select=email`)).json()
-  const email = Array.isArray(profiles) && profiles[0]?.email
+  // Recipient e-mail + notification preference.
+  const profiles = await (
+    await sb(`profiles?id=eq.${encodeURIComponent(userId)}&select=email,email_notifications`)
+  ).json()
+  const prof = Array.isArray(profiles) ? profiles[0] : null
+  const email = prof?.email
   if (!email) return NextResponse.json({ ok: true, skipped: 'no email' })
+  if (prof?.email_notifications === false) return NextResponse.json({ ok: true, skipped: 'opted out' })
 
   // Enrich with the related item + current top bid, if any.
   let item: Item | null = null

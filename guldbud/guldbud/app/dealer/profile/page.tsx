@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import Link from 'next/link'
 import Image from 'next/image'
 import { CheckIcon } from '@/components/Icons'
+import NotifToggle from '@/components/NotifToggle'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
 
@@ -279,6 +280,23 @@ export default function DealerProfilePage() {
                 </label>
               )}
               {docMsg && <p className="text-sm text-red-500 mt-2">{docMsg}</p>}
+            </section>
+
+            {/* Notiser */}
+            <section className="card p-6 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display text-lg text-espresso-900">Notiser</h2>
+                <p className="text-xs text-espresso-400 mt-0.5">
+                  E-post om nya bud, överbud och affärer. Notiser i appen visas alltid.
+                </p>
+              </div>
+              <NotifToggle
+                on={profile.email_notifications !== false}
+                onToggle={async (v) => {
+                  await supabase.from('profiles').update({ email_notifications: v }).eq('id', profile.id)
+                  setProfile((p: any) => ({ ...p, email_notifications: v }))
+                }}
+              />
             </section>
 
             {/* Mina affärer */}
