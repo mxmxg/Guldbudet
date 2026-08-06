@@ -280,7 +280,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
             <div className="relative">
               <div className="absolute inset-0 -m-6 rounded-[2rem] bg-gold-500/10 blur-2xl" />
               <div className="relative">
-                <FeaturedAuction item={items[0]} />
+                <FeaturedAuction items={items} />
               </div>
             </div>
           </Reveal>
@@ -612,8 +612,18 @@ function CheckMark() {
   )
 }
 
-function FeaturedAuction({ item }: { item?: EnrichedItem }) {
-  if (!item) {
+function FeaturedAuction({ items }: { items: EnrichedItem[] }) {
+  const list = items.slice(0, 6)
+  const [idx, setIdx] = useState(0)
+
+  // Auto-rotate through the featured auctions.
+  useEffect(() => {
+    if (list.length <= 1) return
+    const id = setInterval(() => setIdx((i) => (i + 1) % list.length), 5000)
+    return () => clearInterval(id)
+  }, [list.length])
+
+  if (list.length === 0) {
     return (
       <div className="relative rounded-[2rem] border border-gold-500/20 bg-espresso-800/50 backdrop-blur-sm p-8 shadow-gold-lg text-center animate-float">
         <div className="w-16 h-16 mx-auto rounded-2xl bg-gold-500/10 flex items-center justify-center text-gold-300 mb-4">
@@ -629,52 +639,69 @@ function FeaturedAuction({ item }: { item?: EnrichedItem }) {
       </div>
     )
   }
+
+  const item = list[idx % list.length]
   const img = item.image_urls?.[0]
   const top = item.top_bid || 0
   const count = item.bid_count || 0
+
   return (
-    <Link
-      href={`/auctions/${item.id}`}
-      className="relative block rounded-[2rem] border border-gold-500/20 bg-espresso-800/50 backdrop-blur-sm p-6 shadow-gold-lg animate-float group"
-    >
-      <div className="flex items-center justify-between mb-5">
-        <span className="eyebrow text-gold-400/80 inline-flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-70 animate-pulse-ring" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+    <div className="relative rounded-[2rem] border border-gold-500/20 bg-espresso-800/50 backdrop-blur-sm p-6 shadow-gold-lg animate-float">
+      <Link key={item.id} href={`/auctions/${item.id}`} className="block group animate-fade-in">
+        <div className="flex items-center justify-between mb-5">
+          <span className="eyebrow text-gold-400/80 inline-flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-70 animate-pulse-ring" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+            </span>
+            Auktion · live
           </span>
-          Auktion · live
-        </span>
-        {count >= 3 ? (
-          <span className="chip bg-red-500/90 text-white">
-            <FlameIcon size={12} /> {count} bud
-          </span>
-        ) : (
-          <span className="chip bg-gold-500/15 text-gold-100">{count} bud</span>
-        )}
-      </div>
-      <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-5 relative bg-gradient-to-br from-gold-300 via-gold-500 to-gold-700 flex items-center justify-center">
-        {img ? (
-          <Image src={img} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
-        ) : (
-          <CategoryIcon category={item.category} size={70} className="text-espresso-900/30" strokeWidth={1} />
-        )}
-      </div>
-      <p className="font-display text-lg text-gold-100 leading-tight mb-3 truncate">{item.title}</p>
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="text-xs text-espresso-200/60 uppercase tracking-wide">Högsta bud</p>
-          <p className="font-display text-3xl text-gradient-gold tabular-nums">
-            {top ? formatSEK(top) : 'Öppet för bud'}
-          </p>
+          {count >= 3 ? (
+            <span className="chip bg-red-500/90 text-white">
+              <FlameIcon size={12} /> {count} bud
+            </span>
+          ) : (
+            <span className="chip bg-gold-500/15 text-gold-100">{count} bud</span>
+          )}
         </div>
-        {item.auction_ends_at && (
-          <div className="text-right">
-            <p className="text-xs text-espresso-200/60 uppercase tracking-wide mb-1">Avslutas om</p>
-            <CountdownTimer endsAt={item.auction_ends_at} variant="chip" />
+        <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-5 relative bg-gradient-to-br from-gold-300 via-gold-500 to-gold-700 flex items-center justify-center">
+          {img ? (
+            <Image src={img} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+          ) : (
+            <CategoryIcon category={item.category} size={70} className="text-espresso-900/30" strokeWidth={1} />
+          )}
+        </div>
+        <p className="font-display text-lg text-gold-100 leading-tight mb-3 truncate">{item.title}</p>
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-xs text-espresso-200/60 uppercase tracking-wide">Högsta bud</p>
+            <p className="font-display text-3xl text-gradient-gold tabular-nums">
+              {top ? formatSEK(top) : 'Öppet för bud'}
+            </p>
           </div>
-        )}
-      </div>
-    </Link>
+          {item.auction_ends_at && (
+            <div className="text-right">
+              <p className="text-xs text-espresso-200/60 uppercase tracking-wide mb-1">Avslutas om</p>
+              <CountdownTimer endsAt={item.auction_ends_at} variant="chip" />
+            </div>
+          )}
+        </div>
+      </Link>
+
+      {list.length > 1 && (
+        <div className="flex justify-center gap-1.5 mt-5">
+          {list.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              aria-label={`Visa auktion ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all ${
+                i === idx ? 'w-5 bg-gold-400' : 'w-1.5 bg-gold-500/30 hover:bg-gold-500/60'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
