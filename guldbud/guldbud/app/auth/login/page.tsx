@@ -198,7 +198,7 @@ function LoginForm() {
     <>
       <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <style>{`@keyframes authReveal{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}`}</style>
-      <div style={{ minHeight: '100vh', background: '#0f0a04', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '56px 16px' }}>
+      <div className="auth-scope" style={{ minHeight: '100vh', background: '#0f0a04', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '56px 16px' }}>
         <div style={{ width: '100%', maxWidth: '440px' }}>
 
           {/* Logo */}

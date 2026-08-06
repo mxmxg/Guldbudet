@@ -32,6 +32,19 @@
     @apply focus:outline-none focus:ring-2 focus:ring-gold-300 focus:border-gold-300 transition;
   }
 
+  /* Webbläsarens autofyll tvingar annars på en ljus bakgrund. På de mörka
+     auth-sidorna (klass .auth-scope) håller vi kvar den mörka stilen. */
+  .auth-scope input:-webkit-autofill,
+  .auth-scope input:-webkit-autofill:hover,
+  .auth-scope input:-webkit-autofill:focus,
+  .auth-scope input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #1a1208 inset;
+    -webkit-text-fill-color: #f5e6c8;
+    caret-color: #f5e6c8;
+    border: 1px solid #3d2d0f;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
   ::selection {
     @apply bg-gold-200 text-espresso-900;
   }
