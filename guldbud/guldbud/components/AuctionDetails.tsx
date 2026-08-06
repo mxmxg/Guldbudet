@@ -198,11 +198,6 @@ export default function AuctionDetails({ item }: { item: any }) {
             <h1 className="font-display text-3xl sm:text-4xl text-espresso-900 leading-tight">
               {item.title}
             </h1>
-            {item.profiles?.full_name && (
-              <p className="text-espresso-400 text-sm mt-2">
-                Utlagt av {item.profiles.full_name.split(' ')[0]}
-              </p>
-            )}
 
             {item.description && (
               <p className="text-espresso-600 mt-5 leading-relaxed">{item.description}</p>
