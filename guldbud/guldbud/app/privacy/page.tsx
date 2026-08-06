@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         {
           heading: 'Personuppgiftsansvarig',
           body: [
-            'GuldBud AB är personuppgiftsansvarig för behandlingen av dina personuppgifter på denna webbplats. Du når oss på info@guldbud.se.',
+            'GuldBud AB är personuppgiftsansvarig för behandlingen av dina personuppgifter på denna webbplats. Du når oss på info@guldbud.com.',
           ],
         },
         {
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
           heading: 'Dina rättigheter',
           body: [
             'Du har rätt att begära ett utdrag av de uppgifter vi har om dig, att få felaktiga uppgifter rättade, och att i vissa fall få dina uppgifter raderade eller behandlingen begränsad.',
-            'Du har även rätt att invända mot behandling och att klaga hos Integritetsskyddsmyndigheten (IMY). Kontakta oss på info@guldbud.se för att utöva dina rättigheter.',
+            'Du har även rätt att invända mot behandling och att klaga hos Integritetsskyddsmyndigheten (IMY). Kontakta oss på info@guldbud.com för att utöva dina rättigheter.',
           ],
         },
         {

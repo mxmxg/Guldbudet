@@ -55,8 +55,8 @@ export default function LegalPage({
             Detta dokument är en utgångspunkt och behöver granskas av jurist innan lansering för att
             säkerställa att det uppfyller kraven i GDPR, distansavtalslagen och övrig tillämplig
             lagstiftning. Kontakta oss på{' '}
-            <a href="mailto:info@guldbud.se" className="underline hover:text-amber-800">
-              info@guldbud.se
+            <a href="mailto:info@guldbud.com" className="underline hover:text-amber-800">
+              info@guldbud.com
             </a>{' '}
             vid frågor.
           </p>

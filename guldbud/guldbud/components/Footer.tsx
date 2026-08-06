@@ -42,8 +42,8 @@ export default function Footer() {
             <li className="text-sm">GuldBud AB</li>
             <li className="text-sm">Storgatan 1, 111 22 Stockholm</li>
             <li className="text-sm">
-              <a href="mailto:info@guldbud.se" className="hover:text-gold-300 transition">
-                info@guldbud.se
+              <a href="mailto:info@guldbud.com" className="hover:text-gold-300 transition">
+                info@guldbud.com
               </a>
             </li>
           </FooterCol>

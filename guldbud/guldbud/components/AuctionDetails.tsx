@@ -437,7 +437,7 @@ function ShippingCard() {
         <p className="text-gold-200 font-medium">GuldBud AB</p>
         <p className="text-gold-500/80 text-sm">Storgatan 1</p>
         <p className="text-gold-500/80 text-sm">111 22 Stockholm</p>
-        <p className="text-gold-500/60 text-xs mt-2">Vid frågor: info@guldbud.se</p>
+        <p className="text-gold-500/60 text-xs mt-2">Vid frågor: info@guldbud.com</p>
       </div>
     </div>
   )
