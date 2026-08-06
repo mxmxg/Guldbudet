@@ -6,7 +6,9 @@ import Link from 'next/link'
 import BidSection from '@/components/BidSection'
 import AcceptBid from '@/components/AcceptBid'
 import CountdownTimer from '@/components/CountdownTimer'
+import CategoryIcon from '@/components/CategoryIcon'
 import Footer from '@/components/Footer'
+import { GemIcon } from '@/components/Icons'
 import { estimateRange, formatSEK } from '@/lib/gold'
 
 function relTime(iso: string) {
@@ -124,8 +126,8 @@ export default function AuctionDetails({ item }: { item: any }) {
                   priority
                 />
               ) : (
-                <div className="flex items-center justify-center h-full text-7xl text-gold-500/30 animate-float">
-                  ◆
+                <div className="flex items-center justify-center h-full">
+                  <CategoryIcon category={item.category} size={90} className="text-gold-500/30 animate-float" strokeWidth={1} />
                 </div>
               )}
               {!isClosed && (
@@ -158,8 +160,21 @@ export default function AuctionDetails({ item }: { item: any }) {
           {/* ===== Details ===== */}
           <div>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
+              {item.category && (
+                <span className="chip bg-espresso-900 text-gold-200">
+                  <CategoryIcon category={item.category} size={13} strokeWidth={1.8} />
+                  {item.category}
+                </span>
+              )}
               <span className="chip bg-gold-50 text-gold-700">{item.karat}</span>
               <span className="chip bg-espresso-100 text-espresso-600">{item.weight_grams} g</span>
+              {item.gemstone && (
+                <span className="chip bg-gold-50 text-gold-700">
+                  <GemIcon size={12} />
+                  {item.gemstone}
+                  {item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}
+                </span>
+              )}
               {isClosed && <span className="chip bg-espresso-100 text-espresso-500">Avslutad</span>}
             </div>
             <h1 className="font-display text-3xl sm:text-4xl text-espresso-900 leading-tight">
@@ -185,7 +200,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                 <div>
                   <p className="eyebrow text-espresso-400 mb-1">Högsta bud</p>
                   <p className="font-display text-4xl text-gradient-gold tabular-nums">
-                    {topAmount ? formatSEK(topAmount) : '—'}
+                    {topAmount ? formatSEK(topAmount) : 'Öppet för bud'}
                   </p>
                   {topBid ? (
                     <p className="text-xs text-espresso-400 mt-1">
@@ -205,11 +220,14 @@ export default function AuctionDetails({ item }: { item: any }) {
               </div>
 
               {/* indicative value */}
-              <div className="mt-4 pt-4 border-t border-espresso-100 flex items-center gap-2 text-xs text-espresso-500">
-                <SparkIcon />
-                Indikativt metallvärde:{' '}
-                <span className="font-medium text-espresso-700">
-                  {formatSEK(est.low)} – {formatSEK(est.high)}
+              <div className="mt-4 pt-4 border-t border-espresso-100 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-espresso-500">
+                <span className="flex items-center gap-2">
+                  <SparkIcon />
+                  Metallvärde vid dagens kurs:{' '}
+                  <span className="font-medium text-espresso-700">{formatSEK(est.melt)}</span>
+                </span>
+                <span className="text-espresso-400">
+                  Uppskattad utbetalning {formatSEK(est.low)}–{formatSEK(est.high)}
                 </span>
               </div>
             </div>
@@ -218,7 +236,7 @@ export default function AuctionDetails({ item }: { item: any }) {
             {isAdmin && (
               <div className="mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4">
                 <p className="text-amber-700 text-sm font-medium">
-                  Adminvy — du kan inte buda eller acceptera.
+                  Adminvy. Du kan inte buda eller acceptera.
                 </p>
               </div>
             )}
@@ -239,7 +257,7 @@ export default function AuctionDetails({ item }: { item: any }) {
               <div className="mt-4 rounded-2xl bg-white border border-espresso-100 p-5 text-center shadow-soft">
                 <div className="text-2xl mb-2">⏳</div>
                 <p className="text-espresso-600 text-sm">
-                  Auktionen är live. Så fort en handlare budar dyker det upp här — du får en
+                  Auktionen är live. Så fort en handlare budar dyker det upp här, och du får en
                   notifiering direkt.
                 </p>
               </div>

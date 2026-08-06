@@ -16,7 +16,7 @@ export default function Footer() {
               GuldBud
             </span>
             <p className="text-sm mt-3 max-w-xs leading-relaxed text-espresso-100/60">
-              Sveriges guldauktion. Auktoriserade handlare budar mot varandra — du får
+              Sveriges guldauktion. Auktoriserade handlare budar mot varandra, och du får
               marknadens bästa pris, tryggt och kostnadsfritt.
             </p>
             <div className="flex gap-3 mt-5">

@@ -9,6 +9,26 @@ import LiveGoldPrice from '@/components/LiveGoldPrice'
 import Reveal from '@/components/Reveal'
 import CountUp from '@/components/CountUp'
 import Footer from '@/components/Footer'
+import CountdownTimer from '@/components/CountdownTimer'
+import CategoryIcon from '@/components/CategoryIcon'
+import { formatSEK } from '@/lib/gold'
+import {
+  CameraIcon,
+  ScaleIcon,
+  CoinsIcon,
+  ShieldIcon,
+  BoltIcon,
+  HeartIcon,
+  StarIcon,
+  CheckIcon,
+  ArrowRightIcon,
+  SparkleIcon,
+  LockIcon,
+  TruckIcon,
+  WalletIcon,
+  GemIcon,
+  FlameIcon,
+} from '@/components/Icons'
 import type { EnrichedItem } from '@/app/page'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
@@ -99,8 +119,8 @@ export default function HomeContent({ items }: { items: EnrichedItem[] }) {
             </div>
             {myItems.length === 0 ? (
               <div className="card p-10 text-center">
-                <div className="w-14 h-14 rounded-full bg-gold-50 flex items-center justify-center mx-auto mb-4 text-2xl">
-                  ✨
+                <div className="w-14 h-14 rounded-full bg-gold-50 text-gold-500 flex items-center justify-center mx-auto mb-4">
+                  <GemIcon size={26} strokeWidth={1.3} />
                 </div>
                 <p className="text-espresso-500 mb-4">Du har inte lagt ut några föremål ännu.</p>
                 <Link href="/customer/submit" className="btn-gold">
@@ -226,7 +246,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
             <Reveal delay={160}>
               <p className="mt-6 text-lg text-espresso-100/75 max-w-lg leading-relaxed">
                 Lägg ut ditt guldföremål och låt Sveriges auktoriserade guldhandlare buda mot
-                varandra — i realtid. Ingen prutning, inga mellanhänder. Bara det bästa budet.
+                varandra, i realtid. Ingen prutning, inga mellanhänder. Bara det bästa budet.
               </p>
             </Reveal>
 
@@ -255,46 +275,12 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
             </Reveal>
           </div>
 
-          {/* Right — floating showcase */}
+          {/* Right — live featured auction (real data, with fallback) */}
           <Reveal delay={200} className="hidden lg:block">
             <div className="relative">
               <div className="absolute inset-0 -m-6 rounded-[2rem] bg-gold-500/10 blur-2xl" />
-              <div className="relative rounded-[2rem] border border-gold-500/20 bg-espresso-800/50 backdrop-blur-sm p-6 shadow-gold-lg animate-float">
-                <div className="flex items-center justify-between mb-5">
-                  <span className="eyebrow text-gold-400/80">Auktion · live</span>
-                  <span className="chip bg-red-500/90 text-white">🔥 12 bud</span>
-                </div>
-                <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-gold-300 via-gold-500 to-gold-700 flex items-center justify-center mb-5 relative overflow-hidden">
-                  <span className="text-7xl opacity-30">◆</span>
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.5),transparent_50%)]" />
-                </div>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className="text-xs text-espresso-200/60 uppercase tracking-wide">Högsta bud</p>
-                    <p className="font-display text-3xl text-gradient-gold tabular-nums">18&nbsp;450 kr</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-espresso-200/60 uppercase tracking-wide">Avslutas om</p>
-                    <p className="text-gold-200 font-semibold tabular-nums">02:14:37</p>
-                  </div>
-                </div>
-                <div className="mt-4 space-y-2">
-                  {[
-                    ['Guldsmedjan AB', '18 450 kr'],
-                    ['Nordic Gold', '18 200 kr'],
-                    ['Ädelmetall Sthlm', '17 900 kr'],
-                  ].map(([name, amt], i) => (
-                    <div
-                      key={name}
-                      className={`flex justify-between text-sm rounded-lg px-3 py-1.5 ${
-                        i === 0 ? 'bg-gold-500/15 text-gold-100' : 'text-espresso-100/60'
-                      }`}
-                    >
-                      <span>{name}</span>
-                      <span className="tabular-nums">{amt}</span>
-                    </div>
-                  ))}
-                </div>
+              <div className="relative">
+                <FeaturedAuction item={items[0]} />
               </div>
             </div>
           </Reveal>
@@ -303,10 +289,10 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
         {/* trust strip */}
         <div className="relative border-t border-espresso-800">
           <div className="max-w-6xl mx-auto px-4 py-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-espresso-100/50">
-            <Trust>🔒 BankID-verifierade handlare</Trust>
-            <Trust>📦 Försäkrad frakt</Trust>
-            <Trust>💸 Utbetalning via Swish</Trust>
-            <Trust>✅ Kostnadsfritt att lägga ut</Trust>
+            <Trust><LockIcon size={14} className="text-gold-400/80" /> BankID-verifierade handlare</Trust>
+            <Trust><TruckIcon size={14} className="text-gold-400/80" /> Försäkrad frakt</Trust>
+            <Trust><WalletIcon size={14} className="text-gold-400/80" /> Utbetalning via Swish</Trust>
+            <Trust><CheckIcon size={14} className="text-gold-400/80" /> Kostnadsfritt att lägga ut</Trust>
           </div>
         </div>
       </section>
@@ -317,7 +303,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
           <Reveal>
             <span className="eyebrow text-gold-600">Gratis värdering</span>
             <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900 leading-tight">
-              Se värdet på sekunder — <span className="text-gradient-gold">innan</span> du säljer
+              Se värdet på sekunder, <span className="text-gradient-gold">innan</span> du säljer
             </h2>
             <p className="mt-4 text-espresso-500 leading-relaxed max-w-md">
               Ange vikt och karat så räknar vi ut ett indikativt auktionsvärde utifrån dagens
@@ -328,7 +314,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
             </div>
             <ul className="mt-6 space-y-3">
               {[
-                'Inga dolda avgifter — det är gratis att lägga ut',
+                'Inga dolda avgifter, det är gratis att lägga ut',
                 'Du bestämmer själv om du accepterar ett bud',
                 'Sätt ett minimipris om du vill',
               ].map((t) => (
@@ -361,20 +347,20 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
             {[
               {
                 step: '01',
-                icon: '📸',
-                title: 'Fotografera & lägg ut',
-                desc: 'Ladda upp bilder, fyll i vikt och karat. Vi granskar och öppnar auktionen — oftast inom ett par timmar.',
+                Icon: CameraIcon,
+                title: 'Fotografera och lägg ut',
+                desc: 'Ladda upp bilder, fyll i vikt och karat. Vi granskar och öppnar auktionen, oftast inom ett par timmar.',
               },
               {
                 step: '02',
-                icon: '⚖️',
+                Icon: ScaleIcon,
                 title: 'Handlare budar mot varandra',
                 desc: 'Auktoriserade guldhandlare ser ditt föremål och tävlar om att ge dig det högsta budet. Du följer allt i realtid.',
               },
               {
                 step: '03',
-                icon: '💰',
-                title: 'Acceptera & få betalt',
+                Icon: CoinsIcon,
+                title: 'Acceptera och få betalt',
                 desc: 'Välj det bud du är nöjd med, skicka föremålet försäkrat till oss och få pengarna via Swish samma dag som vi verifierat.',
               },
             ].map((s, i) => (
@@ -384,8 +370,8 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
                     {s.step}
                   </span>
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-gold-50 border border-gold-200/60 flex items-center justify-center text-2xl mb-5">
-                      {s.icon}
+                    <div className="w-12 h-12 rounded-xl bg-gold-50 border border-gold-200/60 flex items-center justify-center text-gold-600 mb-5">
+                      <s.Icon size={22} />
                     </div>
                     <h3 className="font-display text-xl text-espresso-900 mb-2">{s.title}</h3>
                     <p className="text-sm text-espresso-500 leading-relaxed">{s.desc}</p>
@@ -420,7 +406,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
 
         {items.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((item, i) => (
+            {items.slice(0, 9).map((item, i) => (
               <Reveal key={item.id} delay={(i % 3) * 90}>
                 <AuctionCard item={item} />
               </Reveal>
@@ -428,8 +414,8 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
           </div>
         ) : (
           <div className="card p-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-gold-50 flex items-center justify-center mx-auto mb-4 text-3xl animate-float">
-              ◆
+            <div className="w-16 h-16 rounded-full bg-gold-50 text-gold-500 flex items-center justify-center mx-auto mb-4 animate-float">
+              <GemIcon size={30} strokeWidth={1.2} />
             </div>
             <p className="font-display text-xl text-espresso-800 mb-2">Inga aktiva auktioner just nu</p>
             <p className="text-espresso-500 text-sm mb-6">Bli den första att lägga ut ett föremål idag.</p>
@@ -451,7 +437,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
           </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: <ScaleIcon />, title: 'Bud i konkurrens', desc: 'Handlarna tävlar om ditt guld. Konkurrens pressar priset uppåt — till din fördel.' },
+              { icon: <ScaleIcon />, title: 'Bud i konkurrens', desc: 'Handlarna tävlar om ditt guld. Konkurrens pressar priset uppåt, till din fördel.' },
               { icon: <ShieldIcon />, title: 'Endast godkända handlare', desc: 'Varje handlare är manuellt verifierad med org.nummer och legitimation.' },
               { icon: <BoltIcon />, title: 'Snabbt & smidigt', desc: 'Från uppladdning till pengar på kontot tar det oftast bara några dagar.' },
               { icon: <HeartIcon />, title: 'Full kontroll', desc: 'Du väljer om och när du säljer. Sätt minimipris och tacka nej när du vill.' },
@@ -482,7 +468,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
           {[
             {
               quote:
-                'Jag fick 2 400 kr mer än vad guldbutiken erbjöd — för exakt samma ärvda ring. Sjukt enkelt.',
+                'Jag fick 2 400 kr mer än vad guldbutiken erbjöd, för exakt samma ärvda ring. Riktigt smidigt.',
               name: 'Karin L.',
               city: 'Göteborg',
             },
@@ -530,12 +516,12 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
             <div className="pointer-events-none absolute -top-24 left-1/4 w-72 h-72 rounded-full bg-gold-500/15 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-24 right-1/4 w-72 h-72 rounded-full bg-gold-400/10 blur-3xl" />
             <div className="relative">
-              <span className="text-5xl">✨</span>
+              <span className="inline-flex text-gold-300 mb-1"><SparkleIcon size={44} /></span>
               <h2 className="mt-4 font-display text-3xl sm:text-4xl text-gold-100">
                 Ditt guld är värt mer än du tror
               </h2>
               <p className="mt-4 text-espresso-100/70 max-w-lg mx-auto">
-                Det tar under fem minuter att lägga ut ditt första föremål — och det kostar ingenting.
+                Det tar under fem minuter att lägga ut ditt första föremål, och det kostar ingenting.
               </p>
               <div className="mt-8 flex flex-wrap gap-3 justify-center">
                 <Link href="/auth/login?mode=register" className="btn-gold text-base !px-8 !py-3.5">
@@ -589,13 +575,13 @@ function AuctionsSection({ items, title }: { items: EnrichedItem[]; title: strin
       <h2 className="font-display text-2xl text-espresso-900 mb-5">{title}</h2>
       {items.length > 0 ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((item) => (
+          {items.slice(0, 9).map((item) => (
             <AuctionCard key={item.id} item={item} />
           ))}
         </div>
       ) : (
         <div className="card p-14 text-center text-espresso-400">
-          <div className="text-3xl mb-3 opacity-40 animate-float">◆</div>
+          <div className="flex justify-center mb-3 text-gold-500/50 animate-float"><GemIcon size={30} strokeWidth={1.2} /></div>
           <p>Inga aktiva auktioner just nu.</p>
         </div>
       )}
@@ -626,39 +612,69 @@ function CheckMark() {
   )
 }
 
-function StarIcon() {
+function FeaturedAuction({ item }: { item?: EnrichedItem }) {
+  if (!item) {
+    return (
+      <div className="relative rounded-[2rem] border border-gold-500/20 bg-espresso-800/50 backdrop-blur-sm p-8 shadow-gold-lg text-center animate-float">
+        <div className="w-16 h-16 mx-auto rounded-2xl bg-gold-500/10 flex items-center justify-center text-gold-300 mb-4">
+          <GemIcon size={30} strokeWidth={1.3} />
+        </div>
+        <p className="font-display text-2xl text-gold-100 mb-2">Din auktion kan vara här</p>
+        <p className="text-espresso-100/60 text-sm mb-6">
+          Bli först att lägga ut ett föremål idag så syns det direkt på förstasidan.
+        </p>
+        <Link href="/auth/login?mode=register" className="btn-gold">
+          Lägg ut ett föremål
+        </Link>
+      </div>
+    )
+  }
+  const img = item.image_urls?.[0]
+  const top = item.top_bid || 0
+  const count = item.bid_count || 0
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7L12 2z" />
-    </svg>
-  )
-}
-function ScaleIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M12 3v18M7 21h10M6 6l-3 6a3 3 0 0 0 6 0L6 6zM18 6l-3 6a3 3 0 0 0 6 0l-3-6zM4 6h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-function ShieldIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-function BoltIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-    </svg>
-  )
-}
-function HeartIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-      <path d="M12 21s-7-4.4-9.5-8.5C1 9.5 2.5 6 6 6c2 0 3.2 1.2 4 2.3C10.8 7.2 12 6 14 6c3.5 0 5 3.5 3.5 6.5C19 16.6 12 21 12 21z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-    </svg>
+    <Link
+      href={`/auctions/${item.id}`}
+      className="relative block rounded-[2rem] border border-gold-500/20 bg-espresso-800/50 backdrop-blur-sm p-6 shadow-gold-lg animate-float group"
+    >
+      <div className="flex items-center justify-between mb-5">
+        <span className="eyebrow text-gold-400/80 inline-flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-70 animate-pulse-ring" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+          </span>
+          Auktion · live
+        </span>
+        {count >= 3 ? (
+          <span className="chip bg-red-500/90 text-white">
+            <FlameIcon size={12} /> {count} bud
+          </span>
+        ) : (
+          <span className="chip bg-gold-500/15 text-gold-100">{count} bud</span>
+        )}
+      </div>
+      <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-5 relative bg-gradient-to-br from-gold-300 via-gold-500 to-gold-700 flex items-center justify-center">
+        {img ? (
+          <Image src={img} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
+        ) : (
+          <CategoryIcon category={item.category} size={70} className="text-espresso-900/30" strokeWidth={1} />
+        )}
+      </div>
+      <p className="font-display text-lg text-gold-100 leading-tight mb-3 truncate">{item.title}</p>
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-xs text-espresso-200/60 uppercase tracking-wide">Högsta bud</p>
+          <p className="font-display text-3xl text-gradient-gold tabular-nums">
+            {top ? formatSEK(top) : 'Öppet för bud'}
+          </p>
+        </div>
+        {item.auction_ends_at && (
+          <div className="text-right">
+            <p className="text-xs text-espresso-200/60 uppercase tracking-wide mb-1">Avslutas om</p>
+            <CountdownTimer endsAt={item.auction_ends_at} variant="chip" />
+          </div>
+        )}
+      </div>
+    </Link>
   )
 }

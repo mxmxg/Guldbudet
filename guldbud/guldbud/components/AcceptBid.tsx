@@ -37,7 +37,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
           </div>
         </div>
         <div className="bg-white border border-green-100 rounded-lg p-4 mb-4">
-          <p className="font-medium text-stone-800 mb-3">Nästa steg — skicka föremålet till oss</p>
+          <p className="font-medium text-stone-800 mb-3">Nästa steg: skicka föremålet till oss</p>
           <div className="flex flex-col gap-2 text-sm text-stone-600">
             <div className="flex gap-2">
               <span className="text-green-500 font-bold">1.</span>
@@ -100,7 +100,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
       onClick={() => setStep('confirm')}
       className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-xl transition mt-4 text-sm"
     >
-      Acceptera detta bud — {amount.toLocaleString('sv-SE')} kr
+      Acceptera budet på {amount.toLocaleString('sv-SE')} kr
     </button>
   )
 }

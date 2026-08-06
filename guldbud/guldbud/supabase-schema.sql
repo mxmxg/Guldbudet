@@ -40,8 +40,11 @@ create table if not exists public.items (
   owner_id uuid references public.profiles not null,
   title text not null,
   description text,
+  category text,
   weight_grams numeric(8,2),
   karat text,
+  diamond_carat numeric(6,2),
+  gemstone text,
   min_price integer,
   status text not null default 'pending'
     check (status in ('pending','approved','active','closed','rejected')),
@@ -54,6 +57,9 @@ create table if not exists public.items (
 
 alter table public.items add column if not exists accepted_bid_id uuid;
 alter table public.items add column if not exists accepted_at timestamptz;
+alter table public.items add column if not exists category text;
+alter table public.items add column if not exists diamond_carat numeric(6,2);
+alter table public.items add column if not exists gemstone text;
 
 -- ------------------------------------------------------------
 -- Bud från guldhandlare
@@ -85,6 +91,18 @@ create table if not exists public.notifications (
 
 create index if not exists notifications_user_idx on public.notifications (user_id, created_at desc);
 
+-- Säkerställ att kopplingarna städas bort automatiskt även om tabellen redan
+-- fanns sedan tidigare (create table ovan hoppas över då och lämnar gamla FK-regler).
+alter table public.notifications
+  drop constraint if exists notifications_item_id_fkey,
+  add constraint notifications_item_id_fkey
+    foreign key (item_id) references public.items(id) on delete cascade;
+
+alter table public.notifications
+  drop constraint if exists notifications_user_id_fkey,
+  add constraint notifications_user_id_fkey
+    foreign key (user_id) references public.profiles(id) on delete cascade;
+
 -- ------------------------------------------------------------
 -- Storage bucket för bilder
 -- ------------------------------------------------------------
@@ -100,6 +118,17 @@ alter table public.items enable row level security;
 alter table public.bids enable row level security;
 alter table public.notifications enable row level security;
 
+-- Non-recursive admin-check. SECURITY DEFINER kör som ägaren och kringgår RLS
+-- internt, så vi undviker "infinite recursion" när en profiles-policy annars
+-- skulle fråga profiles-tabellen igen.
+create or replace function public.is_admin()
+returns boolean
+language sql security definer stable
+set search_path = public
+as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
+$$;
+
 -- ---- Profiles ----
 drop policy if exists "own profile" on public.profiles;
 create policy "own profile" on public.profiles
@@ -107,9 +136,7 @@ create policy "own profile" on public.profiles
 
 drop policy if exists "admins see all profiles" on public.profiles;
 create policy "admins see all profiles" on public.profiles
-  for select using (
-    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
-  );
+  for select using (public.is_admin());
 
 -- Handlare måste vara synliga så att bud kan visa företagsnamn
 drop policy if exists "public reads dealer names" on public.profiles;
@@ -127,9 +154,7 @@ create policy "active items are public" on public.items
 
 drop policy if exists "admins manage all items" on public.items;
 create policy "admins manage all items" on public.items
-  for all using (
-    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
-  );
+  for all using (public.is_admin());
 
 -- ---- Bids ----
 drop policy if exists "dealers can bid" on public.bids;
@@ -207,7 +232,7 @@ returns trigger language plpgsql security definer as $$
 begin
   if new.status = 'active' and coalesce(old.status, '') <> 'active' then
     insert into public.notifications (user_id, title, message, item_id)
-    values (new.owner_id, 'Din auktion är live! 🔔',
+    values (new.owner_id, 'Din auktion är live',
             'Budgivningen på "' || new.title || '" har öppnat.', new.id);
   end if;
   return new;
@@ -235,7 +260,7 @@ begin
 
   -- Notify owner
   insert into public.notifications (user_id, title, message, item_id)
-  values (v_owner, 'Nytt bud! 💰',
+  values (v_owner, 'Nytt bud',
           'Ett nytt bud på ' || new.amount || ' kr lades på "' || v_title || '".', new.item_id);
 
   -- Find previous highest bidder (before this bid) and notify them if outbid
@@ -274,7 +299,7 @@ begin
     select dealer_id into v_dealer from public.bids where id = new.accepted_bid_id;
     if v_dealer is not null then
       insert into public.notifications (user_id, title, message, item_id)
-      values (v_dealer, 'Ditt bud accepterades! 🎉',
+      values (v_dealer, 'Ditt bud accepterades',
               'Säljaren accepterade ditt bud på "' || new.title || '".', new.id);
     end if;
   end if;

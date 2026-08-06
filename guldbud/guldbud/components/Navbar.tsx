@@ -177,7 +177,7 @@ export default function Navbar() {
                         <div className="max-h-80 overflow-y-auto">
                           {notifications.length === 0 ? (
                             <div className="text-center py-10 px-4">
-                              <div className="text-3xl mb-2 opacity-30">🔔</div>
+                              <div className="flex justify-center mb-2 text-espresso-300"><BellIcon /></div>
                               <p className="text-espresso-400 text-sm">Inga notifieringar ännu</p>
                             </div>
                           ) : (

@@ -3,13 +3,15 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Item } from '@/lib/types'
 import CountdownTimer from '@/components/CountdownTimer'
+import CategoryIcon from '@/components/CategoryIcon'
+import { FlameIcon, ArrowRightIcon } from '@/components/Icons'
 import { formatSEK } from '@/lib/gold'
 
 type CardItem = Item & { top_bid?: number; bid_count?: number }
 
-function capitalize(s: string) {
-  if (!s) return ''
-  return s.charAt(0).toUpperCase() + s.slice(1)
+function capitalize(str: string) {
+  if (!str) return ''
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
 export default function AuctionCard({ item }: { item: CardItem }) {
@@ -19,10 +21,7 @@ export default function AuctionCard({ item }: { item: CardItem }) {
   const hot = bidCount >= 3
 
   return (
-    <Link
-      href={`/auctions/${item.id}`}
-      className="group relative block card card-hover overflow-hidden"
-    >
+    <Link href={`/auctions/${item.id}`} className="group relative block card card-hover overflow-hidden">
       {/* Image */}
       <div className="h-52 relative overflow-hidden">
         {img ? (
@@ -35,10 +34,9 @@ export default function AuctionCard({ item }: { item: CardItem }) {
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-espresso-800 to-espresso-600 flex items-center justify-center">
-            <span className="text-5xl text-gold-500/40 animate-float">◆</span>
+            <CategoryIcon category={item.category} size={54} className="text-gold-500/45 animate-float" strokeWidth={1.3} />
           </div>
         )}
-        {/* gradient veil */}
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
 
         {/* Top badges */}
@@ -51,7 +49,9 @@ export default function AuctionCard({ item }: { item: CardItem }) {
             Live
           </span>
           {hot && (
-            <span className="chip bg-red-500/90 backdrop-blur text-white">🔥 Hett</span>
+            <span className="chip bg-red-500/90 backdrop-blur text-white">
+              <FlameIcon size={12} /> Hett
+            </span>
           )}
         </div>
 
@@ -64,11 +64,16 @@ export default function AuctionCard({ item }: { item: CardItem }) {
 
         {/* Title on image */}
         <div className="absolute bottom-3 left-4 right-4">
-          <h3 className="font-display text-lg text-white leading-tight drop-shadow-sm">
-            {capitalize(item.title)}
-          </h3>
+          {item.category && (
+            <span className="inline-flex items-center gap-1 text-[11px] text-gold-200/90 mb-1">
+              <CategoryIcon category={item.category} size={13} strokeWidth={1.8} />
+              {item.category}
+            </span>
+          )}
+          <h3 className="font-display text-lg text-white leading-tight drop-shadow-sm">{capitalize(item.title)}</h3>
           <p className="text-white/70 text-xs mt-0.5">
             {item.weight_grams} g · {item.karat}
+            {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
           </p>
         </div>
       </div>
@@ -84,14 +89,10 @@ export default function AuctionCard({ item }: { item: CardItem }) {
           )}
         </div>
         <div className="text-right">
-          <span className="chip bg-gold-50 text-gold-700">
-            {bidCount} {bidCount === 1 ? 'bud' : 'bud'}
-          </span>
+          <span className="chip bg-gold-50 text-gold-700">{bidCount} bud</span>
           <p className="mt-1.5 text-xs text-gold-600 font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
             Se auktion
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <ArrowRightIcon size={12} strokeWidth={2.5} />
           </p>
         </div>
       </div>

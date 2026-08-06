@@ -15,7 +15,7 @@ export default function HowItWorksPage() {
         <p className="eyebrow text-gold-500/80 mb-3">Enkelt och tryggt</p>
         <h1 className="font-display text-4xl text-gold-100 mb-4">Så fungerar GuldBud</h1>
         <p className="text-gold-200/70 max-w-xl mx-auto text-sm leading-relaxed">
-          Från uppladdning till pengarna på kontot — vi guidar dig genom hela processen.
+          Från uppladdning till pengarna på kontot. Vi guidar dig genom hela processen.
           Allt sker tryggt, snabbt och med full kontroll.
         </p>
         </div>
@@ -29,7 +29,7 @@ export default function HowItWorksPage() {
               step: '1',
               time: 'Direkt',
               title: 'Fotografera och lägg ut ditt föremål',
-              desc: 'Ta minst 2 bilder — framsida, baksida och stämpel om möjligt. Fyll i vikt och karat. Det tar under 5 minuter.',
+              desc: 'Ta minst 2 bilder: framsida, baksida och stämpel om möjligt. Fyll i vikt och karat. Det tar under 5 minuter.',
               color: 'bg-amber-100 text-amber-700 border-amber-200',
             },
             {
@@ -50,7 +50,7 @@ export default function HowItWorksPage() {
               step: '4',
               time: 'Du bestämmer',
               title: 'Välj det bästa budet',
-              desc: 'När auktionen stänger väljer du om du vill acceptera det högsta budet. Ingen press — du har alltid rätt att tacka nej.',
+              desc: 'När auktionen stänger väljer du om du vill acceptera det högsta budet. Ingen press, du har alltid rätt att tacka nej.',
               color: 'bg-green-100 text-green-700 border-green-200',
             },
             {

@@ -7,6 +7,8 @@ import Footer from '@/components/Footer'
 import Image from 'next/image'
 import Link from 'next/link'
 import { KARAT_OPTIONS, estimateRange, formatSEK } from '@/lib/gold'
+import { CATEGORIES, GEMSTONES } from '@/lib/catalog'
+import { CheckIcon } from '@/components/Icons'
 
 export default function SubmitPage() {
   const router = useRouter()
@@ -14,10 +16,14 @@ export default function SubmitPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [title, setTitle] = useState('')
+  const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
   const [weight, setWeight] = useState('')
   const [karat, setKarat] = useState('')
   const [minPrice, setMinPrice] = useState('')
+  const [hasGem, setHasGem] = useState(false)
+  const [gemstone, setGemstone] = useState('Diamant')
+  const [diamondCarat, setDiamondCarat] = useState('')
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -81,9 +87,12 @@ export default function SubmitPage() {
     const { error: insertError } = await supabase.from('items').insert({
       owner_id: user.id,
       title,
+      category: category || null,
       description,
       karat,
       weight_grams: parseFloat(weight),
+      diamond_carat: hasGem && diamondCarat ? parseFloat(diamondCarat) : null,
+      gemstone: hasGem ? gemstone : null,
       min_price: minPrice ? parseInt(minPrice) : null,
       image_urls: imageUrls,
       status: 'pending',
@@ -103,10 +112,10 @@ export default function SubmitPage() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 max-w-lg mx-auto text-center py-24 px-4">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl animate-scale-in">
-            ✓
+          <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
+            <CheckIcon size={34} />
           </div>
-          <h1 className="font-display text-3xl text-espresso-900 mb-3">Förfrågan mottagen!</h1>
+          <h1 className="font-display text-3xl text-espresso-900 mb-3">Förfrågan mottagen</h1>
           <p className="text-espresso-500 mb-8 leading-relaxed">
             Vi granskar ditt föremål och öppnar budgivningen inom ett par timmar. Du får en
             notifiering så fort auktionen är live.
@@ -118,10 +127,13 @@ export default function SubmitPage() {
                 setFiles([])
                 setPreviews([])
                 setTitle('')
+                setCategory('')
                 setDescription('')
                 setWeight('')
                 setKarat('')
                 setMinPrice('')
+                setHasGem(false)
+                setDiamondCarat('')
               }}
               className="btn-gold"
             >
@@ -142,10 +154,10 @@ export default function SubmitPage() {
       <div className="flex-1 max-w-5xl w-full mx-auto px-4 py-10">
         <div className="mb-8">
           <span className="eyebrow text-gold-600">Kostnadsfritt · tar 5 minuter</span>
-          <h1 className="font-display text-3xl sm:text-4xl text-espresso-900 mt-2">Lägg ut ett guldföremål</h1>
+          <h1 className="font-display text-3xl sm:text-4xl text-espresso-900 mt-2">Lägg ut ett smycke</h1>
           <p className="text-espresso-500 mt-2 max-w-xl">
-            Fyll i uppgifter och ladda upp foton. Auktoriserade guldhandlare budar direkt — du väljer
-            det bästa budet.
+            Fyll i uppgifter och ladda upp foton. Auktoriserade guldhandlare budar direkt, och du
+            väljer själv det bud du är nöjd med.
           </p>
         </div>
 
@@ -194,27 +206,40 @@ export default function SubmitPage() {
                         : 'border-espresso-200 text-espresso-400 hover:border-gold-400 hover:text-gold-500'
                     }`}
                   >
-                    <span className="text-2xl mb-1">+</span>
+                    <span className="text-2xl mb-1 leading-none">+</span>
                     <span className="text-xs">Lägg till</span>
                   </button>
                 )}
               </div>
               <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
               <p className="text-xs text-espresso-400">
-                Tips: framsida, baksida, stämpel/punsstämpel och eventuella skador.
+                Tips: framsida, baksida, stämpel och eventuella skador.
               </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-espresso-700 mb-1.5">Typ av föremål</label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="t.ex. Guldring, Halskedja, Guldmynt"
-                className="w-full"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-espresso-700 mb-1.5">Kategori</label>
+                <select required value={category} onChange={(e) => setCategory(e.target.value)} className="w-full">
+                  <option value="">Välj kategori...</option>
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-espresso-700 mb-1.5">Namn på föremålet</label>
+                <input
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="t.ex. Vigselring i rödguld"
+                  className="w-full"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -232,7 +257,7 @@ export default function SubmitPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-espresso-700 mb-1.5">Karat / finhet</label>
+                <label className="block text-sm font-medium text-espresso-700 mb-1.5">Guldets karat / finhet</label>
                 <select required value={karat} onChange={(e) => setKarat(e.target.value)} className="w-full">
                   <option value="">Välj...</option>
                   {KARAT_OPTIONS.map((k) => (
@@ -244,6 +269,47 @@ export default function SubmitPage() {
               </div>
             </div>
 
+            {/* Diamonds / gemstones */}
+            <div className="rounded-xl border border-espresso-100 p-4">
+              <label className="flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={hasGem}
+                  onChange={(e) => setHasGem(e.target.checked)}
+                  className="!w-auto !p-0 h-4 w-4 accent-gold-500"
+                />
+                <span className="text-sm font-medium text-espresso-800">Innehåller diamant eller ädelsten</span>
+              </label>
+              {hasGem && (
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-sm text-espresso-600 mb-1.5">Typ av sten</label>
+                    <select value={gemstone} onChange={(e) => setGemstone(e.target.value)} className="w-full">
+                      {GEMSTONES.map((g) => (
+                        <option key={g} value={g}>
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-espresso-600 mb-1.5">
+                      Stenens vikt (carat) <span className="text-espresso-400 font-normal">(valfritt)</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={diamondCarat}
+                      onChange={(e) => setDiamondCarat(e.target.value)}
+                      placeholder="t.ex. 0.50"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-espresso-700 mb-1.5">
                 Minimipris i SEK <span className="text-espresso-400 font-normal">(valfritt)</span>
@@ -253,7 +319,7 @@ export default function SubmitPage() {
                 min="0"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                placeholder="Lämna tomt för att acceptera alla bud"
+                placeholder="Lämna tomt för att ta emot alla bud"
                 className="w-full"
               />
             </div>
@@ -264,7 +330,7 @@ export default function SubmitPage() {
                 rows={3}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Beskriv föremålet – ålder, ursprung, skick, gravyr eller annan info handlarna bör känna till."
+                placeholder="Beskriv föremålet: ålder, ursprung, skick, gravyr eller annat som handlarna bör känna till."
                 className="w-full"
               />
             </div>
@@ -278,7 +344,7 @@ export default function SubmitPage() {
             </button>
           </form>
 
-          {/* Sidebar — live estimate + reassurance */}
+          {/* Sidebar */}
           <aside className="lg:sticky lg:top-24 space-y-4">
             <div className="relative overflow-hidden rounded-2xl bg-espresso-900 p-6 shadow-gold">
               <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
@@ -287,10 +353,12 @@ export default function SubmitPage() {
                 {est ? (
                   <>
                     <p className="font-display text-2xl text-gradient-gold tabular-nums leading-tight">
-                      {formatSEK(est.low)} – {formatSEK(est.high)}
+                      {formatSEK(est.low)} till {formatSEK(est.high)}
                     </p>
                     <p className="text-espresso-100/50 text-xs mt-2">
-                      Metallvärde vid dagens guldpris. Handlarnas bud landar ofta högre.
+                      {hasGem
+                        ? 'Uppskattad utbetalning utifrån guldvärdet. Diamanter och ädelstenar höjer värdet ytterligare.'
+                        : 'Uppskattad utbetalning, något under metallvärdet vid dagens guldpris. Handlarna budar i konkurrens om slutpriset.'}
                     </p>
                   </>
                 ) : (
@@ -311,10 +379,8 @@ export default function SubmitPage() {
                   'Utbetalning via Swish',
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-full bg-gold-100 flex items-center justify-center shrink-0">
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 13l4 4L19 7" stroke="#a8791a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    <span className="w-4 h-4 rounded-full bg-gold-100 text-gold-700 flex items-center justify-center shrink-0">
+                      <CheckIcon size={10} strokeWidth={3} />
                     </span>
                     {t}
                   </li>

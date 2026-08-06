@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
+import { HomeIcon, StoreIcon } from '@/components/Icons'
 
 function validateField(name: string, value: string, role: string): string {
   switch (name) {
@@ -198,11 +199,13 @@ function LoginForm() {
                 {(['customer', 'dealer'] as const).map(r => (
                   <button key={r} onClick={() => setRole(r)} style={{
                     flex: 1, padding: '12px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', borderRadius: '8px', transition: 'all 0.2s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                     background: role === r ? '#2d1f0a' : 'transparent',
                     border: `1px solid ${role === r ? '#B8860B' : '#3d2d0f'}`,
                     color: role === r ? '#D4AF37' : '#8B6914',
                   }}>
-                    {r === 'customer' ? '🏠 Privatperson' : '🏪 Guldhandlare'}
+                    {r === 'customer' ? <HomeIcon size={16} /> : <StoreIcon size={16} />}
+                    {r === 'customer' ? 'Privatperson' : 'Guldhandlare'}
                   </button>
                 ))}
               </div>
