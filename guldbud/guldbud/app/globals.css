@@ -11,6 +11,13 @@
     scroll-behavior: smooth;
   }
 
+  /* Site-wide guard: never allow horizontal page scroll on any page. Wide
+     rows (tabs, tickers, tables) must scroll inside their own container. */
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-cream text-espresso-900;
     -webkit-font-smoothing: antialiased;

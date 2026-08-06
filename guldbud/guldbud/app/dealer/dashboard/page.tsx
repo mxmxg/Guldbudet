@@ -155,13 +155,14 @@ export default function DealerDashboard() {
       </div>
 
       <div className="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
-        {/* Tabs */}
-        <div className="flex gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-fit mb-6 shadow-soft">
+        {/* Tabs — scroll within their own row on small screens */}
+        <div className="-mx-4 px-4 mb-6 overflow-x-auto no-scrollbar">
+        <div className="flex gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-max shadow-soft">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
+              className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
                 tab === t.key ? 'bg-gold-sheen text-espresso-900 shadow-gold' : 'text-espresso-500 hover:text-espresso-800'
               }`}
             >
@@ -177,6 +178,7 @@ export default function DealerDashboard() {
               )}
             </button>
           ))}
+        </div>
         </div>
 
         {loading ? (
