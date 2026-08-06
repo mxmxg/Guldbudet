@@ -98,7 +98,7 @@ export default function HowItWorksPage() {
             {[
               {
                 q: 'Vad kostar det att lägga ut ett föremål?',
-                a: 'Det är helt gratis att lägga ut föremål och ta emot bud. Vi tar en provision på 5% av slutpriset om du accepterar ett bud.',
+                a: 'Det är helt gratis för dig som säljare – du får hela det vinnande budet, inga avgifter dras. GuldBud tar i stället en köparprovision av den vinnande handlaren.',
               },
               {
                 q: 'Kan jag ångra mig efter att jag accepterat ett bud?',
