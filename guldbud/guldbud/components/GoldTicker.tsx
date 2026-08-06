@@ -56,13 +56,13 @@ export default function GoldTicker() {
             <span key={k.label} className="shrink-0 whitespace-nowrap">
               <span className="text-gold-300 font-semibold">{k.label}</span>{' '}
               <span className="text-gold-100">{fmt(k.perGram)}</span>
-              <span className="text-espresso-200/40"> kr/g</span>
+              <span className="text-gold-300/70"> kr/g</span>
             </span>
           ))}
         </div>
 
         <span
-          className={`shrink-0 ml-auto pl-3 font-semibold tabular-nums ${
+          className={`shrink-0 font-semibold tabular-nums ${
             up ? 'text-emerald-400' : 'text-red-400'
           }`}
         >
