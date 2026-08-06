@@ -134,8 +134,20 @@ $$;
 
 -- ---- Profiles ----
 drop policy if exists "own profile" on public.profiles;
-create policy "own profile" on public.profiles
-  for all using (auth.uid() = id);
+drop policy if exists "own profile read" on public.profiles;
+drop policy if exists "own profile update" on public.profiles;
+-- Alla får läsa sin egen profil ...
+create policy "own profile read" on public.profiles
+  for select using (auth.uid() = id);
+-- ... men vid uppdatering får man INTE ändra sin egen roll eller sitt
+-- godkännande (annars skulle en handlare kunna självgodkänna sig via API:t).
+create policy "own profile update" on public.profiles
+  for update using (auth.uid() = id)
+  with check (
+    auth.uid() = id
+    and role = (select role from public.profiles where id = auth.uid())
+    and approved = (select approved from public.profiles where id = auth.uid())
+  );
 
 -- Admins får se OCH hantera alla profiler (t.ex. godkänna handlare).
 drop policy if exists "admins see all profiles" on public.profiles;

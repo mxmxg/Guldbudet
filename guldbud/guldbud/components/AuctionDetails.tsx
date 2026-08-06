@@ -102,17 +102,17 @@ export default function AuctionDetails({ item }: { item: any }) {
   const images: string[] = item.image_urls?.length ? item.image_urls : []
   const est = estimateRange(item.weight_grams || 0, item.karat || '')
 
-  // Anonymise dealers publicly ("Handlare #N") to prevent collusion; the real
-  // name is revealed to the owner only when accepting a bid (in AcceptBid).
-  const dealerNumbers: Record<string, number> = {}
-  let dealerCounter = 0
-  bids.forEach((b: any) => {
-    if (b.dealer_id && !(b.dealer_id in dealerNumbers)) {
-      dealerCounter += 1
-      dealerNumbers[b.dealer_id] = dealerCounter
-    }
-  })
-  const dealerLabel = (b: any) => `Handlare #${dealerNumbers[b.dealer_id] || '?'}`
+  // Anonymise dealers publicly with a stable six-digit customer number derived
+  // from their id. Because it is hashed (not sequential) it hides both the
+  // dealer's identity and how many dealers are connected. The real name is
+  // shown to the owner only when accepting a bid (in AcceptBid).
+  const dealerCode = (id: string | null | undefined) => {
+    if (!id) return '000000'
+    let h = 0
+    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
+    return String(h % 900000 + 100000)
+  }
+  const dealerLabel = (b: any) => `Handlare ${dealerCode(b.dealer_id)}`
 
   return (
     <>
@@ -129,7 +129,7 @@ export default function AuctionDetails({ item }: { item: any }) {
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           {/* ===== Gallery ===== */}
           <div className="md:sticky md:top-24 md:self-start">
-            <div className="aspect-square rounded-2xl overflow-hidden bg-espresso-100 relative shadow-soft">
+            <div className="aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shadow-soft">
               {images[activeImg] ? (
                 <Image
                   src={images[activeImg]}
@@ -160,7 +160,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                   <button
                     key={i}
                     onClick={() => setActiveImg(i)}
-                    className={`aspect-square rounded-xl overflow-hidden relative border-2 bg-espresso-100 transition ${
+                    className={`aspect-square rounded-xl overflow-hidden relative border-2 bg-gradient-to-br from-espresso-900 to-espresso-800 transition ${
                       activeImg === i ? 'border-gold-400 shadow-gold' : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
@@ -362,7 +362,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                             i === 0 ? 'bg-gold-sheen text-espresso-900' : 'bg-espresso-100 text-espresso-500'
                           }`}
                         >
-                          {dealerNumbers[bid.dealer_id] || '?'}
+                          {dealerCode(bid.dealer_id).slice(-2)}
                         </div>
                         <div>
                           <p className={`${i === 0 ? 'font-medium text-espresso-900' : 'text-espresso-600'}`}>
