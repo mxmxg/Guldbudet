@@ -70,10 +70,13 @@ export default function AdminPage() {
         .select('*, profiles(full_name, email)')
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
+      // Bara aktiva auktioner. Så fort ett bud godkänts blir föremålet en
+      // affär (status 'closed' + order) och hanteras under Affärer i stället –
+      // det ska inte skräpa i auktionslistan.
       const { data: active } = await supabase
         .from('items')
         .select('*')
-        .in('status', ['active', 'closed'])
+        .eq('status', 'active')
         .order('created_at', { ascending: false })
 
       const { count: ordersCount } = await supabase
@@ -201,9 +204,9 @@ export default function AdminPage() {
       setAcceptingId(null)
       return
     }
-    setLiveItems((prev) =>
-      prev.map((i) => (i.id === item.id ? { ...i, status: 'closed', accepted_bid_id: bidId } : i))
-    )
+    // Föremålet blir nu en affär (hanteras under Affärer) → ta bort det från
+    // auktionslistan så det inte ligger kvar och skräpar.
+    setLiveItems((prev) => prev.filter((i) => i.id !== item.id))
     // En ny affär skapas av DB-triggern → håll "pågående affärer"-räknaren i synk
     // utan att behöva ladda om sidan.
     setOpenOrders((n) => n + 1)
@@ -680,7 +683,6 @@ export default function AdminPage() {
           const filtered = liveItems.filter(match)
           const awaiting = filtered.filter((i) => isEnded(i))
           const liveNow = filtered.filter((i) => i.status === 'active' && !isEnded(i))
-          const done = filtered.filter((i) => i.status === 'closed')
           const Group = ({
             title,
             items,
@@ -736,12 +738,6 @@ export default function AdminPage() {
                     title="Pågår just nu"
                     items={liveNow}
                     accent="bg-emerald-100 text-emerald-700"
-                  />
-                  <Group
-                    title="Avslutade"
-                    items={done}
-                    accent="bg-espresso-100 text-espresso-500"
-                    hint="Budet är godkänt – affären hanteras under Affärer."
                   />
                 </>
               )}
