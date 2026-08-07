@@ -159,6 +159,12 @@ create policy "own profile update" on public.profiles
     -- handlaren själv (endast admin). null hanteras med "is not distinct from".
     and company_name is not distinct from (select company_name from public.profiles where id = auth.uid())
     and org_number is not distinct from (select org_number from public.profiles where id = auth.uid())
+    -- Personnummer är en identitetsuppgift och låses när det väl är satt. Får
+    -- fortfarande sättas en gång om det saknas (t.ex. äldre konton).
+    and (
+      personal_number is not distinct from (select personal_number from public.profiles where id = auth.uid())
+      or (select personal_number from public.profiles where id = auth.uid()) is null
+    )
   );
 
 -- Admins får se OCH hantera alla profiler (t.ex. godkänna handlare).

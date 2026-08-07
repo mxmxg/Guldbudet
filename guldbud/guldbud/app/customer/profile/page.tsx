@@ -68,7 +68,9 @@ export default function CustomerProfilePage() {
       .update({
         full_name: form.full_name,
         phone: form.phone || null,
-        personal_number: form.personal_number || null,
+        // Personnummer är en identitetsuppgift – låst när det väl är satt.
+        // (Skickas bara med om det ännu inte finns, så det kan sättas en gång.)
+        ...(profile.personal_number ? {} : { personal_number: form.personal_number || null }),
         address: form.address || null,
         postal_code: form.postal_code || null,
         city: form.city || null,
@@ -117,8 +119,14 @@ export default function CustomerProfilePage() {
                 <Field label="Namn">
                   <input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
                 </Field>
-                <Field label="Personnummer">
-                  <input value={form.personal_number} onChange={(e) => setForm({ ...form, personal_number: e.target.value })} placeholder="ÅÅÅÅMMDD-XXXX" />
+                <Field label={profile.personal_number ? 'Personnummer (kan ej ändras)' : 'Personnummer'}>
+                  <input
+                    value={form.personal_number}
+                    onChange={(e) => setForm({ ...form, personal_number: e.target.value })}
+                    disabled={!!profile.personal_number}
+                    className={profile.personal_number ? '!bg-espresso-50 !text-espresso-400' : ''}
+                    placeholder="ÅÅÅÅMMDD-XXXX"
+                  />
                 </Field>
                 <Field label="E-post (kan ej ändras här)">
                   <input value={profile.email} disabled className="!bg-espresso-50 !text-espresso-400" />
