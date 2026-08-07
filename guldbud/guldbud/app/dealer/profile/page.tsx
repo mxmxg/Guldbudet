@@ -188,7 +188,11 @@ export default function DealerProfilePage() {
             <HeaderStat value={stats.bids} label="Bud lagda" />
             <HeaderStat value={stats.items} label="Auktioner budat på" />
             <HeaderStat value={stats.leading} label="Ledande nu" accent />
-            <HeaderStat value={stats.won} label="Vunna auktioner" />
+            <HeaderStat
+              value={stats.won}
+              label="Vunna auktioner"
+              href={orders.length > 0 ? '#mina-affarer' : undefined}
+            />
           </div>
         </div>
       </div>
@@ -304,7 +308,7 @@ export default function DealerProfilePage() {
 
             {/* Mina affärer */}
             {orders.length > 0 && (
-              <section className="card p-6">
+              <section id="mina-affarer" className="card p-6 scroll-mt-24">
                 <h2 className="font-display text-xl text-espresso-900 mb-1">Mina affärer</h2>
                 <p className="text-xs text-espresso-400 mb-4">Auktioner du vunnit och deras status.</p>
                 <div className="grid gap-3">
@@ -365,12 +369,32 @@ export default function DealerProfilePage() {
   )
 }
 
-function HeaderStat({ value, label, accent }: { value: number; label: string; accent?: boolean }) {
-  return (
-    <div>
+function HeaderStat({
+  value,
+  label,
+  accent,
+  href,
+}: {
+  value: number
+  label: string
+  accent?: boolean
+  href?: string
+}) {
+  const inner = (
+    <>
       <div className={`font-display text-2xl ${accent ? 'text-emerald-400' : 'text-gold-100'}`}>{value}</div>
-      <div className="text-xs text-gold-500/60">{label}</div>
-    </div>
+      <div className="text-xs text-gold-500/60 group-hover:text-gold-400 transition">
+        {label}
+        {href && <span aria-hidden> →</span>}
+      </div>
+    </>
+  )
+  return href ? (
+    <a href={href} className="group block -m-1 p-1 rounded-lg">
+      {inner}
+    </a>
+  ) : (
+    <div>{inner}</div>
   )
 }
 
