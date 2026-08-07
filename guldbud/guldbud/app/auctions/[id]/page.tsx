@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase-server'
 import { notFound } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import AuctionDetails from '@/components/AuctionDetails'
+import JsonLd from '@/components/JsonLd'
+
+const SITE = 'https://guldbud.com'
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const supabase = createClient()
@@ -21,6 +24,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   return {
     title,
     description,
+    alternates: { canonical: `/auctions/${params.id}` },
     openGraph: { title, description, images: image ? [{ url: image }] : undefined, type: 'website' },
   }
 }
@@ -35,8 +39,54 @@ export default async function AuctionPage({ params }: { params: { id: string } }
     .from('items').select('*')
     .eq('id', params.id).single()
   if (!item) return notFound()
+
+  // Current top bid → used as the structured-data offer price (matches the
+  // visible price on the page, which Google requires).
+  const { data: topBids } = await supabase
+    .from('bids').select('amount')
+    .eq('item_id', params.id)
+    .order('amount', { ascending: false })
+    .limit(1)
+  const topBid = topBids?.[0]?.amount || 0
+
+  const url = `${SITE}/auctions/${params.id}`
+  const specs = [item.category, item.weight_grams ? `${item.weight_grams} g` : '', item.karat]
+    .filter(Boolean)
+    .join(' · ')
+  const productLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: item.title,
+    description: item.description || `${item.title} – ${specs}. Bjud hos GuldBud, Sveriges guldauktion.`,
+    image: item.image_urls || undefined,
+    category: item.category || 'Guld',
+    url,
+    ...(topBid > 0
+      ? {
+          offers: {
+            '@type': 'Offer',
+            price: topBid,
+            priceCurrency: 'SEK',
+            availability: 'https://schema.org/InStock',
+            url,
+          },
+        }
+      : {}),
+  }
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Hem', item: SITE },
+      { '@type': 'ListItem', position: 2, name: 'Auktioner', item: `${SITE}/auctions` },
+      { '@type': 'ListItem', position: 3, name: item.title, item: url },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-cream">
+      <JsonLd data={productLd} />
+      <JsonLd data={breadcrumbLd} />
       <Navbar />
       <AuctionDetails item={item} />
     </div>
