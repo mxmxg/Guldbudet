@@ -24,9 +24,23 @@ export default function PendingPage() {
         <h1 style={{ color: '#f5e6c8', fontSize: '20px', fontWeight: 600, marginBottom: '10px' }}>
           Tack för din registrering!
         </h1>
-        <p style={{ color: '#8B6914', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px' }}>
+        <p style={{ color: '#8B6914', fontSize: '14px', lineHeight: 1.6, marginBottom: '14px' }}>
           Ditt handlarkonto granskas av vårt team. Du får ett e-postmeddelande inom 1–2 arbetsdagar när du är
           godkänd att börja buda.
+        </p>
+        <p
+          style={{
+            color: '#c9a84c',
+            fontSize: '13px',
+            lineHeight: 1.6,
+            marginBottom: '24px',
+            background: '#2d1f0a',
+            border: '1px solid #3d2d0f',
+            borderRadius: '10px',
+            padding: '12px 14px',
+          }}
+        >
+          Bekräfta först din e-post via länken vi just mejlade dig — det behövs för att kunna logga in.
         </p>
         <Link href="/" style={{ color: '#B8860B', fontSize: '14px', fontWeight: 500 }}>
           Tillbaka till startsidan
