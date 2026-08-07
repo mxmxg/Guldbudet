@@ -34,6 +34,7 @@ export default function AdminPage() {
   const [endingId, setEndingId] = useState<string | null>(null)
   const [acceptId, setAcceptId] = useState<string | null>(null)
   const [acceptingId, setAcceptingId] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
   const router = useRouter()
@@ -450,6 +451,53 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Att göra – allt som kräver åtgärd, med hopplänkar så inget glöms */}
+        {(() => {
+          const awaitingCount = liveItems.filter((i) => isEnded(i)).length
+          const todos = [
+            { n: pendingDealers.length, label: 'handlare att godkänna', href: '#granska-handlare' },
+            { n: pendingItems.length, label: 'föremål att granska', href: '#granska-foremal' },
+            { n: awaitingCount, label: 'auktioner kräver åtgärd', href: '#auktioner' },
+            { n: openOrders, label: 'affärer att hantera', href: '/admin/orders', emerald: true, link: true },
+          ].filter((t) => t.n > 0)
+          const total = todos.reduce((s, t) => s + t.n, 0)
+          return (
+            <div className="card p-5 mb-6">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <h2 className="font-display text-lg text-espresso-900">Att göra</h2>
+                <span className={`chip ${total === 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                  {total === 0 ? 'Allt hanterat ✓' : `${total} väntar`}
+                </span>
+              </div>
+              {todos.length === 0 ? (
+                <p className="text-sm text-espresso-400">Inga åtgärder väntar just nu. Bra jobbat! 🎉</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {todos.map((t) => {
+                    const cls = `inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition ${
+                      t.emerald
+                        ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-800'
+                        : 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-800'
+                    }`
+                    const inner = (
+                      <>
+                        <span className="font-display text-base leading-none">{t.n}</span>
+                        <span>{t.label}</span>
+                        <span aria-hidden>→</span>
+                      </>
+                    )
+                    return t.link ? (
+                      <Link key={t.label} href={t.href} className={cls}>{inner}</Link>
+                    ) : (
+                      <a key={t.label} href={t.href} className={cls}>{inner}</a>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })()}
+
         {/* Analytics overview */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
           <div className="card p-4">
@@ -482,7 +530,7 @@ export default function AdminPage() {
         </Link>
 
         {/* Dealers */}
-        <section className="mb-12">
+        <section id="granska-handlare" className="mb-12 scroll-mt-24">
           <h2 className="font-display text-xl text-espresso-900 mb-4 flex items-center gap-2">
             Handlare att godkänna
             <span className="chip bg-amber-100 text-amber-700">{pendingDealers.length}</span>
@@ -551,7 +599,7 @@ export default function AdminPage() {
         </section>
 
         {/* Items */}
-        <section>
+        <section id="granska-foremal" className="scroll-mt-24">
           <h2 className="font-display text-xl text-espresso-900 mb-4 flex items-center gap-2">
             Föremål att granska
             <span className="chip bg-amber-100 text-amber-700">{pendingItems.length}</span>
@@ -612,9 +660,15 @@ export default function AdminPage() {
 
         {/* Active / closed auctions — manage & delete */}
         {(() => {
-          const awaiting = liveItems.filter((i) => isEnded(i))
-          const liveNow = liveItems.filter((i) => i.status === 'active' && !isEnded(i))
-          const done = liveItems.filter((i) => i.status === 'closed')
+          const q = search.trim().toLowerCase()
+          const match = (i: any) =>
+            !q ||
+            (i.title || '').toLowerCase().includes(q) ||
+            (sellers[i.owner_id]?.full_name || '').toLowerCase().includes(q)
+          const filtered = liveItems.filter(match)
+          const awaiting = filtered.filter((i) => isEnded(i))
+          const liveNow = filtered.filter((i) => i.status === 'active' && !isEnded(i))
+          const done = filtered.filter((i) => i.status === 'closed')
           const Group = ({
             title,
             items,
@@ -637,13 +691,27 @@ export default function AdminPage() {
               </div>
             )
           return (
-            <section className="mt-12 space-y-8">
-              <h2 className="font-display text-xl text-espresso-900 flex items-center gap-2">
-                Auktioner
-                <span className="chip bg-espresso-100 text-espresso-500">{liveItems.length}</span>
-              </h2>
+            <section id="auktioner" className="mt-12 space-y-8 scroll-mt-24">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <h2 className="font-display text-xl text-espresso-900 flex items-center gap-2">
+                  Auktioner
+                  <span className="chip bg-espresso-100 text-espresso-500">{liveItems.length}</span>
+                </h2>
+                {liveItems.length > 0 && (
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Sök titel eller säljare…"
+                    className="text-sm px-3 py-2 rounded-xl border border-espresso-200 w-full sm:w-64"
+                  />
+                )}
+              </div>
               {liveItems.length === 0 ? (
                 <div className="card p-8 text-center text-espresso-400 text-sm">Inga auktioner ännu.</div>
+              ) : filtered.length === 0 ? (
+                <div className="card p-8 text-center text-espresso-400 text-sm">
+                  Inga träffar för “{search}”.
+                </div>
               ) : (
                 <>
                   <Group
