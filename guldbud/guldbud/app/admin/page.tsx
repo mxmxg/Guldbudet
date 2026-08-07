@@ -439,18 +439,18 @@ export default function AdminPage() {
                       )}
                     </div>
                   </div>
-                  <div className="shrink-0 flex items-center gap-2 flex-wrap justify-end">
+                  <div className="w-full min-w-0 sm:w-auto sm:shrink-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap sm:justify-end">
                     {item.status === 'active' && confirmId !== item.id && (
                       <>
                         <button
                           onClick={() => extendAuction(item)}
-                          className="text-sm text-espresso-600 hover:text-gold-700 border border-espresso-200 hover:border-gold-300 px-3 py-2 rounded-xl transition"
+                          className="w-full sm:w-auto text-sm text-espresso-600 hover:text-gold-700 border border-espresso-200 hover:border-gold-300 px-3 py-2 rounded-xl transition"
                         >
                           Förläng 24h
                         </button>
                         <button
                           onClick={() => endAuctionNow(item)}
-                          className="text-sm text-espresso-600 hover:text-espresso-900 border border-espresso-200 px-3 py-2 rounded-xl transition"
+                          className="w-full sm:w-auto text-sm text-espresso-600 hover:text-espresso-900 border border-espresso-200 px-3 py-2 rounded-xl transition"
                         >
                           Avsluta nu
                         </button>
@@ -458,23 +458,23 @@ export default function AdminPage() {
                           type="datetime-local"
                           defaultValue={toLocalInput(item.auction_ends_at)}
                           onChange={(e) => setSpecificEnd(item, e.target.value)}
-                          className="text-sm !py-2 !px-2"
+                          className="w-full sm:w-auto min-w-0 box-border text-sm !py-2 !px-2"
                           title="Sätt specifik sluttid"
                         />
                       </>
                     )}
                     {confirmId === item.id ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
                         <button
                           onClick={() => deleteItem(item.id)}
                           disabled={deletingId === item.id}
-                          className="text-sm font-medium px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition"
+                          className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition"
                         >
                           {deletingId === item.id ? 'Raderar...' : 'Ja, radera'}
                         </button>
                         <button
                           onClick={() => setConfirmId(null)}
-                          className="text-sm font-medium px-3 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
+                          className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
                         >
                           Avbryt
                         </button>
@@ -482,7 +482,7 @@ export default function AdminPage() {
                     ) : (
                       <button
                         onClick={() => setConfirmId(item.id)}
-                        className="inline-flex items-center gap-1.5 text-sm text-espresso-500 hover:text-red-600 border border-espresso-200 hover:border-red-200 px-3 py-2 rounded-xl transition"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-sm text-espresso-500 hover:text-red-600 border border-espresso-200 hover:border-red-200 px-3 py-2 rounded-xl transition"
                       >
                         <TrashIcon size={15} />
                         Radera
