@@ -57,8 +57,20 @@ export default function VerifyPage() {
           {email && <span style={{ color: '#f5e6c8', fontWeight: 600 }}>{email}</span>}. Klicka på länken i mejlet
           för att aktivera ditt konto.
         </p>
-        <p style={{ color: '#5a4020', fontSize: '12px', marginBottom: '20px' }}>
-          Hittar du inte mejlet? Kolla skräpposten.
+        <p
+          style={{
+            color: '#c9a84c',
+            fontSize: '13px',
+            lineHeight: 1.55,
+            marginBottom: '20px',
+            background: '#2d1f0a',
+            border: '1px solid #3d2d0f',
+            borderRadius: '10px',
+            padding: '11px 14px',
+          }}
+        >
+          📬 Ser du inget mejl? Kolla <strong style={{ color: '#f5e6c8' }}>skräpposten</strong> — bekräftelsemejl
+          hamnar ofta där.
         </p>
 
         <button
