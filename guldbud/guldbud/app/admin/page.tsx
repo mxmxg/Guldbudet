@@ -244,6 +244,150 @@ export default function AdminPage() {
     setPendingItems((prev) => prev.filter((i) => i.id !== id))
   }
 
+  const isEnded = (item: any) =>
+    item.status === 'active' && !!item.auction_ends_at && new Date(item.auction_ends_at) <= new Date()
+
+  const renderAuctionRow = (item: any) => {
+    const ended = isEnded(item)
+    return (
+      <div key={item.id} className="card p-4 flex gap-4 items-center flex-wrap sm:flex-nowrap">
+        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative shrink-0">
+          {item.image_urls?.[0] && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={item.image_urls[0]} alt={item.title} className="w-full h-full object-contain" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-medium text-espresso-900">{item.title}</p>
+            {item.status === 'closed' ? (
+              <span className="chip bg-espresso-100 text-espresso-500">Avslutad</span>
+            ) : ended ? (
+              <span className="chip bg-amber-100 text-amber-700">Slut – inväntar säljare</span>
+            ) : (
+              <span className="chip bg-emerald-100 text-emerald-700">Aktiv</span>
+            )}
+          </div>
+          <p className="text-xs text-espresso-400 mt-0.5">
+            {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
+            {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
+          </p>
+          {sellers[item.owner_id] && (
+            <p className="text-xs text-espresso-500 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <span>
+                Säljare:{' '}
+                <span className="font-medium text-espresso-800">{sellers[item.owner_id].full_name || '—'}</span>
+                {sellers[item.owner_id].city ? ` · ${sellers[item.owner_id].city}` : ''}
+              </span>
+              {sellers[item.owner_id].email && (
+                <a href={`mailto:${sellers[item.owner_id].email}`} className="text-gold-700 hover:underline">
+                  {sellers[item.owner_id].email}
+                </a>
+              )}
+              {sellers[item.owner_id].phone && (
+                <a href={`tel:${sellers[item.owner_id].phone}`} className="text-gold-700 hover:underline">
+                  {sellers[item.owner_id].phone}
+                </a>
+              )}
+            </p>
+          )}
+          <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+            <span className="text-sm font-semibold text-gold-700 tabular-nums">
+              {topBids[item.id] ? formatSEK(topBids[item.id]) : 'Inga bud'}
+            </span>
+            <span className="text-xs text-espresso-400">{bidCounts[item.id] || 0} bud</span>
+            {item.status === 'active' && item.auction_ends_at && !ended && (
+              <CountdownTimer endsAt={item.auction_ends_at} variant="chip" />
+            )}
+            {ended && (
+              <span className="text-xs font-medium text-amber-700">Auktionen har avslutats</span>
+            )}
+          </div>
+        </div>
+        <div className="w-full min-w-0 sm:w-auto sm:shrink-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap sm:justify-end">
+          {/* Godkänn vinnande bud åt säljaren när auktionen är slut */}
+          {item.status === 'active' && ended && topBidIds[item.id] && confirmId !== item.id && (
+            acceptId === item.id ? (
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => acceptTopBid(item)}
+                  disabled={acceptingId === item.id}
+                  className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition disabled:opacity-50"
+                >
+                  {acceptingId === item.id ? 'Godkänner…' : `Ja, godkänn ${formatSEK(topBids[item.id])}`}
+                </button>
+                <button
+                  onClick={() => setAcceptId(null)}
+                  className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
+                >
+                  Avbryt
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setAcceptId(item.id)}
+                className="w-full sm:w-auto text-sm font-medium px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition"
+              >
+                Godkänn budet åt säljaren →
+              </button>
+            )
+          )}
+          {item.status === 'active' && confirmId !== item.id && acceptId !== item.id && (
+            <>
+              <button
+                onClick={() => extendAuction(item)}
+                className="w-full sm:w-auto text-sm text-espresso-600 hover:text-gold-700 border border-espresso-200 hover:border-gold-300 px-3 py-2 rounded-xl transition"
+              >
+                Förläng 24h
+              </button>
+              {!ended && (
+                <button
+                  onClick={() => endAuctionNow(item)}
+                  disabled={endingId === item.id}
+                  className="w-full sm:w-auto text-sm text-espresso-600 hover:text-espresso-900 border border-espresso-200 px-3 py-2 rounded-xl transition disabled:opacity-50"
+                >
+                  {endingId === item.id ? 'Avslutar…' : 'Avsluta nu'}
+                </button>
+              )}
+              <input
+                type="datetime-local"
+                defaultValue={toLocalInput(item.auction_ends_at)}
+                onChange={(e) => setSpecificEnd(item, e.target.value)}
+                className="w-full sm:w-auto min-w-0 box-border text-sm !py-2 !px-2"
+                title="Sätt specifik sluttid"
+              />
+            </>
+          )}
+          {confirmId === item.id ? (
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={() => deleteItem(item.id)}
+                disabled={deletingId === item.id}
+                className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition"
+              >
+                {deletingId === item.id ? 'Raderar...' : 'Ja, radera'}
+              </button>
+              <button
+                onClick={() => setConfirmId(null)}
+                className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
+              >
+                Avbryt
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmId(item.id)}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-sm text-espresso-500 hover:text-red-600 border border-espresso-200 hover:border-red-200 px-3 py-2 rounded-xl transition"
+            >
+              <TrashIcon size={15} />
+              Radera
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   if (loading)
     return (
       <div className="min-h-screen">
@@ -467,161 +611,63 @@ export default function AdminPage() {
         </section>
 
         {/* Active / closed auctions — manage & delete */}
-        <section className="mt-12">
-          <h2 className="font-display text-xl text-espresso-900 mb-4 flex items-center gap-2">
-            Auktioner
-            <span className="chip bg-espresso-100 text-espresso-500">{liveItems.length}</span>
-          </h2>
-          {liveItems.length === 0 ? (
-            <div className="card p-8 text-center text-espresso-400 text-sm">Inga auktioner ännu.</div>
-          ) : (
-            <div className="space-y-3">
-              {liveItems.map((item) => {
-                const ended =
-                  item.status === 'active' &&
-                  !!item.auction_ends_at &&
-                  new Date(item.auction_ends_at) <= new Date()
-                return (
-                <div key={item.id} className="card p-4 flex gap-4 items-center flex-wrap sm:flex-nowrap">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative shrink-0">
-                    {item.image_urls?.[0] && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.image_urls[0]} alt={item.title} className="w-full h-full object-contain" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-medium text-espresso-900">{item.title}</p>
-                      {item.status === 'closed' ? (
-                        <span className="chip bg-espresso-100 text-espresso-500">Avslutad</span>
-                      ) : ended ? (
-                        <span className="chip bg-amber-100 text-amber-700">Slut – inväntar säljare</span>
-                      ) : (
-                        <span className="chip bg-emerald-100 text-emerald-700">Aktiv</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-espresso-400 mt-0.5">
-                      {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
-                      {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
-                    </p>
-                    {sellers[item.owner_id] && (
-                      <p className="text-xs text-espresso-500 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                        <span>
-                          Säljare:{' '}
-                          <span className="font-medium text-espresso-800">{sellers[item.owner_id].full_name || '—'}</span>
-                          {sellers[item.owner_id].city ? ` · ${sellers[item.owner_id].city}` : ''}
-                        </span>
-                        {sellers[item.owner_id].email && (
-                          <a href={`mailto:${sellers[item.owner_id].email}`} className="text-gold-700 hover:underline">
-                            {sellers[item.owner_id].email}
-                          </a>
-                        )}
-                        {sellers[item.owner_id].phone && (
-                          <a href={`tel:${sellers[item.owner_id].phone}`} className="text-gold-700 hover:underline">
-                            {sellers[item.owner_id].phone}
-                          </a>
-                        )}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                      <span className="text-sm font-semibold text-gold-700 tabular-nums">
-                        {topBids[item.id] ? formatSEK(topBids[item.id]) : 'Inga bud'}
-                      </span>
-                      <span className="text-xs text-espresso-400">{bidCounts[item.id] || 0} bud</span>
-                      {item.status === 'active' && item.auction_ends_at && !ended && (
-                        <CountdownTimer endsAt={item.auction_ends_at} variant="chip" />
-                      )}
-                      {ended && (
-                        <span className="text-xs font-medium text-amber-700">Auktionen har avslutats</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="w-full min-w-0 sm:w-auto sm:shrink-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap sm:justify-end">
-                    {/* Godkänn vinnande bud åt säljaren när auktionen är slut */}
-                    {item.status === 'active' && ended && topBidIds[item.id] && confirmId !== item.id && (
-                      acceptId === item.id ? (
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                          <button
-                            onClick={() => acceptTopBid(item)}
-                            disabled={acceptingId === item.id}
-                            className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition disabled:opacity-50"
-                          >
-                            {acceptingId === item.id ? 'Godkänner…' : `Ja, godkänn ${formatSEK(topBids[item.id])}`}
-                          </button>
-                          <button
-                            onClick={() => setAcceptId(null)}
-                            className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
-                          >
-                            Avbryt
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setAcceptId(item.id)}
-                          className="w-full sm:w-auto text-sm font-medium px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition"
-                        >
-                          Godkänn budet åt säljaren →
-                        </button>
-                      )
-                    )}
-                    {item.status === 'active' && confirmId !== item.id && acceptId !== item.id && (
-                      <>
-                        <button
-                          onClick={() => extendAuction(item)}
-                          className="w-full sm:w-auto text-sm text-espresso-600 hover:text-gold-700 border border-espresso-200 hover:border-gold-300 px-3 py-2 rounded-xl transition"
-                        >
-                          Förläng 24h
-                        </button>
-                        {!ended && (
-                          <button
-                            onClick={() => endAuctionNow(item)}
-                            disabled={endingId === item.id}
-                            className="w-full sm:w-auto text-sm text-espresso-600 hover:text-espresso-900 border border-espresso-200 px-3 py-2 rounded-xl transition disabled:opacity-50"
-                          >
-                            {endingId === item.id ? 'Avslutar…' : 'Avsluta nu'}
-                          </button>
-                        )}
-                        <input
-                          type="datetime-local"
-                          defaultValue={toLocalInput(item.auction_ends_at)}
-                          onChange={(e) => setSpecificEnd(item, e.target.value)}
-                          className="w-full sm:w-auto min-w-0 box-border text-sm !py-2 !px-2"
-                          title="Sätt specifik sluttid"
-                        />
-                      </>
-                    )}
-                    {confirmId === item.id ? (
-                      <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <button
-                          onClick={() => deleteItem(item.id)}
-                          disabled={deletingId === item.id}
-                          className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition"
-                        >
-                          {deletingId === item.id ? 'Raderar...' : 'Ja, radera'}
-                        </button>
-                        <button
-                          onClick={() => setConfirmId(null)}
-                          className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
-                        >
-                          Avbryt
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setConfirmId(item.id)}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-sm text-espresso-500 hover:text-red-600 border border-espresso-200 hover:border-red-200 px-3 py-2 rounded-xl transition"
-                      >
-                        <TrashIcon size={15} />
-                        Radera
-                      </button>
-                    )}
-                  </div>
-                </div>
-                )
-              })}
-            </div>
-          )}
-        </section>
+        {(() => {
+          const awaiting = liveItems.filter((i) => isEnded(i))
+          const liveNow = liveItems.filter((i) => i.status === 'active' && !isEnded(i))
+          const done = liveItems.filter((i) => i.status === 'closed')
+          const Group = ({
+            title,
+            items,
+            accent,
+            hint,
+          }: {
+            title: string
+            items: any[]
+            accent: string
+            hint?: string
+          }) =>
+            items.length === 0 ? null : (
+              <div>
+                <h3 className="font-display text-lg text-espresso-900 mb-1 flex items-center gap-2">
+                  {title}
+                  <span className={`chip ${accent}`}>{items.length}</span>
+                </h3>
+                {hint && <p className="text-xs text-espresso-400 mb-3">{hint}</p>}
+                <div className={`space-y-3 ${hint ? '' : 'mt-3'}`}>{items.map(renderAuctionRow)}</div>
+              </div>
+            )
+          return (
+            <section className="mt-12 space-y-8">
+              <h2 className="font-display text-xl text-espresso-900 flex items-center gap-2">
+                Auktioner
+                <span className="chip bg-espresso-100 text-espresso-500">{liveItems.length}</span>
+              </h2>
+              {liveItems.length === 0 ? (
+                <div className="card p-8 text-center text-espresso-400 text-sm">Inga auktioner ännu.</div>
+              ) : (
+                <>
+                  <Group
+                    title="Kräver åtgärd"
+                    items={awaiting}
+                    accent="bg-amber-100 text-amber-700"
+                    hint="Auktionen är slut. Godkänn det vinnande budet åt säljaren för att skapa affären."
+                  />
+                  <Group
+                    title="Pågår just nu"
+                    items={liveNow}
+                    accent="bg-emerald-100 text-emerald-700"
+                  />
+                  <Group
+                    title="Avslutade"
+                    items={done}
+                    accent="bg-espresso-100 text-espresso-500"
+                    hint="Budet är godkänt – affären hanteras under Affärer."
+                  />
+                </>
+              )}
+            </section>
+          )
+        })()}
       </div>
       <Footer />
     </div>
