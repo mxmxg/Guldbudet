@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import AuctionCard from '@/components/AuctionCard'
 import ValueEstimator from '@/components/ValueEstimator'
-import LiveGoldPrice from '@/components/LiveGoldPrice'
 import Reveal from '@/components/Reveal'
 import CountUp from '@/components/CountUp'
 import Footer from '@/components/Footer'
@@ -309,10 +308,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
               Ange vikt och karat så räknar vi ut ett indikativt auktionsvärde utifrån dagens
               guldpris. Sedan låter du handlarna tävla om att ge dig mer.
             </p>
-            <div className="mt-6">
-              <LiveGoldPrice variant="card" className="max-w-sm" />
-            </div>
-            <ul className="mt-6 space-y-3">
+            <ul className="mt-8 space-y-3">
               {[
                 'Inga dolda avgifter, det är gratis att lägga ut',
                 'Du bestämmer själv om du accepterar ett bud',

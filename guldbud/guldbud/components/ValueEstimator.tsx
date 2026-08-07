@@ -35,9 +35,18 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
       <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-gold-500/10 blur-3xl" />
 
       <div className="relative p-7 sm:p-9">
-        <div className="flex items-center gap-2 mb-1">
-          <SparkleIcon />
-          <span className="eyebrow text-gold-400/90">Värderingskalkylator</span>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center gap-2">
+            <SparkleIcon />
+            <span className="eyebrow text-gold-400/90">Värderingskalkylator</span>
+          </div>
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-gold-200/80 tabular-nums">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-70 animate-pulse-ring" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold-400" />
+            </span>
+            Guld {Math.round(spot).toLocaleString('sv-SE')} kr/g
+          </span>
         </div>
         <h3 className="font-display text-2xl text-gold-100 mb-1">Vad är ditt guld värt?</h3>
         <p className="text-espresso-100/70 text-sm mb-7">
