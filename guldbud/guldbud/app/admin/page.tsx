@@ -63,7 +63,7 @@ export default function AdminPage() {
         .order('created_at', { ascending: false })
       const { data: active } = await supabase
         .from('items')
-        .select('*')
+        .select('*, profiles(full_name, email, phone, city)')
         .in('status', ['active', 'closed'])
         .order('created_at', { ascending: false })
 
@@ -449,6 +449,25 @@ export default function AdminPage() {
                       {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
                       {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
                     </p>
+                    {item.profiles && (
+                      <p className="text-xs text-espresso-500 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <span>
+                          Säljare:{' '}
+                          <span className="font-medium text-espresso-800">{item.profiles.full_name || '—'}</span>
+                          {item.profiles.city ? ` · ${item.profiles.city}` : ''}
+                        </span>
+                        {item.profiles.email && (
+                          <a href={`mailto:${item.profiles.email}`} className="text-gold-700 hover:underline">
+                            {item.profiles.email}
+                          </a>
+                        )}
+                        {item.profiles.phone && (
+                          <a href={`tel:${item.profiles.phone}`} className="text-gold-700 hover:underline">
+                            {item.profiles.phone}
+                          </a>
+                        )}
+                      </p>
+                    )}
                     <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                       <span className="text-sm font-semibold text-gold-700 tabular-nums">
                         {topBids[item.id] ? formatSEK(topBids[item.id]) : 'Inga bud'}
