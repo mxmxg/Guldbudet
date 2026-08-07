@@ -47,6 +47,15 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     }
     await loadOrder()
     setLoading(false)
+    // Markera affärens meddelande-notiser som lästa (rensar badgen).
+    supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('user_id', user.id)
+      .eq('read', false)
+      .eq('link', `/admin/orders/${params.id}`)
+      .ilike('title', '%meddelande%')
+      .then(() => {})
   }
 
   const loadOrder = async () => {

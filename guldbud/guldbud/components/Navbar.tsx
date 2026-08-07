@@ -10,6 +10,7 @@ export default function Navbar() {
   const [role, setRole] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
   const [notifications, setNotifications] = useState<any[]>([])
+  const [msgUnread, setMsgUnread] = useState(0)
   const [showNotifs, setShowNotifs] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -41,13 +42,17 @@ export default function Navbar() {
         setRole(profile?.role ?? null)
         setReady(true)
         loadNotifications(data.user.id)
+        loadMsgUnread(data.user.id)
         // Live-uppdatera notisklockan när en ny notis kommer in.
         channel = supabase
           .channel(`notifs-${data.user.id}`)
           .on(
             'postgres_changes',
             { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${data.user.id}` },
-            () => loadNotifications(data.user.id)
+            () => {
+              loadNotifications(data.user.id)
+              loadMsgUnread(data.user.id)
+            }
           )
           .subscribe()
       } else {
@@ -64,6 +69,7 @@ export default function Navbar() {
         setUser(null)
         setRole(null)
         setNotifications([])
+        setMsgUnread(0)
       }
     })
 
@@ -114,6 +120,17 @@ export default function Navbar() {
       .order('created_at', { ascending: false })
       .limit(10)
     setNotifications(data || [])
+  }
+
+  // Antal olästa meddelande-notiser → badge på "Meddelanden".
+  const loadMsgUnread = async (userId: string) => {
+    const { count } = await supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('read', false)
+      .ilike('title', '%meddelande%')
+    setMsgUnread(count || 0)
   }
 
   const handleNotifClick = async (n: any) => {
@@ -204,7 +221,22 @@ export default function Navbar() {
             </Link>
 
             {/* Center links (desktop) */}
-            <div className="hidden md:flex items-center gap-1">{navLinks()}</div>
+            <div className="hidden md:flex items-center gap-1">
+              {navLinks()}
+              {ready && user && (
+                <Link
+                  href="/meddelanden"
+                  className="relative inline-flex items-center gap-1.5 text-sm text-gold-300/90 hover:text-gold-100 px-3 py-2 rounded-lg transition"
+                >
+                  Meddelanden
+                  {msgUnread > 0 && (
+                    <span className="bg-gold-500 text-espresso-900 text-[10px] font-semibold rounded-full min-w-[16px] h-4 px-1 inline-flex items-center justify-center">
+                      {msgUnread}
+                    </span>
+                  )}
+                </Link>
+              )}
+            </div>
 
             {/* Right */}
             <div className="flex items-center gap-3">
@@ -328,6 +360,19 @@ export default function Navbar() {
               <div id="mobile-menu" className="md:hidden absolute top-full inset-x-0 z-50 border-t border-espresso-800 bg-espresso-900 shadow-xl px-4 py-4 flex flex-col gap-1 animate-fade-in">
                 <div onClick={() => setMobileOpen(false)} className="flex flex-col gap-1">
                   {navLinks()}
+                  {ready && user && (
+                    <Link
+                      href="/meddelanden"
+                      className="relative text-sm text-gold-300/90 hover:text-gold-100 px-3 py-2 rounded-lg transition inline-flex items-center gap-2"
+                    >
+                      Meddelanden
+                      {msgUnread > 0 && (
+                        <span className="bg-gold-500 text-espresso-900 text-[10px] font-semibold rounded-full min-w-[16px] h-4 px-1 inline-flex items-center justify-center">
+                          {msgUnread}
+                        </span>
+                      )}
+                    </Link>
+                  )}
                 </div>
                 <div className="h-px bg-espresso-800 my-2" />
                 {user ? (

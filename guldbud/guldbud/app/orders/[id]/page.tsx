@@ -52,6 +52,16 @@ export default function OrderPage({ params }: { params: { id: string } }) {
     setOrder(o)
     setParty(o.seller_id === user.id ? 'seller' : o.dealer_id === user.id ? 'dealer' : null)
 
+    // Öppna affären → markera dess meddelande-notiser som lästa (rensar badgen).
+    supabase
+      .from('notifications')
+      .update({ read: true })
+      .eq('user_id', user.id)
+      .eq('read', false)
+      .eq('link', `/orders/${params.id}`)
+      .ilike('title', '%meddelande%')
+      .then(() => {})
+
     const { data: it } = await supabase
       .from('items')
       .select('id, title, image_urls, weight_grams, karat, category')
