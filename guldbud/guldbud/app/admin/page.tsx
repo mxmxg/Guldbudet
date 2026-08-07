@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [adminNotice, setAdminNotice] = useState('')
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [endingId, setEndingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
   const router = useRouter()
@@ -135,7 +136,17 @@ export default function AdminPage() {
     applyEnd(item, newEnd, `"${item.title}" förlängdes 24 timmar.`)
   }
 
-  const endAuctionNow = (item: any) => applyEnd(item, new Date().toISOString(), `"${item.title}" avslutas nu.`)
+  const endAuctionNow = async (item: any) => {
+    setEndingId(item.id)
+    await applyEnd(item, new Date().toISOString(), `"${item.title}" avslutades. Säljaren får nu bekräfta högsta budet.`)
+    // Kör avräkningen direkt så säljaren notifieras nu i stället för att vänta på cron-jobbet.
+    try {
+      await supabase.rpc('settle_ended_auctions')
+    } catch {
+      /* cron-jobbet kör ändå varje minut */
+    }
+    setEndingId(null)
+  }
 
   const setSpecificEnd = (item: any, localValue: string) => {
     if (!localValue) return
@@ -410,7 +421,12 @@ export default function AdminPage() {
             <div className="card p-8 text-center text-espresso-400 text-sm">Inga auktioner ännu.</div>
           ) : (
             <div className="space-y-3">
-              {liveItems.map((item) => (
+              {liveItems.map((item) => {
+                const ended =
+                  item.status === 'active' &&
+                  !!item.auction_ends_at &&
+                  new Date(item.auction_ends_at) <= new Date()
+                return (
                 <div key={item.id} className="card p-4 flex gap-4 items-center flex-wrap sm:flex-nowrap">
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative shrink-0">
                     {item.image_urls?.[0] && (
@@ -421,9 +437,13 @@ export default function AdminPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium text-espresso-900">{item.title}</p>
-                      <span className={`chip ${item.status === 'closed' ? 'bg-espresso-100 text-espresso-500' : 'bg-emerald-100 text-emerald-700'}`}>
-                        {item.status === 'closed' ? 'Avslutad' : 'Aktiv'}
-                      </span>
+                      {item.status === 'closed' ? (
+                        <span className="chip bg-espresso-100 text-espresso-500">Avslutad</span>
+                      ) : ended ? (
+                        <span className="chip bg-amber-100 text-amber-700">Slut – inväntar säljare</span>
+                      ) : (
+                        <span className="chip bg-emerald-100 text-emerald-700">Aktiv</span>
+                      )}
                     </div>
                     <p className="text-xs text-espresso-400 mt-0.5">
                       {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
@@ -434,8 +454,11 @@ export default function AdminPage() {
                         {topBids[item.id] ? formatSEK(topBids[item.id]) : 'Inga bud'}
                       </span>
                       <span className="text-xs text-espresso-400">{bidCounts[item.id] || 0} bud</span>
-                      {item.status === 'active' && item.auction_ends_at && (
+                      {item.status === 'active' && item.auction_ends_at && !ended && (
                         <CountdownTimer endsAt={item.auction_ends_at} variant="chip" />
+                      )}
+                      {ended && (
+                        <span className="text-xs font-medium text-amber-700">Auktionen har avslutats</span>
                       )}
                     </div>
                   </div>
@@ -448,12 +471,15 @@ export default function AdminPage() {
                         >
                           Förläng 24h
                         </button>
-                        <button
-                          onClick={() => endAuctionNow(item)}
-                          className="w-full sm:w-auto text-sm text-espresso-600 hover:text-espresso-900 border border-espresso-200 px-3 py-2 rounded-xl transition"
-                        >
-                          Avsluta nu
-                        </button>
+                        {!ended && (
+                          <button
+                            onClick={() => endAuctionNow(item)}
+                            disabled={endingId === item.id}
+                            className="w-full sm:w-auto text-sm text-espresso-600 hover:text-espresso-900 border border-espresso-200 px-3 py-2 rounded-xl transition disabled:opacity-50"
+                          >
+                            {endingId === item.id ? 'Avslutar…' : 'Avsluta nu'}
+                          </button>
+                        )}
                         <input
                           type="datetime-local"
                           defaultValue={toLocalInput(item.auction_ends_at)}
@@ -490,7 +516,8 @@ export default function AdminPage() {
                     )}
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </section>
