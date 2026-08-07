@@ -22,6 +22,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const [me, setMe] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [trackingSeller, setTrackingSeller] = useState('')
   const [trackingDealer, setTrackingDealer] = useState('')
 
@@ -68,21 +69,32 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     const next = nextStatus(order.status as OrderStatus)
     if (!next) return
     setSaving(true)
-    await supabase.from('orders').update({ status: next, updated_at: new Date().toISOString() }).eq('id', order.id)
-    await loadOrder()
+    setSaveError('')
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: next, updated_at: new Date().toISOString() })
+      .eq('id', order.id)
+    if (error) setSaveError('Kunde inte uppdatera affären: ' + error.message)
+    else await loadOrder()
     setSaving(false)
   }
 
   const setStatus = async (status: OrderStatus) => {
     setSaving(true)
-    await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', order.id)
-    await loadOrder()
+    setSaveError('')
+    const { error } = await supabase
+      .from('orders')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', order.id)
+    if (error) setSaveError('Kunde inte uppdatera status: ' + error.message)
+    else await loadOrder()
     setSaving(false)
   }
 
   const saveTracking = async () => {
     setSaving(true)
-    await supabase
+    setSaveError('')
+    const { error } = await supabase
       .from('orders')
       .update({
         tracking_seller: trackingSeller || null,
@@ -90,7 +102,8 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         updated_at: new Date().toISOString(),
       })
       .eq('id', order.id)
-    await loadOrder()
+    if (error) setSaveError('Kunde inte spara spårning: ' + error.message)
+    else await loadOrder()
     setSaving(false)
   }
 
@@ -130,7 +143,11 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 grid lg:grid-cols-2 gap-6">
+      <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
+        {saveError && (
+          <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600">{saveError}</div>
+        )}
+      <div className="grid lg:grid-cols-2 gap-6">
         {/* Left: status + controls + parties */}
         <div className="grid gap-6">
           <div className="card p-6">
@@ -235,6 +252,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             counterpartLabel={dealer?.company_name || dealer?.full_name || 'handlaren'}
           />
         </div>
+      </div>
       </div>
       <Footer />
     </div>

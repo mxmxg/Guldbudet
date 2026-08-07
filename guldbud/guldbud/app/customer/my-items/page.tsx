@@ -23,16 +23,22 @@ export default function MyItemsPage() {
   const [orderByItem, setOrderByItem] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [relisting, setRelisting] = useState<string | null>(null)
+  const [relistError, setRelistError] = useState('')
 
   const relist = async (item: any) => {
     setRelisting(item.id)
+    setRelistError('')
     const {
       data: { user },
     } = await supabase.auth.getUser()
-    const { data: created } = await supabase
+    if (!user) {
+      router.push('/auth/login')
+      return
+    }
+    const { data: created, error } = await supabase
       .from('items')
       .insert({
-        owner_id: user!.id,
+        owner_id: user.id,
         title: item.title,
         category: item.category,
         description: item.description,
@@ -47,6 +53,10 @@ export default function MyItemsPage() {
       .select('*')
       .single()
     setRelisting(null)
+    if (error) {
+      setRelistError('Kunde inte lägga ut föremålet igen: ' + error.message)
+      return
+    }
     if (created) setItems((prev) => [created, ...prev])
   }
 
@@ -89,6 +99,10 @@ export default function MyItemsPage() {
             + Lägg ut nytt
           </Link>
         </div>
+
+        {relistError && (
+          <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600">{relistError}</div>
+        )}
 
         {loading ? (
           <div className="grid gap-4">

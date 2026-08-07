@@ -293,8 +293,11 @@ export default function DealerProfilePage() {
               <NotifToggle
                 on={profile.email_notifications !== false}
                 onToggle={async (v) => {
-                  await supabase.from('profiles').update({ email_notifications: v }).eq('id', profile.id)
-                  setProfile((p: any) => ({ ...p, email_notifications: v }))
+                  const { error } = await supabase
+                    .from('profiles')
+                    .update({ email_notifications: v })
+                    .eq('id', profile.id)
+                  if (!error) setProfile((p: any) => ({ ...p, email_notifications: v }))
                 }}
               />
             </section>

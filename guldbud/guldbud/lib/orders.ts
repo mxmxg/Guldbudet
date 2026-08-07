@@ -40,6 +40,19 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   cancelled: 'Avbruten',
 }
 
+// Orders that still need handling – everything except finished/cancelled.
+// Single source of truth so the admin dashboard count and the Affärer list
+// can never drift apart (previously the dashboard silently dropped
+// 'dealer_paid', so those deals vanished from the "pågående" stat).
+export const OPEN_ORDER_STATES: OrderStatus[] = [
+  'accepted',
+  'shipped_by_seller',
+  'received',
+  'dealer_paid',
+  'verified_paid',
+  'shipped_to_dealer',
+]
+
 export function stepIndex(status: OrderStatus): number {
   const i = ORDER_STEPS.findIndex((s) => s.key === status)
   return i

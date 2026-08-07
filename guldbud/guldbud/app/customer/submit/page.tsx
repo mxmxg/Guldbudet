@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useMemo } from 'react'
+import { useState, useRef, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Navbar from '@/components/Navbar'
@@ -31,6 +31,24 @@ export default function SubmitPage() {
   const [success, setSuccess] = useState(false)
   const [dragOver, setDragOver] = useState(false)
 
+  // Guard on mount so a guest/dealer isn't allowed to fill in the whole form
+  // only to be bounced at submit (losing everything they typed).
+  useEffect(() => {
+    const check = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/auth/login')
+        return
+      }
+      const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (prof?.role !== 'customer') router.push('/')
+    }
+    check()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const est = useMemo(() => {
     const w = parseFloat(weight)
     if (!w || !karat) return null
@@ -40,17 +58,20 @@ export default function SubmitPage() {
   const handleFiles = (newFiles: FileList | null) => {
     if (!newFiles) return
     const arr = Array.from(newFiles).slice(0, 6)
+    // Skapa previews synkront och i exakt samma ordning som filerna, så att
+    // previews[i] alltid motsvarar files[i] (annars kan fel bild bli huvudbild
+    // eller fel bild raderas).
     setFiles((prev) => [...prev, ...arr].slice(0, 6))
-    arr.forEach((f) => {
-      const reader = new FileReader()
-      reader.onload = (e) => setPreviews((prev) => [...prev, e.target!.result as string].slice(0, 6))
-      reader.readAsDataURL(f)
-    })
+    setPreviews((prev) => [...prev, ...arr.map((f) => URL.createObjectURL(f))].slice(0, 6))
   }
 
   const removeImage = (i: number) => {
+    setPreviews((p) => {
+      const url = p[i]
+      if (url?.startsWith('blob:')) URL.revokeObjectURL(url)
+      return p.filter((_, idx) => idx !== i)
+    })
     setFiles((f) => f.filter((_, idx) => idx !== i))
-    setPreviews((p) => p.filter((_, idx) => idx !== i))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,6 +87,7 @@ export default function SubmitPage() {
       data: { user },
     } = await supabase.auth.getUser()
     if (!user) {
+      setLoading(false)
       router.push('/auth/login')
       return
     }

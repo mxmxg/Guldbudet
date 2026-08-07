@@ -28,7 +28,10 @@ export default function CountdownTimer({
   className?: string
 }) {
   const target = endsAt ? new Date(endsAt).getTime() : 0
-  const [parts, setParts] = useState(() => diffParts(target))
+  // Compute the time only on the client (in useEffect) so the server-rendered
+  // HTML and the first client render agree – otherwise Date.now() differs
+  // between them and React throws a hydration mismatch on every card.
+  const [parts, setParts] = useState<ReturnType<typeof diffParts> | null>(null)
 
   useEffect(() => {
     if (!target) return
@@ -38,6 +41,19 @@ export default function CountdownTimer({
   }, [target])
 
   if (!endsAt) return null
+
+  // First paint (server + pre-effect client): stable placeholder, no mismatch.
+  if (!parts) {
+    if (variant === 'chip') {
+      return (
+        <span className={`chip tabular-nums bg-gold-50 text-gold-700 ${className}`}>
+          <ClockIcon className="text-gold-500" />
+          <span className="opacity-60">–</span>
+        </span>
+      )
+    }
+    return <div className={`h-[52px] ${className}`} aria-hidden />
+  }
 
   const urgent = !parts.ended && parts.totalMs < urgentUnderMs
 
@@ -74,11 +90,11 @@ export default function CountdownTimer({
     ['Sek', parts.s],
   ]
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex flex-wrap items-center gap-1.5 sm:gap-2 ${className}`}>
       {blocks.map(([label, val], i) => (
-        <div key={label} className="flex items-center gap-2">
+        <div key={label} className="flex items-center gap-1.5 sm:gap-2">
           <div
-            className={`min-w-[52px] rounded-xl px-2.5 py-2 text-center tabular-nums ${
+            className={`min-w-[44px] sm:min-w-[52px] rounded-xl px-2 sm:px-2.5 py-2 text-center tabular-nums ${
               urgent
                 ? 'bg-red-50 border border-red-200'
                 : 'bg-espresso-800 border border-espresso-700'

@@ -1,17 +1,20 @@
 'use client'
 import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import GoldTicker from '@/components/GoldTicker'
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null)
   const [role, setRole] = useState<string | null>(null)
+  const [ready, setReady] = useState(false)
   const [notifications, setNotifications] = useState<any[]>([])
   const [showNotifs, setShowNotifs] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const supabase = createClient()
+  const router = useRouter()
   const notifRef = useRef<HTMLDivElement>(null)
 
   // Password-recovery links land on the Site URL (this page) with the token in
@@ -36,6 +39,7 @@ export default function Navbar() {
           .eq('id', data.user.id)
           .single()
         setRole(profile?.role ?? null)
+        setReady(true)
         loadNotifications(data.user.id)
         // Live-uppdatera notisklockan när en ny notis kommer in.
         channel = supabase
@@ -46,6 +50,8 @@ export default function Navbar() {
             () => loadNotifications(data.user.id)
           )
           .subscribe()
+      } else {
+        setReady(true)
       }
     })
 
@@ -84,6 +90,22 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  // Lock body scroll while the mobile menu is open (so the panel can't scroll
+  // away from its backdrop) and close it on Escape.
+  useEffect(() => {
+    if (!mobileOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [mobileOpen])
+
   const loadNotifications = async (userId: string) => {
     const { data } = await supabase
       .from('notifications')
@@ -99,7 +121,7 @@ export default function Navbar() {
     setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)))
     setShowNotifs(false)
     const dest = n.link || (n.item_id ? `/auctions/${n.item_id}` : null)
-    if (dest) window.location.href = dest
+    if (dest) router.push(dest)
   }
 
   const markAllAsRead = async () => {
@@ -109,13 +131,18 @@ export default function Navbar() {
   }
 
   const handleLogout = async () => {
+    setMobileOpen(false)
     await supabase.auth.signOut()
-    window.location.href = '/'
+    router.push('/')
+    router.refresh()
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
   const navLinks = () => {
+    // Vänta tills vi vet om/vilken roll användaren har, annars blinkar
+    // gäst-länkarna förbi och byts ut → hackig header vid varje sidladdning.
+    if (!ready) return null
     if (!user)
       return (
         <>
@@ -141,7 +168,7 @@ export default function Navbar() {
     if (role === 'admin')
       return (
         <>
-          <NavItem href="/customer/my-items">Föremål</NavItem>
+          <NavItem href="/admin/orders">Affärer</NavItem>
           <NavItem href="/admin">Adminpanel</NavItem>
         </>
       )
@@ -181,13 +208,13 @@ export default function Navbar() {
 
             {/* Right */}
             <div className="flex items-center gap-3">
-              {user ? (
+              {!ready ? null : user ? (
                 <>
                   {/* Notifications */}
                   <div className="relative" ref={notifRef}>
                     <button
                       onClick={() => setShowNotifs(!showNotifs)}
-                      className="relative w-9 h-9 rounded-full flex items-center justify-center text-gold-300 hover:text-gold-100 hover:bg-espresso-800 transition"
+                      className="relative w-11 h-11 rounded-full flex items-center justify-center text-gold-300 hover:text-gold-100 hover:bg-espresso-800 transition"
                       aria-label="Notifieringar"
                     >
                       <BellIcon />
@@ -280,8 +307,10 @@ export default function Navbar() {
               {/* Mobile toggle */}
               <button
                 onClick={() => setMobileOpen((o) => !o)}
-                className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-gold-300 hover:bg-espresso-800 transition"
+                className="md:hidden w-11 h-11 rounded-full flex items-center justify-center text-gold-300 hover:bg-espresso-800 transition"
                 aria-label="Meny"
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-menu"
               >
                 {mobileOpen ? <CloseIcon /> : <MenuIcon />}
               </button>
@@ -296,7 +325,7 @@ export default function Navbar() {
                 className="md:hidden fixed inset-0 top-0 z-40 bg-black/40"
                 onClick={() => setMobileOpen(false)}
               />
-              <div className="md:hidden absolute top-full inset-x-0 z-50 border-t border-espresso-800 bg-espresso-900 shadow-xl px-4 py-4 flex flex-col gap-1 animate-fade-in">
+              <div id="mobile-menu" className="md:hidden absolute top-full inset-x-0 z-50 border-t border-espresso-800 bg-espresso-900 shadow-xl px-4 py-4 flex flex-col gap-1 animate-fade-in">
                 <div onClick={() => setMobileOpen(false)} className="flex flex-col gap-1">
                   {navLinks()}
                 </div>

@@ -228,7 +228,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                   </p>
                   {topBid ? (
                     <p className="text-xs text-espresso-400 mt-1">
-                      {dealerLabel(topBid)} · {bids.length} {bids.length === 1 ? 'bud' : 'bud'}
+                      {dealerLabel(topBid)} · {bids.length} bud
                     </p>
                   ) : (
                     <p className="text-xs text-espresso-400 mt-1">Var först att buda</p>
@@ -361,8 +361,8 @@ export default function AuctionDetails({ item }: { item: any }) {
                 </div>
               ))}
 
-            {/* Not logged in */}
-            {!user && (
+            {/* Not logged in — only invite bidding on auctions that are still open */}
+            {!user && !isClosed && !ended && (
               <div className="mt-4 rounded-2xl bg-espresso-900 p-6 text-center relative overflow-hidden">
                 <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
                 <div className="relative">
