@@ -2,8 +2,28 @@ import { createClient } from '@/lib/supabase-server'
 import { Item } from '@/lib/types'
 import Navbar from '@/components/Navbar'
 import HomeContent from '@/components/HomeContent'
+import JsonLd from '@/components/JsonLd'
 
 export const dynamic = 'force-dynamic'
+
+const SITE = 'https://guldbud.com'
+const orgLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'GuldBud',
+  url: SITE,
+  logo: `${SITE}/icon`,
+  description: 'Sveriges guldauktion – auktoriserade guldhandlare budar mot varandra om ditt guld.',
+  areaServed: 'SE',
+  email: 'info@guldbud.com',
+}
+const siteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'GuldBud',
+  url: SITE,
+  inLanguage: 'sv-SE',
+}
 
 export type EnrichedItem = Item & { top_bid: number; bid_count: number }
 
@@ -42,6 +62,8 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-cream">
+      <JsonLd data={orgLd} />
+      <JsonLd data={siteLd} />
       <Navbar />
       <HomeContent items={enriched} />
     </div>

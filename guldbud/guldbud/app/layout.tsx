@@ -24,13 +24,22 @@ export const metadata: Metadata = {
   description:
     'Lägg ut ditt guld och låt auktoriserade guldhandlare buda mot varandra i realtid. Du får marknadens bästa pris, enkelt, tryggt och kostnadsfritt.',
   keywords: ['sälja guld', 'guldauktion', 'guldpris', 'guldhandlare', 'sälja smycken'],
+  alternates: { canonical: '/' },
   openGraph: {
     title: 'GuldBud · Sveriges guldauktion',
     description:
       'Låt auktoriserade guldhandlare buda mot varandra om ditt guld. Bästa priset, tryggt och gratis.',
     type: 'website',
     locale: 'sv_SE',
+    siteName: 'GuldBud',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'GuldBud · Sveriges guldauktion',
+    description:
+      'Låt auktoriserade guldhandlare buda mot varandra om ditt guld. Bästa priset, tryggt och gratis.',
+  },
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase-server'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticPages = ['', '/auctions', '/how-it-works', '/terms', '/privacy'].map((p) => ({
+  const staticPages = ['', '/auctions', '/resultat', '/how-it-works', '/dealer/guide', '/terms', '/privacy'].map((p) => ({
     url: `${SITE}${p}`,
     changeFrequency: 'weekly' as const,
     priority: p === '' ? 1 : 0.7,
