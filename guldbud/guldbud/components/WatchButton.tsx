@@ -34,18 +34,21 @@ export default function WatchButton({ itemId }: { itemId: string }) {
 
   const toggle = async () => {
     setBusy(true)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) return
-    if (watched) {
-      await supabase.from('watchlist').delete().eq('dealer_id', user.id).eq('item_id', itemId)
-      setWatched(false)
-    } else {
-      await supabase.from('watchlist').insert({ dealer_id: user.id, item_id: itemId })
-      setWatched(true)
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) return
+      if (watched) {
+        const { error } = await supabase.from('watchlist').delete().eq('dealer_id', user.id).eq('item_id', itemId)
+        if (!error) setWatched(false)
+      } else {
+        const { error } = await supabase.from('watchlist').insert({ dealer_id: user.id, item_id: itemId })
+        if (!error) setWatched(true)
+      }
+    } finally {
+      setBusy(false)
     }
-    setBusy(false)
   }
 
   return (

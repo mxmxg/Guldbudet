@@ -13,6 +13,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
 }) {
   const [step, setStep] = useState<'idle' | 'confirm' | 'done'>('idle')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [orderId, setOrderId] = useState<string | null>(null)
   const supabase = createClient()
 
@@ -20,11 +21,19 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
 
   const accept = async () => {
     setLoading(true)
-    await supabase.from('items').update({
-      accepted_bid_id: bidId,
-      accepted_at: new Date().toISOString(),
-      status: 'closed'
-    }).eq('id', itemId)
+    setError('')
+    // Only advance to the success state if the write actually succeeds –
+    // otherwise the seller would be told to ship an item for a deal that
+    // was never created (the order is created by a DB trigger on this update).
+    const { error: updateError } = await supabase
+      .from('items')
+      .update({ accepted_bid_id: bidId, accepted_at: new Date().toISOString(), status: 'closed' })
+      .eq('id', itemId)
+    if (updateError) {
+      setError('Kunde inte acceptera budet: ' + updateError.message + ' Försök igen.')
+      setLoading(false)
+      return
+    }
     // The order is created by a DB trigger; fetch its id so we can link to it.
     const { data: order } = await supabase.from('orders').select('id').eq('item_id', itemId).single()
     setOrderId(order?.id ?? null)
@@ -99,6 +108,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
             Avbryt
           </button>
         </div>
+        {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
       </div>
     )
   }

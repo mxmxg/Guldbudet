@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="relative mt-24 bg-espresso-900 text-espresso-100/70 overflow-hidden">
+    <footer className="relative bg-espresso-900 text-espresso-100/70 overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-500/40 to-transparent" />
       <div className="pointer-events-none absolute -bottom-24 left-1/2 -translate-x-1/2 w-[520px] h-[520px] rounded-full bg-gold-500/5 blur-3xl" />
 
@@ -36,7 +36,7 @@ export default function Footer() {
           <FooterCol title="För handlare">
             <FooterLink href="/auth/login?role=dealer">Bli guldhandlare</FooterLink>
             <FooterLink href="/dealer/dashboard">Handlarpanel</FooterLink>
-            <FooterLink href="/how-it-works">Budgivning</FooterLink>
+            <FooterLink href="/dealer/guide">Budgivning</FooterLink>
           </FooterCol>
 
           <FooterCol title="Kontakt">

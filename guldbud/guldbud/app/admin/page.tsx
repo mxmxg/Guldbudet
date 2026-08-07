@@ -9,6 +9,10 @@ import { TrashIcon } from '@/components/Icons'
 import CountdownTimer from '@/components/CountdownTimer'
 import { estimateRange, formatSEK } from '@/lib/gold'
 import { commission } from '@/lib/fees'
+import { OPEN_ORDER_STATES } from '@/lib/orders'
+
+// Deals where the dealer has actually paid – realized revenue.
+const PAID_ORDER_STATES = ['dealer_paid', 'verified_paid', 'shipped_to_dealer', 'completed']
 
 function toLocalInput(iso?: string | null) {
   if (!iso) return ''
@@ -75,13 +79,16 @@ export default function AdminPage() {
       const { count: ordersCount } = await supabase
         .from('orders')
         .select('id', { count: 'exact', head: true })
-        .in('status', ['accepted', 'shipped_by_seller', 'received', 'verified_paid', 'shipped_to_dealer'])
+        .in('status', OPEN_ORDER_STATES)
 
       const { data: allOrders } = await supabase.from('orders').select('amount, status')
+      // Affärsvolym = värdet på alla affärer som inte avbrutits.
       const settled = (allOrders || []).filter((o: any) => o.status !== 'cancelled')
+      // Provisionsintäkt = bara realiserad, dvs där handlaren faktiskt betalat.
+      const paid = (allOrders || []).filter((o: any) => PAID_ORDER_STATES.includes(o.status))
       setAnalytics({
         gmv: settled.reduce((s: number, o: any) => s + (o.amount || 0), 0),
-        commission: settled.reduce((s: number, o: any) => s + commission(o.amount || 0), 0),
+        commission: paid.reduce((s: number, o: any) => s + commission(o.amount || 0), 0),
         completed: (allOrders || []).filter((o: any) => o.status === 'completed').length,
       })
 
@@ -197,6 +204,9 @@ export default function AdminPage() {
     setLiveItems((prev) =>
       prev.map((i) => (i.id === item.id ? { ...i, status: 'closed', accepted_bid_id: bidId } : i))
     )
+    // En ny affär skapas av DB-triggern → håll "pågående affärer"-räknaren i synk
+    // utan att behöva ladda om sidan.
+    setOpenOrders((n) => n + 1)
     setAdminNotice(
       `Budet på ${formatSEK(topBids[item.id])} godkändes åt säljaren. Affären finns nu under Affärer.`
     )
@@ -421,7 +431,7 @@ export default function AdminPage() {
             </div>
             <div>
               <div className="font-display text-2xl text-gold-100">
-                {liveItems.filter((i) => i.status === 'active').length}
+                {liveItems.filter((i) => i.status === 'active' && !isEnded(i)).length}
               </div>
               <div className="text-xs text-gold-500/60">Aktiva auktioner</div>
             </div>

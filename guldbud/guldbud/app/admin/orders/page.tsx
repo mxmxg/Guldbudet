@@ -6,10 +6,10 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ORDER_STATUS_LABEL, ORDER_STEPS, OrderStatus, stepIndex } from '@/lib/orders'
+import { ORDER_STATUS_LABEL, ORDER_STEPS, OPEN_ORDER_STATES, OrderStatus, stepIndex } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
 
-const OPEN_STATES: OrderStatus[] = ['accepted', 'shipped_by_seller', 'received', 'dealer_paid', 'verified_paid', 'shipped_to_dealer']
+const OPEN_STATES = OPEN_ORDER_STATES
 
 export default function AdminOrdersPage() {
   const router = useRouter()

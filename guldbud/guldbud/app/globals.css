@@ -92,7 +92,7 @@
   }
 
   .btn-ghost-gold {
-    @apply inline-flex items-center justify-center gap-2 border border-gold-500/40 text-gold-200 hover:text-espresso-900 hover:bg-gold-300 font-medium rounded-xl px-6 py-3 text-sm transition-all duration-300;
+    @apply inline-flex items-center justify-center gap-2 border border-gold-500/50 text-gold-700 hover:text-espresso-900 hover:bg-gold-300 font-medium rounded-xl px-6 py-3 text-sm transition-all duration-300;
   }
 
   /* ---- Cards & surfaces ---- */

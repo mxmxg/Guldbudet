@@ -258,7 +258,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
                     <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </Link>
-                <a href="#estimator" className="btn-ghost-gold text-base !px-7 !py-3.5">
+                <a href="#estimator" className="btn-ghost-gold text-gold-200 text-base !px-7 !py-3.5">
                   Vad är mitt guld värt?
                 </a>
               </div>
@@ -298,7 +298,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
       </section>
 
       {/* ESTIMATOR + LIVE PRICE */}
-      <section id="estimator" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-20">
+      <section id="estimator" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-28">
         <div className="grid lg:grid-cols-2 gap-10 items-center">
           <Reveal>
             <span className="eyebrow text-gold-600">Gratis värdering</span>
@@ -390,7 +390,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
       </section>
 
       {/* LIVE AUCTIONS */}
-      <section id="auctions" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-20">
+      <section id="auctions" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-28">
         <Reveal className="flex items-end justify-between mb-10 gap-4 flex-wrap">
           <div>
             <span className="eyebrow text-gold-600">Just nu på GuldBud</span>
@@ -643,7 +643,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
                 <Link href="/auth/login?mode=register" className="btn-gold text-base !px-8 !py-3.5">
                   Kom igång gratis
                 </Link>
-                <a href="#estimator" className="btn-ghost-gold text-base !px-8 !py-3.5">
+                <a href="#estimator" className="btn-ghost-gold text-gold-200 text-base !px-8 !py-3.5">
                   Värdera först
                 </a>
               </div>
