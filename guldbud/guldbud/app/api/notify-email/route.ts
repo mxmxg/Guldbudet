@@ -9,8 +9,12 @@ export const dynamic = 'force-dynamic'
 // branded e-mail via Resend. Configure the webhook to send the header
 // `x-webhook-secret: <EMAIL_WEBHOOK_SECRET>`.
 
+import { DEALER_COMMISSION_LABEL, PAYMENT_WINDOW_LABEL } from '@/lib/fees'
+
 const FROM = process.env.EMAIL_FROM || 'GuldBud <onboarding@resend.dev>'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
+// Mottagningsadress för föremål. Byt till er box-adress innan lansering.
+const SHIP_ADDR = 'GuldBud AB, Storgatan 1, 111 22 Stockholm'
 
 function esc(s: string) {
   return String(s || '')
@@ -33,6 +37,56 @@ type Item = {
   category?: string
 }
 
+// Numrerad instruktionsruta som visas i mejlet.
+function stepsBox(heading: string, steps: string[], footer?: string) {
+  const rows = steps
+    .map(
+      (s, i) =>
+        `<tr><td style="color:#B8860B;font-weight:700;font-size:13px;padding:3px 8px 3px 0;vertical-align:top">${
+          i + 1
+        }.</td><td style="color:#c9a84c;font-size:13px;line-height:1.55;padding:3px 0">${s}</td></tr>`
+    )
+    .join('')
+  return `<div style="margin-top:18px;border:1px solid #3d2d0f;border-radius:12px;padding:16px;background:#0f0a04">
+    <p style="color:#f5e6c8;font-size:14px;font-weight:600;margin:0 0 10px">${esc(heading)}</p>
+    <table style="border-collapse:collapse;width:100%">${rows}</table>
+    ${footer ? `<p style="color:#8B6914;font-size:12px;margin:12px 0 0;line-height:1.5">${footer}</p>` : ''}
+  </div>`
+}
+
+// Färdiga instruktioner beroende på vilken notis det gäller, så varje part
+// vet exakt vad som händer efter en avslutad affär.
+function instructionsFor(title: string): string {
+  const t = title.toLowerCase()
+  // Säljaren – affären är skapad (hen accepterade / admin accepterade budet).
+  if (t.includes('affär skapad')) {
+    return stepsBox(
+      'Så här slutför du affären',
+      [
+        'Packa föremålet omsorgsfullt i en liten ask eller bubbelpåse.',
+        `Skicka som <strong style="color:#f5e6c8">rekommenderat och försäkrat</strong> brev till: <strong style="color:#f5e6c8">${SHIP_ADDR}</strong>.`,
+        'Vi verifierar äktheten så snart vi tagit emot föremålet.',
+        `Du får betalt, normalt inom <strong style="color:#f5e6c8">${PAYMENT_WINDOW_LABEL}</strong> efter verifieringen.`,
+      ],
+      'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
+    )
+  }
+  // Handlaren – budet accepterades, affären är igång.
+  if (t.includes('accepterades') || t.includes('bud accepterat')) {
+    return stepsBox(
+      'Så går affären vidare',
+      [
+        'Säljaren skickar föremålet till GuldBud.',
+        'Vi tar emot och äkthetskontrollerar det.',
+        `Du faktureras budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision och betalar inom <strong style="color:#f5e6c8">${PAYMENT_WINDOW_LABEL}</strong>.`,
+        'När din betalning registrerats skickar vi föremålet till dig.',
+      ],
+      'Följ varje steg och skriv till oss under Affärer.'
+    )
+  }
+  return ''
+}
+
 function emailHtml(opts: {
   title: string
   message: string
@@ -40,8 +94,9 @@ function emailHtml(opts: {
   item: Item | null
   topBid: number | null
   cta: string
+  extra: string
 }) {
-  const { title, message, link, item, topBid, cta } = opts
+  const { title, message, link, item, topBid, cta, extra } = opts
   const href = link ? `${SITE}${link}` : null
 
   const image =
@@ -77,6 +132,7 @@ function emailHtml(opts: {
       ${specs}
       ${top}
       <p style="color:#c9a84c;font-size:14px;line-height:1.6;margin:10px 0 0">${esc(message)}</p>
+      ${extra}
       ${button}
       <p style="color:#5a4020;font-size:11px;margin-top:28px">Du får det här mejlet för att du har ett konto på GuldBud.</p>
     </div>
@@ -142,13 +198,17 @@ export async function POST(req: NextRequest) {
 
   const link = record.link || (record.item_id ? `/auctions/${record.item_id}` : null)
   const t = String(record.title).toLowerCase()
+  const isOrder = !!link && link.includes('/orders/')
   const cta = t.includes('överbjuden')
     ? 'Höj ditt bud →'
     : t.includes('grattis') || t.includes('högsta bud')
     ? 'Godkänn budet →'
+    : isOrder
+    ? 'Öppna affären →'
     : record.item_id
     ? 'Öppna auktionen →'
     : 'Öppna på GuldBud →'
+  const extra = instructionsFor(String(record.title))
 
   const sendRes = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -157,7 +217,7 @@ export async function POST(req: NextRequest) {
       from: FROM,
       to: email,
       subject: record.title,
-      html: emailHtml({ title: record.title, message: record.message || '', link, item, topBid, cta }),
+      html: emailHtml({ title: record.title, message: record.message || '', link, item, topBid, cta, extra }),
     }),
   })
 
