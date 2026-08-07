@@ -343,8 +343,9 @@ begin
   -- Notify owner – men inte om ägaren själv råkar vara budgivaren.
   if v_owner is not null and v_owner <> new.dealer_id then
     insert into public.notifications (user_id, title, message, item_id, link)
-    values (v_owner, 'Nytt bud',
-            'Ett nytt bud på ' || new.amount || ' kr lades på "' || v_title || '".',
+    values (v_owner, 'Nytt bud på ditt föremål',
+            'Ett nytt bud på ' || replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') ||
+            ' kr lades på ditt föremål "' || v_title || '".',
             new.item_id, '/auctions/' || new.item_id);
   end if;
 
@@ -362,7 +363,9 @@ begin
   if v_prev_dealer is not null then
     insert into public.notifications (user_id, title, message, item_id, link)
     values (v_prev_dealer, 'Du är överbjuden',
-            'Någon har lagt ett högre bud på "' || v_title || '". Lägg ett nytt bud för att ta ledningen.',
+            'Ditt bud på "' || v_title || '" har blivit överbjudet. Nytt högsta bud: ' ||
+            replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') ||
+            ' kr. Lägg ett nytt bud för att ta ledningen.',
             new.item_id, '/auctions/' || new.item_id);
   end if;
 
