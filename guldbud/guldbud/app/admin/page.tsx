@@ -22,7 +22,9 @@ export default function AdminPage() {
   const [pendingItems, setPendingItems] = useState<any[]>([])
   const [liveItems, setLiveItems] = useState<any[]>([])
   const [topBids, setTopBids] = useState<Record<string, number>>({})
+  const [topBidIds, setTopBidIds] = useState<Record<string, string>>({})
   const [bidCounts, setBidCounts] = useState<Record<string, number>>({})
+  const [sellers, setSellers] = useState<Record<string, any>>({})
   const [openOrders, setOpenOrders] = useState(0)
   const [analytics, setAnalytics] = useState({ gmv: 0, commission: 0, completed: 0 })
   const [adminError, setAdminError] = useState('')
@@ -30,6 +32,8 @@ export default function AdminPage() {
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [endingId, setEndingId] = useState<string | null>(null)
+  const [acceptId, setAcceptId] = useState<string | null>(null)
+  const [acceptingId, setAcceptingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
   const router = useRouter()
@@ -63,7 +67,7 @@ export default function AdminPage() {
         .order('created_at', { ascending: false })
       const { data: active } = await supabase
         .from('items')
-        .select('*, profiles(full_name, email, phone, city)')
+        .select('*')
         .in('status', ['active', 'closed'])
         .order('created_at', { ascending: false })
 
@@ -85,14 +89,38 @@ export default function AdminPage() {
       setLiveItems(active || [])
       if (active && active.length > 0) {
         const ids = active.map((i: any) => i.id)
-        const { data: bids } = await supabase.from('bids').select('item_id, amount').in('item_id', ids)
+        // Säljar-info hämtas separat (inte som join) så en RLS-hicka på
+        // kopplingen aldrig kan tömma hela auktionslistan.
+        const ownerIds = Array.from(new Set(active.map((i: any) => i.owner_id).filter(Boolean)))
+        if (ownerIds.length) {
+          const { data: sellers } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, phone, city')
+            .in('id', ownerIds)
+          const smap: Record<string, any> = {}
+          sellers?.forEach((s: any) => (smap[s.id] = s))
+          setSellers(smap)
+        }
+        const { data: bids } = await supabase
+          .from('bids')
+          .select('id, item_id, amount, created_at')
+          .in('item_id', ids)
+          .order('amount', { ascending: false })
+          .order('created_at', { ascending: true })
         const top: Record<string, number> = {}
+        const topId: Record<string, string> = {}
         const counts: Record<string, number> = {}
         bids?.forEach((b: any) => {
           counts[b.item_id] = (counts[b.item_id] || 0) + 1
-          if (!top[b.item_id] || b.amount > top[b.item_id]) top[b.item_id] = b.amount
+          // Bids kommer sorterade (belopp fallande, tid stigande) → första per
+          // föremål är vinnaren, precis som settle_ended_auctions räknar.
+          if (top[b.item_id] === undefined) {
+            top[b.item_id] = b.amount
+            topId[b.item_id] = b.id
+          }
         })
         setTopBids(top)
+        setTopBidIds(topId)
         setBidCounts(counts)
       }
       setOpenOrders(ordersCount || 0)
@@ -146,6 +174,33 @@ export default function AdminPage() {
       /* cron-jobbet kör ändå varje minut */
     }
     setEndingId(null)
+  }
+
+  // Godkänn det vinnande budet åt säljaren. Sätter items → 'closed' + accepted_bid_id;
+  // DB-triggern skapar då affären, som dyker upp under Affärer.
+  const acceptTopBid = async (item: any) => {
+    const bidId = topBidIds[item.id]
+    if (!bidId) return
+    setAcceptingId(item.id)
+    setAdminError('')
+    setAdminNotice('')
+    const { error } = await supabase
+      .from('items')
+      .update({ accepted_bid_id: bidId, accepted_at: new Date().toISOString(), status: 'closed' })
+      .eq('id', item.id)
+    if (error) {
+      setAdminError('Kunde inte godkänna budet: ' + error.message)
+      setAcceptingId(null)
+      return
+    }
+    setLiveItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, status: 'closed', accepted_bid_id: bidId } : i))
+    )
+    setAdminNotice(
+      `Budet på ${formatSEK(topBids[item.id])} godkändes åt säljaren. Affären finns nu under Affärer.`
+    )
+    setAcceptId(null)
+    setAcceptingId(null)
   }
 
   const setSpecificEnd = (item: any, localValue: string) => {
@@ -449,21 +504,21 @@ export default function AdminPage() {
                       {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
                       {item.gemstone ? ` · ${item.gemstone}${item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}` : ''}
                     </p>
-                    {item.profiles && (
+                    {sellers[item.owner_id] && (
                       <p className="text-xs text-espresso-500 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                         <span>
                           Säljare:{' '}
-                          <span className="font-medium text-espresso-800">{item.profiles.full_name || '—'}</span>
-                          {item.profiles.city ? ` · ${item.profiles.city}` : ''}
+                          <span className="font-medium text-espresso-800">{sellers[item.owner_id].full_name || '—'}</span>
+                          {sellers[item.owner_id].city ? ` · ${sellers[item.owner_id].city}` : ''}
                         </span>
-                        {item.profiles.email && (
-                          <a href={`mailto:${item.profiles.email}`} className="text-gold-700 hover:underline">
-                            {item.profiles.email}
+                        {sellers[item.owner_id].email && (
+                          <a href={`mailto:${sellers[item.owner_id].email}`} className="text-gold-700 hover:underline">
+                            {sellers[item.owner_id].email}
                           </a>
                         )}
-                        {item.profiles.phone && (
-                          <a href={`tel:${item.profiles.phone}`} className="text-gold-700 hover:underline">
-                            {item.profiles.phone}
+                        {sellers[item.owner_id].phone && (
+                          <a href={`tel:${sellers[item.owner_id].phone}`} className="text-gold-700 hover:underline">
+                            {sellers[item.owner_id].phone}
                           </a>
                         )}
                       </p>
@@ -482,7 +537,34 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div className="w-full min-w-0 sm:w-auto sm:shrink-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap sm:justify-end">
-                    {item.status === 'active' && confirmId !== item.id && (
+                    {/* Godkänn vinnande bud åt säljaren när auktionen är slut */}
+                    {item.status === 'active' && ended && topBidIds[item.id] && confirmId !== item.id && (
+                      acceptId === item.id ? (
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <button
+                            onClick={() => acceptTopBid(item)}
+                            disabled={acceptingId === item.id}
+                            className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition disabled:opacity-50"
+                          >
+                            {acceptingId === item.id ? 'Godkänner…' : `Ja, godkänn ${formatSEK(topBids[item.id])}`}
+                          </button>
+                          <button
+                            onClick={() => setAcceptId(null)}
+                            className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
+                          >
+                            Avbryt
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setAcceptId(item.id)}
+                          className="w-full sm:w-auto text-sm font-medium px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition"
+                        >
+                          Godkänn budet åt säljaren →
+                        </button>
+                      )
+                    )}
+                    {item.status === 'active' && confirmId !== item.id && acceptId !== item.id && (
                       <>
                         <button
                           onClick={() => extendAuction(item)}
