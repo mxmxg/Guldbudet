@@ -203,6 +203,7 @@ create policy "dealers can bid" on public.bids
       where i.id = item_id
         and i.status = 'active'
         and (i.auction_ends_at is null or i.auction_ends_at > now())
+        and i.owner_id <> auth.uid()  -- får inte buda på sitt eget föremål
     )
   );
 
@@ -339,11 +340,13 @@ declare
 begin
   select owner_id, title into v_owner, v_title from public.items where id = new.item_id;
 
-  -- Notify owner
-  insert into public.notifications (user_id, title, message, item_id, link)
-  values (v_owner, 'Nytt bud',
-          'Ett nytt bud på ' || new.amount || ' kr lades på "' || v_title || '".',
-          new.item_id, '/auctions/' || new.item_id);
+  -- Notify owner – men inte om ägaren själv råkar vara budgivaren.
+  if v_owner is not null and v_owner <> new.dealer_id then
+    insert into public.notifications (user_id, title, message, item_id, link)
+    values (v_owner, 'Nytt bud',
+            'Ett nytt bud på ' || new.amount || ' kr lades på "' || v_title || '".',
+            new.item_id, '/auctions/' || new.item_id);
+  end if;
 
   -- Find the previous highest bidder (before this bid), EXCLUDING the person
   -- who just bid, and notify them only if they were actually outbid. This is
