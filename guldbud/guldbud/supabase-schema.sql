@@ -524,9 +524,10 @@ begin
     elsif r.min_price is not null and v_top.amount < r.min_price then
       -- Reservationspris ej uppnått
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (r.owner_id, 'Auktionen nådde inte ditt minimipris',
-              'Högsta bud blev ' || v_top.amount || ' kr på "' || r.title ||
-              '", under ditt minimipris. Du kan ändå välja att acceptera.',
+      values (r.owner_id, 'Högsta bud: ' || v_top.amount || ' kr på "' || r.title || '"',
+              'Budgivningen landade på ' || v_top.amount || ' kr – strax under ditt minimipris på ' ||
+              r.min_price || ' kr. Du kan ändå välja att godkänna budet och få betalt. ' ||
+              'Att sälja är helt kostnadsfritt för dig.',
               r.id, '/auctions/' || r.id);
       insert into public.notifications (user_id, title, message, item_id, link)
       values (v_top.dealer_id, 'Auktionen är avslutad',
@@ -535,9 +536,10 @@ begin
     else
       -- Vinnare korad, inväntar säljarens bekräftelse
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (r.owner_id, 'Din auktion har avslutats',
-              'Högsta bud blev ' || v_top.amount || ' kr på "' || r.title ||
-              '". Bekräfta budet för att slutföra affären.',
+      values (r.owner_id, 'Grattis – ditt föremål fick ' || v_top.amount || ' kr!',
+              'Budgivningen på "' || r.title || '" landade på ' || v_top.amount ||
+              ' kr. Godkänn budet så drar vi igång affären – du får betalt så snart vi tagit emot ' ||
+              'och verifierat föremålet. Att sälja är helt kostnadsfritt för dig.',
               r.id, '/auctions/' || r.id);
       insert into public.notifications (user_id, title, message, item_id, link)
       values (v_top.dealer_id, 'Du hade det högsta budet',
