@@ -18,6 +18,13 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'open' | 'done'>('open')
 
+  // Öppna direkt på "Avslutade" när man kommer från "Slutförda affärer".
+  useEffect(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab') === 'done') {
+      setTab('done')
+    }
+  }, [])
+
   useEffect(() => {
     init()
     // eslint-disable-next-line react-hooks/exhaustive-deps

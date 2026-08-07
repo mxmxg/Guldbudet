@@ -518,10 +518,12 @@ export default function AdminPage() {
             <p className="font-display text-2xl text-emerald-600 tabular-nums">{formatSEK(analytics.commission)}</p>
             <p className="text-xs text-espresso-400 mt-0.5">Provisionsintäkt</p>
           </div>
-          <div className="card p-4">
+          <Link href="/admin/orders?tab=done" className="card card-hover p-4 group">
             <p className="font-display text-2xl text-espresso-900 tabular-nums">{analytics.completed}</p>
-            <p className="text-xs text-espresso-400 mt-0.5">Slutförda affärer</p>
-          </div>
+            <p className="text-xs text-espresso-400 mt-0.5 group-hover:text-gold-700 transition">
+              Slutförda affärer <span aria-hidden>→</span>
+            </p>
+          </Link>
         </div>
 
         {/* Orders */}
