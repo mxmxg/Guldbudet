@@ -10,11 +10,14 @@ export default function OrderStepper({ status }: { status: OrderStatus }) {
     )
   }
   const current = stepIndex(status)
+  // 'completed' is the terminal state – every step (incl. the last) is done,
+  // so nothing should still read as "Pågår".
+  const allDone = status === 'completed'
   return (
     <ol className="relative">
       {ORDER_STEPS.map((step, i) => {
-        const done = i < current
-        const active = i === current
+        const done = allDone || i < current
+        const active = !allDone && i === current
         return (
           <li key={step.key} className="flex gap-4 pb-6 last:pb-0 relative">
             {i < ORDER_STEPS.length - 1 && (
