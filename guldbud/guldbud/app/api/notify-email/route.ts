@@ -144,6 +144,8 @@ export async function POST(req: NextRequest) {
   const t = String(record.title).toLowerCase()
   const cta = t.includes('överbjuden')
     ? 'Höj ditt bud →'
+    : t.includes('grattis') || t.includes('högsta bud')
+    ? 'Godkänn budet →'
     : record.item_id
     ? 'Öppna auktionen →'
     : 'Öppna på GuldBud →'
