@@ -153,6 +153,12 @@ function LoginForm() {
         email: fields.email, password: fields.password
       })
       if (error) {
+        // Skilj på "ej bekräftad e-post" och fel uppgifter, så användaren vet
+        // vad som är fel i stället för att fastna.
+        if (/confirm/i.test(error.message)) {
+          window.location.href = '/auth/verify?email=' + encodeURIComponent(fields.email)
+          return
+        }
         setSubmitError('Fel e-post eller lösenord.')
         setLoading(false)
         return
@@ -164,6 +170,7 @@ function LoginForm() {
         email: fields.email,
         password: fields.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fields.fullName,
             role,
@@ -182,15 +189,16 @@ function LoginForm() {
         setLoading(false)
         return
       }
+      const emailParam = `?email=${encodeURIComponent(fields.email)}`
       if (role === 'dealer') {
-        // Dealers always wait for admin approval.
-        window.location.href = '/auth/pending'
+        // Dealers always wait for admin approval (and must confirm e-mail).
+        window.location.href = '/auth/pending' + emailParam
       } else if (data.session) {
         // Email confirmation is off -> already logged in, go straight in.
         window.location.href = '/'
       } else {
         // Email confirmation is on -> ask them to verify.
-        window.location.href = '/auth/verify'
+        window.location.href = '/auth/verify' + emailParam
       }
     }
     setLoading(false)
