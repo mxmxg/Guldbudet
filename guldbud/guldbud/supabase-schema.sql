@@ -33,6 +33,11 @@ alter table public.profiles add column if not exists city text;
 alter table public.profiles add column if not exists org_number text;
 alter table public.profiles add column if not exists verification_doc_path text;
 alter table public.profiles add column if not exists email_notifications boolean not null default true;
+-- Utbetalningsuppgifter för säljare: Swish eller bankkonto.
+alter table public.profiles add column if not exists payout_method text;
+alter table public.profiles add column if not exists payout_swish text;
+alter table public.profiles add column if not exists payout_bank_clearing text;
+alter table public.profiles add column if not exists payout_bank_account text;
 
 -- ------------------------------------------------------------
 -- Föremål som kunder lägger ut
@@ -710,7 +715,8 @@ begin
       -- Säljaren: mottaget. Handlaren: kontrollerat, dags att betala.
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.seller_id, 'Vi har tagit emot ditt föremål',
-              'GuldBud har mottagit "' || v_title || '" och kontrollerar det nu.',
+              'Vi har tagit emot "' || v_title || '" och börjar nu äkthetskontrollera det. När kontrollen är klar och handlaren betalat förbereder vi din utbetalning på ' ||
+              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr. Fyll gärna i dina utbetalningsuppgifter (Swish eller bankkonto) i din profil så går det snabbt.',
               new.item_id, '/orders/' || new.id);
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.dealer_id, 'Föremålet är kontrollerat – dags att betala',
@@ -719,12 +725,13 @@ begin
     elsif new.status = 'dealer_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.seller_id, 'Betalning på väg',
-              'Handlaren har betalat för "' || v_title || '". Din utbetalning förbereds nu.',
+              'Handlaren har betalat. Din utbetalning på ' || replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') ||
+              ' kr förbereds nu. Dubbelkolla att dina utbetalningsuppgifter är ifyllda i din profil.',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'verified_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.seller_id, 'Du har fått betalt',
-              'Betalningen för "' || v_title || '" är på väg till ditt konto.',
+              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr är på väg till ditt konto, normalt inom 1–2 bankdagar. Tack för att du sålde via GuldBud!',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'shipped_to_dealer' then
       insert into public.notifications (user_id, title, message, item_id, link)

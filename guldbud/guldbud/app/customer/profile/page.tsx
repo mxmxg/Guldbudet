@@ -22,6 +22,10 @@ export default function CustomerProfilePage() {
     address: '',
     postal_code: '',
     city: '',
+    payout_method: 'swish',
+    payout_swish: '',
+    payout_bank_clearing: '',
+    payout_bank_account: '',
   })
 
   useEffect(() => {
@@ -50,6 +54,10 @@ export default function CustomerProfilePage() {
       address: prof.address || '',
       postal_code: prof.postal_code || '',
       city: prof.city || '',
+      payout_method: prof.payout_method || 'swish',
+      payout_swish: prof.payout_swish || '',
+      payout_bank_clearing: prof.payout_bank_clearing || '',
+      payout_bank_account: prof.payout_bank_account || '',
     })
 
     const [{ count: itemCount }, { count: dealCount }] = await Promise.all([
@@ -74,6 +82,10 @@ export default function CustomerProfilePage() {
         address: form.address || null,
         postal_code: form.postal_code || null,
         city: form.city || null,
+        payout_method: form.payout_method,
+        payout_swish: form.payout_swish || null,
+        payout_bank_clearing: form.payout_bank_clearing || null,
+        payout_bank_account: form.payout_bank_account || null,
       })
       .eq('id', profile.id)
     if (error) setMsg({ ok: false, text: error.message })
@@ -144,6 +156,55 @@ export default function CustomerProfilePage() {
                   <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
                 </Field>
               </div>
+
+              <div className="mt-6 pt-6 border-t border-espresso-100">
+                <h3 className="font-display text-lg text-espresso-900 mb-1">Utbetalning</h3>
+                <p className="text-xs text-espresso-400 mb-4">
+                  Hit betalar vi ut när ditt föremål sålts och betalningen kommit in. Uppgifterna visas aldrig publikt.
+                </p>
+                <div className="flex gap-2 mb-4">
+                  {(['swish', 'bank'] as const).map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setForm({ ...form, payout_method: val })}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium border transition ${
+                        form.payout_method === val
+                          ? 'bg-gold-sheen text-espresso-900 border-transparent shadow-gold'
+                          : 'bg-white border-espresso-200 text-espresso-500 hover:border-gold-300'
+                      }`}
+                    >
+                      {val === 'swish' ? 'Swish' : 'Bankkonto'}
+                    </button>
+                  ))}
+                </div>
+                {form.payout_method === 'swish' ? (
+                  <Field label="Swish-nummer">
+                    <input
+                      value={form.payout_swish}
+                      onChange={(e) => setForm({ ...form, payout_swish: e.target.value })}
+                      placeholder="07X XXX XX XX"
+                    />
+                  </Field>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <Field label="Clearingnummer">
+                      <input
+                        value={form.payout_bank_clearing}
+                        onChange={(e) => setForm({ ...form, payout_bank_clearing: e.target.value })}
+                        placeholder="XXXX"
+                      />
+                    </Field>
+                    <Field label="Kontonummer">
+                      <input
+                        value={form.payout_bank_account}
+                        onChange={(e) => setForm({ ...form, payout_bank_account: e.target.value })}
+                      />
+                    </Field>
+                  </div>
+                )}
+              </div>
+
               <div className="mt-5 flex items-center gap-4">
                 <button onClick={save} disabled={saving} className="btn-gold">
                   {saving ? 'Sparar...' : 'Spara ändringar'}
