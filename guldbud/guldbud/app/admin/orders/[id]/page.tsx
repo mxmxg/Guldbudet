@@ -284,6 +284,15 @@ function PartyCard({ title, p }: { title: string; p: any }) {
           {p.postal_code || p.city ? `, ${p.postal_code || ''} ${p.city || ''}` : ''}
         </p>
       )}
+      {p.payout_method && (
+        <p className="mt-2 pt-2 border-t border-espresso-100 text-espresso-700">
+          <span className="text-xs font-semibold text-gold-600 uppercase tracking-wide">Utbetalning</span>
+          <br />
+          {p.payout_method === 'swish'
+            ? `Swish: ${p.payout_swish || '— (ej ifyllt)'}`
+            : `Bank: ${p.payout_bank_clearing || '—'} / ${p.payout_bank_account || '— (ej ifyllt)'}`}
+        </p>
+      )}
     </div>
   )
 }
