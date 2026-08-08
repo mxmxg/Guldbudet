@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 
 export const metadata: Metadata = {
-  title: 'Sälja arvguld och gamla smycken – så gör du',
+  title: 'Så säljer du arvguld och gamla smycken tryggt',
   description:
     'Har du ärvt guld eller gamla smycken du inte använder? Så värderar och säljer du arvguld tryggt och får marknadens bästa pris.',
   alternates: { canonical: '/guider/salja-arvguld' },

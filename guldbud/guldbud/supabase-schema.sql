@@ -318,7 +318,7 @@ begin
   else
     insert into public.notifications (user_id, title, message, link)
     values (new.id, 'Välkommen till GuldBud 👋',
-            'Kul att ha dig här! Nu kan du sälja ditt guld och låta auktoriserade handlare buda mot varandra om bästa priset – gratis och tryggt.',
+            'Kul att ha dig här! Nu kan du sälja ditt guld och låta auktoriserade handlare buda mot varandra om bästa priset, helt gratis och tryggt.',
             '/customer/submit');
   end if;
 
@@ -553,7 +553,7 @@ begin
       -- Reservationspris ej uppnått
       insert into public.notifications (user_id, title, message, item_id, link)
       values (r.owner_id, 'Högsta bud: ' || v_top.amount || ' kr på "' || r.title || '"',
-              'Budgivningen landade på ' || v_top.amount || ' kr – strax under ditt minimipris på ' ||
+              'Budgivningen landade på ' || v_top.amount || ' kr, strax under ditt minimipris på ' ||
               r.min_price || ' kr. Du kan ändå välja att godkänna budet och få betalt. ' ||
               'Att sälja är helt kostnadsfritt för dig.',
               r.id, '/auctions/' || r.id);
@@ -564,9 +564,9 @@ begin
     else
       -- Vinnare korad, inväntar säljarens bekräftelse
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (r.owner_id, 'Grattis – ditt föremål fick ' || v_top.amount || ' kr!',
+      values (r.owner_id, 'Grattis! Ditt föremål fick ' || v_top.amount || ' kr',
               'Budgivningen på "' || r.title || '" landade på ' || v_top.amount ||
-              ' kr. Godkänn budet så drar vi igång affären – du får betalt så snart vi tagit emot ' ||
+              ' kr. Godkänn budet så drar vi igång affären. Du får betalt så snart vi tagit emot ' ||
               'och verifierat föremålet. Att sälja är helt kostnadsfritt för dig.',
               r.id, '/auctions/' || r.id);
       insert into public.notifications (user_id, title, message, item_id, link)
@@ -733,7 +733,7 @@ begin
               replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr. Fyll gärna i dina utbetalningsuppgifter (Swish eller bankkonto) i din profil så går det snabbt.',
               new.item_id, '/orders/' || new.id);
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.dealer_id, 'Föremålet är kontrollerat – dags att betala',
+      values (new.dealer_id, 'Föremålet är kontrollerat, dags att betala',
               '"' || v_title || '" är mottaget och kontrollerat. Betala bud + provision så skickar vi det till dig.',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'dealer_paid' then
