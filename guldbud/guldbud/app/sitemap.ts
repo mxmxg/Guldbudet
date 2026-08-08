@@ -4,7 +4,21 @@ import { createClient } from '@/lib/supabase-server'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticPages = ['', '/auctions', '/resultat', '/how-it-works', '/dealer/guide', '/terms', '/privacy'].map((p) => ({
+  const staticPages = [
+    '',
+    '/auctions',
+    '/resultat',
+    '/how-it-works',
+    '/dealer/guide',
+    '/guider',
+    '/guider/salja-guld',
+    '/guider/vad-ar-mitt-guld-vart',
+    '/guider/guldpris-idag',
+    '/guider/karat-18k-14k-9k',
+    '/guider/salja-arvguld',
+    '/terms',
+    '/privacy',
+  ].map((p) => ({
     url: `${SITE}${p}`,
     changeFrequency: 'weekly' as const,
     priority: p === '' ? 1 : 0.7,
