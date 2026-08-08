@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import Confetti from '@/components/Confetti'
 import { CheckIcon } from '@/components/Icons'
 
 export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }: {
@@ -15,6 +16,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [orderId, setOrderId] = useState<string | null>(null)
+  const [confetti, setConfetti] = useState(0)
   const supabase = createClient()
 
   if (!isOwner) return null
@@ -38,12 +40,14 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
     const { data: order } = await supabase.from('orders').select('id').eq('item_id', itemId).single()
     setOrderId(order?.id ?? null)
     setLoading(false)
+    setConfetti((c) => c + 1)
     setStep('done')
   }
 
   if (step === 'done') {
     return (
       <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-6 mt-6">
+        <Confetti fire={confetti} />
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white">
             <CheckIcon size={18} strokeWidth={3} />

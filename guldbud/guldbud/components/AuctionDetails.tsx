@@ -1,8 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import Image from 'next/image'
 import Link from 'next/link'
+import Confetti from '@/components/Confetti'
 import BidSection from '@/components/BidSection'
 import AcceptBid from '@/components/AcceptBid'
 import WatchButton from '@/components/WatchButton'
@@ -30,8 +31,14 @@ export default function AuctionDetails({ item }: { item: any }) {
   const [activeImg, setActiveImg] = useState(0)
   const [flash, setFlash] = useState(false)
   const [zoom, setZoom] = useState(false)
+  const [extended, setExtended] = useState(false)
+  const [newBidToast, setNewBidToast] = useState<number | null>(null)
+  const [confetti, setConfetti] = useState(0)
   // Kept in state so anti-sniping extensions (server-side) reflect live.
   const [endsAt, setEndsAt] = useState<string | null>(item.auction_ends_at)
+  const endsAtRef = useRef<string | null>(item.auction_ends_at)
+  const bidsCountRef = useRef(0)
+  const userRef = useRef<any>(null)
   const supabase = createClient()
 
   const loadBids = async () => {
@@ -45,9 +52,22 @@ export default function AuctionDetails({ item }: { item: any }) {
       .order('created_at', { ascending: true })
       .limit(100)
     setBids(b || [])
+    bidsCountRef.current = (b || []).length
     // Refresh the end time too, so a late-bid extension shows immediately.
     const { data: it } = await supabase.from('items').select('auction_ends_at').eq('id', item.id).single()
-    if (it) setEndsAt(it.auction_ends_at)
+    if (it) {
+      // Anti-sniping drama: if the end time jumped forward, celebrate it.
+      if (
+        endsAtRef.current &&
+        it.auction_ends_at &&
+        new Date(it.auction_ends_at).getTime() > new Date(endsAtRef.current).getTime() + 1000
+      ) {
+        setExtended(true)
+        setTimeout(() => setExtended(false), 6000)
+      }
+      endsAtRef.current = it.auction_ends_at
+      setEndsAt(it.auction_ends_at)
+    }
   }
 
   useEffect(() => {
@@ -57,6 +77,7 @@ export default function AuctionDetails({ item }: { item: any }) {
       } = await supabase.auth.getUser()
       if (user) {
         setUser(user)
+        userRef.current = user
         const { data: p } = await supabase
           .from('profiles')
           .select('role, approved')
@@ -75,10 +96,20 @@ export default function AuctionDetails({ item }: { item: any }) {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'bids', filter: `item_id=eq.${item.id}` },
-        async () => {
+        async (payload: any) => {
+          const hadBids = bidsCountRef.current
           await loadBids()
           setFlash(true)
           setTimeout(() => setFlash(false), 1200)
+          const amt = payload.new?.amount
+          if (amt) {
+            setNewBidToast(amt)
+            setTimeout(() => setNewBidToast(null), 4500)
+          }
+          // Owner celebrates the very first bid on their item.
+          if (hadBids === 0 && userRef.current?.id === item.owner_id) {
+            setConfetti((c) => c + 1)
+          }
         }
       )
       .subscribe()
@@ -130,6 +161,21 @@ export default function AuctionDetails({ item }: { item: any }) {
 
   return (
     <>
+      <Confetti fire={confetti} />
+      {/* Live drama: new-bid + anti-sniping toasts */}
+      <div className="fixed top-20 inset-x-0 z-[95] flex flex-col items-center gap-2 px-4 pointer-events-none">
+        {newBidToast != null && (
+          <div className="animate-scale-in rounded-full bg-espresso-900 text-gold-100 text-sm font-medium px-4 py-2 shadow-lift border border-gold-500/30">
+            🔨 Nytt bud: {formatSEK(newBidToast)}
+          </div>
+        )}
+        {extended && (
+          <div className="animate-scale-in rounded-full bg-red-600 text-white text-sm font-semibold px-4 py-2 shadow-lift">
+            ⏱ Auktionen förlängdes – någon bjöd i sista sekund!
+          </div>
+        )}
+      </div>
+
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm text-espresso-400">
