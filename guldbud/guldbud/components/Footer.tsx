@@ -31,6 +31,7 @@ export default function Footer() {
             <FooterLink href="/#estimator">Värderingskalkylator</FooterLink>
             <FooterLink href="/auctions">Pågående auktioner</FooterLink>
             <FooterLink href="/resultat">Sålda resultat</FooterLink>
+            <FooterLink href="/guider">Guider</FooterLink>
           </FooterCol>
 
           <FooterCol title="För handlare">
