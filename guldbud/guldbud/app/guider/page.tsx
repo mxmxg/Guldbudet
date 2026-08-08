@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
-  title: 'Guider – sälja guld, guldpris och värdering',
+  title: 'Guider för dig som ska sälja guld',
   description:
     'Guider om att sälja guld: räkna ut vad ditt guld är värt, förstå karat och stämplar, se guldpriset idag och sälj arvguld tryggt.',
   alternates: { canonical: '/guider' },
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const GUIDES = [
   {
     href: '/guider/salja-guld',
-    title: 'Sälja guld – så får du bäst betalt',
+    title: 'Så får du bäst betalt när du säljer guld',
     desc: 'Hela processen från värdering till utbetalning, och hur du undviker att bli lurad.',
   },
   {
@@ -24,7 +24,7 @@ const GUIDES = [
   {
     href: '/guider/guldpris-idag',
     title: 'Guldpris idag',
-    desc: 'Aktuellt pris per gram för 24K, 18K, 14K och 9K – och vad som styr det.',
+    desc: 'Aktuellt pris per gram för 24K, 18K, 14K och 9K, och vad som styr det.',
   },
   {
     href: '/guider/karat-18k-14k-9k',

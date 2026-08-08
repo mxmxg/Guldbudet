@@ -478,7 +478,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
               <ul className="flex flex-col gap-4">
                 {[
                   'Flera verifierade handlare budar mot varandra',
-                  'Du ser alla bud i realtid – innan du bestämmer dig',
+                  'Du ser alla bud i realtid, innan du bestämmer dig',
                   'Konkurrensen pressar priset uppåt, inte nedåt',
                   'Metallvärdet visas ärligt, oavsett vikt',
                   'Kostnadsfritt att lägga ut, och du säger ja först när du är nöjd',
@@ -598,7 +598,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
             },
             {
               title: 'Betalt efter äkthetskontroll',
-              desc: 'När vi mottagit och verifierat föremålet betalas pengarna ut via Swish – ofta samma dag.',
+              desc: 'När vi mottagit och verifierat föremålet betalas pengarna ut via Swish, ofta samma dag.',
             },
             {
               title: 'Du bestämmer',

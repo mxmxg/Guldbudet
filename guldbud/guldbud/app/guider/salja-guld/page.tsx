@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 
 export const metadata: Metadata = {
-  title: 'Sälja guld – så får du bäst betalt 2026',
+  title: 'Så får du bäst betalt när du säljer guld (2026)',
   description:
     'Komplett guide till att sälja guld i Sverige: så räknas guldpriset ut, vad du bör få betalt, och hur du undviker att bli lurad. Låt handlare buda mot varandra.',
   alternates: { canonical: '/guider/salja-guld' },
@@ -15,7 +15,7 @@ const faq = [
   },
   {
     q: 'Är det gratis att sälja guld på GuldBud?',
-    a: 'Ja. Det är kostnadsfritt för dig som säljer – du betalar ingen avgift. Den vinnande handlaren betalar en köparprovision ovanpå sitt bud, så hela budet går till dig.',
+    a: 'Ja. Det är kostnadsfritt för dig som säljer, du betalar ingen avgift. Den vinnande handlaren betalar en köparprovision ovanpå sitt bud, så hela budet går till dig.',
   },
   {
     q: 'Hur skickar jag in mitt guld tryggt?',
@@ -23,7 +23,7 @@ const faq = [
   },
   {
     q: 'Behöver jag veta karaten på förhand?',
-    a: 'Nej. De flesta guldsmycken är stämplade (t.ex. 750 för 18K), men vi kontrollerar alltid guldhalten när vi tagit emot föremålet. Är du osäker kan du gissa – kalkylatorn ger ändå en fingervisning.',
+    a: 'Nej. De flesta guldsmycken är stämplade (t.ex. 750 för 18K), men vi kontrollerar alltid guldhalten när vi tagit emot föremålet. Är du osäker kan du gissa, kalkylatorn ger ändå en fingervisning.',
   },
 ]
 
@@ -31,8 +31,8 @@ export default function Page() {
   return (
     <GuideShell
       eyebrow="Guide · Sälja guld"
-      title="Sälja guld – så får du bäst betalt"
-      intro="Ska du sälja guld men vet inte vad det är värt eller hur du undviker att bli lurad? Här är hela processen – från värdering till utbetalning – och varför konkurrens mellan handlare ger dig mest."
+      title="Så får du bäst betalt när du säljer guld"
+      intro="Ska du sälja guld men vet inte vad det är värt, eller hur du undviker att bli lurad? Här går vi igenom hela processen, från värdering till utbetalning, och varför konkurrensen mellan handlare ger dig mest."
       updated="2026"
       faq={faq}
     >
@@ -54,7 +54,7 @@ export default function Page() {
       </P>
       <UL>
         <li>10 g × 0,75 × 1 300 kr = ca 9 750 kr i rent metallvärde.</li>
-        <li>Utbetalningen brukar ligga något under metallvärdet – men konkurrens mellan handlare pressar upp den.</li>
+        <li>Utbetalningen brukar ligga något under metallvärdet, men konkurrensen mellan handlare pressar upp den.</li>
       </UL>
       <P>
         Slipp räkna för hand: <A href="/#estimator">värderingskalkylatorn</A> gör det åt dig med dagens pris. Vill du
@@ -74,7 +74,7 @@ export default function Page() {
 
       <H2>Så undviker du att bli lurad</H2>
       <UL>
-        <li>Sälj aldrig efter ett enda muntligt bud – jämför alltid.</li>
+        <li>Sälj aldrig efter ett enda muntligt bud. Jämför alltid.</li>
         <li>Väg guldet och kolla stämpeln så du vet ungefär vad det borde ge.</li>
         <li>Välj en köpare som äkthetskontrollerar och betalar spårbart, inte kontant i handen.</li>
         <li>Se till att transporten är försäkrad.</li>
@@ -83,7 +83,7 @@ export default function Page() {
       <H2>Steg för steg på GuldBud</H2>
       <UL>
         <li>Fotografera föremålet och fyll i vikt och karat.</li>
-        <li>Vi granskar och öppnar auktionen – oftast inom ett par timmar.</li>
+        <li>Vi granskar och öppnar auktionen, oftast inom ett par timmar.</li>
         <li>Auktoriserade handlare budar mot varandra i realtid.</li>
         <li>Du accepterar det högsta budet och skickar in föremålet försäkrat.</li>
         <li>Vi kontrollerar äktheten och betalar ut till dig.</li>

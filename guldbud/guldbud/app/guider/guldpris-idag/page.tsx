@@ -3,7 +3,7 @@ import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 import LiveGoldPrice from '@/components/LiveGoldPrice'
 
 export const metadata: Metadata = {
-  title: 'Guldpris idag – aktuellt pris per gram (24K, 18K, 14K, 9K)',
+  title: 'Guldpris idag: aktuellt pris per gram (24K, 18K, 14K, 9K)',
   description:
     'Se guldpriset idag per gram för 24K, 18K, 14K och 9K. Förstå vad som styr guldpriset och vad ditt guld är värt vid dagens kurs.',
   alternates: { canonical: '/guider/guldpris-idag' },
@@ -29,7 +29,7 @@ export default function Page() {
     <GuideShell
       eyebrow="Guldpris"
       title="Guldpris idag"
-      intro="Aktuellt guldpris per gram, uppdaterat löpande. Se vad 24K, 18K, 14K och 9K är värt vid dagens kurs – och räkna ut vad just ditt guld skulle ge."
+      intro="Aktuellt guldpris per gram, uppdaterat löpande. Se vad 24K, 18K, 14K och 9K är värt vid dagens kurs, och räkna ut vad just ditt guld skulle ge."
     >
       <div className="mb-8">
         <LiveGoldPrice variant="card" className="max-w-md" />

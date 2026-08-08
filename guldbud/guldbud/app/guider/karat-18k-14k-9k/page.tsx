@@ -4,7 +4,7 @@ import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 export const metadata: Metadata = {
   title: 'Karat på guld: vad betyder 24K, 18K, 14K och 9K?',
   description:
-    'Vad betyder karat och stämplarna 999, 750, 585 och 375? Så mycket rent guld innehåller 24K, 18K, 14K och 9K – och vad det betyder för värdet.',
+    'Vad betyder karat och stämplarna 999, 750, 585 och 375? Så mycket rent guld innehåller 24K, 18K, 14K och 9K, och vad det betyder för värdet.',
   alternates: { canonical: '/guider/karat-18k-14k-9k' },
 }
 
@@ -15,7 +15,7 @@ const faq = [
   },
   {
     q: 'Vilken karat är bäst att sälja?',
-    a: 'Ju högre karat, desto mer rent guld och desto högre värde per gram. Men även lägre karat som 9K har ett verkligt guldvärde – det mesta går att sälja.',
+    a: 'Ju högre karat, desto mer rent guld och desto högre värde per gram. Men även lägre karat som 9K har ett verkligt guldvärde, så det mesta går att sälja.',
   },
   {
     q: 'Är 18K bättre än 14K?',
