@@ -750,12 +750,12 @@ begin
     elsif new.status = 'shipped_to_dealer' then
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.dealer_id, 'Ditt föremål är på väg',
-              '"' || v_title || '" har skickats till dig.',
+              'Vi har skickat "' || v_title || '" till dig. Tack för ditt köp via GuldBud. Hör av dig i affären om du undrar något.',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'completed' then
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.seller_id, 'Affären är slutförd',
-              'Affären för "' || v_title || '" är avslutad. Tack!',
+      values (new.seller_id, 'Tack för din affär!',
+              'Affären för "' || v_title || '" är helt klar. Tack för att du sålde via GuldBud, vi hoppas att vi ses igen.',
               new.item_id, '/orders/' || new.id);
     end if;
   end if;
