@@ -308,6 +308,20 @@ begin
     new.raw_user_meta_data->>'city',
     new.raw_user_meta_data->>'org_number'
   );
+
+  -- Välkomstbrev (skickas som mejl via notis-webhooken).
+  if (new.raw_user_meta_data->>'role') = 'dealer' then
+    insert into public.notifications (user_id, title, message, link)
+    values (new.id, 'Välkommen till GuldBud 👋',
+            'Tack för att du registrerat dig som handlare. Så snart vi verifierat ditt konto kan du börja buda på guld från hela Sverige.',
+            '/dealer/dashboard');
+  else
+    insert into public.notifications (user_id, title, message, link)
+    values (new.id, 'Välkommen till GuldBud 👋',
+            'Kul att ha dig här! Nu kan du sälja ditt guld och låta auktoriserade handlare buda mot varandra om bästa priset – gratis och tryggt.',
+            '/customer/submit');
+  end if;
+
   return new;
 end;
 $$;
