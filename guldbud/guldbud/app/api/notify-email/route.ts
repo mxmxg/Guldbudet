@@ -58,6 +58,18 @@ function stepsBox(heading: string, steps: string[], footer?: string) {
 // vet exakt vad som händer efter en avslutad affär.
 function instructionsFor(title: string): string {
   const t = title.toLowerCase()
+  // Välkomstbrev – så kommer man igång.
+  if (t.includes('välkommen')) {
+    return stepsBox(
+      'Så kommer du igång',
+      [
+        'Fotografera ditt föremål och fyll i vikt och karat.',
+        'Auktoriserade guldhandlare budar mot varandra om ditt guld.',
+        'Du väljer om du accepterar högsta budet – och får betalt. Helt gratis för dig.',
+      ],
+      'Det tar under fem minuter att lägga ut ditt första föremål.'
+    )
+  }
   // Säljaren – affären är skapad (hen accepterade / admin accepterade budet).
   if (t.includes('affär skapad')) {
     return stepsBox(
@@ -203,6 +215,8 @@ export async function POST(req: NextRequest) {
     ? 'Höj ditt bud →'
     : t.includes('grattis') || t.includes('högsta bud')
     ? 'Godkänn budet →'
+    : t.includes('välkommen')
+    ? 'Kom igång →'
     : isOrder
     ? 'Öppna affären →'
     : record.item_id
