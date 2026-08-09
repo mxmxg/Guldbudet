@@ -211,9 +211,14 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
               </div>
             )}
             {status === 'cancelled' && (
-              <button onClick={() => setStatus('accepted')} disabled={saving} className="btn-ghost-gold !py-2 mt-5">
-                Återöppna affär
-              </button>
+              <div className="mt-5">
+                {order.cancel_reason && (
+                  <p className="text-sm text-red-600 mb-2">Avbruten: {order.cancel_reason}</p>
+                )}
+                <button onClick={() => setStatus('accepted')} disabled={saving} className="btn-ghost-gold !py-2">
+                  Återöppna affär
+                </button>
+              </div>
             )}
           </div>
 
@@ -276,10 +281,20 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
               </>
             ) : (
               <>
-                <p className="text-sm text-espresso-500 mb-3 leading-relaxed">
+                <p className="text-sm text-espresso-500 mb-2 leading-relaxed">
                   Väntar på {formatSEK(totalWithCommission(order.amount))}. Registrera betalningen när pengarna
                   kommit in. Utbetalning till säljaren och vidareskick är låsta tills dess.
                 </p>
+                {order.payment_due_at && (() => {
+                  const due = new Date(order.payment_due_at)
+                  const overdue = due.getTime() < Date.now()
+                  return (
+                    <p className={`text-xs mb-3 ${overdue ? 'text-red-600 font-medium' : 'text-espresso-400'}`}>
+                      {overdue ? 'Förfallen sedan ' : 'Betala senast '}{due.toLocaleDateString('sv-SE')}
+                      {overdue ? ' · påminnelser skickas, avbryts automatiskt efter frist' : ''}
+                    </p>
+                  )
+                })()}
                 <button onClick={() => setDealerPaid(true)} disabled={saving} className="btn-gold !py-2">
                   {saving ? '...' : 'Registrera handlarens betalning'}
                 </button>

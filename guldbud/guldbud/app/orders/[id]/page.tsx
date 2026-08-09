@@ -232,16 +232,27 @@ function DealerPanel({ order }: { order: any }) {
             <span className="tabular-nums">{formatSEK(totalWithCommission(order.amount))}</span>
           </div>
         </div>
-        {awaitingPayment && (
-          <div className="mt-4 rounded-xl bg-gold-50 border border-gold-200 p-4 text-sm">
-            <p className="font-medium text-gold-800">Du vann budgivningen, dags att betala</p>
-            <p className="text-espresso-600 mt-1 leading-relaxed">
-              Betala bud + provision inom <span className="font-medium">{PAYMENT_WINDOW_LABEL}</span>. Så fort betalningen är
-              registrerad reserveras föremålet för dig. Vi äkthetskontrollerar det när det kommit in och skickar det sedan
-              vidare till dig. Betalningsinstruktioner finns i meddelandena nedan.
-            </p>
-          </div>
-        )}
+        {awaitingPayment && (() => {
+          const due = order.payment_due_at ? new Date(order.payment_due_at) : null
+          const overdue = due ? due.getTime() < Date.now() : false
+          return (
+            <div className={`mt-4 rounded-xl p-4 text-sm border ${overdue ? 'bg-red-50 border-red-200' : 'bg-gold-50 border-gold-200'}`}>
+              <p className={`font-medium ${overdue ? 'text-red-700' : 'text-gold-800'}`}>
+                {overdue ? 'Din betalning är försenad' : 'Du vann budgivningen, dags att betala'}
+              </p>
+              <p className="text-espresso-600 mt-1 leading-relaxed">
+                {overdue
+                  ? 'Betala snart så håller vi affären öppen. Uteblir betalningen avbryts affären automatiskt.'
+                  : <>Betala bud + provision inom <span className="font-medium">{PAYMENT_WINDOW_LABEL}</span>. Så fort betalningen är registrerad reserveras föremålet för dig. Betalningsinstruktioner finns i meddelandena nedan.</>}
+              </p>
+              {due && (
+                <p className={`mt-2 font-medium ${overdue ? 'text-red-700' : 'text-espresso-700'}`}>
+                  Betala senast {due.toLocaleDateString('sv-SE')}
+                </p>
+              )}
+            </div>
+          )
+        })()}
         {paid && <p className="mt-3 text-sm text-emerald-700">Betalning registrerad ✓</p>}
         <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
           Visa faktura →

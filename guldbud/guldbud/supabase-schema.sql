@@ -622,6 +622,14 @@ alter table public.orders add column if not exists order_no bigserial;
 -- denna är satt får säljaren betalt och föremålet skickas vidare.
 alter table public.orders add column if not exists dealer_paid_at timestamptz;
 
+-- Fas 2: betalnings-deadline, påminnelse-strypning och avboknings-orsak.
+alter table public.orders add column if not exists payment_due_at timestamptz;
+alter table public.orders add column if not exists payment_reminded_at timestamptz;
+alter table public.orders add column if not exists cancel_reason text;
+-- Backfill: ge befintliga affärer en deadline utifrån när de skapades.
+update public.orders set payment_due_at = created_at + interval '3 days'
+  where payment_due_at is null;
+
 -- Lägg till betalningssteget (dealer_paid) även om tabellen redan finns sedan tidigare.
 alter table public.orders drop constraint if exists orders_status_check;
 alter table public.orders add constraint orders_status_check
@@ -700,8 +708,8 @@ begin
      and (old.accepted_bid_id is distinct from new.accepted_bid_id) then
     select dealer_id, amount into v_dealer, v_amount from public.bids where id = new.accepted_bid_id;
 
-    insert into public.orders (item_id, seller_id, dealer_id, bid_id, amount)
-    values (new.id, new.owner_id, v_dealer, new.accepted_bid_id, v_amount)
+    insert into public.orders (item_id, seller_id, dealer_id, bid_id, amount, payment_due_at)
+    values (new.id, new.owner_id, v_dealer, new.accepted_bid_id, v_amount, now() + interval '3 days')
     on conflict (item_id) do nothing;
 
     select id into v_order from public.orders where item_id = new.id;
@@ -771,6 +779,68 @@ drop trigger if exists on_order_status on public.orders;
 create trigger on_order_status
   after update on public.orders
   for each row execute procedure public.notify_order_status();
+
+-- ============================================================
+-- Fas 2: obetalda affärer – påminnelser och auto-avbokning.
+-- Handlaren betalar vid vinst. Betalar hen inte i tid skickar vi först en
+-- påminnelse (max en per dygn) och avbryter sedan affären efter en frist.
+-- ============================================================
+create or replace function public.process_unpaid_orders()
+returns void language plpgsql security definer as $$
+declare
+  o record;
+  v_title text;
+begin
+  for o in
+    select * from public.orders
+    where dealer_paid_at is null
+      and status not in ('cancelled', 'completed')
+      and payment_due_at is not null
+  loop
+    select title into v_title from public.items where id = o.item_id;
+
+    if now() > o.payment_due_at + interval '4 days' then
+      -- Fristen har passerat: avbryt affären och lösgör föremålet.
+      update public.orders
+        set status = 'cancelled',
+            cancel_reason = 'Betalning uteblev',
+            updated_at = now()
+        where id = o.id;
+
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (o.dealer_id, 'Affären avbröts',
+              'Betalningen för "' || coalesce(v_title, 'föremålet') || '" kom inte in i tid, så affären har avbrutits.',
+              o.item_id, '/orders/' || o.id);
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (o.seller_id, 'Affären avbröts',
+              'Handlaren betalade tyvärr inte i tid för "' || coalesce(v_title, 'ditt föremål') || '". Du kan lägga ut föremålet igen så letar vi upp en ny köpare.',
+              o.item_id, '/my-items');
+
+    elsif now() > o.payment_due_at
+          and (o.payment_reminded_at is null or o.payment_reminded_at < now() - interval '24 hours') then
+      -- Förfallen men inom fristen: påminn handlaren, högst en gång per dygn.
+      update public.orders set payment_reminded_at = now() where id = o.id;
+
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (o.dealer_id, 'Påminnelse: din betalning väntar',
+              'Vi har inte registrerat din betalning för "' || coalesce(v_title, 'föremålet') || '" än. Betala snart så håller vi affären öppen, annars avbryts den automatiskt.',
+              o.item_id, '/orders/' || o.id);
+    end if;
+  end loop;
+end;
+$$;
+
+-- Kör en gång i timmen via pg_cron.
+do $$
+begin
+  create extension if not exists pg_cron;
+  perform cron.unschedule('process-unpaid-orders')
+    from cron.job where jobname = 'process-unpaid-orders';
+  perform cron.schedule('process-unpaid-orders', '0 * * * *',
+    'select public.process_unpaid_orders();');
+exception when others then
+  raise notice 'pg_cron kunde inte konfigureras automatiskt (%). Aktivera pg_cron under Database > Extensions och kör blocket igen.', sqlerrm;
+end $$;
 
 -- Notis när ett meddelande postas: motparten (admin<->part) får besked.
 create or replace function public.notify_order_message()
