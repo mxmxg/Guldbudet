@@ -101,8 +101,13 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
           </div>
           <div className="text-right">
             <p className="font-semibold text-espresso-900 uppercase tracking-wide text-sm">
-              {isInvoice ? 'Faktura' : 'Utbetalningsspecifikation'}
+              {isInvoice ? 'Faktura' : 'Avräkningsnota'}
             </p>
+            {isInvoice ? (
+              <p className="text-[11px] text-espresso-400">Gäller även som inköpsunderlag</p>
+            ) : (
+              <p className="text-[11px] text-espresso-400">Underlag för din försäljning</p>
+            )}
             <p className="text-xs text-espresso-400 mt-1">Nr: {ref(order.order_no)}</p>
             <p className="text-xs text-espresso-400">Datum: {date}</p>
           </div>
@@ -152,10 +157,10 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
         </table>
 
         <p className="text-xs text-espresso-400 leading-relaxed">
-          {item?.weight_grams} g · {item?.karat}. {' '}
+          Föremål: {item?.title} · {item?.weight_grams} g · {item?.karat}.{' '}
           {isInvoice
-            ? `Betalning enligt instruktioner i affären. Referens: ${ref(order.order_no)}.`
-            : 'Utbetalning sker till angivet konto efter godkänd äkthetskontroll.'}
+            ? `Sålt i kommission av ${GULDBUD.name} (org.nr ${GULDBUD.org}). Betalning enligt instruktioner i affären. Referens: ${ref(order.order_no)}. Detta dokument utgör inköpsunderlag för föremålet.`
+            : `Sålt genom ${GULDBUD.name} i kommission för din räkning. Utbetalning sker till angivet konto efter godkänd äkthetskontroll. Som privatperson lägger du ingen moms på försäljning av dina egna begagnade föremål.`}
         </p>
 
         <p className="text-[11px] text-espresso-300 mt-6 pt-4 border-t border-espresso-100">

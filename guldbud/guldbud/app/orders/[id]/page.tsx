@@ -152,19 +152,42 @@ export default function OrderPage({ params }: { params: { id: string } }) {
 function SellerPanel({ order }: { order: any }) {
   const needsShipping = order.status === 'accepted'
   return (
-    <div className="card p-6">
+    <div className={`card p-6 ${needsShipping ? 'ring-2 ring-gold-300' : ''}`}>
       {needsShipping ? (
         <>
-          <h2 className="font-display text-lg text-espresso-900 mb-1">Nästa steg: skicka föremålet</h2>
-          <p className="text-sm text-espresso-500 mb-4">
-            Packa föremålet omsorgsfullt och skicka det rekommenderat och försäkrat till oss. Skriv
-            gärna spårningsnumret i chatten nedan.
+          <div className="flex items-center gap-2 mb-1">
+            <span className="chip bg-gold-100 text-gold-800 border border-gold-200">Din tur</span>
+          </div>
+          <h2 className="font-display text-xl text-espresso-900 mb-1">Skicka in föremålet nu</h2>
+          <p className="text-sm text-espresso-500 mb-5 leading-relaxed">
+            Budet är accepterat och pengarna är reserverade hos oss. Ju snabbare föremålet är på väg,
+            desto snabbare får du betalt. Du behöver inte vänta på något från oss, posta det redan idag.
           </p>
+
+          <ol className="grid gap-3 mb-5">
+            {[
+              'Linda in föremålet väl, gärna i bubbelplast, i ett litet vadderat kuvert eller en liten kartong.',
+              'Skicka som spårbart och försäkrat brev eller paket (t.ex. rekommenderat via PostNord).',
+              'Skriv spårningsnumret i meddelandena längst ner så vi kan följa försändelsen.',
+            ].map((t, i) => (
+              <li key={i} className="flex gap-3 text-sm text-espresso-700">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-gold-500 text-white grid place-items-center text-xs font-semibold">
+                  {i + 1}
+                </span>
+                <span className="leading-relaxed pt-0.5">{t}</span>
+              </li>
+            ))}
+          </ol>
+
           <div className="rounded-xl bg-espresso-900 p-4 text-center">
             <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Skicka till</p>
             <p className="text-gold-200 font-medium">GuldBud AB</p>
             <p className="text-gold-200/80 text-sm">Storgatan 1, 111 22 Stockholm</p>
           </div>
+          <p className="text-xs text-espresso-400 mt-3 leading-relaxed">
+            Så fort vi tar emot och äkthetskontrollerat föremålet betalar vi ut hela budet till dig. Har
+            du frågor innan du postar, skriv i meddelandena nedan.
+          </p>
         </>
       ) : (
         <>
@@ -173,13 +196,13 @@ function SellerPanel({ order }: { order: any }) {
             {order.status === 'shipped_by_seller' && 'Vi väntar på att ditt föremål ska komma fram.'}
             {order.status === 'received' && 'Vi har tagit emot föremålet och kontrollerar äktheten.'}
             {order.status === 'dealer_paid' && 'Handlaren har betalat – din utbetalning förbereds nu.'}
-            {order.status === 'verified_paid' && 'Godkänt! Din betalning är på väg via Swish.'}
+            {order.status === 'verified_paid' && 'Godkänt! Din utbetalning är på väg till ditt konto.'}
             {(order.status === 'shipped_to_dealer' || order.status === 'completed') &&
               'Affären är klar. Tack för att du sålde via GuldBud!'}
           </p>
           {['verified_paid', 'shipped_to_dealer', 'completed'].includes(order.status) && (
             <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
-              Visa utbetalningsspecifikation →
+              Visa avräkningsnota →
             </Link>
           )}
         </>
