@@ -70,27 +70,15 @@ function instructionsFor(title: string): string {
       'Det tar under fem minuter att lägga ut ditt första föremål.'
     )
   }
-  // Säljaren – affären är bekräftad (handlaren har betalat), dags att skicka in.
-  if (t.includes('bekräftad') || t.includes('skicka in')) {
+  // Säljaren – affären är skapad, skicka in direkt (påsen är på väg men behöver inte inväntas).
+  if (t.includes('affär skapad') || t.includes('skicka in')) {
     return stepsBox(
       'Så här slutför du affären',
       [
-        'Packa föremålet omsorgsfullt i en liten ask eller bubbelpåse.',
-        `Skicka som <strong style="color:#f5e6c8">rekommenderat och försäkrat</strong> brev till: <strong style="color:#f5e6c8">${SHIP_ADDR}</strong>.`,
+        'En säkerhetspåse är på väg till dig, men du kan posta redan idag utan att vänta på den.',
+        `Skicka föremålet som <strong style="color:#f5e6c8">rekommenderat och försäkrat</strong> brev till: <strong style="color:#f5e6c8">${SHIP_ADDR}</strong>.`,
         'Vi verifierar äktheten så snart vi tagit emot föremålet.',
         `Du får betalt, normalt inom <strong style="color:#f5e6c8">${PAYMENT_WINDOW_LABEL}</strong> efter verifieringen.`,
-      ],
-      'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
-    )
-  }
-  // Säljaren – affären är skapad, vi bekräftar med handlaren (skicka inte än).
-  if (t.includes('affär skapad')) {
-    return stepsBox(
-      'Vad händer nu?',
-      [
-        'Vi slutför affären med den vinnande handlaren.',
-        'Så fort det är klart hör vi av oss med instruktioner om inskicket, oftast redan samma dag.',
-        'Du behöver inte skicka något än, vänta tills vi säger till.',
       ],
       'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
     )
