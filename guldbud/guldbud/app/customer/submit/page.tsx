@@ -398,7 +398,7 @@ export default function SubmitPage() {
                   'Handlare budar i konkurrens',
                   'Gratis att lägga ut',
                   'Du väljer om du säljer',
-                  'Utbetalning via Swish',
+                  'Utbetalning via Swish eller bankkonto',
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2">
                     <span className="w-4 h-4 rounded-full bg-gold-100 text-gold-700 flex items-center justify-center shrink-0">

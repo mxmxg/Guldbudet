@@ -290,7 +290,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
           <div className="max-w-6xl mx-auto px-4 py-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-espresso-100/50">
             <Trust><LockIcon size={14} className="text-gold-400/80" /> BankID-verifierade handlare</Trust>
             <Trust><TruckIcon size={14} className="text-gold-400/80" /> Försäkrad frakt</Trust>
-            <Trust><WalletIcon size={14} className="text-gold-400/80" /> Utbetalning via Swish</Trust>
+            <Trust><WalletIcon size={14} className="text-gold-400/80" /> Utbetalning via Swish eller bank</Trust>
             <Trust><CheckIcon size={14} className="text-gold-400/80" /> Kostnadsfritt att lägga ut</Trust>
           </div>
         </div>
@@ -357,7 +357,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
                 step: '03',
                 Icon: CoinsIcon,
                 title: 'Acceptera och få betalt',
-                desc: 'Välj det bud du är nöjd med, skicka föremålet försäkrat till oss och få pengarna via Swish samma dag som vi verifierat.',
+                desc: 'Välj det bud du är nöjd med, skicka föremålet försäkrat till oss och få pengarna via Swish eller bankkonto samma dag som vi verifierat.',
               },
             ].map((s, i) => (
               <Reveal key={s.step} delay={i * 100}>
@@ -598,7 +598,7 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
             },
             {
               title: 'Betalt efter äkthetskontroll',
-              desc: 'När vi mottagit och verifierat föremålet betalas pengarna ut via Swish, ofta samma dag.',
+              desc: 'När vi mottagit och verifierat föremålet betalas pengarna ut via Swish eller bankkonto, ofta samma dag.',
             },
             {
               title: 'Du bestämmer',
