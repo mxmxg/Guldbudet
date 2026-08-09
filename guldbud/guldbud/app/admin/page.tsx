@@ -195,12 +195,20 @@ export default function AdminPage() {
     setAcceptingId(item.id)
     setAdminError('')
     setAdminNotice('')
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('items')
       .update({ accepted_bid_id: bidId, accepted_at: new Date().toISOString(), status: 'closed' })
       .eq('id', item.id)
+      .select('id')
     if (error) {
       setAdminError('Kunde inte godkänna budet: ' + error.message)
+      setAcceptingId(null)
+      return
+    }
+    if (!data || data.length === 0) {
+      setAdminError(
+        'Godkännandet gick inte igenom, ingen rad uppdaterades. Det beror oftast på att databasen inte är helt uppdaterad. Kör senaste SQL-blocket och försök igen.'
+      )
       setAcceptingId(null)
       return
     }
