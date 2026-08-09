@@ -70,8 +70,8 @@ function instructionsFor(title: string): string {
       'Det tar under fem minuter att lägga ut ditt första föremål.'
     )
   }
-  // Säljaren – affären är skapad (hen accepterade / admin accepterade budet).
-  if (t.includes('affär skapad')) {
+  // Säljaren – affären är bekräftad (handlaren har betalat), dags att skicka in.
+  if (t.includes('bekräftad') || t.includes('skicka in')) {
     return stepsBox(
       'Så här slutför du affären',
       [
@@ -79,6 +79,18 @@ function instructionsFor(title: string): string {
         `Skicka som <strong style="color:#f5e6c8">rekommenderat och försäkrat</strong> brev till: <strong style="color:#f5e6c8">${SHIP_ADDR}</strong>.`,
         'Vi verifierar äktheten så snart vi tagit emot föremålet.',
         `Du får betalt, normalt inom <strong style="color:#f5e6c8">${PAYMENT_WINDOW_LABEL}</strong> efter verifieringen.`,
+      ],
+      'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
+    )
+  }
+  // Säljaren – affären är skapad, vi bekräftar med handlaren (skicka inte än).
+  if (t.includes('affär skapad')) {
+    return stepsBox(
+      'Vad händer nu?',
+      [
+        'Vi slutför affären med den vinnande handlaren.',
+        'Så fort det är klart hör vi av oss med instruktioner om inskicket, oftast redan samma dag.',
+        'Du behöver inte skicka något än, vänta tills vi säger till.',
       ],
       'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
     )

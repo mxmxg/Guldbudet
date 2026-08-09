@@ -58,29 +58,15 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
           </div>
         </div>
         <div className="rounded-xl bg-white border border-espresso-100 p-4 mb-4">
-          <p className="font-medium text-espresso-800 mb-3">Nästa steg: skicka föremålet till oss</p>
-          <ol className="flex flex-col gap-2 text-sm text-espresso-600">
-            {[
-              'Packa föremålet omsorgsfullt i en liten ask eller bubbelpåse.',
-              'Skicka som rekommenderat och försäkrat brev till vår adress.',
-              'Vi verifierar äktheten så snart vi mottagit föremålet.',
-              'När allt är klart betalas du ut, normalt inom 1–2 bankdagar.',
-            ].map((t, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="text-gold-600 font-semibold">{i + 1}.</span>
-                <span>{t}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className="rounded-xl bg-espresso-900 p-4 text-center">
-          <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Skicka till</p>
-          <p className="text-gold-200 font-medium">GuldBud AB</p>
-          <p className="text-gold-200/80 text-sm">Storgatan 1, 111 22 Stockholm</p>
-          <p className="text-gold-500/70 text-xs mt-2">Vid frågor: info@guldbud.com</p>
+          <p className="font-medium text-espresso-800 mb-2">Vad händer nu?</p>
+          <p className="text-sm text-espresso-600 leading-relaxed">
+            Vi slutför affären med handlaren. Så fort det är klart hör vi av oss med instruktioner om hur du
+            skickar in föremålet, oftast redan samma dag. Du behöver inte skicka något än. När vi tagit emot
+            och verifierat föremålet betalas du ut, normalt inom 1–2 bankdagar.
+          </p>
         </div>
         {orderId && (
-          <Link href={`/orders/${orderId}`} className="btn-gold w-full mt-4 justify-center">
+          <Link href={`/orders/${orderId}`} className="btn-gold w-full mt-1 justify-center">
             Följ affären och kontakta oss →
           </Link>
         )}

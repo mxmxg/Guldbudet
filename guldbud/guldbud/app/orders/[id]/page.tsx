@@ -150,10 +150,21 @@ export default function OrderPage({ params }: { params: { id: string } }) {
 }
 
 function SellerPanel({ order }: { order: any }) {
-  const needsShipping = order.status === 'accepted'
+  const paid = !!order.dealer_paid_at
+  const awaitingConfirm = order.status === 'accepted' && !paid
+  const needsShipping = order.status === 'accepted' && paid
   return (
     <div className={`card p-6 ${needsShipping ? 'ring-2 ring-gold-300' : ''}`}>
-      {needsShipping ? (
+      {awaitingConfirm ? (
+        <>
+          <h2 className="font-display text-lg text-espresso-900 mb-1">Vi bekräftar affären</h2>
+          <p className="text-sm text-espresso-500 leading-relaxed">
+            Ditt bud är accepterat och vi slutför just nu affären med handlaren. Du behöver inte skicka något
+            än, vänta tills vi säger till. Så fort allt är klart hör vi av oss här med instruktioner om
+            inskicket, oftast redan samma dag.
+          </p>
+        </>
+      ) : needsShipping ? (
         <>
           <div className="flex items-center gap-2 mb-1">
             <span className="chip bg-gold-100 text-gold-800 border border-gold-200">Din tur</span>
