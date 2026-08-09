@@ -77,6 +77,12 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const advance = async () => {
     const next = nextStatus(order.status as OrderStatus)
     if (!next) return
+    // Säkerhetsspärr: betala aldrig ut säljaren eller skicka vidare till handlaren
+    // innan handlarens betalning är registrerad. Inga pengar lämnar huset på kredit.
+    if ((next === 'verified_paid' || next === 'shipped_to_dealer') && !order.dealer_paid_at) {
+      setSaveError('Registrera handlarens betalning först – vi betalar ut och skickar vidare först när pengarna är inne.')
+      return
+    }
     setSaving(true)
     setSaveError('')
     const { error } = await supabase
@@ -84,6 +90,18 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
       .update({ status: next, updated_at: new Date().toISOString() })
       .eq('id', order.id)
     if (error) setSaveError('Kunde inte uppdatera affären: ' + error.message)
+    else await loadOrder()
+    setSaving(false)
+  }
+
+  const setDealerPaid = async (paid: boolean) => {
+    setSaving(true)
+    setSaveError('')
+    const { error } = await supabase
+      .from('orders')
+      .update({ dealer_paid_at: paid ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
+      .eq('id', order.id)
+    if (error) setSaveError('Kunde inte spara betalningen: ' + error.message)
     else await loadOrder()
     setSaving(false)
   }
@@ -235,6 +253,38 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-4 text-sm text-gold-600 hover:text-gold-700">
               Visa handlarens faktura →
             </Link>
+          </div>
+
+          {/* Handlarens betalning – fristående från logistikstegen */}
+          <div className={`card p-6 ${!order.dealer_paid_at && !isFinalOrCancelled ? 'ring-2 ring-gold-300' : ''}`}>
+            <h2 className="font-display text-lg text-espresso-900 mb-1">Handlarens betalning</h2>
+            {order.dealer_paid_at ? (
+              <>
+                <p className="text-sm text-emerald-700">
+                  Betald ✓ · {new Date(order.dealer_paid_at).toLocaleString('sv-SE')}
+                </p>
+                <p className="text-xs text-espresso-400 mt-1">
+                  Utbetalning till säljare och vidareskick är nu upplåsta.
+                </p>
+                <button
+                  onClick={() => setDealerPaid(false)}
+                  disabled={saving}
+                  className="mt-3 text-xs text-espresso-400 hover:text-red-500 transition"
+                >
+                  Ångra (markera som obetald)
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-espresso-500 mb-3 leading-relaxed">
+                  Väntar på {formatSEK(totalWithCommission(order.amount))}. Registrera betalningen när pengarna
+                  kommit in. Utbetalning till säljaren och vidareskick är låsta tills dess.
+                </p>
+                <button onClick={() => setDealerPaid(true)} disabled={saving} className="btn-gold !py-2">
+                  {saving ? '...' : 'Registrera handlarens betalning'}
+                </button>
+              </>
+            )}
           </div>
 
           {/* Parties (real details, admin only) */}

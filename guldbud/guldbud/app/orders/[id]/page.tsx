@@ -212,8 +212,8 @@ function SellerPanel({ order }: { order: any }) {
 }
 
 function DealerPanel({ order }: { order: any }) {
-  const awaitingPayment = order.status === 'received'
-  const paid = ['dealer_paid', 'verified_paid', 'shipped_to_dealer', 'completed'].includes(order.status)
+  const paid = !!order.dealer_paid_at
+  const awaitingPayment = !paid && order.status !== 'cancelled'
   return (
     <>
       <div className={`card p-6 ${awaitingPayment ? 'ring-2 ring-gold-300' : ''}`}>
@@ -234,28 +234,30 @@ function DealerPanel({ order }: { order: any }) {
         </div>
         {awaitingPayment && (
           <div className="mt-4 rounded-xl bg-gold-50 border border-gold-200 p-4 text-sm">
-            <p className="font-medium text-gold-800">Dags att betala</p>
+            <p className="font-medium text-gold-800">Du vann budgivningen, dags att betala</p>
             <p className="text-espresso-600 mt-1 leading-relaxed">
-              Föremålet är mottaget och kontrollerat. Betala inom <span className="font-medium">{PAYMENT_WINDOW_LABEL}</span> så
-              skickar vi det till dig. Betalningsinstruktioner finns i meddelandena nedan – hör av dig där om något är oklart.
+              Betala bud + provision inom <span className="font-medium">{PAYMENT_WINDOW_LABEL}</span>. Så fort betalningen är
+              registrerad reserveras föremålet för dig. Vi äkthetskontrollerar det när det kommit in och skickar det sedan
+              vidare till dig. Betalningsinstruktioner finns i meddelandena nedan.
             </p>
           </div>
         )}
         {paid && <p className="mt-3 text-sm text-emerald-700">Betalning registrerad ✓</p>}
-        {(awaitingPayment || paid) && (
-          <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
-            Visa faktura →
-          </Link>
-        )}
+        <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
+          Visa faktura →
+        </Link>
       </div>
       <div className="card p-6">
         <h2 className="font-display text-lg text-espresso-900 mb-1">Status</h2>
         <p className="text-sm text-espresso-500">
           {(order.status === 'accepted' || order.status === 'shipped_by_seller') &&
-            'Inget du behöver göra just nu – vi hör av oss så fort föremålet är mottaget och kontrollerat.'}
-          {order.status === 'received' && 'Föremålet är kontrollerat. Betala så skickar vi det vidare till dig.'}
-          {order.status === 'dealer_paid' && 'Tack för din betalning! Vi förbereder leverans till dig.'}
-          {order.status === 'verified_paid' && 'Säljaren är utbetald och föremålet packas för leverans till dig.'}
+            'Vi väntar på att säljaren skickar in föremålet. Så fort det är mottaget och kontrollerat hör vi av oss.'}
+          {order.status === 'received' &&
+            (paid
+              ? 'Föremålet är mottaget och kontrollerat. Vi packar det och skickar det till dig inom kort.'
+              : 'Föremålet är mottaget och kontrollerat. Vi skickar det vidare så snart din betalning är registrerad.')}
+          {order.status === 'dealer_paid' && 'Vi förbereder leverans till dig.'}
+          {order.status === 'verified_paid' && 'Föremålet packas för leverans till dig.'}
           {order.status === 'shipped_to_dealer' &&
             `Föremålet är skickat till dig.${order.tracking_dealer ? ` Spårningsnummer: ${order.tracking_dealer}.` : ''}`}
           {order.status === 'completed' && 'Affären är slutförd. Tack!'}

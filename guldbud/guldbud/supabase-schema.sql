@@ -617,6 +617,11 @@ create table if not exists public.orders (
 -- Löpnummer per affär (läsbart fakturanummer, t.ex. GB-000123).
 alter table public.orders add column if not exists order_no bigserial;
 
+-- "Handlaren betalar vid vinst": betalningen är ett eget spår, fristående från
+-- logistikstegen. Null = obetald, tidsstämpel = registrerad betalning. Först när
+-- denna är satt får säljaren betalt och föremålet skickas vidare.
+alter table public.orders add column if not exists dealer_paid_at timestamptz;
+
 -- Lägg till betalningssteget (dealer_paid) även om tabellen redan finns sedan tidigare.
 alter table public.orders drop constraint if exists orders_status_check;
 alter table public.orders add constraint orders_status_check
@@ -708,8 +713,8 @@ begin
 
     if v_dealer is not null then
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (v_dealer, 'Ditt bud accepterades',
-              'Säljaren accepterade ditt bud på "' || new.title || '". Följ affären här.',
+      values (v_dealer, 'Grattis, du vann budgivningen',
+              'Säljaren accepterade ditt bud på "' || new.title || '". Betala bud + provision så reserverar vi föremålet för dig. Betalningsinstruktioner finns i affären.',
               new.id, '/orders/' || v_order);
     end if;
   end if;
