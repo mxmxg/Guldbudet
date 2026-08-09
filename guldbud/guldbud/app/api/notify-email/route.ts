@@ -83,15 +83,15 @@ function instructionsFor(title: string): string {
       'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
     )
   }
-  // Handlaren – budet accepterades, affären är igång.
-  if (t.includes('accepterades') || t.includes('bud accepterat')) {
+  // Handlaren – du vann budgivningen, betala så går affären vidare.
+  if (t.includes('accepterades') || t.includes('bud accepterat') || t.includes('vann')) {
     return stepsBox(
       'Så går affären vidare',
       [
-        'Säljaren skickar föremålet till GuldBud.',
-        'Vi tar emot och äkthetskontrollerar det.',
-        `Du faktureras budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision och betalar inom <strong style="color:#f5e6c8">${PAYMENT_WINDOW_LABEL}</strong>.`,
-        'När din betalning registrerats skickar vi föremålet till dig.',
+        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision inom <strong style="color:#f5e6c8">${PAYMENT_WINDOW_LABEL}</strong>. Betalningsinstruktioner finns i affären.`,
+        'När din betalning är registrerad reserveras föremålet för dig.',
+        'Säljaren skickar in det och vi äkthetskontrollerar det.',
+        'Vi skickar sedan föremålet vidare till dig.',
       ],
       'Följ varje steg och skriv till oss under Affärer.'
     )
@@ -213,6 +213,8 @@ export async function POST(req: NextRequest) {
   const isOrder = !!link && link.includes('/orders/')
   const cta = t.includes('överbjuden')
     ? 'Höj ditt bud →'
+    : t.includes('vann')
+    ? 'Betala och följ affären →'
     : t.includes('grattis') || t.includes('högsta bud')
     ? 'Godkänn budet →'
     : t.includes('välkommen')
