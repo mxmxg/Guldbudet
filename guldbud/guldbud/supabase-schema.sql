@@ -433,28 +433,9 @@ create trigger on_bid_extend_auction
 -- Notifiering: när ett bud accepteras (auktion stängs)
 --  - vinnande handlaren får besked
 -- ============================================================
-create or replace function public.notify_bid_accepted()
-returns trigger language plpgsql security definer as $$
-declare
-  v_dealer uuid;
-begin
-  if new.status = 'closed' and new.accepted_bid_id is not null
-     and (old.accepted_bid_id is distinct from new.accepted_bid_id) then
-    select dealer_id into v_dealer from public.bids where id = new.accepted_bid_id;
-    if v_dealer is not null then
-      insert into public.notifications (user_id, title, message, item_id)
-      values (v_dealer, 'Ditt bud accepterades',
-              'Säljaren accepterade ditt bud på "' || new.title || '".', new.id);
-    end if;
-  end if;
-  return new;
-end;
-$$;
-
-drop trigger if exists on_bid_accepted on public.items;
-create trigger on_bid_accepted
-  after update on public.items
-  for each row execute procedure public.notify_bid_accepted();
+-- notify_bid_accepted() och dess trigger definieras längre ner, i avsnittet
+-- "Skapa affär + notiser". Där skapar den affären när ett bud accepteras.
+-- (Tidigare fanns en enklare notis-variant här som bara krånglade till det.)
 
 -- ============================================================
 -- Notifiering: när en handlare godkänns
@@ -731,6 +712,11 @@ begin
   return new;
 end;
 $$;
+
+drop trigger if exists on_bid_accepted on public.items;
+create trigger on_bid_accepted
+  after update on public.items
+  for each row execute procedure public.notify_bid_accepted();
 
 -- Notis när admin flyttar affären till nästa steg.
 create or replace function public.notify_order_status()
