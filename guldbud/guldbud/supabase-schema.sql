@@ -716,7 +716,7 @@ begin
 
     insert into public.notifications (user_id, title, message, item_id, link)
     values (new.owner_id, 'Affär skapad',
-            'Budet är accepterat. Följ affären och skicka föremålet till oss.',
+            'Budet är accepterat. Vi bekräftar affären med handlaren och hör av oss med instruktioner om inskicket, oftast redan samma dag. Du behöver inte skicka något än.',
             new.id, '/orders/' || v_order);
 
     if v_dealer is not null then
@@ -780,6 +780,29 @@ create trigger on_order_status
   after update on public.orders
   for each row execute procedure public.notify_order_status();
 
+-- Fas 3: när handlaren betalat bekräftas affären för säljaren – först nu ber vi
+-- om inskicket. Så känner säljaren aldrig av en handlare som inte betalar.
+create or replace function public.notify_dealer_paid()
+returns trigger language plpgsql security definer as $$
+declare
+  v_title text;
+begin
+  if new.dealer_paid_at is not null and old.dealer_paid_at is null then
+    select title into v_title from public.items where id = new.item_id;
+    insert into public.notifications (user_id, title, message, item_id, link)
+    values (new.seller_id, 'Affären är bekräftad, skicka in föremålet',
+            'Allt är klart med handlaren. Skicka in "' || coalesce(v_title, 'ditt föremål') ||
+            '" till oss så betalar vi ut hela budet så snart vi tagit emot och verifierat det. Instruktioner finns i affären.',
+            new.item_id, '/orders/' || new.id);
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_dealer_paid on public.orders;
+create trigger on_dealer_paid
+  after update on public.orders
+  for each row execute procedure public.notify_dealer_paid();
+
 -- ============================================================
 -- Fas 2: obetalda affärer – påminnelser och auto-avbokning.
 -- Handlaren betalar vid vinst. Betalar hen inte i tid skickar vi först en
@@ -812,8 +835,9 @@ begin
               'Betalningen för "' || coalesce(v_title, 'föremålet') || '" kom inte in i tid, så affären har avbrutits.',
               o.item_id, '/orders/' || o.id);
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (o.seller_id, 'Affären avbröts',
-              'Handlaren betalade tyvärr inte i tid för "' || coalesce(v_title, 'ditt föremål') || '". Du kan lägga ut föremålet igen så letar vi upp en ny köpare.',
+      values (o.seller_id, 'Vi matchar dig med en ny köpare',
+              'Den vinnande handlaren fullföljde tyvärr inte köpet av "' || coalesce(v_title, 'ditt föremål') ||
+              '". Ditt föremål är kvar hos dig och inget har hänt med det. Lägg ut det igen så låter vi handlarna buda på nytt, det är fortfarande gratis för dig.',
               o.item_id, '/my-items');
 
     elsif now() > o.payment_due_at
