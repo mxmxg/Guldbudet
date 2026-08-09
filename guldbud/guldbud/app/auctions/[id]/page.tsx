@@ -61,6 +61,8 @@ export default async function AuctionPage({ params }: { params: { id: string } }
     image: item.image_urls || undefined,
     category: item.category || 'Guld',
     url,
+    // Begagnat är sant för i princip allt guld som säljs här.
+    itemCondition: 'https://schema.org/UsedCondition',
     ...(topBid > 0
       ? {
           offers: {
@@ -68,7 +70,22 @@ export default async function AuctionPage({ params }: { params: { id: string } }
             price: topBid,
             priceCurrency: 'SEK',
             availability: 'https://schema.org/InStock',
+            itemCondition: 'https://schema.org/UsedCondition',
             url,
+            // Budet gäller tills auktionen stänger.
+            ...(item.auction_ends_at ? { priceValidUntil: String(item.auction_ends_at).slice(0, 10) } : {}),
+            // Auktionsköp är slutgiltiga – en sann "inga returer"-policy.
+            hasMerchantReturnPolicy: {
+              '@type': 'MerchantReturnPolicy',
+              applicableCountry: 'SE',
+              returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+            },
+            // Vi står för och sköter frakten till den vinnande handlaren.
+            shippingDetails: {
+              '@type': 'OfferShippingDetails',
+              shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'SEK' },
+              shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'SE' },
+            },
           },
         }
       : {}),
