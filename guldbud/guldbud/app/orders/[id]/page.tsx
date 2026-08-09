@@ -150,29 +150,18 @@ export default function OrderPage({ params }: { params: { id: string } }) {
 }
 
 function SellerPanel({ order }: { order: any }) {
-  const paid = !!order.dealer_paid_at
-  const awaitingConfirm = order.status === 'accepted' && !paid
-  const needsShipping = order.status === 'accepted' && paid
+  const needsShipping = order.status === 'accepted'
   return (
     <div className={`card p-6 ${needsShipping ? 'ring-2 ring-gold-300' : ''}`}>
-      {awaitingConfirm ? (
-        <>
-          <h2 className="font-display text-lg text-espresso-900 mb-1">Vi bekräftar affären</h2>
-          <p className="text-sm text-espresso-500 leading-relaxed">
-            Ditt bud är accepterat och vi slutför just nu affären med handlaren. Du behöver inte skicka något
-            än, vänta tills vi säger till. Så fort allt är klart hör vi av oss här med instruktioner om
-            inskicket, oftast redan samma dag.
-          </p>
-        </>
-      ) : needsShipping ? (
+      {needsShipping ? (
         <>
           <div className="flex items-center gap-2 mb-1">
             <span className="chip bg-gold-100 text-gold-800 border border-gold-200">Din tur</span>
           </div>
           <h2 className="font-display text-xl text-espresso-900 mb-1">Skicka in föremålet nu</h2>
           <p className="text-sm text-espresso-500 mb-5 leading-relaxed">
-            Budet är accepterat och pengarna är reserverade hos oss. Ju snabbare föremålet är på väg,
-            desto snabbare får du betalt. Du behöver inte vänta på något från oss, posta det redan idag.
+            Budet är accepterat och affären är din. En säkerhetspåse är på väg till dig, men vänta inte på den,
+            du kan posta föremålet redan idag. Ju snabbare det är på väg, desto snabbare får du betalt.
           </p>
 
           <ol className="grid gap-3 mb-5">

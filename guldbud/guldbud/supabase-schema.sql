@@ -38,6 +38,8 @@ alter table public.profiles add column if not exists payout_method text;
 alter table public.profiles add column if not exists payout_swish text;
 alter table public.profiles add column if not exists payout_bank_clearing text;
 alter table public.profiles add column if not exists payout_bank_account text;
+-- Avstängning: en handlare som backar från ett vunnet bud stängs av och kan inte buda.
+alter table public.profiles add column if not exists suspended boolean not null default false;
 
 -- ------------------------------------------------------------
 -- Föremål som kunder lägger ut
@@ -208,7 +210,7 @@ create policy "admins manage all items" on public.items
 drop policy if exists "dealers can bid" on public.bids;
 create policy "dealers can bid" on public.bids
   for insert with check (
-    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'dealer' and p.approved = true)
+    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'dealer' and p.approved = true and p.suspended = false)
     and exists (
       select 1 from public.items i
       where i.id = item_id
@@ -715,8 +717,8 @@ begin
     select id into v_order from public.orders where item_id = new.id;
 
     insert into public.notifications (user_id, title, message, item_id, link)
-    values (new.owner_id, 'Affär skapad',
-            'Budet är accepterat. Vi bekräftar affären med handlaren och hör av oss med instruktioner om inskicket, oftast redan samma dag. Du behöver inte skicka något än.',
+    values (new.owner_id, 'Affär skapad, skicka in föremålet',
+            'Budet är accepterat och affären är din. En säkerhetspåse är på väg till dig, men du kan posta föremålet redan idag utan att vänta på den. Så snart vi tagit emot och verifierat det får du betalt.',
             new.id, '/orders/' || v_order);
 
     if v_dealer is not null then
@@ -780,31 +782,15 @@ create trigger on_order_status
   after update on public.orders
   for each row execute procedure public.notify_order_status();
 
--- Fas 3: när handlaren betalat bekräftas affären för säljaren – först nu ber vi
--- om inskicket. Så känner säljaren aldrig av en handlare som inte betalar.
-create or replace function public.notify_dealer_paid()
-returns trigger language plpgsql security definer as $$
-declare
-  v_title text;
-begin
-  if new.dealer_paid_at is not null and old.dealer_paid_at is null then
-    select title into v_title from public.items where id = new.item_id;
-    insert into public.notifications (user_id, title, message, item_id, link)
-    values (new.seller_id, 'Affären är bekräftad, skicka in föremålet',
-            'Allt är klart med handlaren. Skicka in "' || coalesce(v_title, 'ditt föremål') ||
-            '" till oss så betalar vi ut hela budet så snart vi tagit emot och verifierat det. Instruktioner finns i affären.',
-            new.item_id, '/orders/' || new.id);
-  end if;
-  return new;
-end;
-$$;
+-- Modellen: säljaren gör affär med GuldBud och skickar in direkt vid accept.
+-- Vi står bakom affären mot säljaren; handlaren är vår verifierade leverantörssida.
+-- (Tidigare fas 3-trigger som väntade in handlarens betalning togs bort – säljaren
+-- ska aldrig uppleva att vi tvekar på handlaren.)
 drop trigger if exists on_dealer_paid on public.orders;
-create trigger on_dealer_paid
-  after update on public.orders
-  for each row execute procedure public.notify_dealer_paid();
+drop function if exists public.notify_dealer_paid();
 
 -- ============================================================
--- Fas 2: obetalda affärer – påminnelser och auto-avbokning.
+-- Obetalda affärer – påminnelser och avstängning av handlare som backar.
 -- Handlaren betalar vid vinst. Betalar hen inte i tid skickar vi först en
 -- påminnelse (max en per dygn) och avbryter sedan affären efter en frist.
 -- ============================================================
@@ -823,22 +809,24 @@ begin
     select title into v_title from public.items where id = o.item_id;
 
     if now() > o.payment_due_at + interval '4 days' then
-      -- Fristen har passerat: avbryt affären och lösgör föremålet.
+      -- Handlaren backade från ett vunnet bud: stäng av handlaren och larma admin.
+      -- GuldBud står för föremålet mot säljaren, så säljaren notifieras inte.
+      update public.profiles set suspended = true where id = o.dealer_id;
       update public.orders
-        set status = 'cancelled',
-            cancel_reason = 'Betalning uteblev',
-            updated_at = now()
+        set cancel_reason = 'Betalning uteblev – handlaren avstängd', updated_at = now()
         where id = o.id;
 
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (o.dealer_id, 'Affären avbröts',
-              'Betalningen för "' || coalesce(v_title, 'föremålet') || '" kom inte in i tid, så affären har avbrutits.',
+      values (o.dealer_id, 'Ditt konto har stängts av',
+              'Betalningen för "' || coalesce(v_title, 'föremålet') || '" uteblev. Att backa från ett vunnet bud strider mot villkoren, så ditt konto är avstängt. Kontakta oss för att reda ut det.',
               o.item_id, '/orders/' || o.id);
+      -- Larma alla administratörer så vi kan säkra säljarens utbetalning och hantera föremålet.
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (o.seller_id, 'Vi matchar dig med en ny köpare',
-              'Den vinnande handlaren fullföljde tyvärr inte köpet av "' || coalesce(v_title, 'ditt föremål') ||
-              '". Ditt föremål är kvar hos dig och inget har hänt med det. Lägg ut det igen så låter vi handlarna buda på nytt, det är fortfarande gratis för dig.',
-              o.item_id, '/my-items');
+      select p.id, 'Handlare backade, kräver hantering',
+             'Handlaren fullföljde inte köpet av "' || coalesce(v_title, 'föremålet') ||
+             '" och har stängts av. Säkerställ att säljaren får betalt och hantera föremålet.',
+             o.item_id, '/admin/orders/' || o.id
+      from public.profiles p where p.role = 'admin';
 
     elsif now() > o.payment_due_at
           and (o.payment_reminded_at is null or o.payment_reminded_at < now() - interval '24 hours') then
