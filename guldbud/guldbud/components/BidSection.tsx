@@ -28,6 +28,10 @@ export default function BidSection({
   const [approved, setApproved] = useState(false)
   const [suspended, setSuspended] = useState(false)
   const [checked, setChecked] = useState(false)
+  const [maxBid, setMaxBid] = useState('')
+  const [myAutoMax, setMyAutoMax] = useState<number | null>(null)
+  const [autoMsg, setAutoMsg] = useState('')
+  const [autoLoading, setAutoLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -42,10 +46,51 @@ export default function BidSection({
         setRole(prof?.role ?? null)
         setApproved(prof?.approved ?? false)
         setSuspended(prof?.suspended ?? false)
+        const { data: ab } = await supabase
+          .from('auto_bids')
+          .select('max_amount')
+          .eq('item_id', itemId)
+          .eq('dealer_id', data.user.id)
+          .maybeSingle()
+        setMyAutoMax(ab?.max_amount ?? null)
       }
       setChecked(true)
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const saveAutoBid = async () => {
+    const val = parseInt(maxBid)
+    setAutoMsg('')
+    if (!val || val <= currentTop) {
+      setAutoMsg(`Maxbudet måste vara högre än ${currentTop.toLocaleString('sv-SE')} kr`)
+      return
+    }
+    setAutoLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    const { error } = await supabase
+      .from('auto_bids')
+      .upsert({ item_id: itemId, dealer_id: user?.id, max_amount: val }, { onConflict: 'item_id,dealer_id' })
+    if (error) {
+      setAutoMsg(/row-level security|policy|violates/i.test(error.message) ? 'Just nu går det inte att sätta maxbud här.' : error.message)
+    } else {
+      setMyAutoMax(val)
+      setMaxBid('')
+      setAutoMsg('✓ Maxbud satt – vi budar åt dig upp till ' + val.toLocaleString('sv-SE') + ' kr.')
+      if (onPlaced) await onPlaced()
+      router.refresh()
+    }
+    setAutoLoading(false)
+  }
+
+  const removeAutoBid = async () => {
+    setAutoLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    await supabase.from('auto_bids').delete().eq('item_id', itemId).eq('dealer_id', user?.id)
+    setMyAutoMax(null)
+    setAutoMsg('')
+    setAutoLoading(false)
+  }
 
   const minNext = currentTop + 100
   const quickSet = (inc: number) => setAmount(String(Math.max(minNext, (currentTop || 0) + inc)))
@@ -189,6 +234,44 @@ export default function BidSection({
           {msg}
         </p>
       )}
+
+      {/* Auto-bud (maxbud) */}
+      <div className="mt-4 pt-4 border-t border-espresso-100">
+        {myAutoMax ? (
+          <div className="flex items-center justify-between gap-2 rounded-xl bg-gold-50 border border-gold-200 px-3 py-2">
+            <p className="text-sm text-gold-800">
+              <span className="font-medium">Autobud aktivt</span> · vi budar åt dig upp till{' '}
+              <span className="tabular-nums font-medium">{myAutoMax.toLocaleString('sv-SE')} kr</span>
+            </p>
+            <button onClick={removeAutoBid} disabled={autoLoading} className="text-xs text-espresso-400 hover:text-red-500 shrink-0">
+              Ta bort
+            </button>
+          </div>
+        ) : (
+          <div>
+            <p className="text-sm font-medium text-espresso-800 mb-1">Eller sätt ett maxbud</p>
+            <p className="text-xs text-espresso-400 mb-2">
+              Vi budar automatiskt åt dig, ett steg i taget, upp till ditt max. Andra ser aldrig ditt maxbelopp.
+            </p>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="number"
+                  value={maxBid}
+                  onChange={(e) => setMaxBid(e.target.value)}
+                  placeholder={`Max, t.ex. ${(minNext + 900).toLocaleString('sv-SE')}`}
+                  className="w-full !pr-10"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-sm">kr</span>
+              </div>
+              <button onClick={saveAutoBid} disabled={autoLoading} className="btn-ghost-gold whitespace-nowrap !py-2">
+                {autoLoading ? '...' : 'Sätt maxbud'}
+              </button>
+            </div>
+          </div>
+        )}
+        {autoMsg && <p className={`text-sm mt-2 ${autoMsg.startsWith('✓') ? 'text-emerald-600' : 'text-red-500'}`}>{autoMsg}</p>}
+      </div>
     </div>
   )
 }
