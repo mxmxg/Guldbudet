@@ -15,37 +15,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'ai_unavailable' }, { status: 503 })
   }
 
-  let dataUrl: string
+  let dataUrls: string[]
   try {
     const body = await req.json()
-    dataUrl = body.dataUrl
+    dataUrls = body.dataUrls || (body.dataUrl ? [body.dataUrl] : [])
   } catch {
     return NextResponse.json({ error: 'bad_payload' }, { status: 400 })
   }
-  const m = /^data:(image\/[a-zA-Z+]+);base64,(.+)$/.exec(dataUrl || '')
-  if (!m) return NextResponse.json({ error: 'bad_image' }, { status: 400 })
-  const mediaType = m[1]
-  const base64 = m[2]
+  // Bygg upp till 3 bildblock så modellen kan avgöra typ från flera vinklar.
+  const images: any[] = []
+  for (const du of (dataUrls || []).slice(0, 3)) {
+    const m = /^data:(image\/[a-zA-Z+]+);base64,(.+)$/.exec(du || '')
+    if (m) images.push({ type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } })
+  }
+  if (images.length === 0) return NextResponse.json({ error: 'bad_image' }, { status: 400 })
 
-  const prompt = `Du skriver säljande annonstext för ett guldföremål som ska läggas ut på en svensk guldauktion. Målet är att locka handlare att buda, inte att analysera bilden.
+  const prompt = `Du skriver säljande annonstext för ett guldföremål som ska läggas ut på en svensk guldauktion. Bilderna visar SAMMA föremål från olika vinklar. Målet är att locka handlare att buda, inte att analysera bilden.
 
 Svara ENDAST med giltig JSON, inga andra ord, i formatet:
 {"title": "...", "description": "...", "category": "..."}
 
-Ton och stil:
-- Skriv som en professionell annons: självsäker, tilltalande och lyftande, men trovärdig. Tänk auktionshus, inte utredning.
-- Skriv i påståendeform. Referera ALDRIG till fotot eller bilden, och använd ALDRIG osäkra ord som "verkar", "ser ut att", "det går inte att avgöra", "från bilden" eller liknande brasklappar.
-- Lyft föremålets karaktär: modell/länktyp, stil, uttryck och finish. Måla upp något en köpare vill ha.
+STEG 1 – avgör exakt vilken typ av föremål det är, det är det viktigaste:
+- Är det en ring, ett armband, ett halsband, ett par örhängen eller ett hänge? Blanda ALDRIG ihop en ring med ett armband. En liten cirkel som får plats på ett finger är en ring, inte ett armband.
+- Ringtyper: en ring med en rad infattade stenar runt om är en alliansring (eller eternityring om stenarna går hela varvet). Andra: vigselring/slätring, solitär (en stor sten), signetring, kattfotsring.
+- Länktyper (halsband/armband): pansarlänk, kejsarlänk, cordell/kordel, ankarlänk, bismarck, figaro, bröstlänk.
+- Sätt category till exakt en ur denna lista, matchande typen: ${CATEGORIES.join(', ')}.
 
-Innehåll:
-- Identifiera den specifika modellen med korrekta svenska guldsmedstermer: länktyp (t.ex. pansarlänk, kejsarlänk, cordell/kordel, ankarlänk, bismarck, figaro, bröstlänk), ringtyp (t.ex. vigselring, signetring, solitär) eller annan smyckestyp.
-- title: kort, säljande rubrik på svenska, max 6 ord (t.ex. "Klassisk kejsarlänk i guld"). Ingen prissättning.
-- description: 2–3 säljande meningar på svenska som beskriver modell/länktyp, stil och uttryck.
-- category: välj exakt en ur denna lista: ${CATEGORIES.join(', ')}.
+STEG 2 – skriv annonsen:
+- Ton: professionell, självsäker och lyftande, som ett auktionshus. Skriv i påståendeform.
+- Referera ALDRIG till fotot/bilden och använd ALDRIG osäkra ord ("verkar", "ser ut att", "det går inte att avgöra", "från bilden").
+- title: kort, säljande, max 6 ord, och måste innehålla rätt föremålstyp (t.ex. "Elegant alliansring i vitguld").
+- description: 2–3 säljande meningar som nämner rätt modell/typ, stil och uttryck.
 
 Viktigt:
-- Nämn INTE vikt, längd eller exakt karat, och skriv inga meningar om att sådant inte kan avgöras. Säljaren fyller i de uppgifterna separat, så utelämna dem helt.
-- Hitta inte på ett modellnamn du inte är säker på. Är du osäker, beskriv stilen säljande i stället för att gissa fel.`
+- Nämn INTE vikt, längd eller exakt karat, och skriv inga meningar om att sådant inte kan avgöras. Säljaren fyller i det separat.
+- Hitta inte på ett modellnamn du inte är säker på. Men var alltid säker på grundtypen (ring/armband/halsband/örhänge/hänge).`
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -61,10 +65,7 @@ Viktigt:
         messages: [
           {
             role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-              { type: 'text', text: prompt },
-            ],
+            content: [...images, { type: 'text', text: prompt }],
           },
         ],
       }),
