@@ -205,9 +205,9 @@ function SellerPanel({ order }: { order: any }) {
           </ol>
 
           <div className="rounded-xl bg-espresso-900 p-4 text-center">
-            <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Skicka till</p>
-            <p className="text-gold-200 font-medium">GuldBud AB</p>
-            <p className="text-gold-200/80 text-sm">Storgatan 1, 111 22 Stockholm</p>
+            <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Frakt</p>
+            <p className="text-gold-200 font-medium">Förbetald säkerhetspåse</p>
+            <p className="text-gold-200/80 text-sm">Adress och frakt är påtryckt påsen vi skickar dig</p>
           </div>
           <p className="text-xs text-espresso-400 mt-3 leading-relaxed">
             Så fort vi tar emot och äkthetskontrollerat föremålet betalar vi ut hela budet till dig. Har
