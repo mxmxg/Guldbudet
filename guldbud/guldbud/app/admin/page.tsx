@@ -27,7 +27,7 @@ export default function AdminPage() {
   const [bidCounts, setBidCounts] = useState<Record<string, number>>({})
   const [sellers, setSellers] = useState<Record<string, any>>({})
   const [openOrders, setOpenOrders] = useState(0)
-  const [analytics, setAnalytics] = useState({ gmv: 0, commission: 0, completed: 0 })
+  const [analytics, setAnalytics] = useState({ gmv: 0, commission: 0, pendingCommission: 0, completed: 0 })
   const [adminError, setAdminError] = useState('')
   const [adminNotice, setAdminNotice] = useState('')
   const [confirmId, setConfirmId] = useState<string | null>(null)
@@ -35,6 +35,7 @@ export default function AdminPage() {
   const [lightboxIdx, setLightboxIdx] = useState(0)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [endingId, setEndingId] = useState<string | null>(null)
+  const [endConfirmId, setEndConfirmId] = useState<string | null>(null)
   const [acceptId, setAcceptId] = useState<string | null>(null)
   const [acceptingId, setAcceptingId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -91,9 +92,12 @@ export default function AdminPage() {
       // Provisionsintäkt = bara realiserad, dvs där handlarens betalning faktiskt
       // registrerats (dealer_paid_at), inte utifrån logistik-status.
       const paid = (allOrders || []).filter((o: any) => o.dealer_paid_at && o.status !== 'cancelled')
+      // Väntande provision = affärer som ännu inte betalats av handlaren.
+      const unpaid = settled.filter((o: any) => !o.dealer_paid_at)
       setAnalytics({
         gmv: settled.reduce((s: number, o: any) => s + (o.amount || 0), 0),
         commission: paid.reduce((s: number, o: any) => s + commission(o.amount || 0), 0),
+        pendingCommission: unpaid.reduce((s: number, o: any) => s + commission(o.amount || 0), 0),
         completed: (allOrders || []).filter((o: any) => o.status === 'completed').length,
       })
 
@@ -390,15 +394,34 @@ export default function AdminPage() {
               >
                 Förläng 24h
               </button>
-              {!ended && (
-                <button
-                  onClick={() => endAuctionNow(item)}
-                  disabled={endingId === item.id}
-                  className="w-full sm:w-auto text-sm text-espresso-600 hover:text-espresso-900 border border-espresso-200 px-3 py-2 rounded-xl transition disabled:opacity-50"
-                >
-                  {endingId === item.id ? 'Avslutar…' : 'Avsluta nu'}
-                </button>
-              )}
+              {!ended &&
+                (endConfirmId === item.id ? (
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={async () => {
+                        await endAuctionNow(item)
+                        setEndConfirmId(null)
+                      }}
+                      disabled={endingId === item.id}
+                      className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-espresso-800 hover:bg-espresso-900 text-white transition disabled:opacity-50"
+                    >
+                      {endingId === item.id ? 'Avslutar…' : 'Ja, avsluta nu'}
+                    </button>
+                    <button
+                      onClick={() => setEndConfirmId(null)}
+                      className="flex-1 sm:flex-none text-sm font-medium px-3 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
+                    >
+                      Avbryt
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setEndConfirmId(item.id)}
+                    className="w-full sm:w-auto text-sm text-espresso-600 hover:text-espresso-900 border border-espresso-200 px-3 py-2 rounded-xl transition"
+                  >
+                    Avsluta nu
+                  </button>
+                ))}
               <input
                 type="datetime-local"
                 defaultValue={toLocalInput(item.auction_ends_at)}
@@ -555,7 +578,10 @@ export default function AdminPage() {
           </div>
           <div className="card p-4">
             <p className="font-display text-2xl text-emerald-600 tabular-nums">{formatSEK(analytics.commission)}</p>
-            <p className="text-xs text-espresso-400 mt-0.5">Provisionsintäkt</p>
+            <p className="text-xs text-espresso-400 mt-0.5">Provisionsintäkt <span className="text-espresso-300">(betald)</span></p>
+            {analytics.pendingCommission > 0 && (
+              <p className="text-xs text-gold-700 mt-1 tabular-nums">+{formatSEK(analytics.pendingCommission)} väntar</p>
+            )}
           </div>
           <Link href="/admin/orders?tab=done" className="card card-hover p-4 group">
             <p className="font-display text-2xl text-espresso-900 tabular-nums">{analytics.completed}</p>
