@@ -3,6 +3,7 @@ import { Item } from '@/lib/types'
 import Navbar from '@/components/Navbar'
 import HomeContent from '@/components/HomeContent'
 import JsonLd from '@/components/JsonLd'
+import { SoldRow } from '@/components/RecentlySold'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,12 +61,31 @@ export default async function HomePage() {
     }))
   }
 
+  // Nyligen sålt för social proof på startsidan (gäst-vyn).
+  let sold: SoldRow[] = []
+  const { data: soldItems } = await supabase
+    .from('items')
+    .select('id, title, category, weight_grams, karat, image_urls, accepted_at, accepted_bid_id')
+    .eq('status', 'closed')
+    .not('accepted_bid_id', 'is', null)
+    .order('accepted_at', { ascending: false })
+    .limit(8)
+  if (soldItems && soldItems.length > 0) {
+    const bidIds = soldItems.map((i: any) => i.accepted_bid_id).filter(Boolean)
+    const { data: soldBids } = await supabase.from('bids').select('id, amount').in('id', bidIds)
+    const priceByBid: Record<string, number> = {}
+    soldBids?.forEach((b: any) => (priceByBid[b.id] = b.amount))
+    sold = soldItems
+      .map((i: any) => ({ ...i, price: priceByBid[i.accepted_bid_id] || 0 }))
+      .filter((r: any) => r.price > 0)
+  }
+
   return (
     <div className="min-h-screen bg-cream">
       <JsonLd data={orgLd} />
       <JsonLd data={siteLd} />
       <Navbar />
-      <HomeContent items={enriched} />
+      <HomeContent items={enriched} sold={sold} />
     </div>
   )
 }

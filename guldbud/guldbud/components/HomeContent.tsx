@@ -8,6 +8,7 @@ import ValueEstimator from '@/components/ValueEstimator'
 import Reveal from '@/components/Reveal'
 import CountUp from '@/components/CountUp'
 import Footer from '@/components/Footer'
+import RecentlySold, { SoldRow } from '@/components/RecentlySold'
 import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
 import { formatSEK } from '@/lib/gold'
@@ -46,7 +47,7 @@ function capitalize(name: string) {
     .join(' ')
 }
 
-export default function HomeContent({ items }: { items: EnrichedItem[] }) {
+export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[]; sold?: SoldRow[] }) {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [myItems, setMyItems] = useState<any[]>([])
@@ -95,7 +96,7 @@ export default function HomeContent({ items }: { items: EnrichedItem[] }) {
 
   // ============ GUEST — full marketing landing ============
   if (!user) {
-    return <GuestLanding items={items} loggedIn={false} />
+    return <GuestLanding items={items} loggedIn={false} sold={sold} />
   }
 
   // ============ CUSTOMER ============
@@ -208,7 +209,7 @@ export default function HomeContent({ items }: { items: EnrichedItem[] }) {
 /* ============================================================
    GUEST LANDING
    ============================================================ */
-function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: boolean }) {
+function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; loggedIn: boolean; sold?: SoldRow[] }) {
   const totalBids = items.reduce((s, i) => s + (i.bid_count || 0), 0)
   return (
     <>
@@ -647,6 +648,8 @@ function GuestLanding({ items, loggedIn }: { items: EnrichedItem[]; loggedIn: bo
           </div>
         </Reveal>
       </section>
+
+      <RecentlySold rows={sold} />
 
       <Footer />
     </>
