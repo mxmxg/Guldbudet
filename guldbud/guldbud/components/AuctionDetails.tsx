@@ -142,7 +142,10 @@ export default function AuctionDetails({ item }: { item: any }) {
   const isAdmin = profile?.role === 'admin'
   const isClosed = item.status === 'closed'
   const ended = !!endsAt && new Date(endsAt).getTime() < Date.now()
-  const reserveMet = !item.min_price || topAmount >= item.min_price
+  // Status kommer som booleaner från servern; själva nivån (min_price) finns
+  // bara med när ägaren tittar på sitt eget föremål.
+  const hasReserve = !!item.has_reserve
+  const reserveMet = item.reserve_met ?? true
   const images: string[] = item.image_urls?.length ? item.image_urls : []
   const est = estimateRange(item.weight_grams || 0, item.karat || '')
 
@@ -310,12 +313,12 @@ export default function AuctionDetails({ item }: { item: any }) {
                 <span className="text-espresso-400">
                   Uppskattad utbetalning {formatSEK(est.low)}–{formatSEK(est.high)}
                 </span>
-                {item.min_price ? (
+                {hasReserve ? (
                   <span
                     className={`chip ${reserveMet ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}
                   >
                     {reserveMet ? 'Reservationspris uppnått' : 'Reservationspris ej uppnått'}
-                    {isOwner ? ` (${formatSEK(item.min_price)})` : ''}
+                    {isOwner && item.min_price ? ` (${formatSEK(item.min_price)})` : ''}
                   </span>
                 ) : null}
               </div>

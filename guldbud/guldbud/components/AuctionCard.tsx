@@ -19,9 +19,10 @@ export default function AuctionCard({ item }: { item: CardItem }) {
   const topBid = item.top_bid || 0
   const bidCount = item.bid_count || 0
   const hot = bidCount >= 3
-  // Visa bara status, aldrig själva reservationsnivån (köparen ska inte se den).
-  const hasReserve = !!item.min_price
-  const reserveMet = hasReserve ? topBid >= (item.min_price as number) : false
+  // Bara status, aldrig själva reservationsnivån. Beräknas server-side och
+  // skickas som booleaner så min_price aldrig når klienten.
+  const hasReserve = !!(item as any).has_reserve
+  const reserveMet = !!(item as any).reserve_met
 
   return (
     <Link href={`/auctions/${item.id}`} className="group relative block card card-hover overflow-hidden">

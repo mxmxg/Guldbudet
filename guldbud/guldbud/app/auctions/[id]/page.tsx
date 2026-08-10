@@ -49,6 +49,21 @@ export default async function AuctionPage({ params }: { params: { id: string } }
     .limit(1)
   const topBid = topBids?.[0]?.amount || 0
 
+  // Reservationsnivån (min_price) skickas bara till ägaren själv. För alla andra
+  // skalas talet bort och ersätts med booleaner, så köpare aldrig ser nivån.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const isOwnerView = !!user && user.id === item.owner_id
+  const hasReserve = item.min_price != null
+  const reserveMet = hasReserve && topBid >= item.min_price
+  const clientItem: any = isOwnerView
+    ? { ...item, has_reserve: hasReserve, reserve_met: reserveMet }
+    : (() => {
+        const { min_price, ...rest } = item as any
+        return { ...rest, has_reserve: hasReserve, reserve_met: reserveMet }
+      })()
+
   const url = `${SITE}/auctions/${params.id}`
   const specs = [item.category, item.weight_grams ? `${item.weight_grams} g` : '', item.karat]
     .filter(Boolean)
@@ -111,7 +126,7 @@ export default async function AuctionPage({ params }: { params: { id: string } }
       <JsonLd data={productLd} />
       <JsonLd data={breadcrumbLd} />
       <Navbar />
-      <AuctionDetails item={item} />
+      <AuctionDetails item={clientItem} />
     </div>
   )
 }

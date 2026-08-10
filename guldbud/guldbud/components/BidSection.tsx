@@ -26,6 +26,7 @@ export default function BidSection({
   const [confetti, setConfetti] = useState(0)
   const [role, setRole] = useState<string | null>(null)
   const [approved, setApproved] = useState(false)
+  const [suspended, setSuspended] = useState(false)
   const [checked, setChecked] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -35,11 +36,12 @@ export default function BidSection({
       if (data.user) {
         const { data: prof } = await supabase
           .from('profiles')
-          .select('role, approved')
+          .select('role, approved, suspended')
           .eq('id', data.user.id)
           .single()
         setRole(prof?.role ?? null)
         setApproved(prof?.approved ?? false)
+        setSuspended(prof?.suspended ?? false)
       }
       setChecked(true)
     })
@@ -66,7 +68,12 @@ export default function BidSection({
     } = await supabase.auth.getUser()
     const { error } = await supabase.from('bids').insert({ item_id: itemId, dealer_id: user?.id, amount: val })
     if (error) {
-      setMsg(error.message)
+      // Råa RLS-/policyfel ska aldrig visas för användaren.
+      setMsg(
+        /row-level security|policy|violates/i.test(error.message)
+          ? 'Just nu går det inte att lägga bud på det här föremålet.'
+          : error.message
+      )
       setOk(false)
     } else {
       setMsg('🎉 Ditt bud är lagt – du leder nu!')
@@ -105,6 +112,15 @@ export default function BidSection({
       <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
         <p className="text-amber-700 text-sm font-medium">Ditt handlarkonto väntar på godkännande.</p>
         <p className="text-amber-600 text-xs mt-1">Du får ett mejl när du är godkänd och kan börja buda.</p>
+      </div>
+    )
+  }
+
+  if (suspended) {
+    return (
+      <div className="rounded-2xl bg-red-50 border border-red-200 p-4">
+        <p className="text-red-700 text-sm font-medium">Ditt konto är pausat</p>
+        <p className="text-red-600 text-xs mt-1">Du kan inte lägga bud just nu. Kontakta oss så reder vi ut det.</p>
       </div>
     )
   }
