@@ -85,12 +85,7 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
   if (!checked)
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <span
-          className="shimmer-text"
-          style={{ fontFamily: "'Great Vibes', cursive", fontSize: '46px' }}
-        >
-          GuldBud
-        </span>
+        <span className="shimmer-text font-sans font-semibold tracking-tight text-[38px]">GuldBud</span>
       </div>
     )
 

@@ -37,9 +37,9 @@ export function GET() {
           </div>
           <div
             style={{
-              fontSize: 170,
-              fontStyle: 'italic',
-              fontFamily: 'serif',
+              fontSize: 168,
+              fontWeight: 600,
+              letterSpacing: -4,
               color: '#D4AF37',
               lineHeight: 1,
               marginTop: 18,

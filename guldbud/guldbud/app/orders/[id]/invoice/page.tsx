@@ -96,7 +96,7 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
-            <p className="font-display text-2xl text-espresso-900" style={{ fontFamily: 'Georgia, serif' }}>GuldBud</p>
+            <p className="font-sans font-semibold tracking-tight text-2xl text-espresso-900">GuldBud</p>
             <p className="text-xs text-espresso-400 mt-1">{GULDBUD.name}</p>
             <p className="text-xs text-espresso-400">{GULDBUD.address}</p>
             <p className="text-xs text-espresso-400">Org.nr {GULDBUD.org}</p>

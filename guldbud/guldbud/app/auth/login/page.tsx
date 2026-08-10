@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 import { HomeIcon, StoreIcon } from '@/components/Icons'
+import Logo from '@/components/Logo'
 
 function validateField(name: string, value: string, role: string): string {
   switch (name) {
@@ -206,7 +207,6 @@ function LoginForm() {
 
   return (
     <>
-      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <style>{`@keyframes authReveal{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}`}</style>
       <div className="auth-scope" style={{ minHeight: '100vh', background: '#0f0a04', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '56px 16px' }}>
         <div style={{ width: '100%', maxWidth: '440px' }}>
@@ -214,9 +214,7 @@ function LoginForm() {
           {/* Logo */}
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
             <Link href="/">
-              <span style={{ fontFamily: "'Great Vibes', cursive", fontSize: '48px', color: '#D4AF37', lineHeight: 1 }}>
-                GuldBud
-              </span>
+              <Logo className="text-[36px] text-[#D4AF37] leading-none" />
             </Link>
             <p style={{ color: '#8B6914', fontSize: '10px', letterSpacing: '4px', marginTop: '4px' }}>SVERIGES GULDAUKTION</p>
           </div>
@@ -371,7 +369,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0f0a04', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '56px 16px' }}>
-      <span style={{ fontFamily: "'Great Vibes', cursive", fontSize: '48px', color: '#D4AF37' }}>GuldBud</span>
+      <Logo className="text-[36px] text-[#D4AF37]" />
     </div>}>
       <LoginForm />
     </Suspense>

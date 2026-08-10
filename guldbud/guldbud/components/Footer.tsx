@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 export default function Footer() {
   return (
@@ -9,12 +10,7 @@ export default function Footer() {
       <div className="relative max-w-6xl mx-auto px-5 py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
           <div className="col-span-2 md:col-span-1">
-            <span
-              className="text-gold-300 leading-none"
-              style={{ fontFamily: "'Great Vibes', cursive", fontSize: '30px' }}
-            >
-              GuldBud
-            </span>
+            <Logo className="text-gold-300 text-[24px] leading-none" />
             <p className="text-sm mt-3 max-w-xs leading-relaxed text-espresso-100/60">
               Sveriges guldauktion. Auktoriserade handlare budar mot varandra, och du får
               marknadens bästa pris, tryggt och kostnadsfritt.
