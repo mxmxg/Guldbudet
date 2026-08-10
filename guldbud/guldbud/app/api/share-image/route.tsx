@@ -3,15 +3,15 @@ import { ImageResponse } from 'next/og'
 export const runtime = 'edge'
 
 // Dynamisk delningsbild i Instagram-format (1080×1350, 4:5 porträtt).
-// Genererar en snygg "Såld på GuldBud"-ruta av en avslutad affär.
-// Anropas med query-parametrar: ?amount=14200&title=Guldring&meta=18K · 6 g
-// Bilden ligger på en publik URL – redo att laddas ner, delas, och senare
+// Föremålets foto överst, med en "Såld på GuldBud"-ruta under.
+// Query-parametrar: ?amount=14200&title=Guldring&meta=18K · 6 g&img=<url>
+// Bilden ligger på en publik URL, redo att laddas ner, delas, och senare
 // matas rakt in i Instagram Graph API för automatisk postning.
 
 function groupSek(n: number): string {
   // Manuell tusentalsgruppering (edge-runtime saknar full sv-SE locale).
   const s = Math.round(n).toString()
-  return s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' kr'
+  return s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' kr'
 }
 
 export function GET(req: Request) {
@@ -19,6 +19,7 @@ export function GET(req: Request) {
   const amount = Number(searchParams.get('amount') || 0)
   const title = (searchParams.get('title') || 'Guldföremål').slice(0, 60)
   const meta = (searchParams.get('meta') || '').slice(0, 80)
+  const img = searchParams.get('img') || ''
 
   return new ImageResponse(
     (
@@ -28,62 +29,73 @@ export function GET(req: Request) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
           background: '#0f0a04',
-          backgroundImage: 'radial-gradient(circle at 50% 22%, #2a1e0c 0%, #0f0a04 62%)',
-          padding: 80,
+          backgroundImage: 'radial-gradient(circle at 50% 20%, #241a0a 0%, #0f0a04 60%)',
         }}
       >
-        <div style={{ fontSize: 30, letterSpacing: 12, color: '#8B6914', display: 'flex' }}>
-          SÅLD PÅ GULDBUD
-        </div>
+        {img ? (
+          <div style={{ display: 'flex', position: 'relative', width: '100%', height: 660 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={img} width={1080} height={660} style={{ objectFit: 'cover' }} alt="" />
+            {/* Mjuk toning så fotot smälter in i bakgrunden */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                backgroundImage: 'linear-gradient(to bottom, rgba(15,10,4,0) 55%, #0f0a04 100%)',
+              }}
+            />
+          </div>
+        ) : null}
 
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginTop: 70,
-            marginBottom: 70,
+            flex: 1,
+            justifyContent: 'center',
+            padding: '30px 80px',
           }}
         >
-          <div style={{ fontSize: 34, color: '#c9a84c', display: 'flex' }}>slutpris</div>
+          <div style={{ fontSize: 27, letterSpacing: 11, color: '#8B6914', display: 'flex' }}>
+            SÅLD PÅ GULDBUD
+          </div>
+          <div style={{ fontSize: 30, color: '#c9a84c', marginTop: 26, display: 'flex' }}>slutpris</div>
           <div
             style={{
-              fontSize: 168,
+              fontSize: 148,
               fontStyle: 'italic',
               fontFamily: 'serif',
               color: '#D4AF37',
               lineHeight: 1,
-              marginTop: 10,
+              marginTop: 8,
               display: 'flex',
             }}
           >
             {groupSek(amount)}
           </div>
+          <div style={{ fontSize: 48, color: '#f4ead2', textAlign: 'center', marginTop: 34, display: 'flex' }}>
+            {title}
+          </div>
+          {meta ? (
+            <div style={{ fontSize: 31, color: '#9c8149', marginTop: 14, display: 'flex' }}>{meta}</div>
+          ) : null}
         </div>
-
-        <div style={{ fontSize: 52, color: '#f4ead2', textAlign: 'center', maxWidth: 900, display: 'flex' }}>
-          {title}
-        </div>
-        {meta ? (
-          <div style={{ fontSize: 34, color: '#9c8149', marginTop: 18, display: 'flex' }}>{meta}</div>
-        ) : null}
 
         <div
           style={{
-            position: 'absolute',
-            bottom: 70,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
+            paddingBottom: 54,
           }}
         >
-          <div style={{ fontSize: 40, fontStyle: 'italic', fontFamily: 'serif', color: '#D4AF37', display: 'flex' }}>
+          <div style={{ fontSize: 38, fontStyle: 'italic', fontFamily: 'serif', color: '#D4AF37', display: 'flex' }}>
             guldbud.com
           </div>
-          <div style={{ fontSize: 26, letterSpacing: 6, color: '#6b5a33', marginTop: 8, display: 'flex' }}>
+          <div style={{ fontSize: 23, letterSpacing: 5, color: '#6b5a33', marginTop: 8, display: 'flex' }}>
             SVERIGES GULDAUKTION
           </div>
         </div>

@@ -15,16 +15,19 @@ export default function ShareKit({
   amount,
   title,
   meta,
+  image,
 }: {
   amount: number
   title: string
   meta: string
+  image?: string | null
 }) {
   const [copied, setCopied] = useState(false)
 
-  const imageUrl = `/api/share-image?amount=${amount}&title=${encodeURIComponent(
-    title || 'Guldföremål'
-  )}&meta=${encodeURIComponent(meta)}`
+  const imageUrl =
+    `/api/share-image?amount=${amount}&title=${encodeURIComponent(title || 'Guldföremål')}` +
+    `&meta=${encodeURIComponent(meta)}` +
+    (image ? `&img=${encodeURIComponent(image)}` : '')
 
   const caption =
     `✨ Nyss såld på GuldBud: ${title}${meta ? ` (${meta})` : ''}. Slutpris ${groupSek(amount)}.\n\n` +
