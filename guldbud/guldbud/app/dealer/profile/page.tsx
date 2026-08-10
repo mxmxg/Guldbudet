@@ -354,7 +354,7 @@ export default function DealerProfilePage() {
               <button
                 onClick={async () => {
                   await supabase.auth.signOut()
-                  router.push('/')
+                  window.location.href = '/'
                 }}
                 className="text-sm text-espresso-400 hover:text-espresso-700 transition"
               >
