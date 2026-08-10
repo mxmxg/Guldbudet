@@ -84,7 +84,7 @@ function instructionsFor(title: string): string {
     )
   }
   // Handlaren – du vann budgivningen, betala så går affären vidare.
-  if (t.includes('accepterades') || t.includes('bud accepterat') || t.includes('vann')) {
+  if (t.includes('vann')) {
     return stepsBox(
       'Så går affären vidare',
       [
