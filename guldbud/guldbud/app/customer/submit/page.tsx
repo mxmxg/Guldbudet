@@ -88,11 +88,12 @@ export default function SubmitPage() {
     setAiLoading(true)
     setAiError('')
     try {
-      const dataUrl = await fileToDataUrl(files[0])
+      // Skicka upp till 3 bilder så AI:n kan avgöra typ från flera vinklar.
+      const dataUrls = await Promise.all(files.slice(0, 3).map((f) => fileToDataUrl(f)))
       const res = await fetch('/api/suggest-listing', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ dataUrl }),
+        body: JSON.stringify({ dataUrls }),
       })
       if (res.status === 503) {
         // AI inte aktiverad (ingen nyckel) – dölj knappen tyst.
