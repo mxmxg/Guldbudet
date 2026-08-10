@@ -32,9 +32,6 @@ export function GET() {
             justifyContent: 'center',
           }}
         >
-          <div style={{ fontSize: 26, letterSpacing: 14, color: '#8B6914', display: 'flex' }}>
-            SEDAN 2026
-          </div>
           <div
             style={{
               fontSize: 168,
