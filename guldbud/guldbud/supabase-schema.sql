@@ -481,6 +481,29 @@ create trigger on_new_dealer_registered
   after insert on public.profiles
   for each row execute procedure public.notify_admins_new_dealer();
 
+-- Notis till alla admins när en kund lämnar in ett föremål (status 'pending').
+create or replace function public.notify_admins_new_item()
+returns trigger language plpgsql security definer as $$
+begin
+  if new.status = 'pending' then
+    insert into public.notifications (user_id, title, message, item_id, link)
+    select p.id,
+           'Nytt föremål att granska',
+           '"' || new.title || '" har lämnats in och väntar på granskning.',
+           new.id,
+           '/admin'
+    from public.profiles p
+    where p.role = 'admin';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_new_item_submitted on public.items;
+create trigger on_new_item_submitted
+  after insert on public.items
+  for each row execute procedure public.notify_admins_new_item();
+
 -- ============================================================
 -- Realtime: publicera bud och notifieringar så att UI:t
 -- uppdateras live (budhistorik + notisklockan).
