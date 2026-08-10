@@ -212,6 +212,27 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 </Link>
               </div>
             </div>
+
+            {/* Delningsbild för Instagram – dynamiskt genererad "Såld för X"-ruta */}
+            <a
+              href={`/api/share-image?amount=${order.amount}&title=${encodeURIComponent(
+                item?.title || 'Guldföremål'
+              )}&meta=${encodeURIComponent(
+                [item?.karat, item?.weight_grams ? `${item.weight_grams} g` : '']
+                  .filter(Boolean)
+                  .join(' · ')
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-gold-700 hover:text-gold-800 border border-gold-200 hover:border-gold-300 bg-gold-50 rounded-xl px-3 py-2 transition"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.8" />
+                <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
+                <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" />
+              </svg>
+              Delningsbild för Instagram →
+            </a>
             <OrderStepper status={status} />
 
             {!isFinalOrCancelled && (
