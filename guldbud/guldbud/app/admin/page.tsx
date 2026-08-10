@@ -89,11 +89,14 @@ export default function AdminPage() {
       const { data: allOrders } = await supabase.from('orders').select('amount, status, dealer_paid_at')
       // Affärsvolym = värdet på alla affärer som inte avbrutits.
       const settled = (allOrders || []).filter((o: any) => o.status !== 'cancelled')
-      // Provisionsintäkt = bara realiserad, dvs där handlarens betalning faktiskt
-      // registrerats (dealer_paid_at), inte utifrån logistik-status.
-      const paid = (allOrders || []).filter((o: any) => o.dealer_paid_at && o.status !== 'cancelled')
-      // Väntande provision = affärer som ännu inte betalats av handlaren.
-      const unpaid = settled.filter((o: any) => !o.dealer_paid_at)
+      // Provisionsintäkt = realiserad. Handlarens betalning är registrerad
+      // (dealer_paid_at) ELLER affären är slutförd – en affär kan inte nå
+      // 'completed' utan att betalningen passerat spärren, så slutförd innebär
+      // alltid att provisionen är intjänad (även om paid-flaggan råkat nollas).
+      const isRealized = (o: any) => o.status === 'completed' || !!o.dealer_paid_at
+      const paid = settled.filter(isRealized)
+      // Väntande provision = affärer som ännu inte realiserats.
+      const unpaid = settled.filter((o: any) => !isRealized(o))
       setAnalytics({
         gmv: settled.reduce((s: number, o: any) => s + (o.amount || 0), 0),
         commission: paid.reduce((s: number, o: any) => s + commission(o.amount || 0), 0),
