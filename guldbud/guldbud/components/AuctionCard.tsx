@@ -19,6 +19,9 @@ export default function AuctionCard({ item }: { item: CardItem }) {
   const topBid = item.top_bid || 0
   const bidCount = item.bid_count || 0
   const hot = bidCount >= 3
+  // Visa bara status, aldrig själva reservationsnivån (köparen ska inte se den).
+  const hasReserve = !!item.min_price
+  const reserveMet = hasReserve ? topBid >= (item.min_price as number) : false
 
   return (
     <Link href={`/auctions/${item.id}`} className="group relative block card card-hover overflow-hidden">
@@ -86,6 +89,16 @@ export default function AuctionCard({ item }: { item: CardItem }) {
             <p className="text-xl font-semibold text-gradient-gold tabular-nums">{formatSEK(topBid)}</p>
           ) : (
             <p className="text-base font-medium text-espresso-400">Öppet för bud</p>
+          )}
+          {hasReserve && (
+            <p
+              className={`mt-1 text-[11px] font-medium inline-flex items-center gap-1.5 ${
+                reserveMet ? 'text-emerald-600' : 'text-espresso-400'
+              }`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full ${reserveMet ? 'bg-emerald-500' : 'bg-espresso-300'}`} />
+              {reserveMet ? 'Reservationspris uppnått' : 'Reservationspris ej uppnått'}
+            </p>
           )}
         </div>
         <div className="text-right">
