@@ -57,7 +57,7 @@ export default function DealerDashboard() {
       .select('*')
       .eq('status', 'active')
       .or(`auction_ends_at.is.null,auction_ends_at.gt.${new Date().toISOString()}`)
-      .order('auction_ends_at', { ascending: true })
+      .order('created_at', { ascending: false })
     setItems(activeItems || [])
 
     if (activeItems && activeItems.length > 0) {
