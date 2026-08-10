@@ -22,8 +22,8 @@ export type OrderStep = {
 export const ORDER_STEPS: OrderStep[] = [
   { key: 'accepted', label: 'Accepterad', desc: 'Budet är accepterat och affären skapad.' },
   { key: 'shipped_by_seller', label: 'Inskickad', desc: 'Säljaren har skickat föremålet till GuldBud.' },
-  { key: 'received', label: 'Mottagen & kontrollerad', desc: 'GuldBud har tagit emot och äkthetskontrollerat föremålet. Handlaren faktureras.' },
-  { key: 'dealer_paid', label: 'Betald av handlare', desc: 'Handlaren har betalat bud + provision till GuldBud.' },
+  { key: 'received', label: 'Mottagen & kontrollerad', desc: 'GuldBud har tagit emot och äkthetskontrollerat föremålet.' },
+  { key: 'dealer_paid', label: 'Betald av handlare', desc: 'Handlarens betalning är registrerad.' },
   { key: 'verified_paid', label: 'Utbetald till säljare', desc: 'Säljaren har fått betalt.' },
   { key: 'shipped_to_dealer', label: 'Vidareskickad', desc: 'Föremålet har skickats till den vinnande handlaren.' },
   { key: 'completed', label: 'Slutförd', desc: 'Handlaren har mottagit föremålet. Affären är avslutad.' },

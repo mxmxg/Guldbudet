@@ -195,7 +195,7 @@ function SellerPanel({ order }: { order: any }) {
           <p className="text-sm text-espresso-500">
             {order.status === 'shipped_by_seller' && 'Vi väntar på att ditt föremål ska komma fram.'}
             {order.status === 'received' && 'Vi har tagit emot föremålet och kontrollerar äktheten.'}
-            {order.status === 'dealer_paid' && 'Handlaren har betalat – din utbetalning förbereds nu.'}
+            {order.status === 'dealer_paid' && 'Vi förbereder din utbetalning nu.'}
             {order.status === 'verified_paid' && 'Godkänt! Din utbetalning är på väg till ditt konto.'}
             {(order.status === 'shipped_to_dealer' || order.status === 'completed') &&
               'Affären är klar. Tack för att du sålde via GuldBud!'}

@@ -33,7 +33,7 @@ const STEPS = [
   {
     n: '6',
     title: 'Du betalar för föremålet',
-    desc: 'När du vunnit budgivningen betalar du bud + 8% provision omgående. Så fort betalningen är registrerad reserverar vi föremålet för dig, och det ligger tryggt hos oss tills det skickas.',
+    desc: 'När du vunnit budgivningen är föremålet ditt. Du betalar bud + 8% provision omgående, så sätter vi igång affären: säljaren skickar in det, vi kontrollerar äktheten och skickar det sedan vidare till dig.',
   },
   {
     n: '7',
