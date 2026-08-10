@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 import Confetti from '@/components/Confetti'
-import { DEALER_COMMISSION_LABEL, commission, totalWithCommission } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
 
 const INCREMENTS = [100, 250, 500, 1000]
 
@@ -214,13 +214,17 @@ export default function BidSection({
               <span>Provision {DEALER_COMMISSION_LABEL}</span>
               <span className="tabular-nums">+{commission(parseInt(amount)).toLocaleString('sv-SE')} kr</span>
             </div>
+            <div className="flex justify-between">
+              <span>Frakt</span>
+              <span className="tabular-nums">+{DEALER_SHIPPING_FEE.toLocaleString('sv-SE')} kr</span>
+            </div>
             <div className="flex justify-between font-semibold text-espresso-800 pt-1 mt-1 border-t border-espresso-100">
               <span>Ditt totalpris</span>
-              <span className="tabular-nums">{totalWithCommission(parseInt(amount)).toLocaleString('sv-SE')} kr</span>
+              <span className="tabular-nums">{dealerTotal(parseInt(amount)).toLocaleString('sv-SE')} kr</span>
             </div>
           </div>
         ) : (
-          <span>Provision {DEALER_COMMISSION_LABEL} tillkommer på ditt bud. Säljaren får hela budbeloppet.</span>
+          <span>Provision {DEALER_COMMISSION_LABEL} + frakt {DEALER_SHIPPING_FEE} kr tillkommer på ditt bud. Säljaren får hela budbeloppet.</span>
         )}
       </div>
 

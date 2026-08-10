@@ -10,7 +10,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, commission, totalWithCommission } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -252,9 +252,13 @@ function DealerPanel({ order }: { order: any }) {
             <span>Provision {DEALER_COMMISSION_LABEL}</span>
             <span className="tabular-nums">+{formatSEK(commission(order.amount))}</span>
           </div>
+          <div className="flex justify-between text-espresso-600">
+            <span>Frakt</span>
+            <span className="tabular-nums">+{formatSEK(DEALER_SHIPPING_FEE)}</span>
+          </div>
           <div className="flex justify-between font-semibold text-espresso-900 pt-2 mt-1 border-t border-espresso-100">
             <span>Ditt totalpris</span>
-            <span className="tabular-nums">{formatSEK(totalWithCommission(order.amount))}</span>
+            <span className="tabular-nums">{formatSEK(dealerTotal(order.amount))}</span>
           </div>
         </div>
         {awaitingPayment && (() => {
@@ -268,7 +272,7 @@ function DealerPanel({ order }: { order: any }) {
               <p className="text-espresso-600 mt-1 leading-relaxed">
                 {overdue
                   ? 'Betala snart så håller vi affären öppen. Uteblir betalningen avbryts affären automatiskt.'
-                  : <>Föremålet är ditt. Betala bud + provision <span className="font-medium">omgående</span>, så tar säljaren emot din instruktion att skicka in det. Vi kontrollerar äktheten och skickar det sedan vidare till dig. Betalningsinstruktioner finns i meddelandena nedan.</>}
+                  : <>Föremålet är ditt. Betala bud + provision + frakt <span className="font-medium">omgående</span>, så tar säljaren emot din instruktion att skicka in det. Vi kontrollerar äktheten och skickar det sedan vidare till dig. Betalningsinstruktioner finns i meddelandena nedan.</>}
               </p>
               {due && (
                 <p className={`mt-2 font-medium ${overdue ? 'text-red-700' : 'text-espresso-700'}`}>

@@ -11,7 +11,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STEPS, ORDER_STATUS_LABEL, OrderStatus, nextStatus, stepIndex } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, commission, totalWithCommission } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
 
 export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -322,12 +322,16 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             <h2 className="font-display text-lg text-espresso-900 mb-4">Ekonomi</h2>
             <div className="flex flex-col gap-1.5 text-sm">
               <div className="flex justify-between text-espresso-600">
-                <span>Handlaren betalar (bud + provision)</span>
-                <span className="tabular-nums font-medium">{formatSEK(totalWithCommission(order.amount))}</span>
+                <span>Handlaren betalar (bud + provision + frakt)</span>
+                <span className="tabular-nums font-medium">{formatSEK(dealerTotal(order.amount))}</span>
               </div>
               <div className="flex justify-between text-espresso-600">
                 <span>Säljaren får (hela budet)</span>
                 <span className="tabular-nums">{formatSEK(order.amount)}</span>
+              </div>
+              <div className="flex justify-between text-espresso-400">
+                <span>Frakt (genomströmning)</span>
+                <span className="tabular-nums">{formatSEK(DEALER_SHIPPING_FEE)}</span>
               </div>
               <div className="flex justify-between font-semibold text-emerald-700 pt-2 mt-1 border-t border-espresso-100">
                 <span>GuldBuds provision ({DEALER_COMMISSION_LABEL})</span>
@@ -361,7 +365,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             ) : (
               <>
                 <p className="text-sm text-espresso-500 mb-2 leading-relaxed">
-                  Väntar på {formatSEK(totalWithCommission(order.amount))}. Registrera betalningen när pengarna
+                  Väntar på {formatSEK(dealerTotal(order.amount))}. Registrera betalningen när pengarna
                   kommit in. Utbetalning till säljaren och vidareskick är låsta tills dess.
                 </p>
                 {order.payment_due_at && (() => {
