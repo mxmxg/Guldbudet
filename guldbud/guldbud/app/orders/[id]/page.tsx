@@ -243,7 +243,7 @@ function DealerPanel({ order }: { order: any }) {
               <p className="text-espresso-600 mt-1 leading-relaxed">
                 {overdue
                   ? 'Betala snart så håller vi affären öppen. Uteblir betalningen avbryts affären automatiskt.'
-                  : <>Betala bud + provision <span className="font-medium">omgående</span>. Så fort betalningen är registrerad reserveras föremålet för dig. Betalningsinstruktioner finns i meddelandena nedan.</>}
+                  : <>Föremålet är ditt. Betala bud + provision <span className="font-medium">omgående</span>, så tar säljaren emot din instruktion att skicka in det. Vi kontrollerar äktheten och skickar det sedan vidare till dig. Betalningsinstruktioner finns i meddelandena nedan.</>}
               </p>
               {due && (
                 <p className={`mt-2 font-medium ${overdue ? 'text-red-700' : 'text-espresso-700'}`}>
