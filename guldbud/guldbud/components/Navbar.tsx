@@ -150,8 +150,10 @@ export default function Navbar() {
   const handleLogout = async () => {
     setMobileOpen(false)
     await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+    // Hård omladdning så alla server- och klientvyer remontas utan session –
+    // router.refresh() ensam lämnar cachade klientkomponenter (t.ex. startsidan)
+    // kvar i inloggat läge.
+    window.location.href = '/'
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length
