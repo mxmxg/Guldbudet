@@ -27,17 +27,25 @@ export async function POST(req: NextRequest) {
   const mediaType = m[1]
   const base64 = m[2]
 
-  const prompt = `Du är expert på guldsmycken och begagnat guld. Titta på bilden och föreslå säljtext för en svensk guldauktion.
+  const prompt = `Du skriver säljande annonstext för ett guldföremål som ska läggas ut på en svensk guldauktion. Målet är att locka handlare att buda, inte att analysera bilden.
 
 Svara ENDAST med giltig JSON, inga andra ord, i formatet:
 {"title": "...", "description": "...", "category": "..."}
 
-Regler:
-- Identifiera den specifika modellen/typen med korrekta svenska guldsmedstermer när det syns: länktyp (t.ex. pansarlänk, kejsarlänk, cordell/kordel, ankarlänk, bismarck, figaro, bröstlänk), ringtyp (t.ex. vigselring, signetring, solitär), eller annan smyckestyp. Är du osäker, beskriv formen utan att gissa fel modellnamn.
-- title: kort och saklig rubrik på svenska, max 6 ord (t.ex. "Kejsarlänk i 18K guld"). Ingen prissättning.
-- description: 2–3 meningar på svenska. Nämn modell/länktyp, synligt skick, eventuell stämpel eller gravyr. Var ärlig och saklig, inga överdrifter.
+Ton och stil:
+- Skriv som en professionell annons: självsäker, tilltalande och lyftande, men trovärdig. Tänk auktionshus, inte utredning.
+- Skriv i påståendeform. Referera ALDRIG till fotot eller bilden, och använd ALDRIG osäkra ord som "verkar", "ser ut att", "det går inte att avgöra", "från bilden" eller liknande brasklappar.
+- Lyft föremålets karaktär: modell/länktyp, stil, uttryck och finish. Måla upp något en köpare vill ha.
+
+Innehåll:
+- Identifiera den specifika modellen med korrekta svenska guldsmedstermer: länktyp (t.ex. pansarlänk, kejsarlänk, cordell/kordel, ankarlänk, bismarck, figaro, bröstlänk), ringtyp (t.ex. vigselring, signetring, solitär) eller annan smyckestyp.
+- title: kort, säljande rubrik på svenska, max 6 ord (t.ex. "Klassisk kejsarlänk i guld"). Ingen prissättning.
+- description: 2–3 säljande meningar på svenska som beskriver modell/länktyp, stil och uttryck.
 - category: välj exakt en ur denna lista: ${CATEGORIES.join(', ')}.
-- Gissa ALDRIG vikt eller exakt karat om det inte tydligt syns på en stämpel. Hitta inte på modellnamn eller detaljer du inte ser.`
+
+Viktigt:
+- Nämn INTE vikt, längd eller exakt karat, och skriv inga meningar om att sådant inte kan avgöras. Säljaren fyller i de uppgifterna separat, så utelämna dem helt.
+- Hitta inte på ett modellnamn du inte är säker på. Är du osäker, beskriv stilen säljande i stället för att gissa fel.`
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
