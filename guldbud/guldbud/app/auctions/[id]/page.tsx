@@ -72,7 +72,8 @@ export default async function AuctionPage({ params }: { params: { id: string } }
             availability: 'https://schema.org/InStock',
             itemCondition: 'https://schema.org/UsedCondition',
             url,
-            // Budet gäller tills auktionen stänger.
+            // Budet blev giltigt när auktionen lades ut, och gäller tills den stänger.
+            ...(item.created_at ? { validFrom: String(item.created_at).slice(0, 10) } : {}),
             ...(item.auction_ends_at ? { priceValidUntil: String(item.auction_ends_at).slice(0, 10) } : {}),
             // Auktionsköp är slutgiltiga – en sann "inga returer"-policy.
             hasMerchantReturnPolicy: {
@@ -85,6 +86,11 @@ export default async function AuctionPage({ params }: { params: { id: string } }
               '@type': 'OfferShippingDetails',
               shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'SEK' },
               shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'SE' },
+              deliveryTime: {
+                '@type': 'ShippingDeliveryTime',
+                handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 3, unitCode: 'DAY' },
+                transitTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 3, unitCode: 'DAY' },
+              },
             },
           },
         }
