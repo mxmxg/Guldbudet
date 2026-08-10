@@ -301,8 +301,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
       <section id="estimator" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-28">
         <div className="grid lg:grid-cols-2 gap-10 items-center">
           <Reveal>
-            <span className="eyebrow text-gold-600">Gratis värdering</span>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900 leading-tight">
+            <h2 className="font-display text-3xl sm:text-4xl text-espresso-900 leading-tight">
               Se värdet på sekunder, <span className="text-gradient-gold">innan</span> du säljer
             </h2>
             <p className="mt-4 text-espresso-500 leading-relaxed max-w-md">
@@ -335,8 +334,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
         <div className="pointer-events-none absolute -top-20 left-1/4 w-80 h-80 rounded-full bg-gold-500/10 blur-3xl" />
         <div className="relative max-w-6xl mx-auto px-4 py-20">
           <Reveal className="text-center max-w-xl mx-auto">
-            <span className="eyebrow text-gold-500/80">Så enkelt är det</span>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl text-gold-100">
+            <h2 className="font-display text-3xl sm:text-4xl text-gold-100">
               Från byrålåda till betalning
             </h2>
             <p className="mt-3 text-gold-200/60">Tre steg. Under fem minuter av ditt arbete.</p>
@@ -389,8 +387,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
       <section id="auctions" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-28">
         <Reveal className="flex items-end justify-between mb-10 gap-4 flex-wrap">
           <div>
-            <span className="eyebrow text-gold-600">Just nu på GuldBud</span>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">Pågående auktioner</h2>
+            <h2 className="font-display text-3xl sm:text-4xl text-espresso-900">Pågående auktioner</h2>
           </div>
           {items.length > 0 && (
             <p className="text-sm text-espresso-500">
@@ -432,8 +429,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
       {/* HONEST / NO BAIT PRICING */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
-          <span className="eyebrow text-gold-600">Schysst mot dig</span>
-          <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">
+          <h2 className="font-display text-3xl sm:text-4xl text-espresso-900">
             Inga lockpriser. Bara riktiga bud.
           </h2>
           <p className="mt-4 text-espresso-500 leading-relaxed">
@@ -500,8 +496,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
       <section className="bg-white/60 border-y border-espresso-100">
         <div className="max-w-6xl mx-auto px-4 py-20">
           <Reveal className="text-center max-w-xl mx-auto mb-14">
-            <span className="eyebrow text-gold-600">Därför GuldBud</span>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">
+            <h2 className="font-display text-3xl sm:text-4xl text-espresso-900">
               Tryggare än guldbutiken på hörnet
             </h2>
           </Reveal>
@@ -545,8 +540,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
       {/* TESTIMONIALS */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <Reveal className="text-center max-w-xl mx-auto mb-14">
-          <span className="eyebrow text-gold-600">Röster från säljare</span>
-          <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">
+          <h2 className="font-display text-3xl sm:text-4xl text-espresso-900">
             Tusentals svenskar har redan sålt smart
           </h2>
         </Reveal>
@@ -597,8 +591,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
       {/* TRYGGHET */}
       <section className="max-w-6xl mx-auto px-4 pb-20">
         <Reveal className="text-center max-w-xl mx-auto mb-14">
-          <span className="eyebrow text-gold-600">Trygghet hela vägen</span>
-          <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">
+          <h2 className="font-display text-3xl sm:text-4xl text-espresso-900">
             Så håller vi din affär säker
           </h2>
         </Reveal>

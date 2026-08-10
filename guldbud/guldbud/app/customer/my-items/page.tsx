@@ -93,8 +93,7 @@ export default function MyItemsPage() {
       <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <span className="eyebrow text-gold-600">Din portfölj</span>
-            <h1 className="font-display text-3xl text-espresso-900 mt-1">Mina föremål</h1>
+            <h1 className="font-display text-3xl text-espresso-900">Mina föremål</h1>
           </div>
           <Link href="/customer/submit" className="btn-gold">
             + Lägg ut nytt

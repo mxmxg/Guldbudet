@@ -225,11 +225,10 @@ export default function SubmitPage() {
       <Navbar />
       <div className="flex-1 max-w-5xl w-full mx-auto px-4 py-10">
         <div className="mb-8">
-          <span className="eyebrow text-gold-600">Kostnadsfritt · tar 5 minuter</span>
-          <h1 className="font-display text-3xl sm:text-4xl text-espresso-900 mt-2">Lägg ut ett smycke</h1>
+          <h1 className="font-display text-3xl sm:text-4xl text-espresso-900">Lägg ut ett smycke</h1>
           <p className="text-espresso-500 mt-2 max-w-xl">
-            Fyll i uppgifter och ladda upp foton. Auktoriserade guldhandlare budar direkt, och du
-            väljer själv det bud du är nöjd med.
+            Kostnadsfritt och klart på fem minuter. Fyll i uppgifter och ladda upp foton –
+            auktoriserade guldhandlare budar direkt, och du väljer själv det bud du är nöjd med.
           </p>
         </div>
 
