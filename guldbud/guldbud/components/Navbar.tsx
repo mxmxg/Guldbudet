@@ -158,6 +158,9 @@ export default function Navbar() {
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length
+  // Klockan är en "nytt sedan sist"-yta: visa bara olästa. Lästa notiser
+  // finns kvar i databasen men skräpar inte i dropdownen efter att man läst dem.
+  const visibleNotifs = notifications.filter((n) => !n.read)
 
   const navLinks = () => {
     // Vänta tills vi vet om/vilken roll användaren har, annars blinkar
@@ -265,13 +268,13 @@ export default function Navbar() {
                           )}
                         </div>
                         <div className="max-h-80 overflow-y-auto">
-                          {notifications.length === 0 ? (
+                          {visibleNotifs.length === 0 ? (
                             <div className="text-center py-10 px-4">
                               <div className="flex justify-center mb-2 text-espresso-300"><BellIcon /></div>
-                              <p className="text-espresso-400 text-sm">Inga notifieringar ännu</p>
+                              <p className="text-espresso-400 text-sm">Inga nya notifieringar</p>
                             </div>
                           ) : (
-                            notifications.map((n) => (
+                            visibleNotifs.map((n) => (
                               <div
                                 key={n.id}
                                 role="button"
