@@ -309,6 +309,9 @@ begin
   if not found then return; end if;
 
   -- Effektivt max per handlare = högsta av auto-bud (godkänd, ej avstängd) och lagda bud.
+  -- Vinnare = högsta max (deterministiskt tiebreak på dealer_id), näst högsta = rn 2.
+  -- Allt i EN sats: en CTE syns bara i satsen direkt efter, så de två uttagen
+  -- måste ligga i samma query (annars: relation "maxes" does not exist).
   with maxes as (
     select dealer_id, max(m) as mx from (
       select ab.dealer_id, ab.max_amount as m
@@ -318,9 +321,14 @@ begin
       union all
       select b.dealer_id, b.amount from public.bids b where b.item_id = p_item
     ) x group by dealer_id
+  ), ranked as (
+    select dealer_id, mx, row_number() over (order by mx desc, dealer_id) as rn from maxes
   )
-  select dealer_id, mx into w_dealer, w_max from maxes order by mx desc, dealer_id limit 1;
-  select mx into s_max from maxes where dealer_id <> w_dealer order by mx desc limit 1;
+  select
+    (select dealer_id from ranked where rn = 1),
+    (select mx        from ranked where rn = 1),
+    (select mx        from ranked where rn = 2)
+  into w_dealer, w_max, s_max;
 
   if w_dealer is null then return; end if;
 
