@@ -89,7 +89,7 @@ function instructionsFor(title: string): string {
       'Så går affären vidare',
       [
         `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision <strong style="color:#f5e6c8">omgående</strong>. Betalningsinstruktioner finns i affären.`,
-        'När din betalning är registrerad reserveras föremålet för dig.',
+        'Föremålet är redan ditt, betalningen sätter igång affären.',
         'Säljaren skickar in det och vi äkthetskontrollerar det.',
         'Vi skickar sedan föremålet vidare till dig.',
       ],

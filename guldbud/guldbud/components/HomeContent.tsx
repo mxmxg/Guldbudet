@@ -330,56 +330,55 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="bg-white/60 border-y border-espresso-100">
-        <div className="max-w-6xl mx-auto px-4 py-20">
+      <section className="relative overflow-hidden bg-espresso-900 border-y border-espresso-800">
+        <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
+        <div className="pointer-events-none absolute -top-20 left-1/4 w-80 h-80 rounded-full bg-gold-500/10 blur-3xl" />
+        <div className="relative max-w-6xl mx-auto px-4 py-20">
           <Reveal className="text-center max-w-xl mx-auto">
-            <span className="eyebrow text-gold-600">Så enkelt är det</span>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl text-espresso-900">
+            <span className="eyebrow text-gold-500/80">Så enkelt är det</span>
+            <h2 className="mt-3 font-display text-3xl sm:text-4xl text-gold-100">
               Från byrålåda till betalning
             </h2>
-            <p className="mt-3 text-espresso-500">Tre steg. Under fem minuter av ditt arbete.</p>
+            <p className="mt-3 text-gold-200/60">Tre steg. Under fem minuter av ditt arbete.</p>
           </Reveal>
 
-          <div className="mt-14 grid md:grid-cols-3 gap-6">
+          <div className="mt-16 relative grid md:grid-cols-3 gap-10 md:gap-8">
+            {/* Kopplande linje som binder ihop stegen till en resa (desktop) */}
+            <div className="hidden md:block absolute top-8 left-[16.66%] right-[16.66%] h-px bg-gradient-to-r from-transparent via-gold-500/35 to-transparent" />
             {[
               {
-                step: '01',
                 Icon: CameraIcon,
                 title: 'Fotografera och lägg ut',
                 desc: 'Ladda upp bilder, fyll i vikt och karat. Vi granskar och öppnar auktionen, oftast inom ett par timmar.',
               },
               {
-                step: '02',
                 Icon: ScaleIcon,
                 title: 'Handlare budar mot varandra',
                 desc: 'Auktoriserade guldhandlare ser ditt föremål och tävlar om att ge dig det högsta budet. Du följer allt i realtid.',
               },
               {
-                step: '03',
                 Icon: CoinsIcon,
                 title: 'Acceptera och få betalt',
                 desc: 'Välj det bud du är nöjd med, skicka föremålet försäkrat till oss och få pengarna via Swish eller bankkonto samma dag som vi verifierat.',
               },
             ].map((s, i) => (
-              <Reveal key={s.step} delay={i * 100}>
-                <div className="card card-hover p-7 h-full relative overflow-hidden group">
-                  <span className="absolute -top-4 -right-2 font-display text-7xl text-gold-100 select-none group-hover:text-gold-200 transition-colors">
-                    {s.step}
-                  </span>
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-xl bg-gold-50 border border-gold-200/60 flex items-center justify-center text-gold-600 mb-5">
-                      <s.Icon size={22} />
-                    </div>
-                    <h3 className="font-display text-xl text-espresso-900 mb-2">{s.title}</h3>
-                    <p className="text-sm text-espresso-500 leading-relaxed">{s.desc}</p>
+              <Reveal key={s.title} delay={i * 120}>
+                <div className="relative text-center group">
+                  <div className="relative z-10 mx-auto mb-6 w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-300 to-gold-600 flex items-center justify-center shadow-gold transition-transform duration-300 group-hover:-translate-y-1">
+                    <s.Icon size={26} className="text-espresso-900" strokeWidth={1.8} />
+                    <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-espresso-900 border border-gold-500/40 text-gold-300 text-xs font-semibold flex items-center justify-center tabular-nums">
+                      {i + 1}
+                    </span>
                   </div>
+                  <h3 className="font-display text-xl text-gold-100 mb-2">{s.title}</h3>
+                  <p className="text-sm text-gold-200/60 leading-relaxed max-w-xs mx-auto">{s.desc}</p>
                 </div>
               </Reveal>
             ))}
           </div>
 
-          <Reveal className="text-center mt-10">
-            <Link href="/how-it-works" className="btn-outline">
+          <Reveal className="text-center mt-14">
+            <Link href="/how-it-works" className="btn-ghost-gold text-gold-200">
               Läs mer om processen →
             </Link>
           </Reveal>

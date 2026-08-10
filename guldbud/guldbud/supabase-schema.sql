@@ -728,7 +728,7 @@ begin
     if v_dealer is not null then
       insert into public.notifications (user_id, title, message, item_id, link)
       values (v_dealer, 'Grattis, du vann budgivningen',
-              'Säljaren accepterade ditt bud på "' || new.title || '". Betala bud + provision så reserverar vi föremålet för dig. Betalningsinstruktioner finns i affären.',
+              'Föremålet "' || new.title || '" är ditt. Betala bud + provision omgående, så tar vi emot det från säljaren, kontrollerar äktheten och skickar det vidare till dig. Betalningsinstruktioner finns i affären.',
               new.id, '/orders/' || v_order);
     end if;
   end if;
