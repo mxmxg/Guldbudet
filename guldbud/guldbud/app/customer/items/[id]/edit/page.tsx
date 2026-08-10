@@ -169,7 +169,7 @@ export default function EditItemPage({ params }: { params: { id: string } }) {
 
           <label className="block">
             <span className="block text-sm font-medium text-espresso-700 mb-1.5">
-              Minimipris (valfritt)
+              Reservationspris (valfritt)
             </span>
             <input type="number" value={form.minPrice} onChange={(e) => set('minPrice', e.target.value)} placeholder="Lägsta pris du accepterar" className="w-full" />
           </label>

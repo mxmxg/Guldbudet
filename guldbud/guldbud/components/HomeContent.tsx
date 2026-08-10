@@ -313,7 +313,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {[
                 'Inga dolda avgifter, det är gratis att lägga ut',
                 'Du bestämmer själv om du accepterar ett bud',
-                'Sätt ett minimipris om du vill',
+                'Sätt ett reservationspris om du vill',
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3 text-sm text-espresso-600">
                   <CheckMark />
@@ -507,10 +507,26 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
           </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: <ScaleIcon />, title: 'Bud i konkurrens', desc: 'Handlarna tävlar om ditt guld. Konkurrens pressar priset uppåt, till din fördel.' },
-              { icon: <ShieldIcon />, title: 'Endast godkända handlare', desc: 'Varje handlare är manuellt verifierad med org.nummer och legitimation.' },
-              { icon: <BoltIcon />, title: 'Snabbt & smidigt', desc: 'Från uppladdning till pengar på kontot tar det oftast bara några dagar.' },
-              { icon: <HeartIcon />, title: 'Full kontroll', desc: 'Du väljer om och när du säljer. Sätt minimipris och tacka nej när du vill.' },
+              {
+                icon: <ScaleIcon />,
+                title: 'Handlare budar mot varandra',
+                desc: 'I stället för ett lågt engångsbud får du flera auktoriserade guldköpare att tävla om ditt föremål. Konkurrensen driver priset uppåt — ofta långt över vad butiken på hörnet erbjuder.',
+              },
+              {
+                icon: <ShieldIcon />,
+                title: 'Endast godkända handlare',
+                desc: 'Ingen kommer in i budgivningen oanmäld. Varje handlare är manuellt granskad av oss med organisationsnummer och legitimation, så du vet att seriösa köpare står bakom varje bud.',
+              },
+              {
+                icon: <BoltIcon />,
+                title: 'Utbetalning inom 24 timmar',
+                desc: 'Handlaren betalar direkt när auktionen vinns. Så snart vi tagit emot och verifierat ditt föremål har du pengarna på kontot — oftast inom 24 timmar.',
+              },
+              {
+                icon: <HeartIcon />,
+                title: 'Full kontroll, noll press',
+                desc: 'Du bestämmer allt. Sätt ett reservationspris så ditt guld aldrig säljs för billigt, följ buden i realtid och tacka nej ända fram till att du accepterar — helt utan förpliktelser.',
+              },
             ].map((f, i) => (
               <Reveal key={f.title} delay={i * 80}>
                 <div className="card card-hover p-6 h-full">
@@ -602,7 +618,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             },
             {
               title: 'Du bestämmer',
-              desc: 'Sätt ett minimipris, följ buden i realtid och tacka nej när du vill. Ingen press, inga dolda avgifter.',
+              desc: 'Sätt ett reservationspris, följ buden i realtid och tacka nej när du vill. Ingen press, inga dolda avgifter.',
             },
           ].map((f, i) => (
             <Reveal key={f.title} delay={(i % 2) * 90}>

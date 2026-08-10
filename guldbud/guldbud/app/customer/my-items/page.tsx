@@ -154,7 +154,7 @@ export default function MyItemsPage() {
                     </p>
                     {item.min_price && (
                       <p className="text-xs text-espresso-500">
-                        Minimipris: {item.min_price.toLocaleString('sv-SE')} kr
+                        Reservationspris: {item.min_price.toLocaleString('sv-SE')} kr
                       </p>
                     )}
                     <p className="text-[11px] text-espresso-300 mt-1">

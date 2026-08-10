@@ -69,7 +69,7 @@ export default function Page() {
       </P>
       <P>
         På <A href="/">GuldBud</A> lägger du ut ditt föremål gratis, handlarna tävlar, och du bestämmer själv om du
-        accepterar det högsta budet. Du kan sätta ett minimipris om du vill vara säker på en lägstanivå.
+        accepterar det högsta budet. Du kan sätta ett reservationspris om du vill vara säker på en lägstanivå.
       </P>
 
       <H2>Så undviker du att bli lurad</H2>

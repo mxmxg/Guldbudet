@@ -714,7 +714,7 @@ export default function AdminPage() {
                       </p>
                       {item.min_price && (
                         <p className="text-sm text-espresso-500">
-                          Minimipris: {item.min_price.toLocaleString('sv-SE')} kr
+                          Reservationspris: {item.min_price.toLocaleString('sv-SE')} kr
                         </p>
                       )}
                       <p className="text-xs text-espresso-400 mt-1">

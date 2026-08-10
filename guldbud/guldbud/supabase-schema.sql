@@ -689,7 +689,7 @@ begin
       -- Reservationspris ej uppnått
       insert into public.notifications (user_id, title, message, item_id, link)
       values (r.owner_id, 'Högsta bud: ' || v_top.amount || ' kr på "' || r.title || '"',
-              'Budgivningen landade på ' || v_top.amount || ' kr, strax under ditt minimipris på ' ||
+              'Budgivningen landade på ' || v_top.amount || ' kr, strax under ditt reservationspris på ' ||
               r.min_price || ' kr. Du kan ändå välja att godkänna budet och få betalt. ' ||
               'Att sälja är helt kostnadsfritt för dig.',
               r.id, '/auctions/' || r.id);
