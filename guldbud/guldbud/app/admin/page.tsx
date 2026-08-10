@@ -65,9 +65,11 @@ export default function AdminPage() {
         .eq('role', 'dealer')
         .eq('approved', false)
         .order('created_at', { ascending: false })
+      // Ingen profil-join här: en RLS-hicka på kopplingen tömmer annars hela
+      // listan. Säljar-info hämtas separat nedan (samma mönster som aktiva).
       const { data: items } = await supabase
         .from('items')
-        .select('*, profiles(full_name, email)')
+        .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
       // Bara aktiva auktioner. Så fort ett bud godkänts blir föremålet en
@@ -98,20 +100,24 @@ export default function AdminPage() {
       setPendingDealers(dealers || [])
       setPendingItems(items || [])
       setLiveItems(active || [])
+
+      // Säljar-info för både pending och aktiva föremål, hämtad separat (inte
+      // som join) så en RLS-hicka på kopplingen aldrig kan tömma listorna.
+      const ownerIds = Array.from(
+        new Set([...(items || []), ...(active || [])].map((i: any) => i.owner_id).filter(Boolean))
+      )
+      if (ownerIds.length) {
+        const { data: sellers } = await supabase
+          .from('profiles')
+          .select('id, full_name, email, phone, city')
+          .in('id', ownerIds)
+        const smap: Record<string, any> = {}
+        sellers?.forEach((s: any) => (smap[s.id] = s))
+        setSellers(smap)
+      }
+
       if (active && active.length > 0) {
         const ids = active.map((i: any) => i.id)
-        // Säljar-info hämtas separat (inte som join) så en RLS-hicka på
-        // kopplingen aldrig kan tömma hela auktionslistan.
-        const ownerIds = Array.from(new Set(active.map((i: any) => i.owner_id).filter(Boolean)))
-        if (ownerIds.length) {
-          const { data: sellers } = await supabase
-            .from('profiles')
-            .select('id, full_name, email, phone, city')
-            .in('id', ownerIds)
-          const smap: Record<string, any> = {}
-          sellers?.forEach((s: any) => (smap[s.id] = s))
-          setSellers(smap)
-        }
         const { data: bids } = await supabase
           .from('bids')
           .select('id, item_id, amount, created_at')
@@ -654,7 +660,8 @@ export default function AdminPage() {
                         </p>
                       )}
                       <p className="text-xs text-espresso-400 mt-1">
-                        {item.profiles?.full_name} · {item.profiles?.email}
+                        {sellers[item.owner_id]?.full_name || '—'}
+                        {sellers[item.owner_id]?.email ? ` · ${sellers[item.owner_id].email}` : ''}
                       </p>
                       {item.description && (
                         <p className="text-xs text-espresso-400 mt-1 line-clamp-2">{item.description}</p>
