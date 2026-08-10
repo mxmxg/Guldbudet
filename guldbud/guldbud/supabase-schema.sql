@@ -715,7 +715,7 @@ begin
     select dealer_id, amount into v_dealer, v_amount from public.bids where id = new.accepted_bid_id;
 
     insert into public.orders (item_id, seller_id, dealer_id, bid_id, amount, payment_due_at)
-    values (new.id, new.owner_id, v_dealer, new.accepted_bid_id, v_amount, now() + interval '3 days')
+    values (new.id, new.owner_id, v_dealer, new.accepted_bid_id, v_amount, now() + interval '1 day')
     on conflict (item_id) do nothing;
 
     select id into v_order from public.orders where item_id = new.id;
