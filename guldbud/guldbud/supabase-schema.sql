@@ -750,20 +750,20 @@ begin
   select title into v_title from public.items where id = new.item_id;
   if new.status is distinct from old.status then
     if new.status = 'received' then
-      -- Säljaren: mottaget. Handlaren: kontrollerat, dags att betala.
+      -- Säljaren: mottaget, kontroll pågår. Handlaren: mottaget, vi skickar vidare.
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.seller_id, 'Vi har tagit emot ditt föremål',
-              'Vi har tagit emot "' || v_title || '" och börjar nu äkthetskontrollera det. När kontrollen är klar och handlaren betalat förbereder vi din utbetalning på ' ||
+              'Vi har tagit emot "' || v_title || '" och äkthetskontrollerar det nu. När kontrollen är klar förbereder vi din utbetalning på ' ||
               replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr. Fyll gärna i dina utbetalningsuppgifter (Swish eller bankkonto) i din profil så går det snabbt.',
               new.item_id, '/orders/' || new.id);
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.dealer_id, 'Föremålet är kontrollerat, dags att betala',
-              '"' || v_title || '" är mottaget och kontrollerat. Betala bud + provision så skickar vi det till dig.',
+      values (new.dealer_id, 'Ditt föremål är mottaget och kontrollerat',
+              '"' || v_title || '" är mottaget hos oss och äkthetskontrollerat. Vi packar och skickar det vidare till dig.',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'dealer_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.seller_id, 'Betalning på väg',
-              'Handlaren har betalat. Din utbetalning på ' || replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') ||
+      values (new.seller_id, 'Din utbetalning förbereds',
+              'Din utbetalning på ' || replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') ||
               ' kr förbereds nu. Dubbelkolla att dina utbetalningsuppgifter är ifyllda i din profil.',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'verified_paid' then

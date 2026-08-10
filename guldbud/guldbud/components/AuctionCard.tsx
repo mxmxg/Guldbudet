@@ -90,16 +90,19 @@ export default function AuctionCard({ item }: { item: CardItem }) {
           ) : (
             <p className="text-base font-medium text-espresso-400">Öppet för bud</p>
           )}
-          {hasReserve && (
-            <p
-              className={`mt-1 text-[11px] font-medium inline-flex items-center gap-1.5 ${
-                reserveMet ? 'text-emerald-600' : 'text-espresso-400'
-              }`}
-            >
-              <span className={`h-1.5 w-1.5 rounded-full ${reserveMet ? 'bg-emerald-500' : 'bg-espresso-300'}`} />
-              {reserveMet ? 'Reservationspris uppnått' : 'Reservationspris ej uppnått'}
-            </p>
-          )}
+          {/* Alltid samma höjd så alla kort blir lika höga; text bara när reservationspris finns */}
+          <div className="mt-1 min-h-[1.05rem]">
+            {hasReserve && (
+              <span
+                className={`text-[11px] font-medium inline-flex items-center gap-1.5 ${
+                  reserveMet ? 'text-emerald-600' : 'text-espresso-400'
+                }`}
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${reserveMet ? 'bg-emerald-500' : 'bg-espresso-300'}`} />
+                {reserveMet ? 'Reservationspris uppnått' : 'Reservationspris ej uppnått'}
+              </span>
+            )}
+          </div>
         </div>
         <div className="text-right">
           <span className="chip bg-gold-50 text-gold-700">{bidCount} bud</span>

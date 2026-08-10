@@ -19,7 +19,7 @@ const faq = [
   },
   {
     q: 'Hur skickar jag in mitt guld tryggt?',
-    a: 'När du accepterat ett bud packar du föremålet och skickar det som rekommenderat och försäkrat till GuldBud. Vi äkthetskontrollerar det och betalar ut till dig, normalt inom några arbetsdagar.',
+    a: 'När du accepterat ett bud packar du föremålet och skickar det som rekommenderat och försäkrat till GuldBud. Vi äkthetskontrollerar det och betalar ut till dig, normalt inom 1–2 bankdagar.',
   },
   {
     q: 'Behöver jag veta karaten på förhand?',
