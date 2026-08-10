@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 import Image from 'next/image'
 import AuctionCard from '@/components/AuctionCard'
+import AuctionsBrowser from '@/components/AuctionsBrowser'
 import ValueEstimator from '@/components/ValueEstimator'
 import Reveal from '@/components/Reveal'
 import CountUp from '@/components/CountUp'
@@ -177,9 +178,7 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
             Öppna budpanel
           </Link>
         </DashHeader>
-        <div className="max-w-6xl mx-auto px-4 py-10">
-          <AuctionsSection items={items} title="Aktiva auktioner" />
-        </div>
+        <AuctionsBrowser items={items} showHero={false} defaultSort="newest" />
         <Footer />
       </>
     )
