@@ -34,6 +34,7 @@ export default function AuctionDetails({ item }: { item: any }) {
   const [extended, setExtended] = useState(false)
   const [newBidToast, setNewBidToast] = useState<number | null>(null)
   const [confetti, setConfetti] = useState(0)
+  const [watchers, setWatchers] = useState(0)
   // Kept in state so anti-sniping extensions (server-side) reflect live.
   const [endsAt, setEndsAt] = useState<string | null>(item.auction_ends_at)
   const endsAtRef = useRef<string | null>(item.auction_ends_at)
@@ -119,6 +120,26 @@ export default function AuctionDetails({ item }: { item: any }) {
     }
   }, [])
 
+  // Realtidsnärvaro: räkna hur många som tittar på auktionen just nu.
+  useEffect(() => {
+    if (item.status !== 'active') return
+    const key = Math.random().toString(36).slice(2)
+    const presence = supabase.channel(`presence-item-${item.id}`, {
+      config: { presence: { key } },
+    })
+    presence
+      .on('presence', { event: 'sync' }, () => {
+        setWatchers(Object.keys(presence.presenceState()).length)
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') await presence.track({ at: Date.now() })
+      })
+    return () => {
+      supabase.removeChannel(presence)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.id, item.status])
+
   if (!checked)
     return (
       <div className="max-w-5xl mx-auto px-4 py-10">
@@ -142,6 +163,7 @@ export default function AuctionDetails({ item }: { item: any }) {
   const isAdmin = profile?.role === 'admin'
   const isClosed = item.status === 'closed'
   const ended = !!endsAt && new Date(endsAt).getTime() < Date.now()
+  const endingSoon = !!endsAt && !ended && !isClosed && new Date(endsAt).getTime() - Date.now() < 60 * 60 * 1000
   // Status kommer som booleaner från servern; själva nivån (min_price) finns
   // bara med när ägaren tittar på sitt eget föremål.
   const hasReserve = !!item.has_reserve
@@ -281,6 +303,15 @@ export default function AuctionDetails({ item }: { item: any }) {
                 flash ? 'border-gold-400 bg-gold-50/60' : 'border-espresso-100 bg-white'
               } shadow-soft`}
             >
+              {!isClosed && !ended && watchers >= 2 && (
+                <div className="mb-3 inline-flex items-center gap-2 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-pulse-ring" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  {watchers} tittar på auktionen just nu
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 flex-wrap">
                 <div className="min-w-0">
                   <p className="eyebrow text-espresso-400 mb-1">{isClosed ? 'Slutpris' : 'Högsta bud'}</p>
@@ -297,7 +328,9 @@ export default function AuctionDetails({ item }: { item: any }) {
                 </div>
                 {endsAt && (
                   <div className="shrink-0 sm:text-right">
-                    <p className="eyebrow text-espresso-400 mb-2">{ended || isClosed ? 'Status' : 'Avslutas om'}</p>
+                    <p className={`eyebrow mb-2 ${endingSoon ? 'text-amber-600' : 'text-espresso-400'}`}>
+                      {ended || isClosed ? 'Status' : endingSoon ? '⏳ Slutar snart' : 'Avslutas om'}
+                    </p>
                     <CountdownTimer endsAt={endsAt} variant="blocks" />
                   </div>
                 )}
