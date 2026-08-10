@@ -414,7 +414,7 @@ export default function SubmitPage() {
 
             <div>
               <label className="block text-sm font-medium text-espresso-700 mb-1.5">
-                Minimipris i SEK <span className="text-espresso-400 font-normal">(valfritt)</span>
+                Reservationspris i SEK <span className="text-espresso-400 font-normal">(valfritt)</span>
               </label>
               <input
                 type="number"
@@ -424,6 +424,10 @@ export default function SubmitPage() {
                 placeholder="Lämna tomt för att ta emot alla bud"
                 className="w-full"
               />
+              <p className="mt-1.5 text-xs text-espresso-400">
+                Den lägsta nivå du är beredd att sälja för. Når inte högsta budet dit är du aldrig
+                skyldig att sälja. Beloppet visas aldrig för handlarna.
+              </p>
             </div>
 
             <div>

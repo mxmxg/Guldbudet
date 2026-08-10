@@ -68,7 +68,7 @@ const FAQ = [
   },
   {
     q: 'Måste jag acceptera det högsta budet?',
-    a: 'Nej, du har alltid rätt att tacka nej till alla bud. Du kan också sätta ett minimipris när du lägger ut föremålet.',
+    a: 'Nej, du har alltid rätt att tacka nej till alla bud. Du kan också sätta ett reservationspris när du lägger ut föremålet.',
   },
   {
     q: 'Hur skickar jag föremålet på ett säkert sätt?',
