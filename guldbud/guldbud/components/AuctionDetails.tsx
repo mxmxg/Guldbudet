@@ -563,10 +563,10 @@ function ShippingCard() {
     <div className="bg-espresso-900 rounded-xl p-5 text-center relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
       <div className="relative">
-        <p className="eyebrow text-gold-500/70 mb-1">Skicka till</p>
-        <p className="text-gold-200 font-medium">GuldBud AB</p>
-        <p className="text-gold-500/80 text-sm">Storgatan 1</p>
-        <p className="text-gold-500/80 text-sm">111 22 Stockholm</p>
+        <p className="eyebrow text-gold-500/70 mb-1">Frakt</p>
+        <p className="text-gold-200 font-medium">Förbetald säkerhetspåse</p>
+        <p className="text-gold-500/80 text-sm">Adress och frakt är påtryckt</p>
+        <p className="text-gold-500/80 text-sm">påsen vi skickar dig</p>
         <p className="text-gold-500/60 text-xs mt-2">Vid frågor: info@guldbud.com</p>
       </div>
     </div>

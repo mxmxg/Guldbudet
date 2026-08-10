@@ -13,8 +13,6 @@ import { DEALER_COMMISSION_LABEL } from '@/lib/fees'
 
 const FROM = process.env.EMAIL_FROM || 'GuldBud <onboarding@resend.dev>'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
-// Mottagningsadress för föremål. Byt till er box-adress innan lansering.
-const SHIP_ADDR = 'GuldBud AB, Storgatan 1, 111 22 Stockholm'
 
 function esc(s: string) {
   return String(s || '')
@@ -75,8 +73,8 @@ function instructionsFor(title: string): string {
     return stepsBox(
       'Så här slutför du affären',
       [
-        'En säkerhetspåse är på väg till dig, men du kan posta redan idag utan att vänta på den.',
-        `Skicka föremålet som <strong style="color:#f5e6c8">rekommenderat och försäkrat</strong> brev till: <strong style="color:#f5e6c8">${SHIP_ADDR}</strong>.`,
+        'En förbetald och adresserad säkerhetspåse är på väg till dig.',
+        'Lägg föremålet i påsen och posta som <strong style="color:#f5e6c8">rekommenderat och försäkrat</strong> brev. Frakt och adress är redan klara.',
         'Vi verifierar äktheten så snart vi tagit emot föremålet.',
         `Du får betalt, normalt inom <strong style="color:#f5e6c8">1–2 bankdagar</strong> efter verifieringen.`,
       ],
