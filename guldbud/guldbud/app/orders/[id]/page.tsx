@@ -43,7 +43,15 @@ export default function OrderPage({ params }: { params: { id: string } }) {
       return
     }
 
-    const { data: o } = await supabase.from('orders').select('*').eq('id', params.id).single()
+    // Explicita kolumner (inte '*') så interna admin-fält (admin_notes,
+    // cancel_reason) aldrig når säljar-/handlarvyn.
+    const { data: o } = await supabase
+      .from('orders')
+      .select(
+        'id, item_id, seller_id, dealer_id, amount, status, dealer_paid_at, payment_due_at, tracking_dealer, order_no, created_at'
+      )
+      .eq('id', params.id)
+      .single()
     if (!o) {
       setDenied(true)
       setLoading(false)
