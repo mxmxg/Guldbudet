@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import Image from 'next/image'
 import Link from 'next/link'
 import { GemIcon } from '@/components/Icons'
+import InviteFriend from '@/components/InviteFriend'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   pending: { label: 'Väntar på granskning', color: 'bg-amber-100 text-amber-700' },
@@ -185,6 +186,12 @@ export default function MyItemsPage() {
                 </Wrapper>
               )
             })}
+          </div>
+        )}
+
+        {!loading && items.length > 0 && (
+          <div className="mt-8">
+            <InviteFriend />
           </div>
         )}
       </div>
