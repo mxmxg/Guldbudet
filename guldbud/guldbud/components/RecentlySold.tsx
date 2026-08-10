@@ -21,7 +21,7 @@ export default function RecentlySold({ rows }: { rows: SoldRow[] }) {
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="flex items-end justify-between gap-4 mb-6">
           <div>
-            <p className="eyebrow text-gold-600/80 mb-1">Social proof</p>
+            <p className="eyebrow text-gold-600/80 mb-1">Avslutade auktioner</p>
             <h2 className="font-display text-2xl text-espresso-900">Nyligen sålt</h2>
             <p className="text-sm text-espresso-500 mt-1">Riktiga slutpriser från avslutad budgivning.</p>
           </div>
@@ -35,7 +35,7 @@ export default function RecentlySold({ rows }: { rows: SoldRow[] }) {
             <Link key={r.id} href={`/auctions/${r.id}`} className="card card-hover overflow-hidden group">
               <div className="aspect-[4/3] bg-gradient-to-br from-espresso-900 to-espresso-800 relative">
                 {r.image_urls?.[0] ? (
-                  <Image src={r.image_urls[0]} alt={r.title} fill className="object-contain" />
+                  <Image src={r.image_urls[0]} alt={r.title} fill className="object-cover" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-gold-500/60">
                     <CategoryIcon category={r.category || undefined} size={30} strokeWidth={1.4} />
