@@ -86,7 +86,9 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
           mine?.forEach((b: any) => {
             if (!myMax[b.item_id] || b.amount > myMax[b.item_id]) myMax[b.item_id] = b.amount
           })
-          setMyBidIds(new Set(Object.keys(myMax)))
+          // Bara aktiva auktioner (de som faktiskt visas i listan), annars kan
+          // räknaren överstiga antalet auktioner pga bud på avslutade föremål.
+          setMyBidIds(new Set(items.filter((i) => myMax[i.id] !== undefined).map((i) => i.id)))
           setLeadingIds(
             new Set(items.filter((i) => i.top_bid > 0 && myMax[i.id] === i.top_bid).map((i) => i.id)),
           )
