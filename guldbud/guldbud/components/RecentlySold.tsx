@@ -33,11 +33,11 @@ export default function RecentlySold({ rows }: { rows: SoldRow[] }) {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {rows.map((r) => (
             <Link key={r.id} href={`/auctions/${r.id}`} className="card card-hover overflow-hidden group">
-              <div className="aspect-[4/3] bg-gradient-to-br from-espresso-900 to-espresso-800 relative">
+              <div className="aspect-[4/3] bg-espresso-50 relative">
                 {r.image_urls?.[0] ? (
-                  <Image src={r.image_urls[0]} alt={r.title} fill className="object-cover" />
+                  <Image src={r.image_urls[0]} alt={r.title} fill className="object-contain" />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-gold-500/60">
+                  <div className="absolute inset-0 flex items-center justify-center text-gold-600/50">
                     <CategoryIcon category={r.category || undefined} size={30} strokeWidth={1.4} />
                   </div>
                 )}
