@@ -249,7 +249,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                     onClick={() => setShowRefund(true)}
                     className="text-sm text-amber-700 hover:text-amber-800 font-medium"
                   >
-                    Äkthet ej godkänd — returnera &amp; kreditera
+                    Äkthet ej godkänd: returnera &amp; kreditera
                   </button>
                 ) : (
                   <div>

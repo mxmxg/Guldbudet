@@ -505,7 +505,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {
                 icon: <ScaleIcon />,
                 title: 'Handlare budar mot varandra',
-                desc: 'I stället för ett lågt engångsbud får du flera auktoriserade guldköpare att tävla om ditt föremål. Konkurrensen driver priset uppåt — ofta långt över vad butiken på hörnet erbjuder.',
+                desc: 'I stället för ett lågt engångsbud får du flera auktoriserade guldköpare att tävla om ditt föremål. Konkurrensen driver priset uppåt, ofta långt över vad butiken på hörnet erbjuder.',
               },
               {
                 icon: <ShieldIcon />,
@@ -515,12 +515,12 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {
                 icon: <BoltIcon />,
                 title: 'Utbetalning inom 24 timmar',
-                desc: 'Handlaren betalar direkt när auktionen vinns. Så snart vi tagit emot och verifierat ditt föremål har du pengarna på kontot — oftast inom 24 timmar.',
+                desc: 'När du accepterat det vinnande budet betalar handlaren omgående till oss. Så snart vi tagit emot och verifierat ditt föremål har du pengarna på kontot, oftast inom 24 timmar.',
               },
               {
                 icon: <HeartIcon />,
                 title: 'Full kontroll, noll press',
-                desc: 'Du bestämmer allt. Sätt ett reservationspris så ditt guld aldrig säljs för billigt, följ buden i realtid och tacka nej ända fram till att du accepterar — helt utan förpliktelser.',
+                desc: 'Du bestämmer allt. Sätt ett reservationspris så ditt guld aldrig säljs för billigt, följ buden i realtid och tacka nej ända fram till att du accepterar. Helt utan förpliktelser.',
               },
             ].map((f, i) => (
               <Reveal key={f.title} delay={i * 80}>
