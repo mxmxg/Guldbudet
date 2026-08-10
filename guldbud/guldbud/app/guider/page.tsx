@@ -45,7 +45,6 @@ export default function GuidesIndex() {
       <div className="relative overflow-hidden bg-espresso-900">
         <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
         <div className="relative max-w-4xl mx-auto px-4 py-16">
-          <p className="eyebrow text-gold-500/80 mb-2">Guider</p>
           <h1 className="font-display text-3xl sm:text-4xl text-gold-100 leading-tight">Allt om att sälja guld</h1>
           <p className="mt-4 text-gold-200/75 leading-relaxed max-w-2xl">
             Lär dig vad ditt guld är värt, förstå karat och stämplar, och sälj tryggt till marknadens bästa pris.

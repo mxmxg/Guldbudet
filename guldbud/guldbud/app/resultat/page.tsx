@@ -45,7 +45,6 @@ export default async function ResultsPage() {
         <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
         <div className="pointer-events-none absolute -top-24 left-1/3 w-72 h-72 rounded-full bg-gold-500/10 blur-3xl" />
         <div className="relative">
-          <p className="eyebrow text-gold-500/80 mb-3">Transparens</p>
           <h1 className="font-display text-4xl text-gold-100 mb-4">Sålda resultat</h1>
           <p className="text-gold-200/70 max-w-xl mx-auto text-sm leading-relaxed">
             Se vad guld faktiskt sålts för hos GuldBud. Inga lockpriser – bara riktiga slutpriser från
