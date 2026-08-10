@@ -10,7 +10,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, commission, totalWithCommission, PAYMENT_WINDOW_LABEL } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, commission, totalWithCommission } from '@/lib/fees'
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -243,7 +243,7 @@ function DealerPanel({ order }: { order: any }) {
               <p className="text-espresso-600 mt-1 leading-relaxed">
                 {overdue
                   ? 'Betala snart så håller vi affären öppen. Uteblir betalningen avbryts affären automatiskt.'
-                  : <>Betala bud + provision inom <span className="font-medium">{PAYMENT_WINDOW_LABEL}</span>. Så fort betalningen är registrerad reserveras föremålet för dig. Betalningsinstruktioner finns i meddelandena nedan.</>}
+                  : <>Betala bud + provision <span className="font-medium">omgående</span>. Så fort betalningen är registrerad reserveras föremålet för dig. Betalningsinstruktioner finns i meddelandena nedan.</>}
               </p>
               {due && (
                 <p className={`mt-2 font-medium ${overdue ? 'text-red-700' : 'text-espresso-700'}`}>

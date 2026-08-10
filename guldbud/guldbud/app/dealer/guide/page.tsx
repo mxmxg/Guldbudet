@@ -33,7 +33,7 @@ const STEPS = [
   {
     n: '6',
     title: 'Du betalar för föremålet',
-    desc: 'Först när föremålet är mottaget och kontrollerat får du en faktura på bud + 8% provision. Du har 3 arbetsdagar på dig att betala. Föremålet ligger tryggt hos oss under tiden – ingen stress.',
+    desc: 'När du vunnit budgivningen betalar du bud + 8% provision omgående. Så fort betalningen är registrerad reserverar vi föremålet för dig, och det ligger tryggt hos oss tills det skickas.',
   },
   {
     n: '7',

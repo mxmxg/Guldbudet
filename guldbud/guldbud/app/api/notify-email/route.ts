@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 // branded e-mail via Resend. Configure the webhook to send the header
 // `x-webhook-secret: <EMAIL_WEBHOOK_SECRET>`.
 
-import { DEALER_COMMISSION_LABEL, PAYMENT_WINDOW_LABEL } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL } from '@/lib/fees'
 
 const FROM = process.env.EMAIL_FROM || 'GuldBud <onboarding@resend.dev>'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
@@ -78,7 +78,7 @@ function instructionsFor(title: string): string {
         'En säkerhetspåse är på väg till dig, men du kan posta redan idag utan att vänta på den.',
         `Skicka föremålet som <strong style="color:#f5e6c8">rekommenderat och försäkrat</strong> brev till: <strong style="color:#f5e6c8">${SHIP_ADDR}</strong>.`,
         'Vi verifierar äktheten så snart vi tagit emot föremålet.',
-        `Du får betalt, normalt inom <strong style="color:#f5e6c8">${PAYMENT_WINDOW_LABEL}</strong> efter verifieringen.`,
+        `Du får betalt, normalt inom <strong style="color:#f5e6c8">1–2 bankdagar</strong> efter verifieringen.`,
       ],
       'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
     )
@@ -88,7 +88,7 @@ function instructionsFor(title: string): string {
     return stepsBox(
       'Så går affären vidare',
       [
-        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision inom <strong style="color:#f5e6c8">${PAYMENT_WINDOW_LABEL}</strong>. Betalningsinstruktioner finns i affären.`,
+        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision <strong style="color:#f5e6c8">omgående</strong>. Betalningsinstruktioner finns i affären.`,
         'När din betalning är registrerad reserveras föremålet för dig.',
         'Säljaren skickar in det och vi äkthetskontrollerar det.',
         'Vi skickar sedan föremålet vidare till dig.',
