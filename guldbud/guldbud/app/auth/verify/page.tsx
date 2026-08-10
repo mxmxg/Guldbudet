@@ -69,7 +69,7 @@ export default function VerifyPage() {
             padding: '11px 14px',
           }}
         >
-          📬 Ser du inget mejl? Kolla <strong style={{ color: '#f5e6c8' }}>skräpposten</strong> — bekräftelsemejl
+          📬 Ser du inget mejl? Kolla <strong style={{ color: '#f5e6c8' }}>skräpposten</strong>, bekräftelsemejl
           hamnar ofta där.
         </p>
 

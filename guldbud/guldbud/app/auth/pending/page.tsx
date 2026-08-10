@@ -40,7 +40,7 @@ export default function PendingPage() {
             padding: '12px 14px',
           }}
         >
-          Bekräfta först din e-post via länken vi just mejlade dig — det behövs för att kunna logga in.
+          Bekräfta först din e-post via länken vi just mejlade dig. Det behövs för att kunna logga in.
         </p>
         <Link href="/" style={{ color: '#B8860B', fontSize: '14px', fontWeight: 500 }}>
           Tillbaka till startsidan

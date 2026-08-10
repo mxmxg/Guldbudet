@@ -27,7 +27,7 @@ export default function ShareKit({
   )}&meta=${encodeURIComponent(meta)}`
 
   const caption =
-    `✨ Nyss såld på GuldBud: ${title}${meta ? ` (${meta})` : ''} — slutpris ${groupSek(amount)}.\n\n` +
+    `✨ Nyss såld på GuldBud: ${title}${meta ? ` (${meta})` : ''}. Slutpris ${groupSek(amount)}.\n\n` +
     `Auktoriserade guldköpare budar mot varandra, så priset drivs upp. ` +
     `Lägg ut ditt guld helt gratis på guldbud.com 🔗\n\n` +
     HASHTAGS
