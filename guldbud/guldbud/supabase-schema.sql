@@ -162,6 +162,9 @@ create policy "own profile update" on public.profiles
     auth.uid() = id
     and role = (select role from public.profiles where id = auth.uid())
     and approved = (select approved from public.profiles where id = auth.uid())
+    -- Avstängning får bara admin/systemet ändra. Annars kan en avstängd handlare
+    -- häva sin egen avstängning via API:t och börja buda igen.
+    and suspended is not distinct from (select suspended from public.profiles where id = auth.uid())
     -- Företagsnamn och org.nr är verifieringsuppgifter och får inte ändras av
     -- handlaren själv (endast admin). null hanteras med "is not distinct from".
     and company_name is not distinct from (select company_name from public.profiles where id = auth.uid())
@@ -237,7 +240,8 @@ alter table public.bids drop constraint if exists bids_amount_positive;
 alter table public.bids add constraint bids_amount_positive check (amount > 0);
 
 create or replace function public.enforce_bid_higher()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 begin
   if new.amount <= coalesce((select max(amount) from public.bids where item_id = new.item_id), 0) then
     raise exception 'Budet måste vara högre än nuvarande högsta bud.';
@@ -261,8 +265,15 @@ create policy "own notifications update" on public.notifications
 
 -- ---- Storage ----
 drop policy if exists "authenticated upload" on storage.objects;
+-- Får bara ladda upp i sin EGEN mapp (första mappsegmentet = uid), precis som
+-- inlämningssidan skriver (`${user.id}/...`). Hindrar godtycklig fil-hosting och
+-- skrivning i andras mappar.
 create policy "authenticated upload" on storage.objects
-  for insert with check (bucket_id = 'item-images' and auth.role() = 'authenticated');
+  for insert with check (
+    bucket_id = 'item-images'
+    and auth.role() = 'authenticated'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
 
 drop policy if exists "public read" on storage.objects;
 create policy "public read" on storage.objects
@@ -287,7 +298,8 @@ create policy "dealer reads own docs" on storage.objects
 -- Trigger: skapa profil automatiskt vid registrering
 -- ============================================================
 create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 begin
   insert into public.profiles (
     id, email, full_name, role, company_name, approved,
@@ -337,7 +349,8 @@ create trigger on_auth_user_created
 -- Notifiering: när en auktion öppnas (status -> active)
 -- ============================================================
 create or replace function public.notify_auction_live()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 begin
   if new.status = 'active' and coalesce(old.status, '') <> 'active' then
     insert into public.notifications (user_id, title, message, item_id)
@@ -359,7 +372,8 @@ create trigger on_item_activated
 --  - den tidigare ledande handlaren får "du är överbjuden"
 -- ============================================================
 create or replace function public.notify_new_bid()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 declare
   v_owner uuid;
   v_title text;
@@ -411,7 +425,8 @@ create trigger on_bid_created
 -- förlängs auktionen till 2 minuter från nu, så att ingen kan vinna genom att
 -- lägga ett bud i sista sekunden utan att andra hinner svara.
 create or replace function public.extend_auction_on_late_bid()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 declare
   v_ends timestamptz;
 begin
@@ -441,7 +456,8 @@ create trigger on_bid_extend_auction
 -- Notifiering: när en handlare godkänns
 -- ============================================================
 create or replace function public.notify_dealer_approved()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 begin
   if new.role = 'dealer' and new.approved = true and coalesce(old.approved, false) = false then
     insert into public.notifications (user_id, title, message)
@@ -461,7 +477,8 @@ create trigger on_dealer_approved
 -- Notifiering: när en ny handlare registrerar sig -> alla admins
 -- ============================================================
 create or replace function public.notify_admins_new_dealer()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 begin
   if new.role = 'dealer' and coalesce(new.approved, false) = false then
     insert into public.notifications (user_id, title, message, link)
@@ -483,7 +500,8 @@ create trigger on_new_dealer_registered
 
 -- Notis till alla admins när en kund lämnar in ett föremål (status 'pending').
 create or replace function public.notify_admins_new_item()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 begin
   if new.status = 'pending' then
     insert into public.notifications (user_id, title, message, item_id, link)
@@ -531,7 +549,8 @@ end $$;
 alter table public.items add column if not exists ended_notified boolean not null default false;
 
 create or replace function public.settle_ended_auctions()
-returns void language plpgsql security definer as $$
+returns void language plpgsql security definer
+  set search_path = public as $$
 declare
   r record;
   v_top record;
@@ -704,7 +723,8 @@ create policy "dealer writes own thread" on public.order_messages
 
 -- Skapa affär + notiser när ett bud accepteras (ersätter tidigare notify_bid_accepted).
 create or replace function public.notify_bid_accepted()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 declare
   v_dealer uuid;
   v_amount integer;
@@ -743,7 +763,8 @@ create trigger on_bid_accepted
 
 -- Notis när admin flyttar affären till nästa steg.
 create or replace function public.notify_order_status()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 declare
   v_title text;
 begin
@@ -759,12 +780,6 @@ begin
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.dealer_id, 'Ditt föremål är mottaget och kontrollerat',
               '"' || v_title || '" är mottaget hos oss och äkthetskontrollerat. Vi packar och skickar det vidare till dig.',
-              new.item_id, '/orders/' || new.id);
-    elsif new.status = 'dealer_paid' then
-      insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.seller_id, 'Din utbetalning förbereds',
-              'Din utbetalning på ' || replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') ||
-              ' kr förbereds nu. Dubbelkolla att dina utbetalningsuppgifter är ifyllda i din profil.',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'verified_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
@@ -791,6 +806,46 @@ create trigger on_order_status
   after update on public.orders
   for each row execute procedure public.notify_order_status();
 
+-- Bekräftelse när admin registrerar handlarens betalning (dealer_paid_at sätts).
+-- Ersätter det gamla dealer_paid-stegets notis och kvitterar mot rätt händelse.
+create or replace function public.notify_payment_registered()
+returns trigger language plpgsql security definer
+set search_path = public as $$
+declare
+  v_title text;
+begin
+  if new.dealer_paid_at is not null and old.dealer_paid_at is null then
+    select title into v_title from public.items where id = new.item_id;
+    insert into public.notifications (user_id, title, message, item_id, link)
+    values (new.dealer_id, 'Vi har tagit emot din betalning',
+            'Tack! Din betalning för "' || coalesce(v_title, 'föremålet') || '" är registrerad. Vi hör av oss så snart föremålet är mottaget och kontrollerat, och skickar det sedan vidare till dig.',
+            new.item_id, '/orders/' || new.id);
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_payment_registered on public.orders;
+create trigger on_payment_registered
+  after update on public.orders
+  for each row execute procedure public.notify_payment_registered();
+
+-- DB-broms bakom den klient-sidiga spärren: släpp aldrig utbetalning till säljare
+-- eller vidareskick till handlare innan handlarens betalning registrerats.
+create or replace function public.enforce_payment_before_release()
+returns trigger language plpgsql
+set search_path = public as $$
+begin
+  if new.status in ('verified_paid', 'shipped_to_dealer') and new.dealer_paid_at is null then
+    raise exception 'Handlarens betalning måste registreras (dealer_paid_at) innan utbetalning eller vidareskick.';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_order_release_guard on public.orders;
+create trigger on_order_release_guard
+  before update on public.orders
+  for each row execute procedure public.enforce_payment_before_release();
+
 -- Modellen: säljaren gör affär med GuldBud och skickar in direkt vid accept.
 -- Vi står bakom affären mot säljaren; handlaren är vår verifierade leverantörssida.
 -- (Tidigare fas 3-trigger som väntade in handlarens betalning togs bort – säljaren
@@ -804,7 +859,8 @@ drop function if exists public.notify_dealer_paid();
 -- påminnelse (max en per dygn) och avbryter sedan affären efter en frist.
 -- ============================================================
 create or replace function public.process_unpaid_orders()
-returns void language plpgsql security definer as $$
+returns void language plpgsql security definer
+  set search_path = public as $$
 declare
   o record;
   v_title text;
@@ -821,8 +877,10 @@ begin
       -- Handlaren backade från ett vunnet bud: stäng av handlaren och larma admin.
       -- GuldBud står för föremålet mot säljaren, så säljaren notifieras inte.
       update public.profiles set suspended = true where id = o.dealer_id;
+      -- Sätt status='cancelled' så affären lämnar det öppna flödet och grenen
+      -- inte kan fyra igen varje timme (loopen exkluderar 'cancelled').
       update public.orders
-        set cancel_reason = 'Betalning uteblev – handlaren avstängd', updated_at = now()
+        set status = 'cancelled', cancel_reason = 'Betalning uteblev – handlaren avstängd', updated_at = now()
         where id = o.id;
 
       insert into public.notifications (user_id, title, message, item_id, link)
@@ -865,7 +923,8 @@ end $$;
 
 -- Notis när ett meddelande postas: motparten (admin<->part) får besked.
 create or replace function public.notify_order_message()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer
+  set search_path = public as $$
 declare
   v_order public.orders;
   v_recipient uuid;
@@ -923,7 +982,8 @@ alter table public.items add column if not exists ending_soon_notified boolean n
 
 -- Notifiera bevakare när en auktion har mindre än en timme kvar (en gång).
 create or replace function public.notify_ending_soon()
-returns void language plpgsql security definer as $$
+returns void language plpgsql security definer
+  set search_path = public as $$
 declare r record;
 begin
   for r in

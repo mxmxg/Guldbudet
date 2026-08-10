@@ -11,9 +11,6 @@ import { estimateRange, formatSEK } from '@/lib/gold'
 import { commission } from '@/lib/fees'
 import { OPEN_ORDER_STATES } from '@/lib/orders'
 
-// Deals where the dealer has actually paid – realized revenue.
-const PAID_ORDER_STATES = ['dealer_paid', 'verified_paid', 'shipped_to_dealer', 'completed']
-
 function toLocalInput(iso?: string | null) {
   if (!iso) return ''
   const d = new Date(iso)
@@ -88,11 +85,12 @@ export default function AdminPage() {
         .select('id', { count: 'exact', head: true })
         .in('status', OPEN_ORDER_STATES)
 
-      const { data: allOrders } = await supabase.from('orders').select('amount, status')
+      const { data: allOrders } = await supabase.from('orders').select('amount, status, dealer_paid_at')
       // Affärsvolym = värdet på alla affärer som inte avbrutits.
       const settled = (allOrders || []).filter((o: any) => o.status !== 'cancelled')
-      // Provisionsintäkt = bara realiserad, dvs där handlaren faktiskt betalat.
-      const paid = (allOrders || []).filter((o: any) => PAID_ORDER_STATES.includes(o.status))
+      // Provisionsintäkt = bara realiserad, dvs där handlarens betalning faktiskt
+      // registrerats (dealer_paid_at), inte utifrån logistik-status.
+      const paid = (allOrders || []).filter((o: any) => o.dealer_paid_at && o.status !== 'cancelled')
       setAnalytics({
         gmv: settled.reduce((s: number, o: any) => s + (o.amount || 0), 0),
         commission: paid.reduce((s: number, o: any) => s + commission(o.amount || 0), 0),

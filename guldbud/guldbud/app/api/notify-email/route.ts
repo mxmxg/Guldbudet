@@ -211,11 +211,17 @@ export async function POST(req: NextRequest) {
   const link = record.link || (record.item_id ? `/auctions/${record.item_id}` : null)
   const t = String(record.title).toLowerCase()
   const isOrder = !!link && link.includes('/orders/')
-  const cta = t.includes('överbjuden')
+  const isAdminLink = !!link && link.startsWith('/admin')
+  const cta = isAdminLink
+    ? 'Öppna i adminpanelen →'
+    : t.includes('överbjuden')
     ? 'Höj ditt bud →'
     : t.includes('vann')
     ? 'Betala och följ affären →'
-    : t.includes('grattis') || t.includes('högsta bud')
+    // Bara säljarens accept-notis ("Grattis…" / "Högsta bud: X kr på…") ska få
+    // "Godkänn budet". Handlarens "Du hade det högsta budet" börjar inte med
+    // "högsta bud" och faller därför igenom till öppna-auktionen.
+    : t.includes('grattis') || t.startsWith('högsta bud')
     ? 'Godkänn budet →'
     : t.includes('välkommen')
     ? 'Kom igång →'

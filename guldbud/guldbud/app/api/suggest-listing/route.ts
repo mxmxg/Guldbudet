@@ -51,9 +51,12 @@ Viktigt:
 - Nämn INTE vikt, längd eller exakt karat, och skriv inga meningar om att sådant inte kan avgöras. Säljaren fyller i det separat.
 - Hitta inte på ett modellnamn du inte är säker på. Men var alltid säker på grundtypen (ring/armband/halsband/örhänge/hänge).`
 
+  const ctrl = new AbortController()
+  const timeout = setTimeout(() => ctrl.abort(), 30000)
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
+      signal: ctrl.signal,
       headers: {
         'x-api-key': key,
         'anthropic-version': '2023-06-01',
@@ -96,5 +99,7 @@ Viktigt:
     })
   } catch (e: any) {
     return NextResponse.json({ error: 'ai_error', detail: String(e?.message || e).slice(0, 200) }, { status: 502 })
+  } finally {
+    clearTimeout(timeout)
   }
 }

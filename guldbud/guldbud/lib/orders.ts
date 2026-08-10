@@ -23,7 +23,9 @@ export const ORDER_STEPS: OrderStep[] = [
   { key: 'accepted', label: 'Accepterad', desc: 'Budet är accepterat och affären skapad.' },
   { key: 'shipped_by_seller', label: 'Inskickad', desc: 'Säljaren har skickat föremålet till GuldBud.' },
   { key: 'received', label: 'Mottagen & kontrollerad', desc: 'GuldBud har tagit emot och äkthetskontrollerat föremålet.' },
-  { key: 'dealer_paid', label: 'Betald av handlare', desc: 'Handlarens betalning är registrerad.' },
+  // Betalningen spåras separat via orders.dealer_paid_at (handlaren betalar vid
+  // vinst), inte som ett linjärt steg. 'dealer_paid' finns kvar som status-värde
+  // för ev. gamla rader men ingår inte längre i stegen admin går igenom.
   { key: 'verified_paid', label: 'Utbetald till säljare', desc: 'Säljaren har fått betalt.' },
   { key: 'shipped_to_dealer', label: 'Vidareskickad', desc: 'Föremålet har skickats till den vinnande handlaren.' },
   { key: 'completed', label: 'Slutförd', desc: 'Handlaren har mottagit föremålet. Affären är avslutad.' },
@@ -48,7 +50,7 @@ export const OPEN_ORDER_STATES: OrderStatus[] = [
   'accepted',
   'shipped_by_seller',
   'received',
-  'dealer_paid',
+  'dealer_paid', // legacy-status, ingår för att gamla rader ska räknas som öppna
   'verified_paid',
   'shipped_to_dealer',
 ]

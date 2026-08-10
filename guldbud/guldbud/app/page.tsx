@@ -80,12 +80,21 @@ export default async function HomePage() {
       .filter((r: any) => r.price > 0)
   }
 
+  // Skala bort reservationsnivån (min_price) ur klient-payloaden. Köparen ska
+  // bara se STATUS (uppnått/ej), aldrig själva talet. Beräknas server-side.
+  const publicItems = enriched.map((i: any) => {
+    const has_reserve = i.min_price != null
+    const reserve_met = has_reserve && (i.top_bid || 0) >= i.min_price
+    const { min_price, ...rest } = i
+    return { ...rest, has_reserve, reserve_met }
+  })
+
   return (
     <div className="min-h-screen bg-cream">
       <JsonLd data={orgLd} />
       <JsonLd data={siteLd} />
       <Navbar />
-      <HomeContent items={enriched} sold={sold} />
+      <HomeContent items={publicItems} sold={sold} />
     </div>
   )
 }

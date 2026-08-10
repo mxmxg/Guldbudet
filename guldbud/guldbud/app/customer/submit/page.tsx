@@ -312,7 +312,7 @@ export default function SubmitPage() {
                     {aiLoading ? 'Analyserar bilden…' : '✨ Föreslå rubrik & beskrivning'}
                   </button>
                   <p className="text-xs text-espresso-500 mt-2">
-                    Vi tittar på din första bild och fyller i rubrik, beskrivning och kategori åt dig. Du kan ändra allt efteråt.
+                    Vi tittar på dina bilder och fyller i rubrik, beskrivning och kategori åt dig. Du kan ändra allt efteråt.
                   </p>
                   {aiError && <p className="text-xs text-red-500 mt-1.5">{aiError}</p>}
                 </div>
