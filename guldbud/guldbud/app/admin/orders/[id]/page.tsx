@@ -221,6 +221,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
               meta={[item?.karat, item?.weight_grams ? `${item.weight_grams} g` : '']
                 .filter(Boolean)
                 .join(' · ')}
+              image={item?.image_urls?.[0]}
             />
             <OrderStepper status={status} />
 
