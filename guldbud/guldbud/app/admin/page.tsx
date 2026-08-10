@@ -34,6 +34,8 @@ export default function AdminPage() {
   const [adminError, setAdminError] = useState('')
   const [adminNotice, setAdminNotice] = useState('')
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [lightbox, setLightbox] = useState<string[] | null>(null)
+  const [lightboxIdx, setLightboxIdx] = useState(0)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [endingId, setEndingId] = useState<string | null>(null)
   const [acceptId, setAcceptId] = useState<string | null>(null)
@@ -272,6 +274,23 @@ export default function AdminPage() {
     setPendingItems((prev) => prev.filter((i) => i.id !== id))
   }
 
+  const openLightbox = (urls?: string[], i = 0) => {
+    if (!urls || urls.length === 0) return
+    setLightbox(urls)
+    setLightboxIdx(i)
+  }
+
+  useEffect(() => {
+    if (!lightbox) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightbox(null)
+      if (e.key === 'ArrowRight') setLightboxIdx((i) => (i + 1) % lightbox.length)
+      if (e.key === 'ArrowLeft') setLightboxIdx((i) => (i - 1 + lightbox.length) % lightbox.length)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightbox])
+
   const isEnded = (item: any) =>
     item.status === 'active' && !!item.auction_ends_at && new Date(item.auction_ends_at) <= new Date()
 
@@ -279,12 +298,17 @@ export default function AdminPage() {
     const ended = isEnded(item)
     return (
       <div key={item.id} className="card p-4 flex gap-4 items-center flex-wrap sm:flex-nowrap">
-        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative shrink-0">
+        <button
+          type="button"
+          onClick={() => openLightbox(item.image_urls, 0)}
+          className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative shrink-0 cursor-zoom-in group"
+          title="Visa bilden stort"
+        >
           {item.image_urls?.[0] && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.image_urls[0]} alt={item.title} className="w-full h-full object-contain" />
+            <img src={item.image_urls[0]} alt={item.title} className="w-full h-full object-contain transition group-hover:opacity-80" />
           )}
-        </div>
+        </button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-medium text-espresso-900">{item.title}</p>
@@ -438,24 +462,24 @@ export default function AdminPage() {
           <p className="eyebrow text-gold-500/80 mb-1">Kontrollrum</p>
           <h1 className="font-display text-3xl text-gold-100">Adminpanel</h1>
           <div className="mt-4 flex flex-wrap gap-6 text-sm">
-            <div>
-              <div className="font-display text-2xl text-gold-100">{pendingDealers.length}</div>
-              <div className="text-xs text-gold-500/60">Väntande handlare</div>
-            </div>
-            <div>
-              <div className="font-display text-2xl text-gold-100">{pendingItems.length}</div>
-              <div className="text-xs text-gold-500/60">Väntande föremål</div>
-            </div>
-            <div>
-              <div className="font-display text-2xl text-gold-100">
+            <a href="#granska-handlare" className="group rounded-lg -m-1 p-1 transition hover:bg-white/5">
+              <div className="font-display text-2xl text-gold-100 group-hover:text-gold-300 transition">{pendingDealers.length}</div>
+              <div className="text-xs text-gold-500/60 group-hover:text-gold-400">Väntande handlare</div>
+            </a>
+            <a href="#granska-foremal" className="group rounded-lg -m-1 p-1 transition hover:bg-white/5">
+              <div className="font-display text-2xl text-gold-100 group-hover:text-gold-300 transition">{pendingItems.length}</div>
+              <div className="text-xs text-gold-500/60 group-hover:text-gold-400">Väntande föremål</div>
+            </a>
+            <a href="#auktioner" className="group rounded-lg -m-1 p-1 transition hover:bg-white/5">
+              <div className="font-display text-2xl text-gold-100 group-hover:text-gold-300 transition">
                 {liveItems.filter((i) => i.status === 'active' && !isEnded(i)).length}
               </div>
-              <div className="text-xs text-gold-500/60">Aktiva auktioner</div>
-            </div>
-            <div>
-              <div className="font-display text-2xl text-emerald-400">{openOrders}</div>
-              <div className="text-xs text-gold-500/60">Pågående affärer</div>
-            </div>
+              <div className="text-xs text-gold-500/60 group-hover:text-gold-400">Aktiva auktioner</div>
+            </a>
+            <Link href="/admin/orders" className="group rounded-lg -m-1 p-1 transition hover:bg-white/5">
+              <div className="font-display text-2xl text-emerald-400 group-hover:text-emerald-300 transition">{openOrders}</div>
+              <div className="text-xs text-gold-500/60 group-hover:text-gold-400">Pågående affärer</div>
+            </Link>
           </div>
         </div>
       </div>
@@ -642,8 +666,18 @@ export default function AdminPage() {
                 return (
                   <div key={item.id} className="card p-5 flex gap-4 flex-wrap sm:flex-nowrap">
                     {item.image_urls?.[0] && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.image_urls[0]} alt={item.title} className="w-24 h-24 object-contain rounded-xl shrink-0" />
+                      <button
+                        type="button"
+                        onClick={() => openLightbox(item.image_urls, 0)}
+                        className="shrink-0 rounded-xl overflow-hidden cursor-zoom-in group"
+                        title="Visa bilderna stort"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.image_urls[0]} alt={item.title} className="w-24 h-24 object-contain transition group-hover:opacity-80" />
+                        {item.image_urls.length > 1 && (
+                          <span className="block text-[10px] text-espresso-400 mt-0.5">{item.image_urls.length} bilder</span>
+                        )}
+                      </button>
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-espresso-900">{item.title}</p>
@@ -761,6 +795,47 @@ export default function AdminPage() {
         })()}
       </div>
       <Footer />
+
+      {/* Bildförstoring (lightbox) */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white text-xl flex items-center justify-center transition"
+            aria-label="Stäng"
+          >
+            ×
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightbox[lightboxIdx]}
+            alt=""
+            className="max-h-[82vh] max-w-[92vw] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          {lightbox.length > 1 && (
+            <div className="mt-4 flex gap-2 flex-wrap justify-center" onClick={(e) => e.stopPropagation()}>
+              {lightbox.map((url, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setLightboxIdx(i)}
+                  className={`w-14 h-14 rounded-lg overflow-hidden border-2 transition ${
+                    i === lightboxIdx ? 'border-gold-400' : 'border-transparent opacity-60 hover:opacity-100'
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
