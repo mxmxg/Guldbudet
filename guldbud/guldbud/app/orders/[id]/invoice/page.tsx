@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 import { formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, commission, totalWithCommission } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
 
 // GuldBud's own details. Box/fraktadress läggs till här när den är klar.
 const GULDBUD = {
@@ -154,12 +154,18 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
                 <td className="py-2.5 text-right tabular-nums text-espresso-800">{money(commission(order.amount))}</td>
               </tr>
             )}
+            {isInvoice && (
+              <tr className="border-b border-espresso-100">
+                <td className="py-2.5 text-espresso-700">{credit ? 'Kreditering, frakt' : 'Frakt'}</td>
+                <td className="py-2.5 text-right tabular-nums text-espresso-800">{money(DEALER_SHIPPING_FEE)}</td>
+              </tr>
+            )}
             <tr>
               <td className="py-3 font-semibold text-espresso-900">
                 {credit ? 'Att återbetala' : isInvoice ? 'Att betala' : 'Utbetalt belopp'}
               </td>
               <td className="py-3 text-right font-semibold tabular-nums text-espresso-900">
-                {money(isInvoice ? totalWithCommission(order.amount) : order.amount)}
+                {money(isInvoice ? dealerTotal(order.amount) : order.amount)}
               </td>
             </tr>
           </tbody>

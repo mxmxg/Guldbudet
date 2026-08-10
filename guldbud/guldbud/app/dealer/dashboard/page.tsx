@@ -11,7 +11,7 @@ import { GemIcon } from '@/components/Icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, totalWithCommission } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal } from '@/lib/fees'
 
 export default function DealerDashboard() {
   const router = useRouter()
@@ -289,8 +289,8 @@ export default function DealerDashboard() {
                       </div>
                       <p className="text-[11px] text-espresso-400 mt-1.5 lg:text-right">
                         {parseInt(bidInputs[item.id] || '0') > 0
-                          ? `Totalpris inkl. ${DEALER_COMMISSION_LABEL} provision: ${formatSEK(totalWithCommission(parseInt(bidInputs[item.id])))}`
-                          : `Provision ${DEALER_COMMISSION_LABEL} tillkommer`}
+                          ? `Totalpris inkl. ${DEALER_COMMISSION_LABEL} provision + frakt: ${formatSEK(dealerTotal(parseInt(bidInputs[item.id])))}`
+                          : `Provision ${DEALER_COMMISSION_LABEL} + frakt ${DEALER_SHIPPING_FEE} kr tillkommer`}
                       </p>
                       {bidError[item.id] && (
                         <p className="text-[11px] text-red-500 mt-1 lg:text-right">{bidError[item.id]}</p>

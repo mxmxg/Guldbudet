@@ -33,7 +33,7 @@ const STEPS = [
   {
     n: '6',
     title: 'Du betalar för föremålet',
-    desc: 'När du vunnit budgivningen är föremålet ditt. Du betalar bud + 8% provision omgående, så sätter vi igång affären: säljaren skickar in det, vi kontrollerar äktheten och skickar det sedan vidare till dig.',
+    desc: 'När du vunnit budgivningen är föremålet ditt. Du betalar bud + 8% provision + 149 kr frakt omgående, så sätter vi igång affären: säljaren skickar in det, vi kontrollerar äktheten och skickar det sedan vidare till dig.',
   },
   {
     n: '7',
@@ -80,12 +80,13 @@ export default function DealerGuidePage() {
           <p className="text-sm text-espresso-500 leading-relaxed">
             GuldBud tar en köparprovision på <span className="font-semibold text-espresso-800">8&nbsp;%</span> av
             det vinnande budet. Provisionen läggs <span className="font-semibold text-espresso-800">ovanpå</span> ditt
-            bud – säljaren får hela budbeloppet, du betalar bud + provision. När du lägger ett bud ser du alltid
-            ditt totalpris direkt i budpanelen.
+            bud, och därtill en fast <span className="font-semibold text-espresso-800">fraktavgift på 149&nbsp;kr</span> för
+            försäkrad leverans – säljaren får hela budbeloppet, du betalar bud + provision + frakt. När du lägger ett
+            bud ser du alltid ditt totalpris direkt i budpanelen.
           </p>
           <p className="text-sm text-espresso-500 leading-relaxed mt-3">
-            Exempel: vinnande bud 40&nbsp;000 kr → provision 3&nbsp;200 kr → ditt totalpris 43&nbsp;200 kr.
-            All kommunikation med säljaren går via GuldBud i affärsvyn, så att båda parter förblir skyddade.
+            Exempel: vinnande bud 40&nbsp;000 kr → provision 3&nbsp;200 kr → frakt 149&nbsp;kr → ditt totalpris
+            43&nbsp;349 kr. All kommunikation med säljaren går via GuldBud i affärsvyn, så att båda parter förblir skyddade.
           </p>
         </div>
 
