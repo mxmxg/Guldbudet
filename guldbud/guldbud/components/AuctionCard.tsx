@@ -1,4 +1,5 @@
 'use client'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Item } from '@/lib/types'
@@ -19,6 +20,18 @@ export default function AuctionCard({ item }: { item: CardItem }) {
   const topBid = item.top_bid || 0
   const bidCount = item.bid_count || 0
   const hot = bidCount >= 3
+  // Beräknas efter mount (undviker hydration-mismatch): auktionen slutar inom en timme.
+  const [endingSoon, setEndingSoon] = useState(false)
+  useEffect(() => {
+    if (!item.auction_ends_at) return
+    const check = () => {
+      const ms = new Date(item.auction_ends_at as string).getTime() - Date.now()
+      setEndingSoon(ms > 0 && ms < 60 * 60 * 1000)
+    }
+    check()
+    const t = setInterval(check, 30000)
+    return () => clearInterval(t)
+  }, [item.auction_ends_at])
   // Bara status, aldrig själva reservationsnivån. Beräknas server-side och
   // skickas som booleaner så min_price aldrig når klienten.
   const hasReserve = !!(item as any).has_reserve
@@ -56,6 +69,9 @@ export default function AuctionCard({ item }: { item: CardItem }) {
             <span className="chip bg-red-500/90 backdrop-blur text-white">
               <FlameIcon size={12} /> Hett
             </span>
+          )}
+          {endingSoon && (
+            <span className="chip bg-amber-500/95 backdrop-blur text-white">⏳ Slutar snart</span>
           )}
         </div>
 
