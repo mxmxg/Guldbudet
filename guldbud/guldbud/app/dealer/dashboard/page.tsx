@@ -132,7 +132,7 @@ export default function DealerDashboard() {
 
   const tabs: { key: typeof tab; label: string; count?: number }[] = [
     { key: 'active', label: 'Alla auktioner', count: items.length },
-    { key: 'mybids', label: 'Mina bud', count: Object.keys(myBids).length },
+    { key: 'mybids', label: 'Mina bud', count: items.filter((i) => myBids[i.id]).length },
     { key: 'winning', label: 'Ledande', count: winningCount },
     { key: 'watched', label: 'Bevakade', count: watchedIds.size },
   ]
