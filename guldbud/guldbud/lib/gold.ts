@@ -20,7 +20,15 @@ export const KARAT_PURITY: Record<string, number> = {
   Övrigt: 0.585, // conservative fallback
 }
 
-export const KARAT_OPTIONS = Object.keys(KARAT_PURITY)
+// Platina prissätts inte via guldkursen (egen spotmarknad), så den listas som
+// eget material och värderas vid mottagning i stället för via kalkylatorn.
+export const PLATINUM_OPTIONS = ['Platina 950', 'Platina 900']
+
+export function isPlatinum(karat?: string | null): boolean {
+  return !!karat && karat.toLowerCase().startsWith('platina')
+}
+
+export const KARAT_OPTIONS = [...Object.keys(KARAT_PURITY), ...PLATINUM_OPTIONS]
 
 // Karat tiers for the live price breakdown (highest to lowest purity).
 export const KARAT_TIERS: { label: string; purity: number }[] = [
@@ -38,6 +46,7 @@ export function karatPrices(spot: number): { label: string; purity: number; perG
 
 /** Pure metal value of an item at spot, before any dealer margin. */
 export function meltValue(weightGrams: number, karat: string, spot = GOLD_SPOT_SEK_PER_GRAM): number {
+  if (isPlatinum(karat)) return 0 // platina värderas separat, inte via guldkursen
   const purity = KARAT_PURITY[karat] ?? 0.585
   return Math.round(weightGrams * purity * spot)
 }

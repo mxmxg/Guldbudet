@@ -254,6 +254,117 @@ create trigger on_bid_enforce_higher
   before insert on public.bids
   for each row execute procedure public.enforce_bid_higher();
 
+-- ============================================================
+-- Auto-bud (proxy-budgivning): handlaren sätter ett maxbud och systemet budar
+-- åt hen, ett steg i taget, upp till maxet. Priset landar på näst högsta max
+-- + ett budsteg (eBay-modellen). Maxet är hemligt för andra.
+-- ============================================================
+create table if not exists public.auto_bids (
+  id uuid primary key default gen_random_uuid(),
+  item_id uuid references public.items on delete cascade not null,
+  dealer_id uuid references public.profiles not null,
+  max_amount integer not null check (max_amount > 0),
+  created_at timestamptz not null default now(),
+  unique (item_id, dealer_id)
+);
+create index if not exists auto_bids_item_idx on public.auto_bids (item_id);
+alter table public.auto_bids enable row level security;
+
+-- Bara godkänd, ej avstängd handlare får sätta auto-bud, på aktiv auktion, ej egen vara.
+drop policy if exists "dealers set own autobid" on public.auto_bids;
+create policy "dealers set own autobid" on public.auto_bids
+  for all using (auth.uid() = dealer_id)
+  with check (
+    auth.uid() = dealer_id
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'dealer' and p.approved = true and p.suspended = false)
+    and exists (
+      select 1 from public.items i
+      where i.id = item_id and i.status = 'active'
+        and (i.auction_ends_at is null or i.auction_ends_at > now())
+        and i.owner_id <> auth.uid()
+    )
+  );
+drop policy if exists "admins manage autobids" on public.auto_bids;
+create policy "admins manage autobids" on public.auto_bids
+  for all using (public.is_admin());
+
+-- Proxy-resolver: räknar ut rätt ledande bud och lägger det åt vinnaren.
+-- Idempotent: när den lägger ett bud fyras triggern igen men når då ett stabilt
+-- läge och slutar. Ett anrop lägger som mest ett bud.
+create or replace function public.resolve_auto_bids(p_item uuid)
+returns void language plpgsql security definer
+  set search_path = public as $$
+declare
+  inc int := 100;
+  w_dealer uuid;
+  w_max int;
+  s_max int;
+  cur_amount int;
+  cur_dealer uuid;
+  target int;
+begin
+  -- Bara aktiv, ej avslutad auktion.
+  perform 1 from public.items where id = p_item and status = 'active'
+    and (auction_ends_at is null or auction_ends_at > now());
+  if not found then return; end if;
+
+  -- Effektivt max per handlare = högsta av auto-bud (godkänd, ej avstängd) och lagda bud.
+  with maxes as (
+    select dealer_id, max(m) as mx from (
+      select ab.dealer_id, ab.max_amount as m
+        from public.auto_bids ab
+        join public.profiles p on p.id = ab.dealer_id
+       where ab.item_id = p_item and p.role = 'dealer' and p.approved = true and p.suspended = false
+      union all
+      select b.dealer_id, b.amount from public.bids b where b.item_id = p_item
+    ) x group by dealer_id
+  )
+  select dealer_id, mx into w_dealer, w_max from maxes order by mx desc, dealer_id limit 1;
+  select mx into s_max from maxes where dealer_id <> w_dealer order by mx desc limit 1;
+
+  if w_dealer is null then return; end if;
+
+  select amount, dealer_id into cur_amount, cur_dealer
+    from public.bids where item_id = p_item order by amount desc, created_at asc limit 1;
+
+  -- Endast en budgivare: ingen ska buda mot sig själv.
+  if s_max is null then return; end if;
+
+  target := least(w_max, s_max + inc);
+  if target < coalesce(cur_amount, 0) then target := coalesce(cur_amount, 0); end if;
+
+  -- Vinnaren håller redan rätt (eller högre) bud → klart.
+  if cur_dealer = w_dealer and cur_amount >= target then return; end if;
+
+  if target > coalesce(cur_amount, 0) then
+    insert into public.bids (item_id, dealer_id, amount) values (p_item, w_dealer, target)
+      on conflict (item_id, dealer_id, amount) do nothing;
+  end if;
+end;
+$$;
+
+-- Trigger-wrapper som anropar resolvern med rätt item.
+create or replace function public.trigger_resolve_auto_bids()
+returns trigger language plpgsql security definer
+  set search_path = public as $$
+begin
+  perform public.resolve_auto_bids(new.item_id);
+  return new;
+end;
+$$;
+
+-- Efter varje bud: låt proxyerna svara.
+drop trigger if exists on_bid_resolve_auto on public.bids;
+create trigger on_bid_resolve_auto
+  after insert on public.bids
+  for each row execute procedure public.trigger_resolve_auto_bids();
+
+-- När ett auto-bud sätts/ändras: resolva direkt.
+drop trigger if exists on_autobid_resolve on public.auto_bids;
+create trigger on_autobid_resolve
+  after insert or update on public.auto_bids
+  for each row execute procedure public.trigger_resolve_auto_bids();
+
 -- ---- Notifications ----
 drop policy if exists "own notifications" on public.notifications;
 create policy "own notifications" on public.notifications

@@ -11,7 +11,7 @@ import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
 import Footer from '@/components/Footer'
 import { GemIcon, HourglassIcon, CheckIcon } from '@/components/Icons'
-import { estimateRange, formatSEK } from '@/lib/gold'
+import { estimateRange, formatSEK, isPlatinum } from '@/lib/gold'
 
 function relTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime()
@@ -338,14 +338,23 @@ export default function AuctionDetails({ item }: { item: any }) {
 
               {/* indicative value + reserve */}
               <div className="mt-4 pt-4 border-t border-espresso-100 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-espresso-500">
-                <span className="flex items-center gap-2">
-                  <SparkIcon />
-                  Metallvärde vid dagens kurs:{' '}
-                  <span className="font-medium text-espresso-700">{formatSEK(est.melt)}</span>
-                </span>
-                <span className="text-espresso-400">
-                  Uppskattad utbetalning {formatSEK(est.low)}–{formatSEK(est.high)}
-                </span>
+                {isPlatinum(item.karat) ? (
+                  <span className="flex items-center gap-2">
+                    <SparkIcon />
+                    Platina, värderas på sin egen marknad vid mottagning.
+                  </span>
+                ) : (
+                  <>
+                    <span className="flex items-center gap-2">
+                      <SparkIcon />
+                      Metallvärde vid dagens kurs:{' '}
+                      <span className="font-medium text-espresso-700">{formatSEK(est.melt)}</span>
+                    </span>
+                    <span className="text-espresso-400">
+                      Uppskattad utbetalning {formatSEK(est.low)}–{formatSEK(est.high)}
+                    </span>
+                  </>
+                )}
                 {hasReserve ? (
                   <span
                     className={`chip ${reserveMet ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}

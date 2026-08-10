@@ -6,7 +6,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
 import Link from 'next/link'
-import { KARAT_OPTIONS, estimateRange, formatSEK } from '@/lib/gold'
+import { KARAT_OPTIONS, estimateRange, formatSEK, isPlatinum } from '@/lib/gold'
 import { CATEGORIES, GEMSTONES } from '@/lib/catalog'
 import { CheckIcon } from '@/components/Icons'
 
@@ -452,7 +452,12 @@ export default function SubmitPage() {
               <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
               <div className="relative">
                 <p className="eyebrow text-gold-400/80 mb-2">Uppskattat värde</p>
-                {est ? (
+                {isPlatinum(karat) ? (
+                  <p className="text-espresso-100/70 text-sm leading-relaxed">
+                    Platina prissätts på sin egen marknad, inte via guldkursen. Vi värderar den exakt vid
+                    mottagning, och handlarna budar i konkurrens om slutpriset.
+                  </p>
+                ) : est ? (
                   <>
                     <p className="font-display text-2xl text-gradient-gold tabular-nums leading-tight">
                       {formatSEK(est.low)} till {formatSEK(est.high)}
