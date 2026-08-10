@@ -78,6 +78,9 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
   }
 
   const isInvoice = kind === 'invoice'
+  // Krediterad affär (föremålet ej godkänt) → handlarens faktura blir kreditfaktura.
+  const credit = isInvoice && !!order.refunded_at
+  const money = (n: number) => (credit ? '−' + formatSEK(n) : formatSEK(n))
   const date = new Date(order.created_at).toLocaleDateString('sv-SE')
 
   return (
@@ -101,9 +104,11 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
           </div>
           <div className="text-right">
             <p className="font-semibold text-espresso-900 uppercase tracking-wide text-sm">
-              {isInvoice ? 'Faktura' : 'Avräkningsnota'}
+              {credit ? 'Kreditfaktura' : isInvoice ? 'Faktura' : 'Avräkningsnota'}
             </p>
-            {isInvoice ? (
+            {credit ? (
+              <p className="text-[11px] text-espresso-400">Kreditering av faktura {ref(order.order_no)}</p>
+            ) : isInvoice ? (
               <p className="text-[11px] text-espresso-400">Gäller även som inköpsunderlag</p>
             ) : (
               <p className="text-[11px] text-espresso-400">Underlag för din försäljning</p>
@@ -138,19 +143,25 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
           </thead>
           <tbody>
             <tr className="border-b border-espresso-100">
-              <td className="py-2.5 text-espresso-700">{isInvoice ? 'Vinnande bud' : 'Utbetalning för'} – {item?.title}</td>
-              <td className="py-2.5 text-right tabular-nums text-espresso-800">{formatSEK(order.amount)}</td>
+              <td className="py-2.5 text-espresso-700">
+                {credit ? 'Kreditering, vinnande bud' : isInvoice ? 'Vinnande bud' : 'Utbetalning för'} – {item?.title}
+              </td>
+              <td className="py-2.5 text-right tabular-nums text-espresso-800">{money(order.amount)}</td>
             </tr>
             {isInvoice && (
               <tr className="border-b border-espresso-100">
-                <td className="py-2.5 text-espresso-700">Köparprovision {DEALER_COMMISSION_LABEL}</td>
-                <td className="py-2.5 text-right tabular-nums text-espresso-800">{formatSEK(commission(order.amount))}</td>
+                <td className="py-2.5 text-espresso-700">
+                  {credit ? 'Kreditering, köparprovision' : 'Köparprovision'} {DEALER_COMMISSION_LABEL}
+                </td>
+                <td className="py-2.5 text-right tabular-nums text-espresso-800">{money(commission(order.amount))}</td>
               </tr>
             )}
             <tr>
-              <td className="py-3 font-semibold text-espresso-900">{isInvoice ? 'Att betala' : 'Utbetalt belopp'}</td>
+              <td className="py-3 font-semibold text-espresso-900">
+                {credit ? 'Att återbetala' : isInvoice ? 'Att betala' : 'Utbetalt belopp'}
+              </td>
               <td className="py-3 text-right font-semibold tabular-nums text-espresso-900">
-                {formatSEK(isInvoice ? totalWithCommission(order.amount) : order.amount)}
+                {money(isInvoice ? totalWithCommission(order.amount) : order.amount)}
               </td>
             </tr>
           </tbody>
@@ -158,7 +169,9 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
 
         <p className="text-xs text-espresso-400 leading-relaxed">
           Föremål: {item?.title} · {item?.weight_grams} g · {item?.karat}.{' '}
-          {isInvoice
+          {credit
+            ? `Krediterar faktura ${ref(order.order_no)} i sin helhet. Föremålet godkändes inte vid äkthetskontroll${order.refund_reason ? ` (${order.refund_reason})` : ''}, affären återgår och beloppet återbetalas.`
+            : isInvoice
             ? `Sålt i kommission av ${GULDBUD.name} (org.nr ${GULDBUD.org}). Betalning enligt instruktioner i affären. Referens: ${ref(order.order_no)}. Detta dokument utgör inköpsunderlag för föremålet.`
             : `Sålt genom ${GULDBUD.name} i kommission för din räkning. Utbetalning sker till angivet konto efter godkänd äkthetskontroll. Som privatperson lägger du ingen moms på försäljning av dina egna begagnade föremål.`}
         </p>

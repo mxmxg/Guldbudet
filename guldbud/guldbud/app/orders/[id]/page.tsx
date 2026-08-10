@@ -48,7 +48,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
     const { data: o } = await supabase
       .from('orders')
       .select(
-        'id, item_id, seller_id, dealer_id, amount, status, dealer_paid_at, payment_due_at, tracking_dealer, order_no, created_at'
+        'id, item_id, seller_id, dealer_id, amount, status, dealer_paid_at, payment_due_at, tracking_dealer, order_no, created_at, refunded_at, refund_reason'
       )
       .eq('id', params.id)
       .single()
@@ -141,6 +141,23 @@ export default function OrderPage({ params }: { params: { id: string } }) {
             <OrderStepper status={status} />
           </div>
         </div>
+
+        {/* Retur/kreditering – föremålet godkändes inte vid kontroll */}
+        {order.refunded_at && (
+          <div className="card p-6 border border-amber-200 bg-amber-50">
+            <h2 className="font-display text-lg text-amber-800 mb-1">Affären återgick</h2>
+            <p className="text-sm text-espresso-600 leading-relaxed">
+              {party === 'seller'
+                ? `Vid vår kontroll stämde inte uppgifterna${order.refund_reason ? ` (${order.refund_reason})` : ''}, så affären kunde inte slutföras. Vi skickar tillbaka föremålet till dig.`
+                : `Föremålet godkändes inte vid vår äkthetskontroll${order.refund_reason ? ` (${order.refund_reason})` : ''}. Affären återgår och beloppet återbetalas till dig.`}
+            </p>
+            {party === 'dealer' && (
+              <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
+                Visa kreditfaktura →
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Party-specific info */}
         {party === 'seller' ? (

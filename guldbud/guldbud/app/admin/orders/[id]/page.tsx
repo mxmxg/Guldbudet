@@ -25,6 +25,8 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const [saveError, setSaveError] = useState('')
   const [trackingSeller, setTrackingSeller] = useState('')
   const [trackingDealer, setTrackingDealer] = useState('')
+  const [showRefund, setShowRefund] = useState(false)
+  const [refundReason, setRefundReason] = useState('')
 
   useEffect(() => {
     init()
@@ -114,6 +116,24 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', order.id)
     if (error) setSaveError('Kunde inte uppdatera status: ' + error.message)
+    else await loadOrder()
+    setSaving(false)
+  }
+
+  const refundOrder = async (reason: string) => {
+    setSaving(true)
+    setSaveError('')
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        status: 'cancelled',
+        refunded_at: new Date().toISOString(),
+        refund_reason: reason || 'Föremålet godkändes inte vid kontroll',
+        cancel_reason: 'Retur – ' + (reason || 'ej godkänt vid kontroll'),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', order.id)
+    if (error) setSaveError('Kunde inte kreditera affären: ' + error.message)
     else await loadOrder()
     setSaving(false)
   }
@@ -210,10 +230,58 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 </button>
               </div>
             )}
+
+            {/* Äkthet ej godkänd → returnera & kreditera */}
+            {!isFinalOrCancelled && (
+              <div className="mt-4 rounded-xl border border-espresso-100 p-4">
+                {!showRefund ? (
+                  <button
+                    onClick={() => setShowRefund(true)}
+                    className="text-sm text-amber-700 hover:text-amber-800 font-medium"
+                  >
+                    Äkthet ej godkänd — returnera &amp; kreditera
+                  </button>
+                ) : (
+                  <div>
+                    <p className="text-sm font-medium text-espresso-800 mb-1">Returnera &amp; kreditera</p>
+                    <p className="text-xs text-espresso-500 mb-2">
+                      Föremålet stämmer inte / är inte äkta. Affären återgår: handlaren krediteras och föremålet
+                      skickas tillbaka till säljaren. Båda notifieras.
+                    </p>
+                    <input
+                      value={refundReason}
+                      onChange={(e) => setRefundReason(e.target.value)}
+                      placeholder="Orsak, t.ex. lägre karat än uppgivet"
+                      className="mb-2"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => refundOrder(refundReason)}
+                        disabled={saving}
+                        className="bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
+                      >
+                        {saving ? '...' : 'Bekräfta retur & kreditering'}
+                      </button>
+                      <button onClick={() => setShowRefund(false)} className="text-sm text-espresso-500 px-3 py-2">
+                        Avbryt
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {status === 'cancelled' && (
               <div className="mt-5">
-                {order.cancel_reason && (
-                  <p className="text-sm text-red-600 mb-2">Avbruten: {order.cancel_reason}</p>
+                {order.refunded_at ? (
+                  <p className="text-sm text-amber-700 mb-2">
+                    Returnerad & krediterad{order.refund_reason ? `: ${order.refund_reason}` : ''}.{' '}
+                    <Link href={`/orders/${order.id}/invoice`} className="text-gold-600 hover:underline">
+                      Visa kreditfaktura →
+                    </Link>
+                  </p>
+                ) : (
+                  order.cancel_reason && <p className="text-sm text-red-600 mb-2">Avbruten: {order.cancel_reason}</p>
                 )}
                 <button onClick={() => setStatus('accepted')} disabled={saving} className="btn-ghost-gold !py-2">
                   Återöppna affär

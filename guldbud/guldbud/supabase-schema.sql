@@ -651,6 +651,9 @@ alter table public.orders add column if not exists dealer_paid_at timestamptz;
 alter table public.orders add column if not exists payment_due_at timestamptz;
 alter table public.orders add column if not exists payment_reminded_at timestamptz;
 alter table public.orders add column if not exists cancel_reason text;
+-- Retur/kreditering: när ett föremål inte godkänns vid kontroll (fake/stämmer ej).
+alter table public.orders add column if not exists refunded_at timestamptz;
+alter table public.orders add column if not exists refund_reason text;
 -- Backfill: ge befintliga affärer en deadline utifrån när de skapades.
 update public.orders set payment_due_at = created_at + interval '3 days'
   where payment_due_at is null;
@@ -828,6 +831,37 @@ drop trigger if exists on_payment_registered on public.orders;
 create trigger on_payment_registered
   after update on public.orders
   for each row execute procedure public.notify_payment_registered();
+
+-- Retur & kreditering: föremålet godkändes inte vid kontroll. Handlaren krediteras
+-- (pengarna åter), säljaren får föremålet tillbaka.
+create or replace function public.notify_order_refunded()
+returns trigger language plpgsql security definer
+  set search_path = public as $$
+declare
+  v_title text;
+begin
+  if new.refunded_at is not null and old.refunded_at is null then
+    select title into v_title from public.items where id = new.item_id;
+    insert into public.notifications (user_id, title, message, item_id, link)
+    values (new.dealer_id, 'Affären återgår, du krediteras',
+            '"' || coalesce(v_title, 'Föremålet') || '" godkändes inte vid vår kontroll' ||
+            coalesce(' (' || new.refund_reason || ')', '') ||
+            '. Affären återgår och beloppet återbetalas till dig. En kreditfaktura finns i affären.',
+            new.item_id, '/orders/' || new.id);
+    insert into public.notifications (user_id, title, message, item_id, link)
+    values (new.seller_id, 'Ditt föremål kommer tillbaka',
+            'Vid vår kontroll av "' || coalesce(v_title, 'ditt föremål') || '" stämde inte uppgifterna' ||
+            coalesce(' (' || new.refund_reason || ')', '') ||
+            ', så affären kunde inte slutföras. Vi skickar tillbaka föremålet till dig. Hör av dig i affären om du undrar något.',
+            new.item_id, '/orders/' || new.id);
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_order_refunded on public.orders;
+create trigger on_order_refunded
+  after update on public.orders
+  for each row execute procedure public.notify_order_refunded();
 
 -- DB-broms bakom den klient-sidiga spärren: släpp aldrig utbetalning till säljare
 -- eller vidareskick till handlare innan handlarens betalning registrerats.
