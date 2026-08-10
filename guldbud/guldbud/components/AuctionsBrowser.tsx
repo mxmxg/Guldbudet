@@ -17,13 +17,21 @@ const SORTS: { key: Sort; label: string }[] = [
   { key: 'bids', label: 'Flest bud' },
 ]
 
-export default function AuctionsBrowser({ items }: { items: CardItem[] }) {
+export default function AuctionsBrowser({
+  items,
+  showHero = true,
+  defaultSort = 'ending',
+}: {
+  items: CardItem[]
+  showHero?: boolean
+  defaultSort?: Sort
+}) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<string | null>(null)
   const [karat, setKarat] = useState<string>('')
   const [wMin, setWMin] = useState('')
   const [wMax, setWMax] = useState('')
-  const [sort, setSort] = useState<Sort>('ending')
+  const [sort, setSort] = useState<Sort>(defaultSort)
 
   // Only show categories that actually have live auctions.
   const availableCategories = useMemo(() => {
@@ -88,18 +96,20 @@ export default function AuctionsBrowser({ items }: { items: CardItem[] }) {
   return (
     <>
       {/* Hero */}
-      <div className="relative overflow-hidden bg-espresso-900 px-4 py-14 text-center">
-        <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
-        <div className="pointer-events-none absolute -top-24 left-1/3 w-72 h-72 rounded-full bg-gold-500/10 blur-3xl" />
-        <div className="relative">
-          <p className="eyebrow text-gold-500/80 mb-3">Just nu på GuldBud</p>
-          <h1 className="font-display text-4xl text-gold-100 mb-3">Pågående auktioner</h1>
-          <p className="text-gold-200/70 max-w-lg mx-auto text-sm">
-            Bläddra bland allt guld som just nu är ute på budgivning. Filtrera, sök och sortera för att
-            hitta det du letar efter.
-          </p>
+      {showHero && (
+        <div className="relative overflow-hidden bg-espresso-900 px-4 py-14 text-center">
+          <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
+          <div className="pointer-events-none absolute -top-24 left-1/3 w-72 h-72 rounded-full bg-gold-500/10 blur-3xl" />
+          <div className="relative">
+            <p className="eyebrow text-gold-500/80 mb-3">Just nu på GuldBud</p>
+            <h1 className="font-display text-4xl text-gold-100 mb-3">Pågående auktioner</h1>
+            <p className="text-gold-200/70 max-w-lg mx-auto text-sm">
+              Bläddra bland allt guld som just nu är ute på budgivning. Filtrera, sök och sortera för att
+              hitta det du letar efter.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
         {/* Controls */}
