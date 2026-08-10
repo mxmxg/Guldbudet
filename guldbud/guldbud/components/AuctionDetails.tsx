@@ -260,6 +260,18 @@ export default function AuctionDetails({ item }: { item: any }) {
               <p className="text-espresso-600 mt-5 leading-relaxed">{item.description}</p>
             )}
 
+            {/* Sold banner (closed auctions) – social proof + SEO */}
+            {isClosed && topAmount ? (
+              <div className="mt-5 rounded-2xl bg-espresso-900 p-5 text-center shadow-soft">
+                <p className="eyebrow text-gold-500/80 mb-1">Såld</p>
+                <p className="font-display text-3xl text-gold-100 tabular-nums">{formatSEK(topAmount)}</p>
+                <p className="text-gold-200/60 text-xs mt-1">
+                  Slutpris efter budgivning
+                  {item.accepted_at ? ` · ${new Date(item.accepted_at).toLocaleDateString('sv-SE')}` : ''}
+                </p>
+              </div>
+            ) : null}
+
             {/* Bid panel */}
             <div
               className={`mt-6 rounded-2xl border p-5 transition-colors duration-500 ${
@@ -268,7 +280,7 @@ export default function AuctionDetails({ item }: { item: any }) {
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 flex-wrap">
                 <div className="min-w-0">
-                  <p className="eyebrow text-espresso-400 mb-1">Högsta bud</p>
+                  <p className="eyebrow text-espresso-400 mb-1">{isClosed ? 'Slutpris' : 'Högsta bud'}</p>
                   <p className="font-display text-3xl text-gradient-gold tabular-nums">
                     {topAmount ? formatSEK(topAmount) : 'Öppet för bud'}
                   </p>
