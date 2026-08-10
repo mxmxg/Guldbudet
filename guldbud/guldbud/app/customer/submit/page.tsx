@@ -14,6 +14,10 @@ export default function SubmitPage() {
   const router = useRouter()
   const supabase = createClient()
   const fileRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
+  const [aiHidden, setAiHidden] = useState(false)
 
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
@@ -63,6 +67,51 @@ export default function SubmitPage() {
     // eller fel bild raderas).
     setFiles((prev) => [...prev, ...arr].slice(0, 6))
     setPreviews((prev) => [...prev, ...arr.map((f) => URL.createObjectURL(f))].slice(0, 6))
+  }
+
+  // Skala ner bilden i webbläsaren innan den skickas till AI:n (mindre payload,
+  // lägre kostnad, snabbare svar).
+  const fileToDataUrl = async (file: File, max = 1024): Promise<string> => {
+    const img = await createImageBitmap(file)
+    const scale = Math.min(1, max / Math.max(img.width, img.height))
+    const w = Math.round(img.width * scale)
+    const h = Math.round(img.height * scale)
+    const canvas = document.createElement('canvas')
+    canvas.width = w
+    canvas.height = h
+    canvas.getContext('2d')?.drawImage(img, 0, 0, w, h)
+    return canvas.toDataURL('image/jpeg', 0.85)
+  }
+
+  const suggestWithAI = async () => {
+    if (files.length === 0) return
+    setAiLoading(true)
+    setAiError('')
+    try {
+      const dataUrl = await fileToDataUrl(files[0])
+      const res = await fetch('/api/suggest-listing', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ dataUrl }),
+      })
+      if (res.status === 503) {
+        // AI inte aktiverad (ingen nyckel) – dölj knappen tyst.
+        setAiHidden(true)
+        return
+      }
+      if (!res.ok) {
+        setAiError('AI-förslaget gick inte att hämta just nu. Fyll gärna i själv.')
+        return
+      }
+      const s = await res.json()
+      if (s.title) setTitle(s.title)
+      if (s.description) setDescription(s.description)
+      if (s.category && !category) setCategory(s.category)
+    } catch {
+      setAiError('AI-förslaget gick inte att hämta just nu. Fyll gärna i själv.')
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   const removeImage = (i: number) => {
@@ -234,9 +283,39 @@ export default function SubmitPage() {
                 )}
               </div>
               <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+              <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+
+              {previews.length < 6 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <button type="button" onClick={() => cameraRef.current?.click()} className="btn-outline !py-2 text-sm">
+                    📷 Ta foto
+                  </button>
+                  <button type="button" onClick={() => fileRef.current?.click()} className="btn-outline !py-2 text-sm">
+                    🖼 Ladda upp bild
+                  </button>
+                </div>
+              )}
               <p className="text-xs text-espresso-400">
                 Tips: framsida, baksida, stämpel och eventuella skador.
               </p>
+
+              {/* AI-förslag på rubrik & beskrivning från fotot */}
+              {files.length > 0 && !aiHidden && (
+                <div className="mt-3 rounded-xl border border-gold-200 bg-gold-50 p-3">
+                  <button
+                    type="button"
+                    onClick={suggestWithAI}
+                    disabled={aiLoading}
+                    className="btn-gold !py-2 text-sm"
+                  >
+                    {aiLoading ? 'Analyserar bilden…' : '✨ Föreslå rubrik & beskrivning'}
+                  </button>
+                  <p className="text-xs text-espresso-500 mt-2">
+                    Vi tittar på din första bild och fyller i rubrik, beskrivning och kategori åt dig. Du kan ändra allt efteråt.
+                  </p>
+                  {aiError && <p className="text-xs text-red-500 mt-1.5">{aiError}</p>}
+                </div>
+              )}
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
