@@ -21,10 +21,14 @@ export default function AuctionsBrowser({
   items,
   showHero = true,
   defaultSort = 'ending',
+  myBidIds,
+  leadingIds,
 }: {
   items: CardItem[]
   showHero?: boolean
   defaultSort?: Sort
+  myBidIds?: Set<string>
+  leadingIds?: Set<string>
 }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<string | null>(null)
@@ -32,6 +36,7 @@ export default function AuctionsBrowser({
   const [wMin, setWMin] = useState('')
   const [wMax, setWMax] = useState('')
   const [sort, setSort] = useState<Sort>(defaultSort)
+  const [quick, setQuick] = useState<'all' | 'mybids' | 'leading'>('all')
 
   // Only show categories that actually have live auctions.
   const availableCategories = useMemo(() => {
@@ -66,6 +71,8 @@ export default function AuctionsBrowser({
     const min = parseFloat(wMin)
     const max = parseFloat(wMax)
     let list = items.filter((i) => {
+      if (quick === 'mybids' && !myBidIds?.has(i.id)) return false
+      if (quick === 'leading' && !leadingIds?.has(i.id)) return false
       if (category && i.category !== category) return false
       if (karat && i.karat !== karat) return false
       if (!isNaN(min) && (i.weight_grams || 0) < min) return false
@@ -91,7 +98,7 @@ export default function AuctionsBrowser({
       }
     })
     return list
-  }, [items, query, category, karat, wMin, wMax, sort])
+  }, [items, query, category, karat, wMin, wMax, sort, quick, myBidIds, leadingIds])
 
   return (
     <>
@@ -114,6 +121,35 @@ export default function AuctionsBrowser({
       <div className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
         {/* Controls */}
         <div className="sticky top-[104px] z-20 -mx-4 px-4 py-3 bg-cream/85 backdrop-blur border-b border-espresso-100 mb-6">
+          {/* Snabbfilter för handlare: Alla / Mina bud / Ledande */}
+          {myBidIds && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {[
+                { key: 'all' as const, label: 'Alla auktioner', count: items.length },
+                { key: 'mybids' as const, label: 'Mina bud', count: myBidIds.size },
+                { key: 'leading' as const, label: 'Ledande', count: leadingIds?.size ?? 0 },
+              ].map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setQuick(t.key)}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                    quick === t.key
+                      ? 'bg-gold-sheen text-espresso-900 shadow-gold'
+                      : 'bg-espresso-50 text-espresso-500 hover:text-espresso-800'
+                  }`}
+                >
+                  {t.label}
+                  <span
+                    className={`text-xs rounded-full px-1.5 py-0.5 tabular-nums ${
+                      quick === t.key ? 'bg-espresso-900/15' : 'bg-espresso-100 text-espresso-500'
+                    }`}
+                  >
+                    {t.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
             <div className="relative flex-1">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-espresso-300">

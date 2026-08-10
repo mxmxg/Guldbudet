@@ -52,6 +52,8 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [myItems, setMyItems] = useState<any[]>([])
+  const [myBidIds, setMyBidIds] = useState<Set<string>>(new Set())
+  const [leadingIds, setLeadingIds] = useState<Set<string>>(new Set())
   const [checked, setChecked] = useState(false)
   const supabase = createClient()
 
@@ -76,6 +78,18 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
             .order('created_at', { ascending: false })
             .limit(3)
           setMyItems(mi || [])
+        }
+        if (p?.role === 'dealer') {
+          // Vilka auktioner handlaren budat på + vilka hen leder (mitt maxbud === högsta bud).
+          const { data: mine } = await supabase.from('bids').select('item_id, amount').eq('dealer_id', user.id)
+          const myMax: Record<string, number> = {}
+          mine?.forEach((b: any) => {
+            if (!myMax[b.item_id] || b.amount > myMax[b.item_id]) myMax[b.item_id] = b.amount
+          })
+          setMyBidIds(new Set(Object.keys(myMax)))
+          setLeadingIds(
+            new Set(items.filter((i) => i.top_bid > 0 && myMax[i.id] === i.top_bid).map((i) => i.id)),
+          )
         }
       }
       setChecked(true)
@@ -178,7 +192,13 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
             Öppna budpanel
           </Link>
         </DashHeader>
-        <AuctionsBrowser items={items} showHero={false} defaultSort="newest" />
+        <AuctionsBrowser
+          items={items}
+          showHero={false}
+          defaultSort="newest"
+          myBidIds={myBidIds}
+          leadingIds={leadingIds}
+        />
         <Footer />
       </>
     )
