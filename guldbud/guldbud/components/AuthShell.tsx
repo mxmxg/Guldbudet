@@ -1,11 +1,11 @@
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 // Shared dark shell for every /auth page so login, register, pending, verify
 // and reset-password all look consistent. Card + spacing match the login form.
 export default function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <div
         className="auth-scope"
         style={{
@@ -20,9 +20,7 @@ export default function AuthShell({ children }: { children: React.ReactNode }) {
         <div style={{ width: '100%', maxWidth: '440px' }}>
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
             <Link href="/">
-              <span style={{ fontFamily: "'Great Vibes', cursive", fontSize: '48px', color: '#D4AF37', lineHeight: 1 }}>
-                GuldBud
-              </span>
+              <Logo className="text-[36px] text-[#D4AF37] leading-none" />
             </Link>
             <p style={{ color: '#8B6914', fontSize: '10px', letterSpacing: '4px', marginTop: '4px' }}>
               SVERIGES GULDAUKTION

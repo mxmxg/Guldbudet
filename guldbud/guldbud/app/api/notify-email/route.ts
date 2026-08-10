@@ -135,7 +135,7 @@ function emailHtml(opts: {
   return `<!doctype html><html><body style="margin:0;background:#0f0a04;padding:32px 16px;font-family:Segoe UI,Helvetica,Arial,sans-serif">
     <div style="max-width:480px;margin:0 auto;background:#1a1208;border:1px solid #3d2d0f;border-radius:16px;padding:28px">
       <div style="text-align:center;margin-bottom:22px">
-        <span style="font-family:Georgia,serif;font-style:italic;font-size:30px;color:#D4AF37">GuldBud</span>
+        <span style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-weight:600;letter-spacing:-0.5px;font-size:26px;color:#D4AF37">GuldBud</span>
         <div style="color:#8B6914;font-size:9px;letter-spacing:3px;margin-top:2px">SVERIGES GULDAUKTION</div>
       </div>
       <h1 style="color:#f5e6c8;font-size:18px;margin:0 0 16px">${esc(title)}</h1>

@@ -17,10 +17,9 @@ export default function Icon() {
           justifyContent: 'center',
           background: '#0f0a04',
           color: '#D4AF37',
-          fontSize: 34,
-          fontFamily: 'Georgia, "Times New Roman", serif',
-          fontStyle: 'italic',
+          fontSize: 32,
           fontWeight: 700,
+          letterSpacing: -1,
         }}
       >
         G

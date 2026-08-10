@@ -66,8 +66,8 @@ export function GET(req: Request) {
           <div
             style={{
               fontSize: 148,
-              fontStyle: 'italic',
-              fontFamily: 'serif',
+              fontWeight: 600,
+              letterSpacing: -3,
               color: '#D4AF37',
               lineHeight: 1,
               marginTop: 8,
@@ -92,7 +92,7 @@ export function GET(req: Request) {
             paddingBottom: 54,
           }}
         >
-          <div style={{ fontSize: 38, fontStyle: 'italic', fontFamily: 'serif', color: '#D4AF37', display: 'flex' }}>
+          <div style={{ fontSize: 38, fontWeight: 600, letterSpacing: -0.5, color: '#D4AF37', display: 'flex' }}>
             guldbud.com
           </div>
           <div style={{ fontSize: 23, letterSpacing: 5, color: '#6b5a33', marginTop: 8, display: 'flex' }}>

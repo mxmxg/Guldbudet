@@ -24,7 +24,7 @@ export default function OpengraphImage() {
         <div style={{ fontSize: 30, letterSpacing: 10, color: '#8B6914', display: 'flex' }}>
           SVERIGES GULDAUKTION
         </div>
-        <div style={{ fontSize: 150, fontStyle: 'italic', color: '#D4AF37', fontFamily: 'serif', marginTop: 6, display: 'flex' }}>
+        <div style={{ fontSize: 150, fontWeight: 600, letterSpacing: -3, color: '#D4AF37', marginTop: 6, display: 'flex' }}>
           GuldBud
         </div>
         <div style={{ fontSize: 38, color: '#c9a84c', marginTop: 30, maxWidth: 880, textAlign: 'center', display: 'flex' }}>

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import GoldTicker from '@/components/GoldTicker'
+import Logo from '@/components/Logo'
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null)
@@ -196,7 +197,6 @@ export default function Navbar() {
 
   return (
     <>
-      <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
       <header className="sticky top-0 z-50">
         <GoldTicker />
         <nav
@@ -209,12 +209,7 @@ export default function Navbar() {
           <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 shrink-0 group">
-              <span
-                className="text-gold-300 leading-none transition-transform group-hover:scale-105"
-                style={{ fontFamily: "'Great Vibes', cursive", fontSize: '32px' }}
-              >
-                GuldBud
-              </span>
+              <Logo className="text-gold-300 text-[26px] leading-none transition-transform group-hover:scale-105" />
               <span className="hidden sm:block text-[9px] text-gold-500/70 tracking-[3px] uppercase border-l border-espresso-700 pl-3 leading-tight">
                 Sveriges
                 <br />
