@@ -13,6 +13,8 @@ import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal, totalWithCommission } from '@/lib/fees'
 
+const INCREMENTS = [100, 250, 500, 1000]
+
 export default function DealerDashboard() {
   const router = useRouter()
   const supabase = createClient()
@@ -24,6 +26,9 @@ export default function DealerDashboard() {
   const [loading, setLoading] = useState(true)
   const [bidding, setBidding] = useState<string | null>(null)
   const [bidError, setBidError] = useState<Record<string, string>>({})
+  const [maxInputs, setMaxInputs] = useState<Record<string, string>>({})
+  const [autoMax, setAutoMax] = useState<Record<string, number>>({})
+  const [autoBusy, setAutoBusy] = useState<string | null>(null)
   const [profile, setProfile] = useState<any>(null)
   const [watchedIds, setWatchedIds] = useState<Set<string>>(new Set())
   const [tab, setTab] = useState<'active' | 'mybids' | 'winning' | 'watched'>('active')
@@ -58,36 +63,49 @@ export default function DealerDashboard() {
       .eq('status', 'active')
       .or(`auction_ends_at.is.null,auction_ends_at.gt.${new Date().toISOString()}`)
       .order('created_at', { ascending: false })
-    setItems(activeItems || [])
-
-    if (activeItems && activeItems.length > 0) {
-      const itemIds = activeItems.map((i: Item) => i.id)
-      const { data: bids } = await supabase
-        .from('bids')
-        .select('item_id, amount')
-        .in('item_id', itemIds)
-        .order('amount', { ascending: false })
-      const top: Record<string, number> = {}
-      const counts: Record<string, number> = {}
-      bids?.forEach((b: any) => {
-        counts[b.item_id] = (counts[b.item_id] || 0) + 1
-        if (!top[b.item_id] || b.amount > top[b.item_id]) top[b.item_id] = b.amount
-      })
-      setTopBids(top)
-      setBidCounts(counts)
-
-      const { data: mine } = await supabase.from('bids').select('item_id, amount').eq('dealer_id', user.id)
-      const my: Record<string, number> = {}
-      mine?.forEach((b: any) => {
-        if (!my[b.item_id] || b.amount > my[b.item_id]) my[b.item_id] = b.amount
-      })
-      setMyBids(my)
-    }
+    const list = (activeItems || []) as Item[]
+    setItems(list)
+    await refreshBids(user.id, list)
 
     const { data: watch } = await supabase.from('watchlist').select('item_id').eq('dealer_id', user.id)
     setWatchedIds(new Set((watch || []).map((w: any) => w.item_id)))
 
     setLoading(false)
+  }
+
+  // Läser om högsta bud, egna bud och egna autobud. Körs efter varje bud och
+  // maxbud, eftersom proxy-resolvern kan ha lagt ett bud i databasen som
+  // klienten annars inte känner till.
+  const refreshBids = async (userId: string, list: Item[]) => {
+    if (!list || list.length === 0) return
+    const itemIds = list.map((i) => i.id)
+    const { data: bids } = await supabase
+      .from('bids')
+      .select('item_id, amount')
+      .in('item_id', itemIds)
+      .order('amount', { ascending: false })
+    const top: Record<string, number> = {}
+    const counts: Record<string, number> = {}
+    bids?.forEach((b: any) => {
+      counts[b.item_id] = (counts[b.item_id] || 0) + 1
+      if (!top[b.item_id] || b.amount > top[b.item_id]) top[b.item_id] = b.amount
+    })
+    setTopBids(top)
+    setBidCounts(counts)
+
+    const { data: mine } = await supabase.from('bids').select('item_id, amount').eq('dealer_id', userId)
+    const my: Record<string, number> = {}
+    mine?.forEach((b: any) => {
+      if (!my[b.item_id] || b.amount > my[b.item_id]) my[b.item_id] = b.amount
+    })
+    setMyBids(my)
+
+    const { data: autos } = await supabase.from('auto_bids').select('item_id, max_amount').eq('dealer_id', userId)
+    const am: Record<string, number> = {}
+    autos?.forEach((a: any) => {
+      am[a.item_id] = a.max_amount
+    })
+    setAutoMax(am)
   }
 
   const placeBid = async (itemId: string) => {
@@ -112,12 +130,61 @@ export default function DealerDashboard() {
     if (error) {
       setErr(error.message)
     } else {
-      setTopBids((prev) => ({ ...prev, [itemId]: amount }))
-      setMyBids((prev) => ({ ...prev, [itemId]: amount }))
-      setBidCounts((prev) => ({ ...prev, [itemId]: (prev[itemId] || 0) + 1 }))
       setBidInputs((prev) => ({ ...prev, [itemId]: '' }))
+      // Läs om från databasen: proxy-resolvern kan ha lagt ett motbud direkt.
+      await refreshBids(user!.id, items)
     }
     setBidding(null)
+  }
+
+  // Additiv höjning: varje klick lägger till inc ovanpå det som redan står i
+  // budrutan, så man kan stapla (+1000 sen +500 = +1500). Golv på top + 100.
+  const bump = (itemId: string, inc: number, top: number) => {
+    setBidInputs((prev) => {
+      const base = parseInt(prev[itemId] || '') || top || 0
+      return { ...prev, [itemId]: String(Math.max(top + 100, base + inc)) }
+    })
+  }
+
+  const setAutoBid = async (itemId: string) => {
+    const val = parseInt(maxInputs[itemId] || '0')
+    const currentTop = topBids[itemId] || 0
+    const setErr = (m: string) => setBidError((p) => ({ ...p, [itemId]: m }))
+    setBidError((p) => ({ ...p, [itemId]: '' }))
+    if (!val || val <= currentTop) {
+      setErr(`Maxbudet måste vara högre än ${currentTop.toLocaleString('sv-SE')} kr.`)
+      return
+    }
+    setAutoBusy(itemId)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    const { error } = await supabase
+      .from('auto_bids')
+      .upsert({ item_id: itemId, dealer_id: user!.id, max_amount: val }, { onConflict: 'item_id,dealer_id' })
+    if (error) {
+      setErr(/row-level security|policy|violates/i.test(error.message) ? 'Går inte att sätta maxbud här just nu.' : error.message)
+    } else {
+      setAutoMax((prev) => ({ ...prev, [itemId]: val }))
+      setMaxInputs((prev) => ({ ...prev, [itemId]: '' }))
+      // Resolvern kan ha budat åt dig direkt – läs om.
+      await refreshBids(user!.id, items)
+    }
+    setAutoBusy(null)
+  }
+
+  const removeAutoBid = async (itemId: string) => {
+    setAutoBusy(itemId)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    await supabase.from('auto_bids').delete().eq('item_id', itemId).eq('dealer_id', user!.id)
+    setAutoMax((prev) => {
+      const next = { ...prev }
+      delete next[itemId]
+      return next
+    })
+    setAutoBusy(null)
   }
 
   const winningCount = items.filter((i) => myBids[i.id] && myBids[i.id] === topBids[i.id]).length
@@ -267,7 +334,20 @@ export default function DealerDashboard() {
                       </div>
                     </div>
 
-                    <div className="lg:w-auto">
+                    <div className="lg:w-auto lg:min-w-[19rem]">
+                      {/* Additiva höj-knappar */}
+                      <div className="flex flex-wrap gap-1.5 mb-2 lg:justify-end">
+                        {INCREMENTS.map((inc) => (
+                          <button
+                            key={inc}
+                            type="button"
+                            onClick={() => bump(item.id, inc, top)}
+                            className="text-[11px] font-medium px-2.5 py-1 rounded-lg border border-espresso-200 text-espresso-600 hover:border-gold-400 hover:text-gold-700 hover:bg-gold-50 transition"
+                          >
+                            +{inc.toLocaleString('sv-SE')}
+                          </button>
+                        ))}
+                      </div>
                       <div className="flex gap-2 items-center">
                         <div className="relative flex-1 lg:flex-initial">
                           <input
@@ -292,6 +372,46 @@ export default function DealerDashboard() {
                           ? `Bud + ${DEALER_COMMISSION_LABEL} provision ${formatSEK(totalWithCommission(parseInt(bidInputs[item.id])))} · frakt ${formatSEK(DEALER_SHIPPING_FEE)} · totalt ${formatSEK(dealerTotal(parseInt(bidInputs[item.id])))}`
                           : `Provision ${DEALER_COMMISSION_LABEL} + frakt ${DEALER_SHIPPING_FEE} kr tillkommer`}
                       </p>
+
+                      {/* Maxbud (autobud) */}
+                      <div className="mt-2">
+                        {autoMax[item.id] ? (
+                          <div className="flex items-center justify-between gap-2 rounded-lg bg-gold-50 border border-gold-200 px-2.5 py-1.5">
+                            <span className="text-[11px] text-gold-800">
+                              Autobud upp till{' '}
+                              <span className="font-medium tabular-nums">{formatSEK(autoMax[item.id])}</span>
+                            </span>
+                            <button
+                              onClick={() => removeAutoBid(item.id)}
+                              disabled={autoBusy === item.id}
+                              className="text-[11px] text-espresso-400 hover:text-red-500 shrink-0"
+                            >
+                              Ta bort
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2 items-center">
+                            <div className="relative flex-1 lg:flex-initial">
+                              <input
+                                type="number"
+                                value={maxInputs[item.id] || ''}
+                                onChange={(e) => setMaxInputs((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                                placeholder="Maxbud (dolt)"
+                                className="w-full lg:w-40 !pr-8 text-sm"
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-xs">kr</span>
+                            </div>
+                            <button
+                              onClick={() => setAutoBid(item.id)}
+                              disabled={autoBusy === item.id}
+                              className="btn-ghost-gold whitespace-nowrap !px-4 !py-2 text-sm"
+                            >
+                              {autoBusy === item.id ? '...' : 'Maxbud'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
                       {bidError[item.id] && (
                         <p className="text-[11px] text-red-500 mt-1 lg:text-right">{bidError[item.id]}</p>
                       )}
