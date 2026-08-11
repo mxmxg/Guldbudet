@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
-import Confetti from '@/components/Confetti'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
 
 const INCREMENTS = [100, 250, 500, 1000]
@@ -23,7 +22,6 @@ export default function BidSection({
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [ok, setOk] = useState(false)
-  const [confetti, setConfetti] = useState(0)
   const [role, setRole] = useState<string | null>(null)
   const [approved, setApproved] = useState(false)
   const [suspended, setSuspended] = useState(false)
@@ -121,10 +119,9 @@ export default function BidSection({
       )
       setOk(false)
     } else {
-      setMsg('🎉 Ditt bud är lagt – du leder nu!')
+      setMsg('Ditt bud är lagt.')
       setOk(true)
       setAmount('')
-      setConfetti((c) => c + 1)
       if (onPlaced) await onPlaced()
       router.refresh()
     }
@@ -172,7 +169,6 @@ export default function BidSection({
 
   return (
     <div className="rounded-2xl bg-white border border-espresso-100 p-5 shadow-soft">
-      <Confetti fire={confetti} />
       <p className="text-sm font-medium text-espresso-800 mb-3">Lägg ditt bud</p>
       <div className="flex flex-wrap gap-2 mb-3">
         {INCREMENTS.map((inc) => (
