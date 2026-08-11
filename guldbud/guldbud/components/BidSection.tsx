@@ -91,7 +91,10 @@ export default function BidSection({
   }
 
   const minNext = currentTop + 100
-  const quickSet = (inc: number) => setAmount(String(Math.max(minNext, (currentTop || 0) + inc)))
+  // Additiv: varje klick lägger till inc ovanpå det som redan står i rutan, så
+  // man kan stapla (+1000 sen +500 = +1500). Golv på minNext.
+  const bump = (inc: number) =>
+    setAmount((prev) => String(Math.max(minNext, (parseInt(prev) || currentTop || 0) + inc)))
 
   const place = async () => {
     const val = parseInt(amount)
@@ -175,7 +178,7 @@ export default function BidSection({
           <button
             key={inc}
             type="button"
-            onClick={() => quickSet(inc)}
+            onClick={() => bump(inc)}
             className="text-xs font-medium px-3 py-1.5 rounded-lg border border-espresso-200 text-espresso-600 hover:border-gold-400 hover:text-gold-700 hover:bg-gold-50 transition"
           >
             +{inc.toLocaleString('sv-SE')}
