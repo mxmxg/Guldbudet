@@ -27,10 +27,9 @@ export default function RecentlySold({ rows }: { rows: SoldRow[] }) {
       <div className="max-w-6xl mx-auto px-4 py-14">
         <div className="flex items-end justify-between gap-4 mb-7">
           <div>
-            <p className="eyebrow text-gold-600/80 mb-1">Avslutade auktioner</p>
-            <h2 className="font-display text-2xl sm:text-3xl text-espresso-900">Nyligen sålt</h2>
+            <h2 className="font-display text-2xl sm:text-3xl text-espresso-900">Avslutade auktioner</h2>
             <p className="text-sm text-espresso-500 mt-1.5">
-              Riktiga slutpriser från avslutad budgivning — konkurrensen mellan handlare avgör priset.
+              Riktiga slutpriser från avslutad budgivning. Konkurrensen mellan handlare avgör priset.
             </p>
           </div>
           <Link
