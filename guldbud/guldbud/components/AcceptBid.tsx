@@ -61,8 +61,8 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
           <p className="font-medium text-espresso-800 mb-3">Skicka in föremålet, gärna redan idag</p>
           <ol className="flex flex-col gap-2 text-sm text-espresso-600">
             {[
-              'Vi skickar en säkerhetspåse till dig, men du kan posta direkt utan att vänta på den.',
-              'Packa föremålet omsorgsfullt och skicka som rekommenderat och försäkrat brev till vår adress.',
+              'Nu när du godkänt ditt slutpris skickar vi dig en kostnadsfri, förbetald säkerhetspåse, försäkrad upp till 100 000 kr.',
+              'Lägg föremålet i påsen och posta den rekommenderat. Frakt och adress är redan klara.',
               'Vi verifierar äktheten så snart vi mottagit föremålet.',
               'Du får betalt, normalt inom 1–2 bankdagar efter verifieringen.',
             ].map((t, i) => (
@@ -75,8 +75,8 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
         </div>
         <div className="rounded-xl bg-espresso-900 p-4 text-center">
           <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Frakt</p>
-          <p className="text-gold-200 font-medium">Förbetald säkerhetspåse</p>
-          <p className="text-gold-200/80 text-sm">Adress och frakt är påtryckt påsen vi skickar dig</p>
+          <p className="text-gold-200 font-medium">Kostnadsfri säkerhetspåse</p>
+          <p className="text-gold-200/80 text-sm">Förbetald och adresserad, försäkrad upp till 100 000 kr. Skickas när du godkänt ditt slutpris.</p>
           <p className="text-gold-500/70 text-xs mt-2">Vid frågor: info@guldbud.com</p>
         </div>
         {orderId && (
