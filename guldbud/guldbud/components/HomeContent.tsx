@@ -54,6 +54,7 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
   const [myItems, setMyItems] = useState<any[]>([])
   const [myBidIds, setMyBidIds] = useState<Set<string>>(new Set())
   const [leadingIds, setLeadingIds] = useState<Set<string>>(new Set())
+  const [watchedIds, setWatchedIds] = useState<Set<string>>(new Set())
   const [checked, setChecked] = useState(false)
   const supabase = createClient()
 
@@ -92,6 +93,10 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
           setLeadingIds(
             new Set(items.filter((i) => i.top_bid > 0 && myMax[i.id] === i.top_bid).map((i) => i.id)),
           )
+          // Bevakade auktioner (begränsat till aktiva som visas i listan).
+          const { data: watch } = await supabase.from('watchlist').select('item_id').eq('dealer_id', user.id)
+          const watchSet = new Set((watch || []).map((w: any) => w.item_id))
+          setWatchedIds(new Set(items.filter((i) => watchSet.has(i.id)).map((i) => i.id)))
         }
       }
       setChecked(true)
@@ -200,6 +205,7 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
           defaultSort="newest"
           myBidIds={myBidIds}
           leadingIds={leadingIds}
+          watchedIds={watchedIds}
         />
         <Footer />
       </>
