@@ -45,7 +45,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
               <span className="absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-70 animate-pulse-ring" />
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold-400" />
             </span>
-            Guld {Math.round(spot).toLocaleString('sv-SE')} kr/g
+            Guld {karatShort} · {karatPerGram.toLocaleString('sv-SE')} kr/g
           </span>
         </div>
         <h3 className="font-display text-2xl text-gold-100 mb-1">Vad är ditt guld värt?</h3>
