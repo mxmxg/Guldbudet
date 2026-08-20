@@ -472,9 +472,21 @@ returns trigger language plpgsql security definer
   set search_path = public as $$
 begin
   if new.status = 'active' and coalesce(old.status, '') <> 'active' then
+    -- Säljaren: din auktion är live.
     insert into public.notifications (user_id, title, message, item_id)
     values (new.owner_id, 'Din auktion är live',
             'Budgivningen på "' || new.title || '" har öppnat.', new.id);
+
+    -- Alla godkända, ej avstängda handlare: nytt föremål att buda på.
+    -- Mejl skickas automatiskt via notifications-webhooken, och hoppas över
+    -- för handlare som stängt av e-postnotiser (email_notifications = false).
+    insert into public.notifications (user_id, title, message, item_id, link)
+    select p.id, 'Nytt föremål på GuldBud',
+           'Ett nytt föremål har lagts ut: "' || new.title || '". Lägg ditt bud.',
+           new.id, '/auctions/' || new.id
+    from public.profiles p
+    where p.role = 'dealer' and p.approved = true and p.suspended = false
+      and p.id <> new.owner_id;
   end if;
   return new;
 end;
