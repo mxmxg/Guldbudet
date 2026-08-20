@@ -12,6 +12,8 @@ export const dynamic = 'force-dynamic'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE } from '@/lib/fees'
 
 const FROM = process.env.EMAIL_FROM || 'GuldBud <onboarding@resend.dev>'
+// Svar på notismejl ska landa i den riktiga brevlådan, inte i no-reply-tomrummet.
+const REPLY_TO = process.env.EMAIL_REPLY_TO || 'info@guldbud.com'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
 
 function esc(s: string) {
@@ -236,6 +238,7 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify({
       from: FROM,
       to: email,
+      reply_to: REPLY_TO,
       subject: record.title,
       html: emailHtml({ title: record.title, message: record.message || '', link, item, topBid, cta, extra }),
     }),
