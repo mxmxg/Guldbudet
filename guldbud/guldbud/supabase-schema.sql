@@ -33,6 +33,14 @@ alter table public.profiles add column if not exists city text;
 alter table public.profiles add column if not exists org_number text;
 alter table public.profiles add column if not exists verification_doc_path text;
 alter table public.profiles add column if not exists email_notifications boolean not null default true;
+
+-- BankID-verifiering (via Criipto/OIDC). Verifierad identitet lagras server-side.
+-- OBS: verified_ssn (personnummer) är känslig PII enligt GDPR. RLS ska tillåta
+-- att endast användaren själv och service-role/admin läser dessa fält.
+alter table public.profiles add column if not exists identity_verified boolean not null default false;
+alter table public.profiles add column if not exists verified_name text;
+alter table public.profiles add column if not exists verified_ssn text;
+alter table public.profiles add column if not exists identity_verified_at timestamptz;
 -- Utbetalningsuppgifter för säljare: Swish eller bankkonto.
 alter table public.profiles add column if not exists payout_method text;
 alter table public.profiles add column if not exists payout_swish text;
@@ -782,6 +790,13 @@ alter table public.orders add column if not exists dealer_paid_at timestamptz;
 alter table public.orders add column if not exists payment_due_at timestamptz;
 alter table public.orders add column if not exists payment_reminded_at timestamptz;
 alter table public.orders add column if not exists cancel_reason text;
+
+-- A2A-betalning (Brite m.fl.): leverantörsagnostisk referens + status för
+-- handlarens inbetalning. dealer_paid_at sätts automatiskt när callbacken
+-- bekräftar en lyckad betalning; admin kan fortfarande sätta den manuellt.
+alter table public.orders add column if not exists payment_provider text;
+alter table public.orders add column if not exists payment_reference text;
+alter table public.orders add column if not exists payment_status text; -- 'pending' | 'paid' | 'failed'
 -- Retur/kreditering: när ett föremål inte godkänns vid kontroll (fake/stämmer ej).
 alter table public.orders add column if not exists refunded_at timestamptz;
 alter table public.orders add column if not exists refund_reason text;
