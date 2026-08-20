@@ -23,12 +23,14 @@ export default function AuctionsBrowser({
   defaultSort = 'ending',
   myBidIds,
   leadingIds,
+  watchedIds,
 }: {
   items: CardItem[]
   showHero?: boolean
   defaultSort?: Sort
   myBidIds?: Set<string>
   leadingIds?: Set<string>
+  watchedIds?: Set<string>
 }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<string | null>(null)
@@ -36,7 +38,7 @@ export default function AuctionsBrowser({
   const [wMin, setWMin] = useState('')
   const [wMax, setWMax] = useState('')
   const [sort, setSort] = useState<Sort>(defaultSort)
-  const [quick, setQuick] = useState<'all' | 'mybids' | 'leading'>('all')
+  const [quick, setQuick] = useState<'all' | 'mybids' | 'leading' | 'watched'>('all')
 
   // Only show categories that actually have live auctions.
   const availableCategories = useMemo(() => {
@@ -73,6 +75,7 @@ export default function AuctionsBrowser({
     let list = items.filter((i) => {
       if (quick === 'mybids' && !myBidIds?.has(i.id)) return false
       if (quick === 'leading' && !leadingIds?.has(i.id)) return false
+      if (quick === 'watched' && !watchedIds?.has(i.id)) return false
       if (category && i.category !== category) return false
       if (karat && i.karat !== karat) return false
       if (!isNaN(min) && (i.weight_grams || 0) < min) return false
@@ -98,7 +101,7 @@ export default function AuctionsBrowser({
       }
     })
     return list
-  }, [items, query, category, karat, wMin, wMax, sort, quick, myBidIds, leadingIds])
+  }, [items, query, category, karat, wMin, wMax, sort, quick, myBidIds, leadingIds, watchedIds])
 
   return (
     <>
@@ -121,13 +124,14 @@ export default function AuctionsBrowser({
       <div className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
         {/* Controls */}
         <div className="sticky top-[104px] z-20 -mx-4 px-4 py-3 bg-cream/85 backdrop-blur border-b border-espresso-100 mb-6">
-          {/* Snabbfilter för handlare: Alla / Mina bud / Ledande */}
+          {/* Snabbfilter för handlare: Alla / Mina bud / Ledande / Bevakade */}
           {myBidIds && (
             <div className="flex flex-wrap gap-2 mb-3">
               {[
                 { key: 'all' as const, label: 'Alla auktioner', count: items.length },
                 { key: 'mybids' as const, label: 'Mina bud', count: myBidIds.size },
                 { key: 'leading' as const, label: 'Ledande', count: leadingIds?.size ?? 0 },
+                { key: 'watched' as const, label: 'Bevakade', count: watchedIds?.size ?? 0 },
               ].map((t) => (
                 <button
                   key={t.key}
