@@ -22,7 +22,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
   const [karat, setKarat] = useState('18K / 750')
   const { price: spot } = useGoldPrice()
 
-  const { low, high, melt } = useMemo(() => estimateRange(weight, karat, spot), [weight, karat, spot])
+  const { low, high } = useMemo(() => estimateRange(weight, karat, spot), [weight, karat, spot])
   const purity = KARAT_PURITY[karat] ?? 0.585
   const purityPct = Math.round(purity * 100)
   const karatShort = karat.split(' ')[0]
@@ -120,7 +120,6 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
           </div>
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-espresso-100/60">
             <span>Renhet: <span className="text-gold-200">{purityPct}%</span></span>
-            <span>Metallvärde: <span className="text-gold-200">{formatSEK(melt)}</span></span>
           </div>
         </div>
 
