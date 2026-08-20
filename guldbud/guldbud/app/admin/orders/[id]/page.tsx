@@ -225,22 +225,41 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             />
             <OrderStepper status={status} />
 
-            {!isFinalOrCancelled && (
-              <div className="mt-5 flex flex-wrap gap-2">
-                {next && (
-                  <button onClick={advance} disabled={saving} className="btn-gold !py-2">
-                    {saving ? '...' : `Markera som ${ORDER_STATUS_LABEL[next]} →`}
-                  </button>
-                )}
-                <button
-                  onClick={() => setStatus('cancelled')}
-                  disabled={saving}
-                  className="text-sm text-red-500 hover:text-red-600 px-3 py-2 transition"
-                >
-                  Avbryt affär
-                </button>
-              </div>
-            )}
+            {!isFinalOrCancelled && (() => {
+              const needsDealerPaid =
+                !!next && (next === 'verified_paid' || next === 'shipped_to_dealer') && !order.dealer_paid_at
+              return (
+                <div className="mt-5">
+                  <div className="flex flex-wrap gap-2">
+                    {next && (
+                      <button
+                        onClick={advance}
+                        disabled={saving || needsDealerPaid}
+                        className="btn-gold !py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {saving ? '...' : `Markera som ${ORDER_STATUS_LABEL[next]} →`}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setStatus('cancelled')}
+                      disabled={saving}
+                      className="text-sm text-red-500 hover:text-red-600 px-3 py-2 transition"
+                    >
+                      Avbryt affär
+                    </button>
+                  </div>
+                  {needsDealerPaid && (
+                    <p className="mt-2 text-xs text-amber-700 flex items-start gap-1.5">
+                      <span aria-hidden>⚠</span>
+                      <span>
+                        Registrera <strong>handlarens betalning</strong> nedan först. Säljaren betalas ut och
+                        föremålet skickas vidare först när pengarna är inne.
+                      </span>
+                    </p>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Äkthet ej godkänd → returnera & kreditera */}
             {!isFinalOrCancelled && (
