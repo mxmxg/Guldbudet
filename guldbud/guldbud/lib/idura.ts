@@ -1,21 +1,21 @@
 import crypto from 'crypto'
 
-// BankID via Criipto (OIDC). Vi använder Criiptos standard-OIDC-flöde med PKCE.
+// BankID via Idura (tidigare Criipto), OIDC. Vi använder standard-OIDC med PKCE.
 // Konfigureras helt via env, så koden ligger klar och väntar på test-nycklarna.
-//   CRIIPTO_DOMAIN         t.ex. guldbud-test.criipto.id
-//   CRIIPTO_CLIENT_ID
-//   CRIIPTO_CLIENT_SECRET
+//   IDURA_DOMAIN         t.ex. guldbud-test.criipto.id (Idura behåller .criipto.id-domäner)
+//   IDURA_CLIENT_ID
+//   IDURA_CLIENT_SECRET
 // Redirect-URI byggs från NEXT_PUBLIC_SITE_URL: {site}/api/bankid/callback
 
-const DOMAIN = process.env.CRIIPTO_DOMAIN || ''
-const CLIENT_ID = process.env.CRIIPTO_CLIENT_ID || ''
-const CLIENT_SECRET = process.env.CRIIPTO_CLIENT_SECRET || ''
+const DOMAIN = process.env.IDURA_DOMAIN || ''
+const CLIENT_ID = process.env.IDURA_CLIENT_ID || ''
+const CLIENT_SECRET = process.env.IDURA_CLIENT_SECRET || ''
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
 
-// Svenskt BankID hos Criipto.
+// Svenskt BankID hos Idura/Criipto.
 const ACR_VALUES = 'urn:grn:authn:se:bankid'
 
-export function criiptoConfigured() {
+export function iduraConfigured() {
   return Boolean(DOMAIN && CLIENT_ID && CLIENT_SECRET)
 }
 
@@ -53,9 +53,9 @@ export function buildAuthorizeUrl(params: { state: string; nonce: string; codeCh
   return u.toString()
 }
 
-// Byter authorization code mot tokens hos Criiptos token-endpoint. Anropet sker
+// Byter authorization code mot tokens hos Iduras token-endpoint. Anropet sker
 // server-till-server över TLS med vår client_secret, så id_token som returneras
-// kommer direkt från Criipto (betrodd kanal).
+// kommer direkt från Idura (betrodd kanal).
 export async function exchangeCode(code: string, codeVerifier: string) {
   const res = await fetch(`https://${DOMAIN}/oauth2/token`, {
     method: 'POST',
@@ -71,7 +71,7 @@ export async function exchangeCode(code: string, codeVerifier: string) {
   })
   if (!res.ok) {
     const detail = await res.text().catch(() => '')
-    throw new Error(`Criipto token exchange failed (${res.status}): ${detail.slice(0, 300)}`)
+    throw new Error(`Idura token exchange failed (${res.status}): ${detail.slice(0, 300)}`)
   }
   return (await res.json()) as { id_token?: string; access_token?: string }
 }
@@ -90,8 +90,8 @@ export function extractIdentity(idToken: string, expectedNonce: string): Verifie
   if (CLIENT_ID && !aud.includes(CLIENT_ID)) throw new Error('Fel audience')
   if (payload.exp && Date.now() / 1000 > payload.exp) throw new Error('id_token har gått ut')
 
-  // Criipto exponerar personnummer och namn under något av dessa claims beroende
-  // på konfiguration. Läs defensivt.
+  // Idura/Criipto exponerar personnummer och namn under något av dessa claims
+  // beroende på konfiguration. Läs defensivt.
   const ssn: string =
     payload.ssn ||
     payload.socialno ||

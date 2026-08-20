@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
-import { criiptoConfigured, makePkce, randomToken, buildAuthorizeUrl } from '@/lib/criipto'
+import { iduraConfigured, makePkce, randomToken, buildAuthorizeUrl } from '@/lib/idura'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -16,7 +16,7 @@ export async function GET() {
     return NextResponse.redirect(`${SITE}/auth/login`)
   }
 
-  if (!criiptoConfigured()) {
+  if (!iduraConfigured()) {
     return NextResponse.redirect(`${SITE}/verifiering?error=ej_konfigurerad`)
   }
 
