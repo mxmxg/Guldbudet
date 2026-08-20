@@ -32,8 +32,8 @@ const STEPS = [
   {
     step: '5',
     time: 'Efter avslutad auktion',
-    title: 'Skicka med rekommenderad, försäkrad post',
-    desc: 'Du skickar föremålet rekommenderat och försäkrat till GuldBud. Vi hjälper dig välja rätt fraktalternativ baserat på föremålets värde.',
+    title: 'Posta i vårt kostnadsfria rekommenderade brev',
+    desc: 'När du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du lägger föremålet i det och postar det rekommenderat. Porto och adress är redan klara.',
   },
   {
     step: '6',
@@ -72,7 +72,7 @@ const FAQ = [
   },
   {
     q: 'Hur skickar jag föremålet på ett säkert sätt?',
-    a: 'Du skickar föremålet med rekommenderat och försäkrat brev. Vi hjälper dig välja rätt fraktalternativ baserat på föremålets värde så att det är fullt försäkrat under transporten.',
+    a: 'När du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du lägger föremålet i det och postar det rekommenderat, porto och adress är redan klara.',
   },
 ]
 

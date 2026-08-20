@@ -28,7 +28,7 @@ const STEPS = [
   {
     n: '5',
     title: 'Vi tar emot och kontrollerar',
-    desc: 'Säljaren skickar föremålet försäkrat till GuldBud. Vi kontrollerar äkthet, vikt och karat innan något går vidare – du behöver aldrig lita blint på en okänd motpart.',
+    desc: 'Säljaren skickar in föremålet försäkrat i det kostnadsfria rekommenderade brev GuldBud tillhandahåller. Vi kontrollerar äkthet, vikt och karat innan något går vidare – du behöver aldrig lita blint på en okänd motpart.',
   },
   {
     n: '6',

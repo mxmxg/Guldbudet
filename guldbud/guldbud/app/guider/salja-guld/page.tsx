@@ -19,7 +19,7 @@ const faq = [
   },
   {
     q: 'Hur skickar jag in mitt guld tryggt?',
-    a: 'När du accepterat ett bud packar du föremålet och skickar det som rekommenderat och försäkrat till GuldBud. Vi äkthetskontrollerar det och betalar ut till dig, normalt inom 1–2 bankdagar.',
+    a: 'När du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du lägger föremålet i det och postar det rekommenderat, porto och adress är redan klara. Vi äkthetskontrollerar det och betalar ut till dig, normalt inom 1–2 bankdagar.',
   },
   {
     q: 'Behöver jag veta karaten på förhand?',
@@ -77,7 +77,7 @@ export default function Page() {
         <li>Sälj aldrig efter ett enda muntligt bud. Jämför alltid.</li>
         <li>Väg guldet och kolla stämpeln så du vet ungefär vad det borde ge.</li>
         <li>Välj en köpare som äkthetskontrollerar och betalar spårbart, inte kontant i handen.</li>
-        <li>Se till att transporten är försäkrad.</li>
+        <li>Se till att transporten är försäkrad. På GuldBud skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr efter godkänt slutpris.</li>
       </UL>
 
       <H2>Steg för steg på GuldBud</H2>
@@ -85,7 +85,7 @@ export default function Page() {
         <li>Fotografera föremålet och fyll i vikt och karat.</li>
         <li>Vi granskar och öppnar auktionen, oftast inom ett par timmar.</li>
         <li>Auktoriserade handlare budar mot varandra i realtid.</li>
-        <li>Du accepterar det högsta budet och skickar in föremålet försäkrat.</li>
+        <li>Du accepterar det högsta budet. Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto (försäkrat upp till 100 000 kr) och du postar det rekommenderat.</li>
         <li>Vi kontrollerar äktheten och betalar ut till dig.</li>
       </UL>
       <P>

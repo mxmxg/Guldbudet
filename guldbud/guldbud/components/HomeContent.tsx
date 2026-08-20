@@ -379,7 +379,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {
                 Icon: CoinsIcon,
                 title: 'Acceptera och få betalt',
-                desc: 'Välj det bud du är nöjd med, skicka föremålet försäkrat till oss och få pengarna via Swish eller bankkonto samma dag som vi verifierat.',
+                desc: 'Välj det bud du är nöjd med, posta föremålet i det kostnadsfria, försäkrade rekommenderade brev vi skickar dig och få pengarna via Swish eller bankkonto samma dag som vi verifierat.',
               },
             ].map((s, i) => (
               <Reveal key={s.title} delay={i * 120}>
@@ -625,7 +625,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             },
             {
               title: 'Försäkrad transport',
-              desc: 'Föremålet skickas rekommenderat och försäkrat. Vi hjälper dig välja rätt fraktalternativ efter värdet.',
+              desc: 'Efter godkänt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du postar det rekommenderat, porto och adress är redan klara.',
             },
             {
               title: 'Betalt efter äkthetskontroll',
