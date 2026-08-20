@@ -69,7 +69,7 @@ export default async function HomePage() {
     .eq('status', 'closed')
     .not('accepted_bid_id', 'is', null)
     .order('accepted_at', { ascending: false })
-    .limit(8)
+    .limit(4)
   if (soldItems && soldItems.length > 0) {
     const bidIds = soldItems.map((i: any) => i.accepted_bid_id).filter(Boolean)
     const { data: soldBids } = await supabase.from('bids').select('id, amount').in('id', bidIds)
