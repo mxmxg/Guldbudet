@@ -47,8 +47,8 @@ export default function TermsPage() {
         {
           heading: 'Frakt och ansvar under transport',
           body: [
-            'Efter att säljaren accepterat ett bud skickar säljaren föremålet rekommenderat och försäkrat till GuldBud enligt de instruktioner som ges i tjänsten. Säljaren ansvarar för att föremålet är korrekt och säkert paketerat.',
-            'GuldBud ansvarar för föremål under transport endast i den utsträckning försändelsen är försäkrad enligt vald fraktmetod och endast om säljaren har följt de fraktinstruktioner som anges i tjänsten. Vid skadad eller förlorad försändelse ska säljaren spara inlämningskvitto och kontakta GuldBud. Föremål som skickas på annat sätt än enligt instruktionerna sker på säljarens egen risk.',
+            'Efter att säljaren accepterat det vinnande budet tillhandahåller GuldBud ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Säljaren lägger föremålet i det tillhandahållna brevet och postar det rekommenderat enligt de instruktioner som ges i tjänsten. Säljaren ansvarar för att föremålet är korrekt och säkert paketerat i brevet.',
+            'GuldBud ansvarar för föremål under transport inom ramen för nämnda försäkring, det vill säga upp till 100 000 kr, förutsatt att säljaren har använt det tillhandahållna rekommenderade brevet och följt de fraktinstruktioner som anges i tjänsten. Vid skadad eller förlorad försändelse ska säljaren spara inlämningskvitto och kontakta GuldBud. Föremål som skickas på annat sätt än enligt instruktionerna sker på säljarens egen risk.',
           ],
         },
         {

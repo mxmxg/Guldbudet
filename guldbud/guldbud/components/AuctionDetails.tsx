@@ -564,9 +564,9 @@ function ShippingCard() {
       <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
       <div className="relative">
         <p className="eyebrow text-gold-500/70 mb-1">Frakt</p>
-        <p className="text-gold-200 font-medium">Förbetald säkerhetspåse</p>
-        <p className="text-gold-500/80 text-sm">Adress och frakt är påtryckt</p>
-        <p className="text-gold-500/80 text-sm">påsen vi skickar dig</p>
+        <p className="text-gold-200 font-medium">Kostnadsfritt rekommenderat brev</p>
+        <p className="text-gold-500/80 text-sm">Förbetalt porto och adress, försäkrat upp till 100 000 kr.</p>
+        <p className="text-gold-500/80 text-sm">Skickas när du godkänt ditt slutpris.</p>
         <p className="text-gold-500/60 text-xs mt-2">Vid frågor: info@guldbud.com</p>
       </div>
     </div>

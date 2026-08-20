@@ -876,7 +876,7 @@ begin
 
     insert into public.notifications (user_id, title, message, item_id, link)
     values (new.owner_id, 'Affär skapad, skicka in föremålet',
-            'Budet är accepterat och affären är din. En säkerhetspåse är på väg till dig, men du kan posta föremålet redan idag utan att vänta på den. Så snart vi tagit emot och verifierat det får du betalt.',
+            'Budet är accepterat och affären är din. Så fort du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat, porto och adress är redan klara. Så snart vi tagit emot och verifierat det får du betalt.',
             new.id, '/orders/' || v_order);
 
     if v_dealer is not null then

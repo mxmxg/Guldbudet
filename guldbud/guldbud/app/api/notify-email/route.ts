@@ -70,13 +70,13 @@ function instructionsFor(title: string): string {
       'Det tar under fem minuter att lägga ut ditt första föremål.'
     )
   }
-  // Säljaren – affären är skapad, skicka in direkt (påsen är på väg men behöver inte inväntas).
+  // Säljaren – affären är skapad, skicka in direkt (brevet är på väg men behöver inte inväntas).
   if (t.includes('affär skapad') || t.includes('skicka in')) {
     return stepsBox(
       'Så här slutför du affären',
       [
-        'En förbetald och adresserad säkerhetspåse är på väg till dig.',
-        'Lägg föremålet i påsen och posta som <strong style="color:#f5e6c8">rekommenderat och försäkrat</strong> brev. Frakt och adress är redan klara.',
+        'Så fort du godkänt ditt slutpris skickar vi dig ett <strong style="color:#f5e6c8">kostnadsfritt, rekommenderat brev</strong> med förbetalt porto, försäkrat upp till <strong style="color:#f5e6c8">100 000 kr</strong>.',
+        'Lägg föremålet i det och posta det <strong style="color:#f5e6c8">rekommenderat</strong>. Porto och adress är redan klara.',
         'Vi verifierar äktheten så snart vi tagit emot föremålet.',
         `Du får betalt, normalt inom <strong style="color:#f5e6c8">1–2 bankdagar</strong> efter verifieringen.`,
       ],
