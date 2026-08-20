@@ -121,7 +121,6 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-espresso-100/60">
             <span>Renhet: <span className="text-gold-200">{purityPct}%</span></span>
             <span>Metallvärde: <span className="text-gold-200">{formatSEK(melt)}</span></span>
-            <span>{karatShort}-pris: <span className="text-gold-200">{karatPerGram.toLocaleString('sv-SE')} kr/g</span></span>
           </div>
         </div>
 
