@@ -47,7 +47,21 @@ export default function SubmitPage() {
         return
       }
       const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-      if (prof?.role !== 'customer') router.push('/')
+      if (prof?.role !== 'customer') {
+        router.push('/')
+        return
+      }
+      // Kräv BankID-verifiering innan listning – men bara när BankID är skarpt
+      // aktiverat. identity_verified läses bara då, så submit inte kraschar om
+      // kolumnen ännu inte finns (migrationen körs innan BankID aktiveras).
+      if (process.env.NEXT_PUBLIC_BANKID_ENABLED === 'true') {
+        const { data: v } = await supabase
+          .from('profiles')
+          .select('identity_verified')
+          .eq('id', user.id)
+          .single()
+        if (!v?.identity_verified) router.push('/verifiering')
+      }
     }
     check()
     // eslint-disable-next-line react-hooks/exhaustive-deps

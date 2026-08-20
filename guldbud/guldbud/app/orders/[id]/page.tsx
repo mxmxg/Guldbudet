@@ -237,6 +237,56 @@ function SellerPanel({ order }: { order: any }) {
   )
 }
 
+// Startar en A2A-betalning (Brite som första leverantör). Skickar dealern till
+// leverantörens hostade betalsida. Servern svarar 503 payments_not_configured
+// tills betalnycklarna är på plats, och då visar vi bara en lugn notis och
+// låter den befintliga omgående-texten stå kvar som fallback.
+function PayNowButton({ orderId }: { orderId: string }) {
+  const [loading, setLoading] = useState(false)
+  const [notConfigured, setNotConfigured] = useState(false)
+  const [error, setError] = useState('')
+
+  const pay = async () => {
+    setLoading(true)
+    setError('')
+    setNotConfigured(false)
+    try {
+      const res = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId }),
+      })
+      if (res.status === 503) {
+        setNotConfigured(true)
+        return
+      }
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data?.redirectUrl) {
+        setError('Betalningen kunde inte startas just nu. Försök igen om en stund.')
+        return
+      }
+      window.location.href = data.redirectUrl
+    } catch {
+      setError('Betalningen kunde inte startas just nu. Försök igen om en stund.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (notConfigured) {
+    return <p className="mt-4 text-xs text-espresso-400">Onlinebetalning aktiveras inom kort.</p>
+  }
+
+  return (
+    <div className="mt-4">
+      <button type="button" onClick={pay} disabled={loading} className="btn-gold w-full sm:w-auto disabled:opacity-60">
+        {loading ? 'Öppnar betalning…' : 'Betala nu'}
+      </button>
+      {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
+    </div>
+  )
+}
+
 function DealerPanel({ order }: { order: any }) {
   const paid = !!order.dealer_paid_at
   const awaitingPayment = !paid && order.status !== 'cancelled'
@@ -280,6 +330,7 @@ function DealerPanel({ order }: { order: any }) {
                   Betala senast {due.toLocaleDateString('sv-SE')}
                 </p>
               )}
+              <PayNowButton orderId={order.id} />
             </div>
           )
         })()}
