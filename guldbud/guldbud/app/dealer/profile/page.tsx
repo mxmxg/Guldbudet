@@ -291,7 +291,8 @@ export default function DealerProfilePage() {
               <div>
                 <h2 className="font-display text-lg text-espresso-900">Notiser</h2>
                 <p className="text-xs text-espresso-400 mt-0.5">
-                  E-post om nya bud, överbud och affärer. Notiser i appen visas alltid.
+                  Vi mejlar det viktiga: när en auktion du budat på snart avslutas, samt dina affärer
+                  och utbetalningar. Löpande bud och överbud syns i notisklockan i appen.
                 </p>
               </div>
               <NotifToggle
