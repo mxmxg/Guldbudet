@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import OrderStepper from '@/components/OrderStepper'
 import OrderChat from '@/components/OrderChat'
 import DisputePanel from '@/components/DisputePanel'
+import TrustpilotInvite from '@/components/TrustpilotInvite'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
@@ -166,6 +167,12 @@ export default function OrderPage({ params }: { params: { id: string } }) {
         ) : (
           <DealerPanel order={order} />
         )}
+
+        {/* Betygsätt oss – vid det bästa tillfället, precis efter avslutad affär */}
+        {party === 'seller' &&
+          ['verified_paid', 'shipped_to_dealer', 'completed'].includes(order.status) && (
+            <TrustpilotInvite />
+          )}
 
         {/* Chat */}
         <OrderChat orderId={order.id} party={party} meId={me} isAdmin={false} counterpartLabel="GuldBud" />
