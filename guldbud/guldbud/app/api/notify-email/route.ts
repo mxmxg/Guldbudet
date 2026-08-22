@@ -198,6 +198,19 @@ export async function POST(req: NextRequest) {
   if (!email) return NextResponse.json({ ok: true, skipped: 'no email' })
   if (prof?.email_notifications === false) return NextResponse.json({ ok: true, skipped: 'opted out' })
 
+  // Vissa notiser lever bara i klockan i appen, inte som mejl. Håller nere
+  // mejlvolymen och skräpet: varje bud triggar annars ett "överbjuden"-mejl
+  // till handlaren och ett "nytt bud"-mejl till säljaren. De syns i notis-
+  // klockan i stället. Viktiga steg (avslut, mottaget, utbetalning, "snart
+  // slut") mejlas fortfarande.
+  const titleLower = String(record.title).toLowerCase()
+  if (titleLower.includes('överbjuden') && !titleLower.includes('snart slut')) {
+    return NextResponse.json({ ok: true, skipped: 'in-app only (överbjuden)' })
+  }
+  if (titleLower.includes('nytt bud på ditt föremål')) {
+    return NextResponse.json({ ok: true, skipped: 'in-app only (nytt bud)' })
+  }
+
   // Enrich with the related item + current top bid, if any.
   let item: Item | null = null
   let topBid: number | null = null

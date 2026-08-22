@@ -1423,3 +1423,54 @@ drop trigger if exists on_order_aml_review on public.orders;
 create trigger on_order_aml_review
   after insert on public.orders
   for each row execute procedure public.notify_admins_aml_review();
+
+-- ============================================================
+-- "Snart slut" till budgivare. ~10 min före avslut får varje handlare som
+-- budat men INTE leder just nu en påminnelse (mejl + notis) om att höja.
+-- Den enda notisen som verkligen är värd ett mejl: sista chansen att ta
+-- ledningen. Ledaren slipper (behöver inte agera). En gång per auktion.
+-- ============================================================
+alter table public.items add column if not exists bidders_ending_notified boolean not null default false;
+
+create or replace function public.notify_bidders_ending_soon()
+returns void language plpgsql security definer
+  set search_path = public as $$
+declare
+  r record;
+  v_leader uuid;
+begin
+  for r in
+    select i.* from public.items i
+    where i.status = 'active'
+      and i.auction_ends_at is not null
+      and i.auction_ends_at > now()
+      and i.auction_ends_at <= now() + interval '10 minutes'
+      and i.bidders_ending_notified = false
+  loop
+    -- Nuvarande ledande handlare (högsta bud) exkluderas.
+    select dealer_id into v_leader
+    from public.bids where item_id = r.id
+    order by amount desc limit 1;
+
+    insert into public.notifications (user_id, title, message, item_id, link)
+    select distinct b.dealer_id,
+           'Snart slut – du är överbjuden',
+           '"' || r.title || '" avslutas inom 10 minuter och du är inte högsta bud just nu. Höj ditt bud för att ta ledningen innan det är för sent.',
+           r.id,
+           '/auctions/' || r.id
+    from public.bids b
+    where b.item_id = r.id
+      and b.dealer_id is distinct from v_leader;
+
+    update public.items set bidders_ending_notified = true where id = r.id;
+  end loop;
+end; $$;
+
+do $$
+begin
+  create extension if not exists pg_cron;
+  perform cron.unschedule('notify-bidders-ending-soon') from cron.job where jobname = 'notify-bidders-ending-soon';
+  perform cron.schedule('notify-bidders-ending-soon', '* * * * *', 'select public.notify_bidders_ending_soon();');
+exception when others then
+  raise notice 'pg_cron ej konfigurerat för notify-bidders-ending-soon: %', sqlerrm;
+end $$;
