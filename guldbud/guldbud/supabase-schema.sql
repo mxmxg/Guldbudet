@@ -424,9 +424,11 @@ create policy "dealer reads own docs" on storage.objects
 -- ============================================================
 -- Trigger: skapa profil automatiskt vid registrering
 -- ============================================================
--- Handlaren godkänner handlarvillkoren vid registrering (kryssruta). Tidsstämpeln
--- sparas för spårbarhet på vilken version som accepterades.
+-- Användaren godkänner villkoren vid registrering (kryssruta). Tidsstämpeln
+-- sparas för spårbarhet på vilken version som accepterades. Handlare godkänner
+-- handlarvillkoren, privatpersoner de allmänna användarvillkoren.
 alter table public.profiles add column if not exists dealer_terms_accepted_at timestamptz;
+alter table public.profiles add column if not exists customer_terms_accepted_at timestamptz;
 
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer
@@ -435,7 +437,7 @@ begin
   insert into public.profiles (
     id, email, full_name, role, company_name, approved,
     phone, personal_number, address, postal_code, city, org_number,
-    dealer_terms_accepted_at
+    dealer_terms_accepted_at, customer_terms_accepted_at
   )
   values (
     new.id,
@@ -454,7 +456,9 @@ begin
     new.raw_user_meta_data->>'city',
     new.raw_user_meta_data->>'org_number',
     case when new.raw_user_meta_data->>'role' = 'dealer'
-      then (new.raw_user_meta_data->>'dealer_terms_accepted_at')::timestamptz else null end
+      then (new.raw_user_meta_data->>'dealer_terms_accepted_at')::timestamptz else null end,
+    case when new.raw_user_meta_data->>'role' <> 'dealer'
+      then (new.raw_user_meta_data->>'customer_terms_accepted_at')::timestamptz else null end
   );
 
   -- Välkomstbrev (skickas som mejl via notis-webhooken).

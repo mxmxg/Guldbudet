@@ -148,8 +148,12 @@ function LoginForm() {
         setLoading(false)
         return
       }
-      if (role === 'dealer' && !termsAccepted) {
-        setSubmitError('Du behöver godkänna handlarvillkoren för att registrera dig.')
+      if (!termsAccepted) {
+        setSubmitError(
+          role === 'dealer'
+            ? 'Du behöver godkänna handlarvillkoren för att registrera dig.'
+            : 'Du behöver godkänna villkoren för att registrera dig.'
+        )
         setLoading(false)
         return
       }
@@ -189,6 +193,7 @@ function LoginForm() {
             company_name: fields.company,
             org_number: fields.orgNumber,
             dealer_terms_accepted_at: role === 'dealer' ? new Date().toISOString() : null,
+            customer_terms_accepted_at: role === 'dealer' ? null : new Date().toISOString(),
           }
         }
       })
@@ -359,6 +364,28 @@ function LoginForm() {
                     </Link>
                     , inklusive skyldigheten att betala vunna auktioner omgående, slagavgift på 8 %, fraktavgift och
                     att avstängning kan ske vid misskötsamhet.
+                  </span>
+                </label>
+              )}
+
+              {mode === 'register' && role === 'customer' && (
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={e => setTermsAccepted(e.target.checked)}
+                    style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0, accentColor: '#B8860B' }}
+                  />
+                  <span style={{ color: '#c9a84c', fontSize: '12px', lineHeight: 1.5 }}>
+                    Jag har läst och godkänner{' '}
+                    <Link href="/terms" target="_blank" style={{ color: '#D4AF37', textDecoration: 'underline' }}>
+                      användarvillkoren
+                    </Link>{' '}
+                    och{' '}
+                    <Link href="/privacy" target="_blank" style={{ color: '#D4AF37', textDecoration: 'underline' }}>
+                      integritetspolicyn
+                    </Link>
+                    .
                   </span>
                 </label>
               )}
