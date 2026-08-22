@@ -5,38 +5,29 @@ import { iduraConfigured, makePkce, randomToken, buildAuthorizeUrl } from '@/lib
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
+// Startar BankID-flödet. Klienten (som säkert känner sin session) skickar sitt
+// access_token i Authorization-headern. Vi validerar det mot Supabase Auth
+// (getUser(token)) i stället för att läsa den sköra cookie-sessionen. Den
+// validerade user-iden bäddas in i en httpOnly-cookie tillsammans med PKCE/state,
+// så callbacken vet vem verifieringen gäller utan att läsa sessionen igen.
+export async function POST(request: NextRequest) {
+  const token = (request.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+  if (!token) return NextResponse.json({ error: 'not_authenticated' }, { status: 401 })
 
-export async function GET(request: NextRequest) {
   const supabase = createRouteClient(request)
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(token)
+  if (!user) return NextResponse.json({ error: 'not_authenticated' }, { status: 401 })
 
-  // Tillfällig diagnostik: /api/bankid/start?debug=1 visar vad servern ser.
-  if (request.nextUrl.searchParams.get('debug') === '1') {
-    return NextResponse.json({
-      hasUser: !!user,
-      authError: error?.message || null,
-      iduraConfigured: iduraConfigured(),
-      cookieNames: request.cookies.getAll().map((c) => c.name),
-      site: SITE,
-    })
-  }
-
-  if (!user) {
-    return NextResponse.redirect(`${SITE}/auth/login`)
-  }
-
-  if (!iduraConfigured()) {
-    return NextResponse.redirect(`${SITE}/verifiering?error=ej_konfigurerad`)
-  }
+  if (!iduraConfigured()) return NextResponse.json({ error: 'ej_konfigurerad' }, { status: 503 })
 
   const state = randomToken()
   const nonce = randomToken()
   const { verifier, challenge } = makePkce()
 
-  const res = NextResponse.redirect(buildAuthorizeUrl({ state, nonce, codeChallenge: challenge }))
-  // Kortlivad, httpOnly. code_verifier lämnar aldrig baksidan.
-  res.cookies.set('bankid_flow', JSON.stringify({ state, nonce, verifier }), {
+  const res = NextResponse.json({ url: buildAuthorizeUrl({ state, nonce, codeChallenge: challenge }) })
+  res.cookies.set('bankid_flow', JSON.stringify({ state, nonce, verifier, userId: user.id }), {
     httpOnly: true,
     secure: true,
     sameSite: 'lax',

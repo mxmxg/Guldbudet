@@ -21,6 +21,40 @@ export default function VerifieringPage() {
   const [verified, setVerified] = useState(false)
   const [name, setName] = useState<string>('')
   const [banner, setBanner] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
+  const [starting, setStarting] = useState(false)
+
+  // Skickar klientens access_token till start-routen (pålitligare än att servern
+  // läser sessionen ur cookies) och skickar sedan vidare till BankID.
+  const startBankId = async () => {
+    setStarting(true)
+    setBanner(null)
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) {
+      window.location.href = '/auth/login'
+      return
+    }
+    try {
+      const res = await fetch('/api/bankid/start', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      const json = await res.json()
+      if (json.url) {
+        window.location.href = json.url
+        return
+      }
+      if (json.error === 'not_authenticated') {
+        window.location.href = '/auth/login'
+        return
+      }
+      setBanner({ kind: 'error', text: ERROR_TEXT[json.error] || 'Kunde inte starta BankID. Försök igen.' })
+    } catch {
+      setBanner({ kind: 'error', text: 'Kunde inte starta BankID. Försök igen.' })
+    }
+    setStarting(false)
+  }
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
@@ -91,9 +125,9 @@ export default function VerifieringPage() {
                 För din och köparnas trygghet verifierar vi din identitet med BankID innan du lägger ut föremål
                 och innan utbetalning. Det tar några sekunder och görs bara en gång.
               </p>
-              <a href="/api/bankid/start" className="btn-gold inline-flex">
-                Verifiera med BankID
-              </a>
+              <button onClick={startBankId} disabled={starting} className="btn-gold inline-flex">
+                {starting ? 'Startar...' : 'Verifiera med BankID'}
+              </button>
             </>
           )}
         </div>
