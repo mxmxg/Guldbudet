@@ -65,16 +65,16 @@ export default function DealerTermsPage() {
           ],
         },
         {
-          heading: 'Förbud mot otillbörlig budgivning',
+          heading: 'Självständig budgivning',
           body: [
-            'Det är inte tillåtet att samordna bud med andra handlare, dela upp marknaden, komma överens om priser, eller på annat sätt manipulera budgivningen. Det är inte heller tillåtet att lägga bud utan avsikt att fullfölja köp, eller att buda genom bulvan.',
-            'GuldBud övervakar budmönster och kan stänga av handlare vid misstanke om samverkan eller manipulation, samt anmäla överträdelser till berörd myndighet.',
+            'På GuldBud budar varje handlare självständigt. Du får inte komma överens med andra handlare om att hålla nere priserna eller att dela upp föremål mellan er. Lägg bara bud som du menar allvar med och är beredd att fullfölja.',
+            'GuldBud följer budgivningen och kan stänga av en handlare som samordnar bud med andra eller på annat sätt sätter den fria budgivningen ur spel.',
           ],
         },
         {
           heading: 'Misskötsamhet och avstängning',
           body: [
-            'GuldBud kan varna, tillfälligt stänga av eller permanent utesluta en handlare vid brott mot dessa villkor. Det gäller bland annat utebliven eller sen betalning av en vunnen auktion, otillbörlig budgivning, upprepade reklamationer utan grund, oprofessionellt uppträdande, eller misstanke om bedrägeri eller hantering av stöldgods.',
+            'GuldBud kan varna, tillfälligt stänga av eller permanent utesluta en handlare vid brott mot dessa villkor. Det gäller bland annat utebliven eller sen betalning av en vunnen auktion, samordnad budgivning med andra handlare, upprepade reklamationer utan grund, oprofessionellt uppträdande, eller misstanke om bedrägeri eller hantering av stöldgods.',
             'Uteblir betalning för en vunnen auktion trots påminnelse kan affären hävas och handlaren stängas av. Handlaren kan hållas ansvarig för de kostnader och den skada som misskötsamheten orsakar GuldBud eller säljaren. Allvarliga eller upprepade överträdelser leder till permanent avstängning.',
           ],
         },
