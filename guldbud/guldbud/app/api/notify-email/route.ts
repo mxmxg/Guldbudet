@@ -15,6 +15,11 @@ const FROM = process.env.EMAIL_FROM || 'GuldBud <no-reply@guldbud.com>'
 // Svar på notismejl ska landa i den riktiga brevlådan, inte i no-reply-tomrummet.
 const REPLY_TO = process.env.EMAIL_REPLY_TO || 'info@guldbud.com'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
+// Trustpilot Automatic Feedback Service: vi BCC:ar den här adressen på säljarens
+// utbetalningsmejl, så Trustpilot skickar en omdömesförfrågan efter avslutad
+// affär. Overridbar via env, med nuvarande AFS-adress som default.
+const TRUSTPILOT_AFS_BCC =
+  process.env.TRUSTPILOT_AFS_BCC || 'guldbud.com+e893a9c0ac@invite.trustpilot.com'
 
 function esc(s: string) {
   return String(s || '')
@@ -232,6 +237,11 @@ export async function POST(req: NextRequest) {
     : 'Öppna på GuldBud →'
   const extra = instructionsFor(String(record.title))
 
+  // Trustpilot-förfrågan bara på säljarens utbetalningsmejl ("Du har fått
+  // betalt"), en gång per avslutad affär. Så slipper vi be om omdöme på varje
+  // notis, och vi fångar kunden när hen precis fått pengarna.
+  const wantsReviewInvite = TRUSTPILOT_AFS_BCC && t.includes('fått betalt')
+
   const sendRes = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
@@ -239,6 +249,7 @@ export async function POST(req: NextRequest) {
       from: FROM,
       to: email,
       reply_to: REPLY_TO,
+      ...(wantsReviewInvite ? { bcc: TRUSTPILOT_AFS_BCC } : {}),
       subject: record.title,
       html: emailHtml({ title: record.title, message: record.message || '', link, item, topBid, cta, extra }),
     }),
