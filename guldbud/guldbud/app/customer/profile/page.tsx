@@ -217,7 +217,8 @@ export default function CustomerProfilePage() {
               <div>
                 <h2 className="font-display text-lg text-espresso-900">Notiser</h2>
                 <p className="text-xs text-espresso-400 mt-0.5">
-                  E-post om bud, godkännande och affärer. Notiser i appen visas alltid.
+                  Vi mejlar det viktiga: godkännande, mottaget föremål och utbetalning. Löpande bud
+                  syns i notisklockan i appen.
                 </p>
               </div>
               <NotifToggle
