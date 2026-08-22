@@ -97,6 +97,37 @@ export default function SubmitPage() {
     return canvas.toDataURL('image/jpeg', 0.85)
   }
 
+  // Skala ner och normalisera bilden till JPEG i webbläsaren innan uppladdning.
+  // Stora telefonfoton (flera MB) blir små utan synlig kvalitetsförlust (2560px
+  // längsta sida räcker även för fullskärm/zoom, kvalitet 0.92), och HEIC från
+  // iPhone blir en renderbar JPEG. imageOrientation bakar in EXIF-rotationen så
+  // liggande/stående blir rätt. Faller tillbaka på originalfilen om avkodningen
+  // inte går (t.ex. HEIC i vissa webbläsare), så inskicket aldrig går sönder.
+  const prepareForUpload = async (file: File): Promise<{ data: Blob; ext: string }> => {
+    const MAX_EDGE = 2560
+    try {
+      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+      const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height))
+      const w = Math.round(bitmap.width * scale)
+      const h = Math.round(bitmap.height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('no 2d context')
+      ctx.drawImage(bitmap, 0, 0, w, h)
+      bitmap.close?.()
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.92)
+      )
+      if (!blob) throw new Error('toBlob gav null')
+      return { data: blob, ext: 'jpg' }
+    } catch {
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+      return { data: file, ext }
+    }
+  }
+
   const suggestWithAI = async () => {
     if (files.length === 0) return
     setAiLoading(true)
@@ -158,9 +189,11 @@ export default function SubmitPage() {
 
     const imageUrls: string[] = []
     for (const file of files) {
-      const ext = file.name.split('.').pop()
+      const { data: fileData, ext } = await prepareForUpload(file)
       const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { error: uploadError } = await supabase.storage.from('item-images').upload(path, file)
+      const { error: uploadError } = await supabase.storage
+        .from('item-images')
+        .upload(path, fileData, { contentType: fileData.type || 'image/jpeg' })
       if (uploadError) {
         setError('Bilduppladdning misslyckades: ' + uploadError.message)
         setLoading(false)
