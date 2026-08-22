@@ -17,9 +17,9 @@ const BUCKET = 'item-images'
 const MIN_BYTES = 400 * 1024
 const MAX_EDGE = 2048
 const QUALITY = 80
-// Snäv budget: en påbörjad bild måste hinna klart innan Vercels 10s-tak.
-// Startar vi ingen bild efter 4,5s hinner den in-flight-bilden bli klar i tid.
-const TIME_BUDGET_MS = 4500
+// Antal bilder som bearbetas samtidigt per anrop. Fler = snabbare, men måste
+// hinna klart under Vercels 10s-tak och rymmas i minnet. 5 är en trygg balans.
+const BATCH = 5
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
@@ -102,36 +102,30 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // SKARPT: behandla en bunt inom tidsbudgeten.
-    const started = Date.now()
-    let scanned = 0
+    // SKARPT: bearbeta en bunt bilder SAMTIDIGT (snabbare), en batch per anrop
+    // så vi håller oss under Vercels 10s-tak.
     let changed = 0
     let saved = 0
-    let timedOut = false
+    const batch = bigOnes.slice(0, BATCH)
 
-    for (const f of bigOnes) {
-      if (Date.now() - started > TIME_BUDGET_MS) {
-        timedOut = true
-        break
-      }
-      scanned++
+    const processOne = async (f: { path: string; size: number | null }) => {
       try {
         const dl = await fetch(`${SB}/storage/v1/object/${BUCKET}/${encodeURI(f.path)}`, { headers: H, cache: 'no-store' })
-        if (!dl.ok) continue
+        if (!dl.ok) return
         const buf = Buffer.from(await dl.arrayBuffer())
-        if (buf.length < MIN_BYTES) continue
+        if (buf.length < MIN_BYTES) return
         const out = await sharp(buf)
           .rotate()
           .resize(MAX_EDGE, MAX_EDGE, { fit: 'inside', withoutEnlargement: true })
-          .jpeg({ quality: QUALITY }) // utan mozjpeg = snabbare kodning, håller under tidsgränsen
+          .jpeg({ quality: QUALITY })
           .toBuffer()
-        if (out.length >= buf.length) continue // ingen vinst
+        if (out.length >= buf.length) return // ingen vinst
         const up = await fetch(`${SB}/storage/v1/object/${BUCKET}/${encodeURI(f.path)}`, {
           method: 'POST',
           headers: { ...H, 'Content-Type': 'image/jpeg', 'x-upsert': 'true', 'cache-control': 'max-age=31536000' },
           body: out as any,
         })
-        if (!up.ok) continue
+        if (!up.ok) return
         changed++
         saved += buf.length - out.length
       } catch {
@@ -139,14 +133,16 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    await Promise.all(batch.map(processOne))
+
     return NextResponse.json({
       mode: 'skarpt',
       stora_bilder: bigOnes.length,
-      behandlade_denna_körning: scanned,
+      behandlade_denna_körning: batch.length,
       krympta: changed,
       sparat_mb: mb(saved),
-      done: !timedOut,
-      tips: timedOut ? 'Kör igen tills done=true.' : 'Klart!',
+      done: bigOnes.length <= BATCH,
+      tips: bigOnes.length <= BATCH ? 'Klart!' : 'Kör igen tills done=true.',
     })
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'okänt fel' }, { status: 500 })
