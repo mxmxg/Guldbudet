@@ -45,6 +45,7 @@ export default function ImageOptimizeButton() {
     let saved = 0
     let guard = 0
     let consecTimeouts = 0
+    let noProgress = 0
     let initial = 0
     setStatus('Krymper bilder... 0%')
     // Endpoint:en tar en liten bunt per anrop (tidsbudget) – loopa tills done.
@@ -55,11 +56,14 @@ export default function ImageOptimizeButton() {
         consecTimeouts = 0
         saved += j.sparat_mb || 0
         if (initial === 0) initial = j.stora_bilder || 0
-        if (j.done) {
+        // Avsluta även om inget faktiskt krympts på några varv – då är allt
+        // redan optimerat (skydd mot att loopa på bilder som ligger på gränsen).
+        noProgress = (j.krympta || 0) === 0 ? noProgress + 1 : 0
+        if (j.done || noProgress >= 3) {
           setStatus(
             saved > 0
               ? `Klart! 100% – bilderna är krympta, ca ${Math.round(saved)} MB sparat. Kör om PageSpeed.`
-              : 'Klart! Inga bilder behövde krympas.'
+              : 'Klart! Allt är redan optimerat.'
           )
           break
         }
