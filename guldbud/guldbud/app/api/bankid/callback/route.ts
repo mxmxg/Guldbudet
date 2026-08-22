@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteClient } from '@/lib/supabase-route'
 import { exchangeCode, extractIdentity } from '@/lib/idura'
 
 export const runtime = 'nodejs'
@@ -20,21 +19,16 @@ export async function GET(req: NextRequest) {
   if (err) return back(`error=${encodeURIComponent(err)}`)
   if (!code || !state) return back('error=saknar_kod')
 
-  // Läs och validera flödes-cookien (state + nonce + PKCE-verifier).
-  let flow: { state: string; nonce: string; verifier: string } | null = null
+  // Läs och validera flödes-cookien (state + nonce + PKCE-verifier + userId).
+  // userId sattes server-side i start-routen efter att access_token validerats,
+  // så den är betrodd, ingen ny sessionsläsning behövs här.
+  let flow: { state: string; nonce: string; verifier: string; userId: string } | null = null
   try {
     flow = JSON.parse(req.cookies.get('bankid_flow')?.value || 'null')
   } catch {
     flow = null
   }
-  if (!flow || flow.state !== state) return back('error=ogiltig_session')
-
-  // Vem är inloggad? Vi verifierar identiteten för den användaren.
-  const supabase = createRouteClient(req)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return NextResponse.redirect(`${SITE}/auth/login`)
+  if (!flow || flow.state !== state || !flow.userId) return back('error=ogiltig_session')
 
   let identity: { name: string; ssn: string }
   try {
@@ -52,7 +46,7 @@ export async function GET(req: NextRequest) {
   if (!supabaseUrl || !serviceKey) return back('error=serverkonfig')
 
   const patch = await fetch(
-    `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}`,
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(flow.userId)}`,
     {
       method: 'PATCH',
       headers: {
