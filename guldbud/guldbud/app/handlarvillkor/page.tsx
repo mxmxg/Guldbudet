@@ -40,7 +40,7 @@ export default function DealerTermsPage() {
           heading: 'Avgifter: slagavgift och frakt',
           body: [
             'På varje vunnen affär tillkommer en slagavgift (köparprovision) på 8 % av det vinnande budet, som läggs ovanpå budet. Utöver detta tillkommer en fast fraktavgift på 149 kr per föremål för försäkrad leverans till dig. Avgifterna gäller samtliga varor.',
-            'Du ser alltid ditt totalpris inklusive slagavgift och frakt innan du lägger ett bud. Priser anges exklusive eventuell mervärdesskatt. Du ansvarar själv för din egen moms- och skattehantering; för handel med investeringsguld och skrotguld kan särskilda regler gälla, såsom undantag eller omvänd skattskyldighet.',
+            'Du ser alltid ditt totalpris inklusive slagavgift och frakt innan du lägger ett bud. Inköpet sker från en privatperson och är därför utan moms. Du ansvarar själv för din moms- och skattehantering vid vidareförsäljning, där vinstmarginalbeskattning (VMB) normalt tillämpas för begagnade varor.',
           ],
         },
         {
