@@ -8,7 +8,8 @@ import { formatSEK } from '@/lib/gold'
 export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Sålda resultat · GuldBud',
-  description: 'Se vad guld faktiskt sålts för på GuldBud. Transparent prisstatistik – inga lockpriser.',
+  description: 'Se vad guld faktiskt sålts för på GuldBud. Transparent prisstatistik, inga lockpriser.',
+  alternates: { canonical: '/resultat' },
 }
 
 export default async function ResultsPage() {

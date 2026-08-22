@@ -2,7 +2,10 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 
-export const metadata = { title: 'Så fungerar budgivningen · GuldBud' }
+export const metadata = {
+  title: 'Så fungerar budgivningen · GuldBud',
+  alternates: { canonical: '/dealer/guide' },
+}
 
 const STEPS = [
   {
