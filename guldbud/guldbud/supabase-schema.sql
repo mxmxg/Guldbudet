@@ -1305,3 +1305,110 @@ drop trigger if exists on_dispute_resolved on public.disputes;
 create trigger on_dispute_resolved
   after update on public.disputes
   for each row execute procedure public.notify_dispute_resolved();
+
+-- ============================================================
+-- AML / ursprungskontroll. Målet: kännas som trygghet för säljaren,
+-- inte förhör. Säljaren gör bara en enkel ägarbekräftelse vid inlämning
+-- (source_type + attest). Resten (trösklar, flaggor, utbetalningsspärr)
+-- jobbar i bakgrunden och syns bara för admin. Vi är helt kontantfria
+-- (spårbar in- och utbetalning), vilket sänker tvättrisken rejält.
+-- ============================================================
+
+-- Ursprungsdeklaration på föremålet (fylls i vid inlämning).
+alter table public.items add column if not exists source_type text;         -- 'arv' | 'eget_kop' | 'eget_smycke' | 'annat'
+alter table public.items add column if not exists source_note text;
+alter table public.items add column if not exists ownership_attested_at timestamptz;
+
+-- AML-status på affären. null/'clear' = ok, 'review' = kräver granskning,
+-- 'approved' = admin har godkänt, 'flagged' = misstänkt (utbetalning spärrad).
+alter table public.orders add column if not exists aml_status text;
+alter table public.orders add column if not exists aml_flag_reason text;
+alter table public.orders add column if not exists aml_reviewed_by uuid references public.profiles;
+alter table public.orders add column if not exists aml_reviewed_at timestamptz;
+alter table public.orders add column if not exists aml_notes text;
+
+-- Riskbaserad flaggning när affären skapas. Små affärer går rakt igenom
+-- ('clear'); stora enskilda eller hög sammanlagd volym per person kräver
+-- granskning ('review'). Trösklar: 25 000 kr per affär, 50 000 kr sammanlagt
+-- på rullande 12 mån (fångar den som delar upp i många små affärer).
+create or replace function public.set_order_aml_status()
+returns trigger language plpgsql security definer
+  set search_path = public as $$
+declare
+  v_single constant integer := 25000;
+  v_cumulative constant integer := 50000;
+  v_prior integer;
+begin
+  select coalesce(sum(amount), 0) into v_prior
+  from public.orders
+  where seller_id = new.seller_id
+    and status <> 'cancelled'
+    and created_at > now() - interval '12 months';
+
+  if new.amount >= v_single then
+    new.aml_status := 'review';
+    new.aml_flag_reason := 'Enskild affär över ' || v_single || ' kr';
+  elsif v_prior + new.amount >= v_cumulative then
+    new.aml_status := 'review';
+    new.aml_flag_reason := 'Sammanlagd volym över ' || v_cumulative || ' kr på 12 mån';
+  else
+    new.aml_status := 'clear';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_order_set_aml on public.orders;
+create trigger on_order_set_aml
+  before insert on public.orders
+  for each row execute procedure public.set_order_aml_status();
+
+-- Utbetalningsspärr utökad: släpp aldrig pengar (verified_paid/shipped_to_dealer)
+-- medan AML-granskning pågår eller affären är flaggad. Befintliga rader har
+-- aml_status = null och påverkas inte.
+create or replace function public.enforce_payment_before_release()
+returns trigger language plpgsql
+set search_path = public as $$
+begin
+  if new.status in ('verified_paid', 'shipped_to_dealer') and new.dealer_paid_at is null then
+    raise exception 'Handlarens betalning måste registreras (dealer_paid_at) innan utbetalning eller vidareskick.';
+  end if;
+  if new.status in ('verified_paid', 'shipped_to_dealer')
+     and new.aml_status is not null and new.aml_status not in ('clear', 'approved') then
+    raise exception 'AML-granskning krävs innan utbetalning (aml_status=%).', new.aml_status;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_order_release_guard on public.orders;
+create trigger on_order_release_guard
+  before update on public.orders
+  for each row execute procedure public.enforce_payment_before_release();
+
+-- Notis till admin när en affär skapas som kräver AML-granskning.
+create or replace function public.notify_admins_aml_review()
+returns trigger language plpgsql security definer
+  set search_path = public as $$
+declare
+  v_title text;
+begin
+  if new.aml_status = 'review' then
+    select title into v_title from public.items where id = new.item_id;
+    insert into public.notifications (user_id, title, message, item_id, link)
+    select p.id,
+           'Affär att granska (rutinkontroll)',
+           'Affären för "' || coalesce(v_title, 'föremål') || '" behöver en snabb granskning innan utbetalning: ' ||
+             coalesce(new.aml_flag_reason, 'högre belopp') || '.',
+           new.item_id,
+           '/admin/orders/' || new.id
+    from public.profiles p
+    where p.role = 'admin';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_order_aml_review on public.orders;
+create trigger on_order_aml_review
+  after insert on public.orders
+  for each row execute procedure public.notify_admins_aml_review();

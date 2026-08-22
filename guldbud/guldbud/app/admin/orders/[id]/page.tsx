@@ -18,6 +18,7 @@ import {
   DisputeStatus,
   reasonLabel,
 } from '@/lib/disputes'
+import { AML_STATUS_LABEL, AML_STATUS_STYLE, AmlStatus, sourceLabel } from '@/lib/aml'
 
 export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -36,6 +37,8 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const [refundReason, setRefundReason] = useState('')
   const [disputes, setDisputes] = useState<any[]>([])
   const [resolutionText, setResolutionText] = useState<Record<string, string>>({})
+  const [amlCumulative, setAmlCumulative] = useState<number | null>(null)
+  const [amlNotes, setAmlNotes] = useState('')
 
   useEffect(() => {
     init()
@@ -89,6 +92,36 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
       .eq('order_id', params.id)
       .order('created_at', { ascending: false })
     setDisputes(disp || [])
+    setAmlNotes(o.aml_notes || '')
+    // Säljarens sammanlagda volym (rullande 12 mån, exkl. avbrutna) för AML-vyn.
+    const yearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
+    const { data: sellerOrders } = await supabase
+      .from('orders')
+      .select('amount, status, created_at')
+      .eq('seller_id', o.seller_id)
+      .neq('status', 'cancelled')
+      .gte('created_at', yearAgo)
+    setAmlCumulative((sellerOrders || []).reduce((sum: number, r: any) => sum + (r.amount || 0), 0))
+  }
+
+  // Admin avgör AML-granskningen. approved släpper utbetalningen; flagged
+  // spärrar den och markerar affären som misstänkt.
+  const updateAml = async (status: AmlStatus) => {
+    setSaving(true)
+    setSaveError('')
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        aml_status: status,
+        aml_notes: amlNotes.trim() || null,
+        aml_reviewed_by: me,
+        aml_reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', order.id)
+    if (error) setSaveError('Kunde inte spara granskningen: ' + error.message)
+    else await loadOrder()
+    setSaving(false)
   }
 
   // Admin avgör ett ärende. under_review kräver ingen text; resolved/rejected
@@ -434,6 +467,82 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
               </>
             )}
           </div>
+
+          {/* AML / ursprungskontroll */}
+          {(() => {
+            const amlStatus = (order.aml_status || null) as AmlStatus | null
+            const needsReview = amlStatus === 'review' || amlStatus === 'flagged'
+            return (
+              <div className={`card p-5 ${needsReview ? 'border border-amber-200' : ''}`}>
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <p className="font-display text-lg text-espresso-900">Ursprung & granskning</p>
+                  {amlStatus && (
+                    <span className={`chip text-xs ${AML_STATUS_STYLE[amlStatus]}`}>
+                      {AML_STATUS_LABEL[amlStatus]}
+                    </span>
+                  )}
+                </div>
+
+                <dl className="text-sm grid gap-1.5 mb-4">
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-espresso-400">Angivet ursprung</dt>
+                    <dd className="text-espresso-800 text-right">{sourceLabel(item?.source_type)}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-espresso-400">Ägarintyg</dt>
+                    <dd className="text-espresso-800 text-right">
+                      {item?.ownership_attested_at ? 'Ja, intygat vid inlämning' : 'Saknas'}
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-espresso-400">Säljarens volym (12 mån)</dt>
+                    <dd className="text-espresso-800 text-right tabular-nums">
+                      {amlCumulative != null ? formatSEK(amlCumulative) : '—'}
+                    </dd>
+                  </div>
+                  {order.aml_flag_reason && (
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-espresso-400">Orsak till granskning</dt>
+                      <dd className="text-amber-700 text-right">{order.aml_flag_reason}</dd>
+                    </div>
+                  )}
+                  {item?.source_note && (
+                    <div className="mt-1">
+                      <dt className="text-espresso-400">Säljarens notering</dt>
+                      <dd className="text-espresso-700 mt-0.5 whitespace-pre-wrap break-words">{item.source_note}</dd>
+                    </div>
+                  )}
+                </dl>
+
+                {needsReview && (
+                  <p className="text-xs text-amber-700 mb-3 flex items-start gap-1.5">
+                    <span aria-hidden>⚠</span>
+                    <span>Utbetalning är spärrad tills du godkänt granskningen.</span>
+                  </p>
+                )}
+
+                <textarea
+                  value={amlNotes}
+                  onChange={(e) => setAmlNotes(e.target.value)}
+                  rows={2}
+                  placeholder="Anteckning om granskningen (sparas för dokumentation)"
+                  className="w-full text-sm mb-2"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => updateAml('approved')} disabled={saving} className="btn-gold !py-1.5 text-sm">
+                    Godkänn
+                  </button>
+                  <button
+                    onClick={() => updateAml('flagged')}
+                    disabled={saving}
+                    className="text-sm text-red-500 hover:text-red-600 px-3 py-1.5 transition"
+                  >
+                    Flagga som misstänkt
+                  </button>
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Parties (real details, admin only) */}
           <div className="grid sm:grid-cols-2 gap-4">

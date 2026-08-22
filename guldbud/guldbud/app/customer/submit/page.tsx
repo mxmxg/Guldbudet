@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { KARAT_OPTIONS, estimateRange, formatSEK, isPlatinum } from '@/lib/gold'
 import { CATEGORIES, GEMSTONES } from '@/lib/catalog'
+import { SOURCE_OPTIONS } from '@/lib/aml'
 import { CheckIcon } from '@/components/Icons'
 
 export default function SubmitPage() {
@@ -28,6 +29,8 @@ export default function SubmitPage() {
   const [hasGem, setHasGem] = useState(false)
   const [gemstone, setGemstone] = useState('Diamant')
   const [diamondCarat, setDiamondCarat] = useState('')
+  const [sourceType, setSourceType] = useState('')
+  const [ownershipAttested, setOwnershipAttested] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -175,6 +178,14 @@ export default function SubmitPage() {
       setError('Ladda upp minst 2 bilder.')
       return
     }
+    if (!sourceType) {
+      setError('Välj hur du fick föremålet.')
+      return
+    }
+    if (!ownershipAttested) {
+      setError('Bekräfta att föremålet är ditt att sälja.')
+      return
+    }
     setLoading(true)
     setError('')
 
@@ -214,6 +225,8 @@ export default function SubmitPage() {
       gemstone: hasGem ? gemstone : null,
       min_price: minPrice ? parseInt(minPrice) : null,
       image_urls: imageUrls,
+      source_type: sourceType,
+      ownership_attested_at: new Date().toISOString(),
       status: 'pending',
     })
 
@@ -485,6 +498,43 @@ export default function SubmitPage() {
                 placeholder="Beskriv föremålet: ålder, ursprung, skick, gravyr eller annat som handlarna bör känna till."
                 className="w-full"
               />
+            </div>
+
+            {/* Ägarbekräftelse – trygghet, inte förhör. Enkelt val + intyg. */}
+            <div className="rounded-2xl border border-gold-200/70 bg-gold-50/40 p-5">
+              <div className="flex items-center gap-2 mb-1">
+                <CheckIcon size={16} />
+                <p className="text-sm font-medium text-espresso-800">Bara en snabb bekräftelse</p>
+              </div>
+              <p className="text-xs text-espresso-500 mb-4 leading-relaxed">
+                För allas trygghet säljer vi bara guld med känt ursprung. Det tar tre sekunder.
+              </p>
+
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-espresso-700 mb-1.5">
+                  Hur kom du över föremålet?
+                </label>
+                <select value={sourceType} onChange={(e) => setSourceType(e.target.value)} className="w-full">
+                  <option value="">Välj...</option>
+                  {SOURCE_OPTIONS.map((o) => (
+                    <option key={o.key} value={o.key}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={ownershipAttested}
+                  onChange={(e) => setOwnershipAttested(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 shrink-0"
+                />
+                <span className="text-sm text-espresso-600 leading-relaxed">
+                  Jag intygar att föremålet är min egendom och lagligt införskaffat.
+                </span>
+              </label>
             </div>
 
             {error && (
