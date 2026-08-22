@@ -69,7 +69,9 @@ export default function Page() {
       </P>
       <P>
         På <A href="/">GuldBud</A> lägger du ut ditt föremål gratis, handlarna tävlar, och du bestämmer själv om du
-        accepterar det högsta budet. Du kan sätta ett reservationspris om du vill vara säker på en lägstanivå.
+        accepterar det högsta budet. Du kan sätta ett reservationspris om du vill vara säker på en lägstanivå. Läs mer om{' '}
+        <A href="/guider/bast-betalt-for-guld">hur du får bäst betalt för guld</A> och{' '}
+        <A href="/guider/var-salja-guld">var man säljer guld bäst</A>.
       </P>
 
       <H2>Så undviker du att bli lurad</H2>
