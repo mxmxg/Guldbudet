@@ -12,6 +12,12 @@ import Link from 'next/link'
 import { ORDER_STEPS, ORDER_STATUS_LABEL, OrderStatus, nextStatus, stepIndex } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
+import {
+  DISPUTE_STATUS_LABEL,
+  DISPUTE_STATUS_STYLE,
+  DisputeStatus,
+  reasonLabel,
+} from '@/lib/disputes'
 
 export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -28,6 +34,8 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const [trackingDealer, setTrackingDealer] = useState('')
   const [showRefund, setShowRefund] = useState(false)
   const [refundReason, setRefundReason] = useState('')
+  const [disputes, setDisputes] = useState<any[]>([])
+  const [resolutionText, setResolutionText] = useState<Record<string, string>>({})
 
   useEffect(() => {
     init()
@@ -75,6 +83,29 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     setItem(it)
     setSeller(s)
     setDealer(d)
+    const { data: disp } = await supabase
+      .from('disputes')
+      .select('*')
+      .eq('order_id', params.id)
+      .order('created_at', { ascending: false })
+    setDisputes(disp || [])
+  }
+
+  // Admin avgör ett ärende. under_review kräver ingen text; resolved/rejected
+  // sparar admins svar som skickas till parten via notis-triggern.
+  const updateDispute = async (id: string, status: DisputeStatus) => {
+    setSaving(true)
+    setSaveError('')
+    const patch: any = { status, updated_at: new Date().toISOString() }
+    if (status === 'resolved' || status === 'rejected') {
+      patch.resolution = (resolutionText[id] || '').trim() || null
+      patch.resolved_by = me
+      patch.resolved_at = new Date().toISOString()
+    }
+    const { error } = await supabase.from('disputes').update(patch).eq('id', id)
+    if (error) setSaveError('Kunde inte uppdatera ärendet: ' + error.message)
+    else await loadOrder()
+    setSaving(false)
   }
 
   const advance = async () => {
@@ -411,8 +442,85 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* Right: both chat threads */}
+        {/* Right: disputes + both chat threads */}
         <div className="grid gap-6 content-start">
+          {disputes.length > 0 && (
+            <div className="card p-5 border border-amber-200">
+              <p className="font-display text-lg text-espresso-900 mb-3">
+                Ärenden ({disputes.filter((d) => d.status === 'open' || d.status === 'under_review').length} öppna)
+              </p>
+              <div className="grid gap-4">
+                {disputes.map((d) => {
+                  const openState = d.status === 'open' || d.status === 'under_review'
+                  return (
+                    <div key={d.id} className="rounded-xl border border-espresso-100 p-4">
+                      <div className="flex items-center justify-between gap-3 mb-1">
+                        <p className="text-sm font-medium text-espresso-800">{reasonLabel(d.reason)}</p>
+                        <span className={`chip text-xs ${DISPUTE_STATUS_STYLE[d.status as DisputeStatus]}`}>
+                          {DISPUTE_STATUS_LABEL[d.status as DisputeStatus]}
+                        </span>
+                      </div>
+                      <p className="text-xs text-espresso-400 mb-2">
+                        Anmält av {d.party === 'seller' ? 'säljaren' : 'handlaren'} ·{' '}
+                        {new Date(d.created_at).toLocaleDateString('sv-SE', {
+                          day: 'numeric',
+                          month: 'short',
+                        })}
+                      </p>
+                      <p className="text-sm text-espresso-600 whitespace-pre-wrap break-words">{d.description}</p>
+
+                      {d.resolution && (
+                        <div className="mt-3 rounded-lg bg-espresso-50 p-3">
+                          <p className="text-xs font-medium text-espresso-500 mb-0.5">Ert svar</p>
+                          <p className="text-sm text-espresso-700 whitespace-pre-wrap break-words">{d.resolution}</p>
+                        </div>
+                      )}
+
+                      {openState && (
+                        <div className="mt-3 grid gap-2">
+                          <textarea
+                            value={resolutionText[d.id] || ''}
+                            onChange={(e) =>
+                              setResolutionText((s) => ({ ...s, [d.id]: e.target.value }))
+                            }
+                            rows={2}
+                            placeholder="Svar till parten (visas när du markerar löst eller avslår)"
+                            className="w-full text-sm"
+                          />
+                          <div className="flex flex-wrap gap-2">
+                            {d.status === 'open' && (
+                              <button
+                                onClick={() => updateDispute(d.id, 'under_review')}
+                                disabled={saving}
+                                className="btn-ghost-gold !py-1.5 text-sm"
+                              >
+                                Under utredning
+                              </button>
+                            )}
+                            <button
+                              onClick={() => updateDispute(d.id, 'resolved')}
+                              disabled={saving}
+                              className="btn-gold !py-1.5 text-sm"
+                            >
+                              Markera som löst
+                            </button>
+                            <button
+                              onClick={() => updateDispute(d.id, 'rejected')}
+                              disabled={saving}
+                              className="text-sm text-red-500 hover:text-red-600 px-3 py-1.5 transition"
+                            >
+                              Avslå
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <OrderChat
             orderId={order.id}
             party="seller"
