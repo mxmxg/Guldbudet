@@ -235,6 +235,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
   const totalBids = items.reduce((s, i) => s + (i.bid_count || 0), 0)
   return (
     <>
+      <main>
       {/* HERO */}
       <section className="relative overflow-hidden bg-espresso-900 text-white">
         <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
@@ -681,6 +682,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
       </section>
 
       <RecentlySold rows={sold} />
+      </main>
 
       <Footer />
     </>

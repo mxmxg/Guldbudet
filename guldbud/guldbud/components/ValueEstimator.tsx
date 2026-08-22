@@ -60,6 +60,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
             <div className="tabular-nums">
               <input
                 type="number"
+                aria-label="Vikt i gram"
                 value={weight}
                 min={0.5}
                 max={500}
@@ -72,6 +73,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
           </div>
           <input
             type="range"
+            aria-label="Vikt i gram, reglage"
             min={0.5}
             max={200}
             step={0.5}
@@ -79,7 +81,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
             onChange={(e) => setWeight(Number(e.target.value))}
             className="gold-range w-full"
           />
-          <div className="flex justify-between text-[10px] text-espresso-200/50 mt-1">
+          <div className="flex justify-between text-[10px] text-espresso-100/75 mt-1">
             <span>0,5 g</span>
             <span>200 g</span>
           </div>
@@ -130,7 +132,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
           Lägg ut och få riktiga bud
           <ArrowIcon />
         </Link>
-        <p className="text-center text-[11px] text-espresso-200/45 mt-3">
+        <p className="text-center text-[11px] text-espresso-100/70 mt-3">
           Uppskattad utbetalning, något under metallvärdet. Konkurrensen mellan handlare avgör slutpriset.
         </p>
       </div>
