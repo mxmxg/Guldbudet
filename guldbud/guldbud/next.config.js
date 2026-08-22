@@ -7,6 +7,11 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
+  // sharp är en native-modul och ska laddas från node_modules i runtime, inte
+  // bundlas in (används i engångs-routen /api/admin/optimize-images).
+  experimental: {
+    serverComponentsExternalPackages: ['sharp'],
+  },
   images: {
     // Serva bilderna direkt från Supabase CDN i stället för via Vercels
     // bildoptimering. Vercels optimering har en månadskvot och började svara
