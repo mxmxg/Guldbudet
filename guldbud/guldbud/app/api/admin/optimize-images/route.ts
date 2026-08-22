@@ -23,6 +23,11 @@ export async function GET(req: NextRequest) {
   const url = new URL(req.url)
   const run = url.searchParams.get('run') === '1'
 
+  const SB = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!SB || !KEY) return NextResponse.json({ error: 'missing env' }, { status: 500 })
+  const H = { apikey: KEY, Authorization: `Bearer ${KEY}` }
+
   // Auth: antingen en inloggad admin (Bearer access_token) eller
   // EMAIL_WEBHOOK_SECRET som ?secret= (för direktanrop). Adminknappen i
   // adminpanelen använder det första, så ingen nyckel behövs i URL:en.
@@ -37,17 +42,19 @@ export async function GET(req: NextRequest) {
         data: { user },
       } = await sb.auth.getUser(token)
       if (user) {
-        const { data: prof } = await sb.from('profiles').select('role').eq('id', user.id).single()
-        if (prof?.role === 'admin') authed = true
+        // Slå upp rollen med service role – RLS döljer profilen för ett
+        // oautentiserat anon-anrop, så vi frågar rakt via REST med den
+        // redan validerade user-iden.
+        const r = await fetch(`${SB}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=role`, {
+          headers: H,
+          cache: 'no-store',
+        })
+        const rows = r.ok ? await r.json() : []
+        if (Array.isArray(rows) && rows[0]?.role === 'admin') authed = true
       }
     }
   }
   if (!authed) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-
-  const SB = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!SB || !KEY) return NextResponse.json({ error: 'missing env' }, { status: 500 })
-  const H = { apikey: KEY, Authorization: `Bearer ${KEY}` }
 
   const listFolder = async (prefix: string): Promise<any[]> => {
     const res = await fetch(`${SB}/storage/v1/object/list/${BUCKET}`, {
