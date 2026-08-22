@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Logo from '@/components/Logo'
+import { TrustpilotFooterLink } from '@/components/TrustpilotInvite'
 
 export default function Footer() {
   return (
@@ -43,6 +44,9 @@ export default function Footer() {
               <a href="mailto:info@guldbud.com" className="hover:text-gold-300 transition">
                 info@guldbud.com
               </a>
+            </li>
+            <li className="pt-1">
+              <TrustpilotFooterLink />
             </li>
           </FooterCol>
         </div>
