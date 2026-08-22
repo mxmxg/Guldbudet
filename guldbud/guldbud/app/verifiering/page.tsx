@@ -8,11 +8,11 @@ import { ShieldIcon, CheckIcon } from '@/components/Icons'
 
 const ERROR_TEXT: Record<string, string> = {
   ej_konfigurerad: 'BankID är inte aktiverat än. Vi öppnar det inom kort.',
-  saknar_kod: 'Något gick fel i BankID-svaret. Försök igen.',
-  ogiltig_session: 'Sessionen gick ut. Starta verifieringen på nytt.',
+  avbruten: 'Verifieringen avbröts. Klicka på knappen för att försöka igen.',
+  ogiltig_session: 'Det tog för lång tid. Klicka på knappen och försök igen.',
   verifiering_misslyckades: 'Verifieringen kunde inte slutföras. Försök igen.',
-  serverkonfig: 'Ett tekniskt fel uppstod. Försök igen om en stund.',
-  kunde_ej_spara: 'Vi kunde inte spara verifieringen. Försök igen.',
+  serverkonfig: 'Ett tekniskt fel uppstod hos oss. Försök igen om en liten stund.',
+  kunde_ej_spara: 'Vi kunde inte spara verifieringen just nu. Försök igen.',
 }
 
 export default function VerifieringPage() {
@@ -60,7 +60,11 @@ export default function VerifieringPage() {
     const q = new URLSearchParams(window.location.search)
     if (q.get('ok')) setBanner({ kind: 'ok', text: 'Din identitet är nu verifierad med BankID.' })
     const err = q.get('error')
-    if (err) setBanner({ kind: 'error', text: ERROR_TEXT[err] || 'Något gick fel. Försök igen.' })
+    if (err)
+      setBanner({
+        kind: 'error',
+        text: ERROR_TEXT[err] || 'Verifieringen kunde inte slutföras. Klicka på knappen för att försöka igen.',
+      })
 
     const load = async () => {
       const {
