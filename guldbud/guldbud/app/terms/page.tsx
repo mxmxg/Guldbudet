@@ -1,6 +1,9 @@
 import LegalPage from '@/components/LegalPage'
 
-export const metadata = { title: 'Användarvillkor · GuldBud' }
+export const metadata = {
+  title: 'Användarvillkor · GuldBud',
+  alternates: { canonical: '/terms' },
+}
 
 export default function TermsPage() {
   return (

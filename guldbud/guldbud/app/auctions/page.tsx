@@ -6,7 +6,11 @@ import AuctionsBrowser from '@/components/AuctionsBrowser'
 import RecentlySold, { SoldRow } from '@/components/RecentlySold'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Auktioner · GuldBud' }
+export const metadata = {
+  title: 'Auktioner · GuldBud',
+  description: 'Pågående guldauktioner just nu. Auktoriserade handlare budar mot varandra om guld och smycken.',
+  alternates: { canonical: '/auctions' },
+}
 
 export type EnrichedItem = Item & { top_bid: number; bid_count: number }
 
