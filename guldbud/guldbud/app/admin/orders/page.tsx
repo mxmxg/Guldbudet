@@ -113,6 +113,12 @@ export default function AdminOrdersPage() {
                       {disputedIds.has(o.id) && (
                         <span className="chip bg-amber-100 text-amber-800 border border-amber-200">Ärende</span>
                       )}
+                      {o.aml_status === 'review' && (
+                        <span className="chip bg-amber-100 text-amber-800 border border-amber-200">Granska</span>
+                      )}
+                      {o.aml_status === 'flagged' && (
+                        <span className="chip bg-red-100 text-red-700 border border-red-200">Flaggad</span>
+                      )}
                     </div>
                     <p className="text-xs text-espresso-400 mt-0.5">
                       {o.seller?.full_name} → {o.dealer?.company_name || o.dealer?.full_name}
