@@ -56,14 +56,14 @@ export default function Footer() {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-espresso-100/45">
           <p>© {new Date().getFullYear()} GuldBud AB. Alla rättigheter förbehållna.</p>
-          <div className="flex gap-5">
-            <Link href="/terms" className="hover:text-gold-300 transition">
+          <div className="flex gap-4">
+            <Link href="/terms" className="hover:text-gold-300 transition inline-block py-2 px-1">
               Villkor
             </Link>
-            <Link href="/privacy" className="hover:text-gold-300 transition">
+            <Link href="/privacy" className="hover:text-gold-300 transition inline-block py-2 px-1">
               Integritetspolicy
             </Link>
-            <Link href="/privacy" className="hover:text-gold-300 transition">
+            <Link href="/privacy" className="hover:text-gold-300 transition inline-block py-2 px-1">
               Cookies
             </Link>
           </div>
@@ -76,7 +76,7 @@ export default function Footer() {
 function FooterCol({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h4 className="text-gold-300 text-sm font-semibold mb-4 font-sans tracking-wide">{title}</h4>
+      <h3 className="text-gold-300 text-sm font-semibold mb-4 font-sans tracking-wide">{title}</h3>
       <ul className="flex flex-col gap-2.5">{children}</ul>
     </div>
   )
