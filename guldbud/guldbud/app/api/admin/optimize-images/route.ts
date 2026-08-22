@@ -3,7 +3,8 @@ import sharp from 'sharp'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-export const maxDuration = 60
+// 10s är taket på Vercels gratisplan; tidsbudgeten nedan (8s) håller sig under.
+export const maxDuration = 10
 
 // Engångsverktyg: krymper redan uppladdade bilder i item-images-bucketen till
 // max 2048px JPEG, så de gamla råa telefonfotona (flera MB) blir några hundra kB.
