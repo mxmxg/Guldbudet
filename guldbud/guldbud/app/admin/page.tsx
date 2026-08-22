@@ -609,6 +609,18 @@ export default function AdminPage() {
           </div>
         </Link>
 
+        {/* Marknadsövervakning (anti-samverkan) */}
+        <Link
+          href="/admin/overvakning"
+          className="card card-hover p-5 mb-10 flex items-center justify-between gap-4"
+        >
+          <div>
+            <p className="font-display text-lg text-espresso-900">Marknadsövervakning</p>
+            <p className="text-sm text-espresso-400">Upptäck mönster som kan tyda på samordnad budgivning.</p>
+          </div>
+          <span className="text-gold-600 text-sm shrink-0">Öppna →</span>
+        </Link>
+
         {/* Dealers */}
         <section id="granska-handlare" className="mb-12 scroll-mt-24">
           <h2 className="font-display text-xl text-espresso-900 mb-4 flex items-center gap-2">
