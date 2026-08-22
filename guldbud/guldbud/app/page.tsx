@@ -1,11 +1,15 @@
-import { createClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import { Item } from '@/lib/types'
 import Navbar from '@/components/Navbar'
 import HomeContent from '@/components/HomeContent'
 import JsonLd from '@/components/JsonLd'
 import { SoldRow } from '@/components/RecentlySold'
 
-export const dynamic = 'force-dynamic'
+// Cacha startsidan i 30 s (ISR) i stället för att bygga om den från databasen
+// vid varje besök. Serverns HTML är ändå samma publika sida för alla (inloggade
+// delar läggs till på klienten), och live-uppdatering av bud sker på klienten.
+// Ger snabb, jämn laddningstid och avlastar databasen.
+export const revalidate = 30
 
 const SITE = 'https://guldbud.com'
 const orgLd = {
@@ -29,7 +33,13 @@ const siteLd = {
 export type EnrichedItem = Item & { top_bid: number; bid_count: number }
 
 export default async function HomePage() {
-  const supabase = createClient()
+  // Cookie-lös anon-klient: startsidans data är publik (RLS tillåter anon att
+  // läsa aktiva föremål och deras bud), och att inte läsa cookies är det som gör
+  // ISR-cachningen möjlig.
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
   // Select items without embedding profiles — the homepage cards don't use the
   // owner name, and dropping the join removes a profiles-RLS failure mode that
   // could otherwise empty the whole list.
