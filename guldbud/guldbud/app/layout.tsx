@@ -22,8 +22,18 @@ export const metadata: Metadata = {
     template: '%s · GuldBud',
   },
   description:
-    'Lägg ut ditt guld och låt auktoriserade guldhandlare buda mot varandra i realtid. Du får marknadens bästa pris, enkelt, tryggt och kostnadsfritt.',
-  keywords: ['sälja guld', 'guldauktion', 'guldpris', 'guldhandlare', 'sälja smycken'],
+    'Sälja guld med bäst betalt? Lägg ut ditt guld och låt auktoriserade guldhandlare buda mot varandra i realtid. Du får marknadens bästa pris, enkelt, tryggt och kostnadsfritt.',
+  keywords: [
+    'sälja guld',
+    'bäst betalt för guld',
+    'vad är mitt guld värt',
+    'guldpris idag',
+    'sälja guld online',
+    'guldauktion',
+    'sälja guldsmycken',
+    'guldhandlare',
+    'värdera guld',
+  ],
   alternates: { canonical: '/' },
   openGraph: {
     title: 'GuldBud · Sveriges guldauktion',

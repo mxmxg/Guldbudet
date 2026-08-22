@@ -17,6 +17,11 @@ const GUIDES = [
     desc: 'Hela processen från värdering till utbetalning, och hur du undviker att bli lurad.',
   },
   {
+    href: '/guider/bast-betalt-for-guld',
+    title: 'Bäst betalt för guld',
+    desc: 'Vem ger mest, och hur du låter handlarna tävla i stället för att ta första budet.',
+  },
+  {
     href: '/guider/vad-ar-mitt-guld-vart',
     title: 'Vad är mitt guld värt?',
     desc: 'Räkna ut värdet på sekunder utifrån vikt, karat och dagens guldpris.',
@@ -27,6 +32,16 @@ const GUIDES = [
     desc: 'Aktuellt pris per gram för 24K, 18K, 14K och 9K, och vad som styr det.',
   },
   {
+    href: '/guider/var-salja-guld',
+    title: 'Var säljer man guld bäst?',
+    desc: 'Pantbank, guldsmed, nätet eller auktion, en ärlig jämförelse av var du får mest.',
+  },
+  {
+    href: '/guider/salja-guld-online',
+    title: 'Sälja guld online',
+    desc: 'Så säljer du guld på nätet tryggt, och ofta mer lönsamt än i butik.',
+  },
+  {
     href: '/guider/karat-18k-14k-9k',
     title: 'Vad betyder 18K, 14K och 9K?',
     desc: 'Karat och stämplar förklarade, och hur guldhalten påverkar värdet.',
@@ -35,6 +50,11 @@ const GUIDES = [
     href: '/guider/salja-arvguld',
     title: 'Sälja arvguld och gamla smycken',
     desc: 'Så värderar och säljer du ärvda eller omoderna smycken tryggt.',
+  },
+  {
+    href: '/guider/salja-trasigt-guld',
+    title: 'Sälja trasigt guld och tandguld',
+    desc: 'Trasigt, ostämplat eller tandguld, värdet sitter i metallen, inte i skicket.',
   },
 ]
 

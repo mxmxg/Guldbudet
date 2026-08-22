@@ -268,7 +268,8 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             <Reveal delay={160}>
               <p className="mt-6 text-lg text-espresso-100/75 max-w-lg leading-relaxed">
                 Lägg ut ditt guldföremål och låt Sveriges auktoriserade guldhandlare buda mot
-                varandra, i realtid. Ingen prutning, inga mellanhänder. Bara det bästa budet.
+                varandra, i realtid. Ingen prutning, inga mellanhänder. Bäst betalt för ditt guld,
+                helt kostnadsfritt.
               </p>
             </Reveal>
 
