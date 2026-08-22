@@ -252,9 +252,9 @@ export default function SubmitPage() {
           <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
             <CheckIcon size={34} />
           </div>
-          <h1 className="font-display text-3xl text-espresso-900 mb-3">Förfrågan mottagen</h1>
+          <h1 className="font-display text-3xl text-espresso-900 mb-3">Föremålet är inskickat</h1>
           <p className="text-espresso-500 mb-8 leading-relaxed">
-            Vi granskar ditt föremål och öppnar budgivningen inom ett par timmar. Du får en
+            Vi granskar det snabbt och öppnar budgivningen inom ett par timmar. Du får en
             notifiering så fort auktionen är live.
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
@@ -547,7 +547,7 @@ export default function SubmitPage() {
             )}
 
             <button type="submit" disabled={loading} className="btn-gold">
-              {loading ? 'Skickar in...' : 'Skicka in förfrågan'}
+              {loading ? 'Lägger ut...' : 'Lägg ut föremålet'}
             </button>
           </form>
 
