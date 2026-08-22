@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { TrashIcon } from '@/components/Icons'
 import CountdownTimer from '@/components/CountdownTimer'
+import ImageOptimizeButton from '@/components/ImageOptimizeButton'
 import { estimateRange, formatSEK } from '@/lib/gold'
 import { commission } from '@/lib/fees'
 import { OPEN_ORDER_STATES } from '@/lib/orders'
@@ -620,6 +621,11 @@ export default function AdminPage() {
           </div>
           <span className="text-gold-600 text-sm shrink-0">Öppna →</span>
         </Link>
+
+        {/* Engångs-bildoptimering */}
+        <div className="mb-10">
+          <ImageOptimizeButton />
+        </div>
 
         {/* Dealers */}
         <section id="granska-handlare" className="mb-12 scroll-mt-24">

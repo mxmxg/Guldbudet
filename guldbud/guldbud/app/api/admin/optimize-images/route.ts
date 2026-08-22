@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
+import { createRouteClient } from '@/lib/supabase-route'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -20,11 +21,28 @@ const TIME_BUDGET_MS = 8000
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
-  const secret = url.searchParams.get('secret')
-  if (!process.env.EMAIL_WEBHOOK_SECRET || secret !== process.env.EMAIL_WEBHOOK_SECRET) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  }
   const run = url.searchParams.get('run') === '1'
+
+  // Auth: antingen en inloggad admin (Bearer access_token) eller
+  // EMAIL_WEBHOOK_SECRET som ?secret= (för direktanrop). Adminknappen i
+  // adminpanelen använder det första, så ingen nyckel behövs i URL:en.
+  let authed = false
+  const secret = url.searchParams.get('secret')
+  if (process.env.EMAIL_WEBHOOK_SECRET && secret === process.env.EMAIL_WEBHOOK_SECRET) authed = true
+  if (!authed) {
+    const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+    if (token) {
+      const sb = createRouteClient(req)
+      const {
+        data: { user },
+      } = await sb.auth.getUser(token)
+      if (user) {
+        const { data: prof } = await sb.from('profiles').select('role').eq('id', user.id).single()
+        if (prof?.role === 'admin') authed = true
+      }
+    }
+  }
+  if (!authed) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   const SB = process.env.NEXT_PUBLIC_SUPABASE_URL
   const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
