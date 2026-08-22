@@ -17,7 +17,9 @@ const BUCKET = 'item-images'
 const MIN_BYTES = 400 * 1024
 const MAX_EDGE = 2048
 const QUALITY = 80
-const TIME_BUDGET_MS = 8000
+// Snäv budget: en påbörjad bild måste hinna klart innan Vercels 10s-tak.
+// Startar vi ingen bild efter 4,5s hinner den in-flight-bilden bli klar i tid.
+const TIME_BUDGET_MS = 4500
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url)
@@ -121,7 +123,7 @@ export async function GET(req: NextRequest) {
         const out = await sharp(buf)
           .rotate()
           .resize(MAX_EDGE, MAX_EDGE, { fit: 'inside', withoutEnlargement: true })
-          .jpeg({ quality: QUALITY, mozjpeg: true })
+          .jpeg({ quality: QUALITY }) // utan mozjpeg = snabbare kodning, håller under tidsgränsen
           .toBuffer()
         if (out.length >= buf.length) continue // ingen vinst
         const up = await fetch(`${SB}/storage/v1/object/${BUCKET}/${encodeURI(f.path)}`, {

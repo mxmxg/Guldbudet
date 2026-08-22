@@ -44,24 +44,36 @@ export default function ImageOptimizeButton() {
     setBusy(true)
     let saved = 0
     let guard = 0
-    // Endpoint:en tar en bunt per anrop (tidsbudget) – loopa tills done.
-    while (guard++ < 200) {
+    let consecTimeouts = 0
+    // Endpoint:en tar en liten bunt per anrop (tidsbudget) – loopa tills done.
+    while (guard++ < 400) {
       setStatus(`Krymper bilder... (${Math.round(saved)} MB sparat hittills)`)
       const r = await call(true)
       const j = r?.body
-      if (!r || !r.ok || !j || j.error) {
-        setStatus(`Fel (${r?.status ?? '?'}): ${j?.error ?? 'inget svar'}. Klicka igen för att fortsätta.`)
-        break
+      if (r && r.ok && j && !j.error) {
+        consecTimeouts = 0
+        saved += j.sparat_mb || 0
+        if (j.done) {
+          setStatus(
+            saved > 0
+              ? `Klart! Bilderna är krympta, ca ${Math.round(saved)} MB sparat. Kör om PageSpeed.`
+              : 'Klart! Inga bilder behövde krympas.'
+          )
+          break
+        }
+        continue
       }
-      saved += j.sparat_mb || 0
-      if (j.done) {
-        setStatus(
-          saved > 0
-            ? `Klart! Bilderna är krympta och sparade ca ${Math.round(saved)} MB. Kör om PageSpeed.`
-            : 'Klart! Inga bilder behövde krympas.'
-        )
-        break
+      // Timeout (504) betyder bara att bunten tog slut på tid – redan klara
+      // bilder är sparade, så vi fortsätter automatiskt.
+      if (r?.status === 504) {
+        if (++consecTimeouts > 10) {
+          setStatus('Många timeouts i rad. Klicka "Krymp bilderna" igen för att fortsätta.')
+          break
+        }
+        continue
       }
+      setStatus(`Fel (${r?.status ?? '?'}): ${j?.error ?? 'inget svar'}. Klicka igen för att fortsätta.`)
+      break
     }
     setBusy(false)
   }
