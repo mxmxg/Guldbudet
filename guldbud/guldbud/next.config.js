@@ -8,6 +8,11 @@ const nextConfig = {
   },
   output: 'standalone',
   images: {
+    // Serva bilderna direkt från Supabase CDN i stället för via Vercels
+    // bildoptimering. Vercels optimering har en månadskvot och började svara
+    // 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED (bilder blev svarta). Supabase
+    // levererar redan via CDN, så vi behöver inte mellanledet.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
