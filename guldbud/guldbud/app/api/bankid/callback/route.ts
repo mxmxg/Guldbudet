@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
   const state = url.searchParams.get('state')
   const err = url.searchParams.get('error')
 
-  if (err) return back(`error=${encodeURIComponent(err)}`)
-  if (!code || !state) return back('error=saknar_kod')
+  if (err) return back('error=avbruten')
+  if (!code || !state) return back('error=avbruten')
 
   // Läs och validera flödes-cookien (state + nonce + PKCE-verifier + userId).
   // userId sattes server-side i start-routen efter att access_token validerats,
