@@ -21,16 +21,22 @@ export default function ImageOptimizeButton() {
       headers: { Authorization: `Bearer ${session.access_token}` },
       cache: 'no-store',
     })
-    return res.json().catch(() => null)
+    const body = await res.json().catch(() => null)
+    return { ok: res.ok, status: res.status, body }
   }
 
   const analyze = async () => {
     setBusy(true)
     setStatus('Analyserar bilderna...')
-    const j = await call(false)
-    if (!j || j.error) setStatus('Kunde inte analysera. Försök igen.')
-    else if (j.stora_bilder === 0) setStatus('Inga stora bilder att krympa. Allt är redan optimerat.')
-    else setStatus(`${j.stora_bilder} stora bilder hittades. Krympning skulle spara ca ${j.sparat_mb} MB.`)
+    const r = await call(false)
+    const j = r?.body
+    if (!r || !r.ok || !j || j.error) {
+      setStatus(`Fel (${r?.status ?? '?'}): ${j?.error ?? 'inget svar'}`)
+    } else if (j.stora_bilder === 0) {
+      setStatus('Inga stora bilder att krympa. Allt är redan optimerat.')
+    } else {
+      setStatus(`${j.stora_bilder} stora bilder (${j.total_mb} MB). Krympning sparar ca ${j.sparat_mb} MB.`)
+    }
     setBusy(false)
   }
 
@@ -41,9 +47,10 @@ export default function ImageOptimizeButton() {
     // Endpoint:en tar en bunt per anrop (tidsbudget) – loopa tills done.
     while (guard++ < 200) {
       setStatus(`Krymper bilder... (${Math.round(saved)} MB sparat hittills)`)
-      const j = await call(true)
-      if (!j || j.error) {
-        setStatus('Något gick fel under krympningen. Klicka igen för att fortsätta.')
+      const r = await call(true)
+      const j = r?.body
+      if (!r || !r.ok || !j || j.error) {
+        setStatus(`Fel (${r?.status ?? '?'}): ${j?.error ?? 'inget svar'}. Klicka igen för att fortsätta.`)
         break
       }
       saved += j.sparat_mb || 0

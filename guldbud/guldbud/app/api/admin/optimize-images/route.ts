@@ -66,73 +66,87 @@ export async function GET(req: NextRequest) {
     return res.ok ? await res.json() : []
   }
 
-  // Samla alla filer (en nivå av användarmappar under roten).
-  const files: { path: string; size: number | null }[] = []
-  const top = await listFolder('')
-  for (const e of top) {
-    const isFolder = e.id == null && e.metadata == null
-    if (isFolder) {
-      const sub = await listFolder(e.name)
-      for (const f of sub)
-        if (f.id != null || f.metadata != null) files.push({ path: `${e.name}/${f.name}`, size: f.metadata?.size ?? null })
-    } else {
-      files.push({ path: e.name, size: e.metadata?.size ?? null })
-    }
-  }
+  const mb = (b: number) => Math.round((b / 1024 / 1024) * 10) / 10
 
-  const started = Date.now()
-  let scanned = 0
-  let changed = 0
-  let saved = 0
-  let candidates = 0
-  let timedOut = false
-
-  for (const f of files) {
-    if (f.size != null && f.size < MIN_BYTES) continue // redan liten
-    candidates++
-    if (Date.now() - started > TIME_BUDGET_MS) {
-      timedOut = true
-      continue
+  try {
+    // Samla alla filer (en nivå av användarmappar under roten).
+    const files: { path: string; size: number | null }[] = []
+    const top = await listFolder('')
+    for (const e of top) {
+      const isFolder = e.id == null && e.metadata == null
+      if (isFolder) {
+        const sub = await listFolder(e.name)
+        for (const f of sub)
+          if (f.id != null || f.metadata != null) files.push({ path: `${e.name}/${f.name}`, size: f.metadata?.size ?? null })
+      } else {
+        files.push({ path: e.name, size: e.metadata?.size ?? null })
+      }
     }
-    scanned++
-    try {
-      const dl = await fetch(`${SB}/storage/v1/object/${BUCKET}/${encodeURI(f.path)}`, { headers: H, cache: 'no-store' })
-      if (!dl.ok) continue
-      const buf = Buffer.from(await dl.arrayBuffer())
-      if (buf.length < MIN_BYTES) continue
-      const out = await sharp(buf)
-        .rotate()
-        .resize(MAX_EDGE, MAX_EDGE, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: QUALITY, mozjpeg: true })
-        .toBuffer()
-      if (out.length >= buf.length) continue // ingen vinst
-      if (run) {
+
+    const bigOnes = files.filter((f) => f.size != null && f.size >= MIN_BYTES)
+    const totalBig = bigOnes.reduce((s, f) => s + (f.size || 0), 0)
+
+    // ANALYS (dry): bara storlekar ur metadatan, ingen nedladdning eller
+    // bildbehandling. Snabbt och kan aldrig time-outa.
+    if (!run) {
+      return NextResponse.json({
+        mode: 'testkörning',
+        filer_totalt: files.length,
+        stora_bilder: bigOnes.length,
+        total_mb: mb(totalBig),
+        sparat_mb: mb(Math.round(totalBig * 0.7)), // uppskattning ~70 %
+        done: true,
+        tips: bigOnes.length ? 'Klicka "Krymp bilderna" för att köra skarpt.' : 'Inget att göra.',
+      })
+    }
+
+    // SKARPT: behandla en bunt inom tidsbudgeten.
+    const started = Date.now()
+    let scanned = 0
+    let changed = 0
+    let saved = 0
+    let timedOut = false
+
+    for (const f of bigOnes) {
+      if (Date.now() - started > TIME_BUDGET_MS) {
+        timedOut = true
+        break
+      }
+      scanned++
+      try {
+        const dl = await fetch(`${SB}/storage/v1/object/${BUCKET}/${encodeURI(f.path)}`, { headers: H, cache: 'no-store' })
+        if (!dl.ok) continue
+        const buf = Buffer.from(await dl.arrayBuffer())
+        if (buf.length < MIN_BYTES) continue
+        const out = await sharp(buf)
+          .rotate()
+          .resize(MAX_EDGE, MAX_EDGE, { fit: 'inside', withoutEnlargement: true })
+          .jpeg({ quality: QUALITY, mozjpeg: true })
+          .toBuffer()
+        if (out.length >= buf.length) continue // ingen vinst
         const up = await fetch(`${SB}/storage/v1/object/${BUCKET}/${encodeURI(f.path)}`, {
           method: 'POST',
           headers: { ...H, 'Content-Type': 'image/jpeg', 'x-upsert': 'true', 'cache-control': 'max-age=31536000' },
           body: out as any,
         })
         if (!up.ok) continue
+        changed++
+        saved += buf.length - out.length
+      } catch {
+        // hoppa över trasiga filer
       }
-      changed++
-      saved += buf.length - out.length
-    } catch {
-      // hoppa över trasiga filer
     }
-  }
 
-  const mb = (b: number) => Math.round((b / 1024 / 1024) * 10) / 10
-  // Kvar att göra ≈ kandidater vi inte hann med (grov uppskattning).
-  const remaining = timedOut ? candidates - scanned : 0
-  return NextResponse.json({
-    mode: run ? 'skarpt' : 'testkörning',
-    filer_totalt: files.length,
-    stora_bilder: candidates,
-    behandlade_denna_körning: scanned,
-    krympta: changed,
-    sparat_mb: mb(saved),
-    kvar_ungefär: remaining,
-    done: !timedOut,
-    tips: timedOut ? 'Öppna samma länk igen tills done=true.' : run ? 'Klart!' : 'Lägg till &run=1 för att skriva om på riktigt.',
-  })
+    return NextResponse.json({
+      mode: 'skarpt',
+      stora_bilder: bigOnes.length,
+      behandlade_denna_körning: scanned,
+      krympta: changed,
+      sparat_mb: mb(saved),
+      done: !timedOut,
+      tips: timedOut ? 'Kör igen tills done=true.' : 'Klart!',
+    })
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || 'okänt fel' }, { status: 500 })
+  }
 }
