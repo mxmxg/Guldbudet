@@ -9,9 +9,19 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
 
 export async function GET(request: NextRequest) {
   const supabase = createRouteClient(request)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  // Tillfällig diagnostik: /api/bankid/start?debug=1 visar vad servern ser.
+  if (request.nextUrl.searchParams.get('debug') === '1') {
+    return NextResponse.json({
+      hasUser: !!user,
+      authError: error?.message || null,
+      iduraConfigured: iduraConfigured(),
+      cookieNames: request.cookies.getAll().map((c) => c.name),
+      site: SITE,
+    })
+  }
+
   if (!user) {
     return NextResponse.redirect(`${SITE}/auth/login`)
   }
