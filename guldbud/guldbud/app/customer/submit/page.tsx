@@ -204,7 +204,12 @@ export default function SubmitPage() {
       const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const { error: uploadError } = await supabase.storage
         .from('item-images')
-        .upload(path, fileData, { contentType: fileData.type || 'image/jpeg' })
+        // Ett års cache: filnamnet är unikt per uppladdning, så bilden ändras
+        // aldrig. Återbesökare slipper ladda om den (PageSpeed: cache-livslängd).
+        .upload(path, fileData, {
+          contentType: fileData.type || 'image/jpeg',
+          cacheControl: '31536000',
+        })
       if (uploadError) {
         setError('Bilduppladdning misslyckades: ' + uploadError.message)
         setLoading(false)
