@@ -1191,3 +1191,117 @@ begin
 exception when others then
   raise notice 'pg_cron ej konfigurerat för notify-ending-soon: %', sqlerrm;
 end $$;
+
+-- ============================================================
+-- Tvistehantering ("ärenden"): en part i en affär kan formellt
+-- anmäla ett problem. Skilt från order_messages (löpande prat) –
+-- en tvist har en orsak, en status och en lösning, så plattformen
+-- har spårbarhet på vad som gått fel och hur det lösts. Endast admin
+-- avgör; parten skriver bara in ärendet.
+-- ============================================================
+create table if not exists public.disputes (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid references public.orders on delete cascade not null,
+  raised_by uuid references public.profiles not null,
+  party text not null check (party in ('seller','dealer')),
+  reason text not null,
+  description text not null,
+  status text not null default 'open'
+    check (status in ('open','under_review','resolved','rejected')),
+  resolution text,
+  resolved_by uuid references public.profiles,
+  resolved_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists disputes_order_idx on public.disputes (order_id);
+create index if not exists disputes_status_idx on public.disputes (status);
+
+alter table public.disputes enable row level security;
+
+-- Admin ser och hanterar allt.
+drop policy if exists "admins manage disputes" on public.disputes;
+create policy "admins manage disputes" on public.disputes
+  for all using (public.is_admin());
+
+-- En part läser tvister på sina egna affärer.
+drop policy if exists "parties read own disputes" on public.disputes;
+create policy "parties read own disputes" on public.disputes
+  for select using (
+    exists (
+      select 1 from public.orders o
+      where o.id = disputes.order_id
+        and (o.seller_id = auth.uid() or o.dealer_id = auth.uid())
+    )
+  );
+
+-- En part öppnar en tvist på sin egen affär, och bara i sin egen roll
+-- (säljaren som 'seller', handlaren som 'dealer'). raised_by måste vara
+-- en själv. Parten kan inte uppdatera/avgöra – det gör bara admin.
+drop policy if exists "parties open own disputes" on public.disputes;
+create policy "parties open own disputes" on public.disputes
+  for insert with check (
+    raised_by = auth.uid()
+    and exists (
+      select 1 from public.orders o
+      where o.id = disputes.order_id
+        and (
+          (party = 'seller' and o.seller_id = auth.uid()) or
+          (party = 'dealer' and o.dealer_id = auth.uid())
+        )
+    )
+  );
+
+-- Notis till admin när ett ärende öppnas.
+create or replace function public.notify_admins_new_dispute()
+returns trigger language plpgsql security definer
+  set search_path = public as $$
+declare
+  v_title text;
+  v_item_id uuid;
+begin
+  select i.title, i.id into v_title, v_item_id
+  from public.orders o join public.items i on i.id = o.item_id
+  where o.id = new.order_id;
+  insert into public.notifications (user_id, title, message, item_id, link)
+  select p.id,
+         'Nytt ärende att hantera',
+         'En ' || case new.party when 'seller' then 'säljare' else 'handlare' end ||
+           ' har anmält ett problem i affären för "' || coalesce(v_title, 'föremål') || '".',
+         v_item_id,
+         '/admin/orders/' || new.order_id
+  from public.profiles p
+  where p.role = 'admin';
+  return new;
+end;
+$$;
+
+drop trigger if exists on_dispute_opened on public.disputes;
+create trigger on_dispute_opened
+  after insert on public.disputes
+  for each row execute procedure public.notify_admins_new_dispute();
+
+-- Notis till parten när admin avgör ärendet (löst eller avslaget).
+create or replace function public.notify_dispute_resolved()
+returns trigger language plpgsql security definer
+  set search_path = public as $$
+begin
+  if new.status is distinct from old.status
+     and new.status in ('resolved','rejected') then
+    insert into public.notifications (user_id, title, message, item_id, link)
+    values (
+      new.raised_by,
+      case new.status when 'resolved' then 'Ditt ärende är löst' else 'Svar på ditt ärende' end,
+      coalesce(new.resolution, 'GuldBud har hanterat ditt ärende.'),
+      null,
+      '/orders/' || new.order_id
+    );
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_dispute_resolved on public.disputes;
+create trigger on_dispute_resolved
+  after update on public.disputes
+  for each row execute procedure public.notify_dispute_resolved();

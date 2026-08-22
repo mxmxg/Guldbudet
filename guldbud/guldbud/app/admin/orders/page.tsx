@@ -15,6 +15,7 @@ export default function AdminOrdersPage() {
   const router = useRouter()
   const supabase = createClient()
   const [orders, setOrders] = useState<any[]>([])
+  const [disputedIds, setDisputedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'open' | 'done'>('open')
 
@@ -48,6 +49,12 @@ export default function AdminOrdersPage() {
       .select('*, items(title, image_urls), seller:profiles!orders_seller_id_fkey(full_name), dealer:profiles!orders_dealer_id_fkey(company_name, full_name)')
       .order('created_at', { ascending: false })
     setOrders(os || [])
+    // Vilka affärer har ett öppet ärende? (för en varningsmarkering i listan)
+    const { data: disp } = await supabase
+      .from('disputes')
+      .select('order_id')
+      .in('status', ['open', 'under_review'])
+    setDisputedIds(new Set((disp || []).map((d: { order_id: string }) => d.order_id)))
     setLoading(false)
   }
 
@@ -103,6 +110,9 @@ export default function AdminOrdersPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium text-espresso-900 truncate">{o.items?.title}</p>
                       <span className="chip bg-espresso-100 text-espresso-600">{ORDER_STATUS_LABEL[o.status as OrderStatus]}</span>
+                      {disputedIds.has(o.id) && (
+                        <span className="chip bg-amber-100 text-amber-800 border border-amber-200">Ärende</span>
+                      )}
                     </div>
                     <p className="text-xs text-espresso-400 mt-0.5">
                       {o.seller?.full_name} → {o.dealer?.company_name || o.dealer?.full_name}

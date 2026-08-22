@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import OrderStepper from '@/components/OrderStepper'
 import OrderChat from '@/components/OrderChat'
+import DisputePanel from '@/components/DisputePanel'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
@@ -168,6 +169,9 @@ export default function OrderPage({ params }: { params: { id: string } }) {
 
         {/* Chat */}
         <OrderChat orderId={order.id} party={party} meId={me} isAdmin={false} counterpartLabel="GuldBud" />
+
+        {/* Ärenden / tvistehantering */}
+        <DisputePanel orderId={order.id} party={party} meId={me} />
       </div>
       <Footer />
     </div>
