@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { createRouteClient } from '@/lib/supabase-route'
 import { exchangeCode, extractIdentity } from '@/lib/idura'
 
 export const runtime = 'nodejs'
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   if (!flow || flow.state !== state) return back('error=ogiltig_session')
 
   // Vem är inloggad? Vi verifierar identiteten för den användaren.
-  const supabase = createClient()
+  const supabase = createRouteClient(req)
   const {
     data: { user },
   } = await supabase.auth.getUser()

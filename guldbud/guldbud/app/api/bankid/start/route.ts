@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { NextRequest, NextResponse } from 'next/server'
+import { createRouteClient } from '@/lib/supabase-route'
 import { iduraConfigured, makePkce, randomToken, buildAuthorizeUrl } from '@/lib/idura'
 
 export const runtime = 'nodejs'
@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
 
-export async function GET() {
-  const supabase = createClient()
+export async function GET(request: NextRequest) {
+  const supabase = createRouteClient(request)
   const {
     data: { user },
   } = await supabase.auth.getUser()
