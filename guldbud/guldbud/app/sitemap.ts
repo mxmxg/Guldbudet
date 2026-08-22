@@ -10,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/resultat',
     '/how-it-works',
     '/dealer/guide',
+    '/handlarvillkor',
     '/guider',
     '/guider/salja-guld',
     '/guider/bast-betalt-for-guld',

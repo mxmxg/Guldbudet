@@ -89,6 +89,7 @@ function LoginForm() {
     postalCode: '', city: '', company: '', orgNumber: '', email: '', password: ''
   })
   const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [resetMsg, setResetMsg] = useState('')
   const [forgot, setForgot] = useState(false)
@@ -147,6 +148,11 @@ function LoginForm() {
         setLoading(false)
         return
       }
+      if (role === 'dealer' && !termsAccepted) {
+        setSubmitError('Du behöver godkänna handlarvillkoren för att registrera dig.')
+        setLoading(false)
+        return
+      }
     }
 
     if (mode === 'login') {
@@ -182,6 +188,7 @@ function LoginForm() {
             city: fields.city,
             company_name: fields.company,
             org_number: fields.orgNumber,
+            dealer_terms_accepted_at: role === 'dealer' ? new Date().toISOString() : null,
           }
         }
       })
@@ -335,6 +342,25 @@ function LoginForm() {
                 <p style={{ color: '#8B6914', fontSize: '12px', background: '#0f0a04', padding: '10px 12px', borderRadius: '8px', border: '1px solid #3d2d0f' }}>
                   Handlarkonton granskas manuellt. Du får ett e-postmeddelande när ditt konto är godkänt.
                 </p>
+              )}
+
+              {mode === 'register' && role === 'dealer' && (
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={e => setTermsAccepted(e.target.checked)}
+                    style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0, accentColor: '#B8860B' }}
+                  />
+                  <span style={{ color: '#c9a84c', fontSize: '12px', lineHeight: 1.5 }}>
+                    Jag har läst och godkänner{' '}
+                    <Link href="/handlarvillkor" target="_blank" style={{ color: '#D4AF37', textDecoration: 'underline' }}>
+                      handlarvillkoren
+                    </Link>
+                    , inklusive skyldigheten att betala vunna auktioner omgående, slagavgift på 8 %, fraktavgift och
+                    att avstängning kan ske vid misskötsamhet.
+                  </span>
+                </label>
               )}
 
               {mode === 'register' && (
