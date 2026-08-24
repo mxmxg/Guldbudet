@@ -324,6 +324,7 @@ export default function SubmitPage() {
                     <button
                       type="button"
                       onClick={() => removeImage(i)}
+                      aria-label={`Ta bort bild ${i + 1}`}
                       className="absolute top-1 right-1 w-6 h-6 bg-black/60 hover:bg-red-500 text-white rounded-full text-xs flex items-center justify-center transition"
                     >
                       ×
@@ -394,7 +395,7 @@ export default function SubmitPage() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-espresso-700 mb-1.5">Kategori</label>
-                <select required value={category} onChange={(e) => setCategory(e.target.value)} className="w-full">
+                <select required value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Kategori" className="w-full">
                   <option value="">Välj kategori...</option>
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
@@ -411,6 +412,7 @@ export default function SubmitPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="t.ex. Vigselring i rödguld"
+                  aria-label="Namn på föremålet"
                   className="w-full"
                 />
               </div>
@@ -427,12 +429,13 @@ export default function SubmitPage() {
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
                   placeholder="t.ex. 12.5"
+                  aria-label="Vikt i gram"
                   className="w-full"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-espresso-700 mb-1.5">Guldets karat / finhet</label>
-                <select required value={karat} onChange={(e) => setKarat(e.target.value)} className="w-full">
+                <select required value={karat} onChange={(e) => setKarat(e.target.value)} aria-label="Guldets karat eller finhet" className="w-full">
                   <option value="">Välj...</option>
                   {KARAT_OPTIONS.map((k) => (
                     <option key={k} value={k}>
@@ -458,7 +461,7 @@ export default function SubmitPage() {
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="block text-sm text-espresso-600 mb-1.5">Typ av sten</label>
-                    <select value={gemstone} onChange={(e) => setGemstone(e.target.value)} className="w-full">
+                    <select value={gemstone} onChange={(e) => setGemstone(e.target.value)} aria-label="Typ av sten" className="w-full">
                       {GEMSTONES.map((g) => (
                         <option key={g} value={g}>
                           {g}
@@ -477,6 +480,7 @@ export default function SubmitPage() {
                       value={diamondCarat}
                       onChange={(e) => setDiamondCarat(e.target.value)}
                       placeholder="t.ex. 0.50"
+                      aria-label="Stenens vikt i carat"
                       className="w-full"
                     />
                   </div>
@@ -494,6 +498,7 @@ export default function SubmitPage() {
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 placeholder="Lämna tomt för att ta emot alla bud"
+                aria-label="Reservationspris i kronor (valfritt)"
                 className="w-full"
               />
               <p className="mt-1.5 text-xs text-espresso-400">
@@ -509,6 +514,7 @@ export default function SubmitPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Beskriv föremålet: ålder, ursprung, skick, gravyr eller annat som handlarna bör känna till."
+                aria-label="Beskrivning"
                 className="w-full"
               />
             </div>

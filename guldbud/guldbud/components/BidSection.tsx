@@ -192,6 +192,7 @@ export default function BidSection({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder={`Minst ${minNext.toLocaleString('sv-SE')}`}
+            aria-label="Ditt bud i kronor"
             className="w-full !pr-10"
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-sm">kr</span>
@@ -263,6 +264,7 @@ export default function BidSection({
                   value={maxBid}
                   onChange={(e) => setMaxBid(e.target.value)}
                   placeholder={`Max, t.ex. ${(minNext + 900).toLocaleString('sv-SE')}`}
+                  aria-label="Maxbud i kronor (autobud)"
                   className="w-full !pr-10"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-sm">kr</span>
