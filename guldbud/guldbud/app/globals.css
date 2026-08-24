@@ -11,6 +11,21 @@
     scroll-behavior: smooth;
   }
 
+  /* Respektera prefers-reduced-motion: frys allt som rör sig (float, pulse-ring,
+     shimmer, marquee, spin, fade-up osv) och stäng av mjuk scroll. Innehållet
+     landar direkt i sitt slutläge. WCAG 2.3.3 / 2.2.2. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
   /* Site-wide guard: never allow horizontal page scroll on any page. Wide
      rows (tabs, tickers, tables) must scroll inside their own container. */
   html, body {

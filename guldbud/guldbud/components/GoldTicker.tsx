@@ -1,5 +1,4 @@
 'use client'
-import { useEffect, useState } from 'react'
 import { useGoldPrice } from '@/lib/useGoldPrice'
 import { karatPrices } from '@/lib/gold'
 
@@ -7,43 +6,23 @@ function fmt(n: number) {
   return n.toLocaleString('sv-SE')
 }
 
-function priceAt(t: number, base: number) {
-  const wave = Math.sin(t / 42000) * 3.4 + Math.sin(t / 130000) * 5.1 + Math.sin(t / 17000) * 1.2
-  return base + wave
-}
-
 /**
- * Live gold price for every karat on one row, with a green/red movement chip.
- * Desktop: static row (everything fits). Mobile: a continuously scrolling
- * marquee so all karats pass by instead of getting cut off.
+ * Dagens guldpris per karat på en rad. Priset är det RIKTIGA spotpriset som
+ * hämtas live via /api/gold-price (uppdateras var 5:e minut), med en ärlig
+ * fallback om hämtningen fallerar. Ingen simulerad rörelse: en tidigare version
+ * lade på en Math.sin()-våg och en påhittad procentförändring märkt "live",
+ * vilket krockade med löftet om ärliga priser. Nu visas bara det faktiska priset.
+ * Desktop: statisk rad (allt får plats). Mobil: en scrollande marquee (pausas
+ * automatiskt vid prefers-reduced-motion) så alla karat hinner passera.
  */
 export default function GoldTicker() {
-  const { price: base } = useGoldPrice()
-  const [state, setState] = useState<{ price: number; up: boolean }>({ price: base, up: true })
-
-  useEffect(() => {
-    let prev = base
-    const tick = () => {
-      const p = priceAt(Date.now(), base)
-      setState({ price: p, up: p >= prev })
-      prev = p
-    }
-    tick()
-    const id = setInterval(tick, 3000)
-    return () => clearInterval(id)
-  }, [base])
-
-  const { price, up } = state
-  const changePct = ((price - base) / base) * 100
+  const { price } = useGoldPrice()
   const karats = karatPrices(price)
 
   const Label = () => (
     <span className="inline-flex items-center gap-1.5 shrink-0 text-gold-400/90">
-      <span className="relative flex h-1.5 w-1.5">
-        <span className="absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-70 animate-pulse-ring" />
-        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold-400" />
-      </span>
-      <span className="font-semibold tracking-wide uppercase text-[10px]">Guldpris live</span>
+      <span className="inline-flex rounded-full h-1.5 w-1.5 bg-gold-400" />
+      <span className="font-semibold tracking-wide uppercase text-[10px]">Dagens guldpris</span>
     </span>
   )
 
@@ -56,18 +35,11 @@ export default function GoldTicker() {
       </span>
     ))
 
-  const Change = () => (
-    <span className={`shrink-0 font-semibold tabular-nums ${up ? 'text-emerald-400' : 'text-red-400'}`}>
-      {up ? '▲' : '▼'} {Math.abs(changePct).toFixed(2)}%
-    </span>
-  )
-
   // One full sequence of the ticker content (used twice in the marquee).
   const Segment = () => (
     <span className="flex items-center gap-4 pr-4 text-xs tabular-nums">
       <Label />
       <Prices />
-      <Change />
     </span>
   )
 
@@ -79,7 +51,6 @@ export default function GoldTicker() {
         <div className="flex items-center gap-4">
           <Prices />
         </div>
-        <Change />
       </div>
 
       {/* Mobile: continuously scrolling marquee */}
