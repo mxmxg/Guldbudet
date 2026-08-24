@@ -1,11 +1,14 @@
-import { createClient } from '@/lib/supabase-server'
+import { createClient } from '@supabase/supabase-js'
 import { loadActiveItemsWithStats } from '@/lib/auctions'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import AuctionsBrowser from '@/components/AuctionsBrowser'
 import RecentlySold, { SoldRow } from '@/components/RecentlySold'
 
-export const dynamic = 'force-dynamic'
+// Cacha listan i 30 s (ISR) i stället för att köra queryn på varje besök. Datan
+// är publik och samma för alla; live-buduppdatering sker ändå på klienten via
+// realtime. En cookie-lös anon-klient krävs för att ISR-cachningen ska bita.
+export const revalidate = 30
 export const metadata = {
   title: 'Auktioner · GuldBud',
   description: 'Pågående guldauktioner just nu. Auktoriserade handlare budar mot varandra om guld och smycken.',
@@ -15,7 +18,13 @@ export const metadata = {
 export type { EnrichedItem } from '@/lib/auctions'
 
 export default async function AuctionsPage() {
-  const supabase = createClient()
+  // Cookie-lös anon-klient: datan är publik (RLS tillåter anon att läsa aktiva
+  // och avslutade föremål samt deras bud), och att inte läsa cookies är det som
+  // gör ISR-cachningen ovan möjlig.
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
   // Aktiva auktioner + budstatistik i en query (DB-funktion, ingen .in-id-lista).
   const enriched = await loadActiveItemsWithStats(supabase)
 
