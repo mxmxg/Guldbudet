@@ -138,9 +138,17 @@ export default function SubmitPage() {
     try {
       // Skicka upp till 3 bilder så AI:n kan avgöra typ från flera vinklar.
       const dataUrls = await Promise.all(files.slice(0, 3).map((f) => fileToDataUrl(f)))
+      // Skicka access-token så endpointen kan kräva inloggad användare (skyddar
+      // den betalda AI-modellen mot anonymt missbruk).
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       const res = await fetch('/api/suggest-listing', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: {
+          'content-type': 'application/json',
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ dataUrls }),
       })
       if (res.status === 503) {

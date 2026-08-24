@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CATEGORIES } from '@/lib/catalog'
+import { createRouteClient } from '@/lib/supabase-route'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -8,12 +9,41 @@ export const dynamic = 'force-dynamic'
 // beskrivning och kategori för ett guldföremål. Nyckeln stannar på servern.
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001'
 
+// Enkel rate limit per användare (best-effort per serverinstans). Skyddar den
+// betalda AI-modellen mot loop-missbruk. Legitimt annonsflöde gör bara ett fåtal
+// anrop, så taket är rymligt. En instans kan nollställas vid cold start – det är
+// ok, det verkliga skyddet är inloggningskravet nedan.
+const RL_MAX = 20
+const RL_WINDOW_MS = 5 * 60 * 1000
+const rlHits = new Map<string, number[]>()
+function allowRequest(userId: string): boolean {
+  const now = Date.now()
+  const recent = (rlHits.get(userId) || []).filter((t) => now - t < RL_WINDOW_MS)
+  if (recent.length >= RL_MAX) {
+    rlHits.set(userId, recent)
+    return false
+  }
+  recent.push(now)
+  rlHits.set(userId, recent)
+  return true
+}
+
 export async function POST(req: NextRequest) {
   const key = process.env.ANTHROPIC_API_KEY
   if (!key) {
     // Funktionen är byggd men inte aktiverad än – klienten döljer knappen snyggt.
     return NextResponse.json({ error: 'ai_unavailable' }, { status: 503 })
   }
+
+  // Kräv inloggad användare. Den betalda vision-modellen får inte vara öppen för
+  // anonymt/scriptat missbruk (kostnads- och DoS-skydd).
+  const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+  if (!token) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  const {
+    data: { user },
+  } = await createRouteClient(req).auth.getUser(token)
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  if (!allowRequest(user.id)) return NextResponse.json({ error: 'rate_limited' }, { status: 429 })
 
   let dataUrls: string[]
   try {
@@ -29,6 +59,9 @@ export async function POST(req: NextRequest) {
     if (m) images.push({ type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } })
   }
   if (images.length === 0) return NextResponse.json({ error: 'bad_image' }, { status: 400 })
+  // Tak på sammanlagd bildstorlek så en enda begäran inte kan svälla minnet.
+  const totalBytes = images.reduce((s, im) => s + (im.source?.data?.length || 0), 0)
+  if (totalBytes > 15_000_000) return NextResponse.json({ error: 'too_large' }, { status: 413 })
 
   const prompt = `Du skriver säljande annonstext för ett guldföremål som ska läggas ut på en svensk guldauktion. Bilderna visar SAMMA föremål från olika vinklar. Målet är att locka handlare att buda, inte att analysera bilden.
 
