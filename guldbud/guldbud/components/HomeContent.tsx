@@ -303,7 +303,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
                 <div className="w-px h-10 bg-espresso-700" />
                 <Stat value={<><CountUp end={100} />%</>} label="Verifierade handlare" />
                 <div className="w-px h-10 bg-espresso-700" />
-                <Stat value={<><CountUp end={24} />h</>} label="Utbetalning" />
+                <Stat value="Omgående" label="Utbetalning efter kontroll" />
               </div>
             </Reveal>
           </div>
@@ -390,7 +390,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {
                 Icon: CoinsIcon,
                 title: 'Acceptera och få betalt',
-                desc: 'Välj det bud du är nöjd med, posta föremålet i det kostnadsfria, försäkrade rekommenderade brev vi skickar dig och få pengarna via Swish eller bankkonto samma dag som vi verifierat.',
+                desc: 'Välj det bud du är nöjd med, posta föremålet i det kostnadsfria, försäkrade rekommenderade brev vi skickar dig och få pengarna omgående via Swish eller bankkonto när vi verifierat det.',
               },
             ].map((s, i) => (
               <Reveal key={s.title} delay={i * 120}>
@@ -547,8 +547,8 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               },
               {
                 icon: <BoltIcon />,
-                title: 'Utbetalning inom 24 timmar',
-                desc: 'När du accepterat det vinnande budet betalar handlaren omgående till oss. Så snart vi tagit emot och verifierat ditt föremål har du pengarna på kontot, oftast inom 24 timmar.',
+                title: 'Utbetalning omgående',
+                desc: 'När du accepterat det vinnande budet betalar handlaren omgående till oss. Så snart vi tagit emot och verifierat ditt föremål betalas pengarna ut omgående via Swish eller bankkonto.',
               },
               {
                 icon: <HeartIcon />,
@@ -617,7 +617,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             },
             {
               title: 'Betalt efter äkthetskontroll',
-              desc: 'När vi mottagit och verifierat föremålet betalas pengarna ut via Swish eller bankkonto, ofta samma dag.',
+              desc: 'När vi mottagit och verifierat föremålet betalas pengarna ut omgående via Swish eller bankkonto.',
             },
             {
               title: 'Du bestämmer',

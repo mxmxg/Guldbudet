@@ -750,8 +750,8 @@ begin
       insert into public.notifications (user_id, title, message, item_id, link)
       values (r.owner_id, 'Grattis! Ditt föremål fick ' || v_top.amount || ' kr',
               'Budgivningen på "' || r.title || '" landade på ' || v_top.amount ||
-              ' kr. Godkänn budet så drar vi igång affären. Du får betalt så snart vi tagit emot ' ||
-              'och verifierat föremålet. Att sälja är helt kostnadsfritt för dig.',
+              ' kr. Godkänn budet så drar vi igång affären. Vi betalar ut omgående via Swish eller ' ||
+              'bankkonto så snart vi tagit emot och verifierat föremålet. Att sälja är helt kostnadsfritt för dig.',
               r.id, '/auctions/' || r.id);
       insert into public.notifications (user_id, title, message, item_id, link)
       values (v_top.dealer_id, 'Du hade det högsta budet',
@@ -911,7 +911,7 @@ begin
 
     insert into public.notifications (user_id, title, message, item_id, link)
     values (new.owner_id, 'Affär skapad, skicka in föremålet',
-            'Budet är accepterat och affären är din. Så fort du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat, porto och adress är redan klara. Så snart vi tagit emot och verifierat det får du betalt.',
+            'Budet är accepterat och affären är din. Så fort du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat, porto och adress är redan klara. Så snart vi tagit emot och verifierat det betalar vi ut omgående via Swish eller bankkonto.',
             new.id, '/orders/' || v_order);
 
     if v_dealer is not null then
@@ -969,8 +969,8 @@ begin
       -- Säljaren: mottaget, kontroll pågår. Handlaren: mottaget, vi skickar vidare.
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.seller_id, 'Vi har tagit emot ditt föremål',
-              'Vi har tagit emot "' || v_title || '" och äkthetskontrollerar det nu. När kontrollen är klar förbereder vi din utbetalning på ' ||
-              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr. Fyll gärna i dina utbetalningsuppgifter (Swish eller bankkonto) i din profil så går det snabbt.',
+              'Vi har tagit emot "' || v_title || '" och äkthetskontrollerar det nu. Så snart kontrollen är godkänd betalar vi ut ' ||
+              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr omgående via Swish eller bankkonto. Fyll gärna i dina utbetalningsuppgifter i din profil så går det snabbt.',
               new.item_id, '/orders/' || new.id);
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.dealer_id, 'Ditt föremål är mottaget och kontrollerat',
@@ -979,7 +979,7 @@ begin
     elsif new.status = 'verified_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
       values (new.seller_id, 'Du har fått betalt',
-              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr är på väg till ditt konto, normalt inom 1–2 bankdagar. Tack för att du sålde via GuldBud!',
+              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr betalas ut omgående via Swish eller bankkonto. Tack för att du sålde via GuldBud!',
               new.item_id, '/orders/' || new.id);
     elsif new.status = 'shipped_to_dealer' then
       insert into public.notifications (user_id, title, message, item_id, link)

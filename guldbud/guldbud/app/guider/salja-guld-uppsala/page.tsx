@@ -19,7 +19,7 @@ const faq = [
   },
   {
     q: 'Hur snabbt får jag betalt?',
-    a: 'När vi tagit emot och äkthetskontrollerat föremålet betalar vi ut via Swish eller bankkonto, normalt inom 1–2 bankdagar. Det är kostnadsfritt för dig som säljer.',
+    a: 'När vi tagit emot och äkthetskontrollerat föremålet betalar vi ut omgående via Swish eller bankkonto. Det är kostnadsfritt för dig som säljer.',
   },
 ]
 

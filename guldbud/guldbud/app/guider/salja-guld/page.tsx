@@ -19,7 +19,7 @@ const faq = [
   },
   {
     q: 'Hur skickar jag in mitt guld tryggt?',
-    a: 'När du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du lägger föremålet i det och postar det rekommenderat, porto och adress är redan klara. Vi äkthetskontrollerar det och betalar ut till dig, normalt inom 1–2 bankdagar.',
+    a: 'När du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du lägger föremålet i det och postar det rekommenderat, porto och adress är redan klara. Vi äkthetskontrollerar det och betalar ut till dig omgående via Swish eller bankkonto.',
   },
   {
     q: 'Behöver jag veta karaten på förhand?',
