@@ -104,16 +104,24 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
     load()
   }, [])
 
-  if (!checked)
+  // ============ GUEST — full marketing landing ============
+  // Gästvyn renderas DIREKT, även server-side (ISR i app/page.tsx), så
+  // förstasidans innehåll, H1 och sökord finns i HTML:en för besökare och
+  // sökmotorer. Tidigare låg allt bakom en spinner tills klientens auth-koll
+  // resolvat, vilket gjorde att SSR-HTML:en i praktiken bara var ordet "GuldBud".
+  // Bara de inloggade vyerna nedan väntar in auth-kollen.
+  if (!user) {
+    return <GuestLanding items={items} loggedIn={false} sold={sold} />
+  }
+
+  // Inloggad men profilen (rollen) inte laddad än: kort neutral laddning så vi
+  // inte råkar rendera admin-fallbacken innan rollen är känd.
+  if (!profile) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <span className="shimmer-text font-sans font-semibold tracking-tight text-[38px]">GuldBud</span>
       </div>
     )
-
-  // ============ GUEST — full marketing landing ============
-  if (!user) {
-    return <GuestLanding items={items} loggedIn={false} sold={sold} />
   }
 
   // ============ CUSTOMER ============
