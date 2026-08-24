@@ -17,6 +17,11 @@ const GUIDES = [
     desc: 'Hela processen från värdering till utbetalning, och hur du undviker att bli lurad.',
   },
   {
+    href: '/guider/guldauktion',
+    title: 'Guldauktion: så säljer du guld på auktion',
+    desc: 'Vad en guldauktion är, hur budgivningen fungerar och varför den slår pantbank och guldsmed.',
+  },
+  {
     href: '/guider/bast-betalt-for-guld',
     title: 'Bäst betalt för guld',
     desc: 'Vem ger mest, och hur du låter handlarna tävla i stället för att ta första budet.',

@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/handlarvillkor',
     '/guider',
     '/guider/salja-guld',
+    '/guider/guldauktion',
     '/guider/bast-betalt-for-guld',
     '/guider/vad-ar-mitt-guld-vart',
     '/guider/guldpris-idag',
