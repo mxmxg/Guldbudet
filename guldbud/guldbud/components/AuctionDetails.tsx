@@ -99,10 +99,25 @@ export default function AuctionDetails({ item }: { item: any }) {
         { event: 'INSERT', schema: 'public', table: 'bids', filter: `item_id=eq.${item.id}` },
         async (payload: any) => {
           const hadBids = bidsCountRef.current
-          await loadBids()
+          const nb = payload.new
+          // Använd budet direkt ur eventet i stället för att läsa om ALLA bud.
+          // Tidigare gjorde varje tittare två queries per bud, vilket i slutspurten
+          // (många tittare × många bud) blev en query-storm mot en enda auktion.
+          if (nb?.id) {
+            setBids((prev) => {
+              if (prev.some((x) => x.id === nb.id)) return prev
+              const next = [...prev, nb].sort(
+                (a, z) =>
+                  z.amount - a.amount ||
+                  new Date(a.created_at).getTime() - new Date(z.created_at).getTime()
+              )
+              bidsCountRef.current = next.length
+              return next
+            })
+          }
           setFlash(true)
           setTimeout(() => setFlash(false), 1200)
-          const amt = payload.new?.amount
+          const amt = nb?.amount
           if (amt) {
             setNewBidToast(amt)
             setTimeout(() => setNewBidToast(null), 4500)
@@ -110,6 +125,28 @@ export default function AuctionDetails({ item }: { item: any }) {
           // Owner celebrates the very first bid on their item.
           if (hadBids === 0 && userRef.current?.id === item.owner_id) {
             setConfetti((c) => c + 1)
+          }
+          // Anti-sniping: bara nära slutet kan sluttiden hoppa framåt. Läs om den
+          // då (billig enkolumnsfråga) så förlängningen syns live, i stället för att
+          // läsa om sluttiden vid varje bud under hela auktionen.
+          const ms = endsAtRef.current ? new Date(endsAtRef.current).getTime() - Date.now() : Infinity
+          if (ms < 3 * 60 * 1000) {
+            const { data: it } = await supabase
+              .from('items')
+              .select('auction_ends_at')
+              .eq('id', item.id)
+              .single()
+            if (it?.auction_ends_at) {
+              if (
+                endsAtRef.current &&
+                new Date(it.auction_ends_at).getTime() > new Date(endsAtRef.current).getTime() + 1000
+              ) {
+                setExtended(true)
+                setTimeout(() => setExtended(false), 6000)
+              }
+              endsAtRef.current = it.auction_ends_at
+              setEndsAt(it.auction_ends_at)
+            }
           }
         }
       )
