@@ -2,14 +2,19 @@
 import { useEffect, useState } from 'react'
 import { GOLD_SPOT_SEK_PER_GRAM } from '@/lib/gold'
 
+type GoldState = { price: number; live: boolean; changePct: number | null; up: boolean }
+
 /**
- * Returns the current 24K gold price (SEK/gram). Starts from the calibrated
- * constant and updates to the live value from /api/gold-price once loaded.
+ * Returns the current 24K gold price (SEK/gram) plus the real daily change
+ * (changePct / up). Starts from the calibrated constant and updates to the live
+ * value from /api/gold-price once loaded, then every 5 minutes.
  */
-export function useGoldPrice(): { price: number; live: boolean } {
-  const [state, setState] = useState<{ price: number; live: boolean }>({
+export function useGoldPrice(): GoldState {
+  const [state, setState] = useState<GoldState>({
     price: GOLD_SPOT_SEK_PER_GRAM,
     live: false,
+    changePct: null,
+    up: true,
   })
 
   useEffect(() => {
@@ -18,7 +23,13 @@ export function useGoldPrice(): { price: number; live: boolean } {
       fetch('/api/gold-price')
         .then((r) => r.json())
         .then((d) => {
-          if (active && d?.pricePerGram24k) setState({ price: d.pricePerGram24k, live: !!d.live })
+          if (active && d?.pricePerGram24k)
+            setState({
+              price: d.pricePerGram24k,
+              live: !!d.live,
+              changePct: typeof d.changePct === 'number' ? d.changePct : null,
+              up: !!d.up,
+            })
         })
         .catch(() => {})
     load()
