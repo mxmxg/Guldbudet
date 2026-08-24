@@ -43,13 +43,13 @@ const STEPS = [
     step: '6',
     time: 'Efter mottagning',
     title: 'Vi verifierar äktheten',
-    desc: 'När vi mottagit föremålet granskar våra experter äktheten, vikten och karathalten. Stämmer allt förbereder vi utbetalningen.',
+    desc: 'När vi mottagit föremålet granskar våra experter äktheten, vikten och karathalten. Stämmer allt betalar vi ut omgående.',
   },
   {
     step: '7',
-    time: '1–2 bankdagar',
+    time: 'Omgående',
     title: 'Pengarna på ditt konto',
-    desc: 'När kontrollen är godkänd betalas beloppet ut till ditt konto, normalt inom 1–2 bankdagar. Du får hela det vinnande budet – inga avgifter dras.',
+    desc: 'När kontrollen är godkänd betalas beloppet ut omgående via Swish eller bankkonto. Du får hela det vinnande budet – inga avgifter dras.',
   },
 ]
 
