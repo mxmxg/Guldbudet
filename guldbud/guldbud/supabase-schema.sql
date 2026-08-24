@@ -1561,3 +1561,36 @@ as $$
     and (i.auction_ends_at is null or i.auction_ends_at > now())
   order by i.auction_ends_at asc nulls last;
 $$;
+
+-- ============================================================
+-- Admin-KPI: snittbud per objekt, aggregerat server-side i EN query i stället
+-- för att hämta alla items + alla deras bud med .in(id-lista) (som växer med
+-- HELA historiken och spricker på URL-längd). SECURITY DEFINER + is_admin-koll
+-- så den bara kan läsas av admin (annars skulle marknadsstatistiken vara publik).
+-- ============================================================
+create or replace function public.bid_kpi_summary()
+returns table (objects int, total_bids int, zero_one int, three_plus int, live_starving int)
+language plpgsql stable security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Endast admin.';
+  end if;
+  return query
+  with per_item as (
+    select i.id, i.status, count(b.id) as n
+    from public.items i
+    left join public.bids b on b.item_id = i.id
+    where i.status in ('active', 'closed')
+    group by i.id, i.status
+  )
+  select
+    count(*)::int,
+    coalesce(sum(n), 0)::int,
+    count(*) filter (where n <= 1)::int,
+    count(*) filter (where n >= 3)::int,
+    count(*) filter (where status = 'active' and n <= 1)::int
+  from per_item;
+end;
+$$;

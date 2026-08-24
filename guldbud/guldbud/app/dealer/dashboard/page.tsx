@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import { Item } from '@/lib/types'
+import { loadActiveItemsWithStats } from '@/lib/auctions'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import CountdownTimer from '@/components/CountdownTimer'
@@ -57,15 +58,7 @@ export default function DealerDashboard() {
     }
     setProfile(prof)
 
-    const { data: activeItems } = await supabase
-      .from('items')
-      .select('*')
-      .eq('status', 'active')
-      .or(`auction_ends_at.is.null,auction_ends_at.gt.${new Date().toISOString()}`)
-      .order('created_at', { ascending: false })
-    const list = (activeItems || []) as Item[]
-    setItems(list)
-    await refreshBids(user.id, list)
+    await refreshBids(user.id)
 
     const { data: watch } = await supabase.from('watchlist').select('item_id').eq('dealer_id', user.id)
     setWatchedIds(new Set((watch || []).map((w: any) => w.item_id)))
@@ -73,22 +66,23 @@ export default function DealerDashboard() {
     setLoading(false)
   }
 
-  // Läser om högsta bud, egna bud och egna autobud. Körs efter varje bud och
-  // maxbud, eftersom proxy-resolvern kan ha lagt ett bud i databasen som
-  // klienten annars inte känner till.
-  const refreshBids = async (userId: string, list: Item[]) => {
-    if (!list || list.length === 0) return
-    const itemIds = list.map((i) => i.id)
-    const { data: bids } = await supabase
-      .from('bids')
-      .select('item_id, amount')
-      .in('item_id', itemIds)
-      .order('amount', { ascending: false })
+  // Läser om aktiva auktioner + högsta bud/antal via DB-funktionen
+  // active_items_with_stats (en query, ingen .in-id-lista som spricker på
+  // URL-längd), samt egna bud och egna autobud. Körs efter varje bud och maxbud,
+  // eftersom proxy-resolvern kan ha lagt ett bud i databasen som klienten annars
+  // inte känner till.
+  const refreshBids = async (userId: string) => {
+    const rows = await loadActiveItemsWithStats(supabase)
+    // Behåll dashboardens ordning: senast inlagda först.
+    const list = (rows as any[]).sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+    setItems(list as Item[])
     const top: Record<string, number> = {}
     const counts: Record<string, number> = {}
-    bids?.forEach((b: any) => {
-      counts[b.item_id] = (counts[b.item_id] || 0) + 1
-      if (!top[b.item_id] || b.amount > top[b.item_id]) top[b.item_id] = b.amount
+    list.forEach((r: any) => {
+      top[r.id] = r.top_bid || 0
+      counts[r.id] = r.bid_count || 0
     })
     setTopBids(top)
     setBidCounts(counts)
@@ -132,7 +126,7 @@ export default function DealerDashboard() {
     } else {
       setBidInputs((prev) => ({ ...prev, [itemId]: '' }))
       // Läs om från databasen: proxy-resolvern kan ha lagt ett motbud direkt.
-      await refreshBids(user!.id, items)
+      await refreshBids(user!.id)
     }
     setBidding(null)
   }
@@ -168,7 +162,7 @@ export default function DealerDashboard() {
       setAutoMax((prev) => ({ ...prev, [itemId]: val }))
       setMaxInputs((prev) => ({ ...prev, [itemId]: '' }))
       // Resolvern kan ha budat åt dig direkt – läs om.
-      await refreshBids(user!.id, items)
+      await refreshBids(user!.id)
     }
     setAutoBusy(null)
   }

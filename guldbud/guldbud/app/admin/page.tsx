@@ -151,25 +151,22 @@ export default function AdminPage() {
       }
 
       // KPI: snittbud per objekt – marknadens viktigaste hälsomätvärde. Räknas
-      // över alla föremål som gått till auktion (aktiva + avslutade), inte
-      // pending/rejected som aldrig fått bud. Vid tillväxt kan detta flyttas
-      // till en DB-vy/RPC, men på nuvarande volym räcker en klientfråga.
-      const { data: auctionItems } = await supabase.from('items').select('id, status').in('status', ['active', 'closed'])
-      const aItems = auctionItems || []
-      if (aItems.length) {
-        const aIds = aItems.map((i: any) => i.id)
-        const { data: allBids } = await supabase.from('bids').select('item_id').in('item_id', aIds)
-        const c: Record<string, number> = {}
-        allBids?.forEach((b: any) => (c[b.item_id] = (c[b.item_id] || 0) + 1))
-        const perObject = aItems.map((i: any) => c[i.id] || 0)
-        const totalBids = perObject.reduce((s, n) => s + n, 0)
+      // över alla föremål som gått till auktion (aktiva + avslutade) via DB-
+      // funktionen bid_kpi_summary, som aggregerar server-side i en query i
+      // stället för att hämta alla items + alla deras bud (som växer med hela
+      // historiken). Om funktionen inte finns än stannar KPI:n tyst på noll.
+      const { data: kpiRows } = await supabase.rpc('bid_kpi_summary')
+      const k: any = Array.isArray(kpiRows) ? kpiRows[0] : kpiRows
+      if (k) {
+        const objects = k.objects || 0
+        const total = k.total_bids || 0
         setBidKpi({
-          avg: aItems.length ? totalBids / aItems.length : 0,
-          objects: aItems.length,
-          total: totalBids,
-          zeroOne: perObject.filter((n) => n <= 1).length,
-          threePlus: perObject.filter((n) => n >= 3).length,
-          liveStarving: aItems.filter((i: any) => i.status === 'active' && (c[i.id] || 0) <= 1).length,
+          avg: objects ? total / objects : 0,
+          objects,
+          total,
+          zeroOne: k.zero_one || 0,
+          threePlus: k.three_plus || 0,
+          liveStarving: k.live_starving || 0,
         })
       }
 
