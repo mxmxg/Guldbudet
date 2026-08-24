@@ -1,5 +1,5 @@
 'use client'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Item } from '@/lib/types'
 import { CATEGORIES } from '@/lib/catalog'
 import AuctionCard from '@/components/AuctionCard'
@@ -7,6 +7,11 @@ import CategoryIcon from '@/components/CategoryIcon'
 import { GemIcon, SearchIcon } from '@/components/Icons'
 
 type CardItem = Item & { top_bid: number; bid_count: number }
+
+// Rendera listan i bitar i stället för att lägga tusentals kort i DOM samtidigt.
+// Filtrering/sortering sker fortfarande över hela mängden; bara antalet renderade
+// noder är begränsat, och fler laddas in när man scrollar nära slutet.
+const PAGE_SIZE = 24
 
 type Sort = 'ending' | 'newest' | 'price' | 'bids'
 
@@ -102,6 +107,32 @@ export default function AuctionsBrowser({
     })
     return list
   }, [items, query, category, karat, wMin, wMax, sort, quick, myBidIds, leadingIds, watchedIds])
+
+  // Inkrementell rendering: visa PAGE_SIZE kort och ladda fler vid scroll.
+  const [visible, setVisible] = useState(PAGE_SIZE)
+  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  // Återställ till första sidan när filtret/sorteringen ändras.
+  useEffect(() => {
+    setVisible(PAGE_SIZE)
+  }, [query, category, karat, wMin, wMax, sort, quick])
+
+  // Auto-ladda fler när sentinel-elementet närmar sig vyn.
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) setVisible((v) => v + PAGE_SIZE)
+      },
+      { rootMargin: '600px' }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [filtered.length, visible])
+
+  const shown = filtered.slice(0, visible)
+  const hasMore = filtered.length > visible
 
   return (
     <>
@@ -253,11 +284,20 @@ export default function AuctionsBrowser({
         </div>
 
         {filtered.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
-            {filtered.map((item) => (
-              <AuctionCard key={item.id} item={item} />
-            ))}
-          </div>
+          <>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
+              {shown.map((item) => (
+                <AuctionCard key={item.id} item={item} />
+              ))}
+            </div>
+            {hasMore && (
+              <div ref={sentinelRef} className="pb-10 flex justify-center">
+                <button onClick={() => setVisible((v) => v + PAGE_SIZE)} className="btn-ghost-gold !px-8">
+                  Visa fler ({filtered.length - visible} kvar)
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="card p-16 text-center my-4">
             <div className="w-16 h-16 rounded-full bg-gold-50 text-gold-500 flex items-center justify-center mx-auto mb-4">
