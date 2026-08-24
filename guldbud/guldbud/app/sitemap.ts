@@ -22,6 +22,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/guider/karat-18k-14k-9k',
     '/guider/salja-arvguld',
     '/guider/salja-trasigt-guld',
+    '/guider/salja-guldmynt',
+    '/guider/pantbank-eller-auktion',
     '/terms',
     '/privacy',
   ].map((p) => ({
