@@ -101,6 +101,16 @@ const GUIDES = [
     title: 'Skatt på sålt guld',
     desc: 'Måste man skatta? Så gäller reglerna för smycken kontra investeringsguld.',
   },
+  {
+    href: '/guider/salja-guld-uppsala',
+    title: 'Sälja guld i Uppsala',
+    desc: 'Från Luthagen till Sävja, låt handlarna tävla om ditt guld hemifrån.',
+  },
+  {
+    href: '/guider/salja-guld-helsingborg',
+    title: 'Sälja guld i Helsingborg',
+    desc: 'Bäst betalt i hela nordvästra Skåne, marknaden sätter priset.',
+  },
 ]
 
 export default function GuidesIndex() {
