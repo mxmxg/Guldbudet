@@ -349,6 +349,7 @@ export default function DealerDashboard() {
                             value={bidInputs[item.id] || ''}
                             onChange={(e) => setBidInputs((prev) => ({ ...prev, [item.id]: e.target.value }))}
                             placeholder={`Min ${(top + 100).toLocaleString('sv-SE')}`}
+                            aria-label={`Ditt bud i kronor på ${item.title}`}
                             className="w-full lg:w-40 !pr-8 text-sm"
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-xs">kr</span>
@@ -391,6 +392,7 @@ export default function DealerDashboard() {
                                 value={maxInputs[item.id] || ''}
                                 onChange={(e) => setMaxInputs((prev) => ({ ...prev, [item.id]: e.target.value }))}
                                 placeholder="Maxbud (dolt)"
+                                aria-label={`Maxbud i kronor (autobud) på ${item.title}`}
                                 className="w-full lg:w-40 !pr-8 text-sm"
                               />
                               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-xs">kr</span>

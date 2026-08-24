@@ -228,7 +228,7 @@ function LoginForm() {
             <Link href="/">
               <Logo className="text-[36px] text-[#D4AF37] leading-none" />
             </Link>
-            <p style={{ color: '#8B6914', fontSize: '10px', letterSpacing: '4px', marginTop: '4px' }}>SVERIGES GULDAUKTION</p>
+            <p style={{ color: '#c9a24a', fontSize: '10px', letterSpacing: '4px', marginTop: '4px' }}>SVERIGES GULDAUKTION</p>
           </div>
 
           {/* Kort */}
@@ -241,7 +241,7 @@ function LoginForm() {
                   <button key={m} onClick={() => setMode(m)} style={{
                     flex: 1, padding: '10px', fontSize: '14px', fontWeight: 500, cursor: 'pointer', border: 'none', transition: 'all 0.2s',
                     background: mode === m ? '#B8860B' : 'transparent',
-                    color: mode === m ? 'white' : '#8B6914',
+                    color: mode === m ? 'white' : '#c9a24a',
                     borderRadius: mode === m ? '6px' : '0',
                   }}>
                     {m === 'login' ? 'Logga in' : 'Registrera'}
@@ -254,7 +254,7 @@ function LoginForm() {
             {forgot && (
               <div style={{ marginBottom: '20px', animation: 'authReveal .28s ease' }}>
                 <h2 style={{ color: '#D4AF37', fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>Återställ lösenord</h2>
-                <p style={{ color: '#8B6914', fontSize: '13px' }}>
+                <p style={{ color: '#c9a24a', fontSize: '13px' }}>
                   Fyll i din e-post så skickar vi en länk för att sätta ett nytt lösenord.
                 </p>
               </div>
@@ -269,7 +269,7 @@ function LoginForm() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                     background: role === r ? '#2d1f0a' : 'transparent',
                     border: `1px solid ${role === r ? '#B8860B' : '#3d2d0f'}`,
-                    color: role === r ? '#D4AF37' : '#8B6914',
+                    color: role === r ? '#D4AF37' : '#c9a24a',
                   }}>
                     {r === 'customer' ? <HomeIcon size={16} /> : <StoreIcon size={16} />}
                     {r === 'customer' ? 'Privatperson' : 'Guldhandlare'}
@@ -324,7 +324,7 @@ function LoginForm() {
                   <button
                     type="button"
                     onClick={() => { setForgot(false); setSubmitError(''); setResetMsg('') }}
-                    style={{ background: 'none', border: 'none', color: '#8B6914', fontSize: '12px', cursor: 'pointer', padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: '#c9a24a', fontSize: '12px', cursor: 'pointer', padding: 0 }}
                   >
                     ← Tillbaka till inloggning
                   </button>
@@ -344,7 +344,7 @@ function LoginForm() {
               )}
 
               {mode === 'register' && role === 'dealer' && (
-                <p style={{ color: '#8B6914', fontSize: '12px', background: '#0f0a04', padding: '10px 12px', borderRadius: '8px', border: '1px solid #3d2d0f' }}>
+                <p style={{ color: '#c9a24a', fontSize: '12px', background: '#0f0a04', padding: '10px 12px', borderRadius: '8px', border: '1px solid #3d2d0f' }}>
                   Handlarkonton granskas manuellt. Du får ett e-postmeddelande när ditt konto är godkänt.
                 </p>
               )}
@@ -391,7 +391,7 @@ function LoginForm() {
               )}
 
               {mode === 'register' && (
-                <p style={{ color: '#5a4020', fontSize: '11px' }}>
+                <p style={{ color: '#b89a63', fontSize: '11px' }}>
                   Dina personuppgifter hanteras säkert och delas aldrig med tredje part.{' '}
                   <Link href="/privacy" style={{ color: '#B8860B' }}>Integritetspolicy</Link>
                 </p>
