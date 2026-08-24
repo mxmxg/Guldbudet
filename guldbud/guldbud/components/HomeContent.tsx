@@ -260,17 +260,17 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
 
             <Reveal delay={80}>
               <h1 className="mt-6 font-display text-4xl sm:text-5xl md:text-6xl leading-[1.05] tracking-tight">
-                Sälj ditt guld till
+                Låt guldköparna
                 <br />
-                <span className="text-gradient-gold">marknadens bästa pris</span>
+                <span className="text-gradient-gold">tävla om ditt guld</span>
               </h1>
             </Reveal>
 
             <Reveal delay={160}>
               <p className="mt-6 text-lg text-espresso-100/75 max-w-lg leading-relaxed">
-                Lägg ut ditt guldföremål och låt Sveriges auktoriserade guldhandlare buda mot
-                varandra, i realtid. Ingen prutning, inga mellanhänder. Bäst betalt för ditt guld,
-                helt kostnadsfritt.
+                Sälj ditt guld utan att gissa vem som betalar mest. Lägg ut föremålet så budar
+                Sveriges auktoriserade guldhandlare mot varandra i realtid, och du väljer det
+                högsta budet. Bäst betalt för ditt guld, helt kostnadsfritt.
               </p>
             </Reveal>
 

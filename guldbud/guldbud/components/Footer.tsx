@@ -13,8 +13,8 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Logo className="text-gold-300 text-[24px] leading-none" />
             <p className="text-sm mt-3 max-w-xs leading-relaxed text-espresso-100/60">
-              Sveriges guldauktion. Auktoriserade handlare budar mot varandra, och du får
-              marknadens bästa pris, tryggt och kostnadsfritt.
+              Vi får guldköparna att konkurrera om ditt guld. Auktoriserade handlare budar mot
+              varandra i realtid, och du säljer till bäst betalt, tryggt och kostnadsfritt.
             </p>
             <div className="flex gap-3 mt-5">
               <TrustBadge>BankID-verifierad</TrustBadge>
