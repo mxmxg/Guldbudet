@@ -86,6 +86,21 @@ const GUIDES = [
     title: 'Sälja guld i Malmö',
     desc: 'Bäst betalt i hela Skåne utan att lämna hemmet, marknaden sätter priset.',
   },
+  {
+    href: '/guider/salja-vitguld-rodguld',
+    title: 'Sälja vitguld och rödguld',
+    desc: 'Påverkar färgen värdet? Nej, det är karaten som räknas, inte tonen.',
+  },
+  {
+    href: '/guider/salja-guld-utan-kvitto',
+    title: 'Sälja guld utan kvitto',
+    desc: 'Saknar du kvittot på ärvda eller gamla smycken? Det går alldeles utmärkt.',
+  },
+  {
+    href: '/guider/skatt-pa-salt-guld',
+    title: 'Skatt på sålt guld',
+    desc: 'Måste man skatta? Så gäller reglerna för smycken kontra investeringsguld.',
+  },
 ]
 
 export default function GuidesIndex() {

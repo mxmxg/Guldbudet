@@ -27,6 +27,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/guider/salja-guld-stockholm',
     '/guider/salja-guld-goteborg',
     '/guider/salja-guld-malmo',
+    '/guider/salja-vitguld-rodguld',
+    '/guider/salja-guld-utan-kvitto',
+    '/guider/skatt-pa-salt-guld',
     '/terms',
     '/privacy',
   ].map((p) => ({
