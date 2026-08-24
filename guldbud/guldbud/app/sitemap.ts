@@ -24,6 +24,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/guider/salja-trasigt-guld',
     '/guider/salja-guldmynt',
     '/guider/pantbank-eller-auktion',
+    '/guider/salja-guld-stockholm',
+    '/guider/salja-guld-goteborg',
+    '/guider/salja-guld-malmo',
     '/terms',
     '/privacy',
   ].map((p) => ({
