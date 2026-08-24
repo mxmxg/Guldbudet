@@ -140,20 +140,12 @@ export default function AuctionDetails({ item }: { item: any }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item.id, item.status])
 
-  if (!checked)
-    return (
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="aspect-square rounded-2xl skeleton" />
-          <div className="space-y-4">
-            <div className="h-8 w-2/3 rounded skeleton" />
-            <div className="h-4 w-1/3 rounded skeleton" />
-            <div className="h-28 rounded-2xl skeleton" />
-          </div>
-        </div>
-      </div>
-    )
-
+  // Innehållet (titel, beskrivning, bilder, specar, pris) renderas DIREKT från
+  // item-propen, även server-side (SSR), så auktionssidan är indexerbar och
+  // besökaren ser innehållet med en gång. Tidigare låg allt bakom en skelett-
+  // loader tills klientens auth/bud-koll resolvat, vilket gjorde SSR-HTML:en
+  // innehållslös. De inloggnings- och tidsberoende delarna nedan aktiveras först
+  // när klienten kollat (`checked`), så SSR och hydrering matchar.
   const topBid = bids[0]
   const topAmount = topBid?.amount || 0
   const myTopBid = user ? bids.filter((b: any) => b.dealer_id === user.id).reduce((m: number, b: any) => Math.max(m, b.amount), 0) : 0
@@ -162,8 +154,10 @@ export default function AuctionDetails({ item }: { item: any }) {
   const isOwner = user?.id === item.owner_id && profile?.role !== 'admin'
   const isAdmin = profile?.role === 'admin'
   const isClosed = item.status === 'closed'
-  const ended = !!endsAt && new Date(endsAt).getTime() < Date.now()
-  const endingSoon = !!endsAt && !ended && !isClosed && new Date(endsAt).getTime() - Date.now() < 60 * 60 * 1000
+  // Tidsberoende hålls false tills klienten kollat (checked). Annars skiljer sig
+  // server- och första klientrenderingen åt (Date.now) och hydreringen krånglar.
+  const ended = checked && !!endsAt && new Date(endsAt).getTime() < Date.now()
+  const endingSoon = checked && !!endsAt && !ended && !isClosed && new Date(endsAt).getTime() - Date.now() < 60 * 60 * 1000
   // Status kommer som booleaner från servern; själva nivån (min_price) finns
   // bara med när ägaren tittar på sitt eget föremål.
   const hasReserve = !!item.has_reserve
@@ -464,8 +458,10 @@ export default function AuctionDetails({ item }: { item: any }) {
                 </div>
               ))}
 
-            {/* Not logged in — only invite bidding on auctions that are still open */}
-            {!user && !isClosed && !ended && (
+            {/* Not logged in — only invite bidding on auctions that are still open.
+                Gated on `checked` so a logged-in dealer doesn't flash this CTA
+                before auth resolves, and so it stays out of the SSR markup. */}
+            {checked && !user && !isClosed && !ended && (
               <div className="mt-4 rounded-2xl bg-espresso-900 p-6 text-center relative overflow-hidden">
                 <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
                 <div className="relative">
