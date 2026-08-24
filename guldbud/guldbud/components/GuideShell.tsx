@@ -32,9 +32,21 @@ export default function GuideShell({
       }
     : null
 
+  const SITE = 'https://guldbud.com'
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Hem', item: SITE },
+      { '@type': 'ListItem', position: 2, name: 'Guider', item: `${SITE}/guider` },
+      { '@type': 'ListItem', position: 3, name: title },
+    ],
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-cream">
       {faqLd && <JsonLd data={faqLd} />}
+      <JsonLd data={breadcrumbLd} />
       <Navbar />
 
       <div className="relative overflow-hidden bg-espresso-900">
