@@ -12,6 +12,7 @@ import Footer from '@/components/Footer'
 import RecentlySold, { SoldRow } from '@/components/RecentlySold'
 import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
+import { TRUSTPILOT_PROFILE_URL } from '@/components/TrustpilotInvite'
 import { formatSEK } from '@/lib/gold'
 import {
   CameraIcon,
@@ -569,55 +570,32 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
+      {/* OMDÖMEN — äkta, via Trustpilot (inga påhittade citat) */}
       <section className="max-w-6xl mx-auto px-4 py-20">
-        <Reveal className="text-center max-w-xl mx-auto mb-14">
+        <Reveal className="text-center max-w-2xl mx-auto">
+          <div className="flex justify-center gap-0.5 mb-4 text-gold-400">
+            {Array.from({ length: 5 }).map((_, s) => (
+              <StarIcon key={s} />
+            ))}
+          </div>
           <h2 className="font-display text-3xl sm:text-4xl text-espresso-900">
-            Tusentals svenskar har redan sålt smart
+            Läs vad säljare tycker
           </h2>
+          <p className="mt-4 text-espresso-500 leading-relaxed">
+            Vi samlar äkta omdömen på Trustpilot, från riktiga säljare som fått betalt via GuldBud.
+            Läs dem själv, och lämna gärna ett eget efter din affär.
+          </p>
+          <div className="mt-7 flex justify-center">
+            <a
+              href={TRUSTPILOT_PROFILE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost-gold"
+            >
+              Se våra omdömen på Trustpilot
+            </a>
+          </div>
         </Reveal>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              quote:
-                'Jag fick 2 400 kr mer än vad guldbutiken erbjöd, för exakt samma ärvda ring. Riktigt smidigt.',
-              name: 'Karin L.',
-              city: 'Göteborg',
-            },
-            {
-              quote:
-                'Lade ut på kvällen, hade tolv bud nästa morgon. Betalningen kom via Swish samma dag jag skickade.',
-              name: 'Mattias R.',
-              city: 'Malmö',
-            },
-            {
-              quote:
-                'Trygg känsla hela vägen. Handlarna är verifierade och man ser alla bud i realtid. Rekommenderas!',
-              name: 'Elisabeth N.',
-              city: 'Uppsala',
-            },
-          ].map((t, i) => (
-            <Reveal key={t.name} delay={i * 100}>
-              <figure className="card p-7 h-full flex flex-col">
-                <div className="flex gap-0.5 mb-4 text-gold-400">
-                  {Array.from({ length: 5 }).map((_, s) => (
-                    <StarIcon key={s} />
-                  ))}
-                </div>
-                <blockquote className="text-espresso-700 leading-relaxed flex-1">“{t.quote}”</blockquote>
-                <figcaption className="mt-5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gold-sheen flex items-center justify-center text-espresso-900 font-semibold">
-                    {t.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-espresso-900">{t.name}</p>
-                    <p className="text-xs text-espresso-400">{t.city}</p>
-                  </div>
-                </figcaption>
-              </figure>
-            </Reveal>
-          ))}
-        </div>
       </section>
 
       {/* TRYGGHET */}
