@@ -1509,3 +1509,25 @@ begin
 exception when others then
   raise notice 'pg_cron ej konfigurerat för notify-bidders-ending-soon: %', sqlerrm;
 end $$;
+
+-- ============================================================
+-- Prestanda-index för de hetaste filtren och sorteringarna. Utan dessa gör
+-- handlar-/kundvyer och budläggning sekventiell scan som växer linjärt med
+-- tabellstorleken. Ligger sist så alla tabeller garanterat finns, och är
+-- idempotenta (if not exists) så blocket kan köras på en befintlig databas.
+-- ============================================================
+-- Handlarens egna bud (dealer/dashboard, profil, "mina bud"). bids är den
+-- tabell som växer snabbast, så detta är den viktigaste indexeringen.
+create index if not exists bids_dealer_id_idx on public.bids (dealer_id);
+-- Högsta bud + enforce_bid_higher: max(amount) / order by amount desc per item.
+create index if not exists bids_item_amount_idx on public.bids (item_id, amount desc);
+-- Kundens egna föremål (my-items, startsidans "mina föremål", accept-flödet).
+create index if not exists items_owner_id_idx on public.items (owner_id);
+-- Aktiva auktioner sorterade på sluttid (startsidan, /auctions, dashboarden).
+-- Partiellt på status='active' så indexet hålls litet och träffar den heta frågan
+-- "status=active and auction_ends_at > now() order by auction_ends_at".
+create index if not exists items_active_ends_idx on public.items (auction_ends_at) where status = 'active';
+-- Handlarens auto-bud per handlare (dashboard läser auto_bids where dealer_id).
+create index if not exists auto_bids_dealer_id_idx on public.auto_bids (dealer_id);
+-- notify_ending_soon slår upp watchlist per item_id, men PK börjar på dealer_id.
+create index if not exists watchlist_item_id_idx on public.watchlist (item_id);
