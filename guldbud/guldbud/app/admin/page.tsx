@@ -276,29 +276,36 @@ export default function AdminPage() {
     window.open(data.signedUrl, '_blank')
   }
 
+  // Kontrollera alltid { error } innan raden tas bort ur UI. Annars kan en RLS-
+  // eller nätverksmiss se ut som att en handlare godkänts / ett föremål
+  // publicerats fast inget hände i databasen.
   const approveDealer = async (id: string) => {
-    await supabase.from('profiles').update({ approved: true }).eq('id', id)
+    const { error } = await supabase.from('profiles').update({ approved: true }).eq('id', id)
+    if (error) return setAdminError('Kunde inte godkänna handlaren: ' + error.message)
     setPendingDealers((prev) => prev.filter((d) => d.id !== id))
   }
 
   const rejectDealer = async (id: string) => {
-    await supabase.from('profiles').delete().eq('id', id)
+    const { error } = await supabase.from('profiles').delete().eq('id', id)
+    if (error) return setAdminError('Kunde inte neka handlaren: ' + error.message)
     setPendingDealers((prev) => prev.filter((d) => d.id !== id))
   }
 
   const approveItem = async (id: string) => {
-    await supabase
+    const { error } = await supabase
       .from('items')
       .update({
         status: 'active',
         auction_ends_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
       })
       .eq('id', id)
+    if (error) return setAdminError('Kunde inte godkänna föremålet: ' + error.message)
     setPendingItems((prev) => prev.filter((i) => i.id !== id))
   }
 
   const rejectItem = async (id: string) => {
-    await supabase.from('items').update({ status: 'rejected' }).eq('id', id)
+    const { error } = await supabase.from('items').update({ status: 'rejected' }).eq('id', id)
+    if (error) return setAdminError('Kunde inte neka föremålet: ' + error.message)
     setPendingItems((prev) => prev.filter((i) => i.id !== id))
   }
 
