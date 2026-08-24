@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: '%s · GuldBud',
   },
   description:
-    'Sälja guld med bäst betalt? Lägg ut ditt guld och låt auktoriserade guldhandlare buda mot varandra i realtid. Du får marknadens bästa pris, enkelt, tryggt och kostnadsfritt.',
+    'Låt guldköparna tävla om ditt guld. Lägg ut föremålet så budar Sveriges auktoriserade guldhandlare mot varandra i realtid, och du säljer till bäst betalt. Enkelt, tryggt och kostnadsfritt.',
   keywords: [
     'sälja guld',
     'bäst betalt för guld',
@@ -36,18 +36,18 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'GuldBud · Sveriges guldauktion',
+    title: 'GuldBud · Låt guldköparna tävla om ditt guld',
     description:
-      'Låt auktoriserade guldhandlare buda mot varandra om ditt guld. Bästa priset, tryggt och gratis.',
+      'Låt guldköparna tävla om ditt guld. Auktoriserade guldhandlare budar mot varandra i realtid, och du säljer till bäst betalt. Tryggt och gratis.',
     type: 'website',
     locale: 'sv_SE',
     siteName: 'GuldBud',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GuldBud · Sveriges guldauktion',
+    title: 'GuldBud · Låt guldköparna tävla om ditt guld',
     description:
-      'Låt auktoriserade guldhandlare buda mot varandra om ditt guld. Bästa priset, tryggt och gratis.',
+      'Låt guldköparna tävla om ditt guld. Auktoriserade guldhandlare budar mot varandra i realtid, och du säljer till bäst betalt. Tryggt och gratis.',
   },
   robots: { index: true, follow: true },
 }
