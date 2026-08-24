@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [sellers, setSellers] = useState<Record<string, any>>({})
   const [openOrders, setOpenOrders] = useState(0)
   const [analytics, setAnalytics] = useState({ gmv: 0, commission: 0, pendingCommission: 0, completed: 0 })
+  const [bidKpi, setBidKpi] = useState({ avg: 0, objects: 0, total: 0, zeroOne: 0, threePlus: 0, liveStarving: 0 })
   const [adminError, setAdminError] = useState('')
   const [adminNotice, setAdminNotice] = useState('')
   const [confirmId, setConfirmId] = useState<string | null>(null)
@@ -148,6 +149,30 @@ export default function AdminPage() {
         setTopBidIds(topId)
         setBidCounts(counts)
       }
+
+      // KPI: snittbud per objekt – marknadens viktigaste hälsomätvärde. Räknas
+      // över alla föremål som gått till auktion (aktiva + avslutade), inte
+      // pending/rejected som aldrig fått bud. Vid tillväxt kan detta flyttas
+      // till en DB-vy/RPC, men på nuvarande volym räcker en klientfråga.
+      const { data: auctionItems } = await supabase.from('items').select('id, status').in('status', ['active', 'closed'])
+      const aItems = auctionItems || []
+      if (aItems.length) {
+        const aIds = aItems.map((i: any) => i.id)
+        const { data: allBids } = await supabase.from('bids').select('item_id').in('item_id', aIds)
+        const c: Record<string, number> = {}
+        allBids?.forEach((b: any) => (c[b.item_id] = (c[b.item_id] || 0) + 1))
+        const perObject = aItems.map((i: any) => c[i.id] || 0)
+        const totalBids = perObject.reduce((s, n) => s + n, 0)
+        setBidKpi({
+          avg: aItems.length ? totalBids / aItems.length : 0,
+          objects: aItems.length,
+          total: totalBids,
+          zeroOne: perObject.filter((n) => n <= 1).length,
+          threePlus: perObject.filter((n) => n >= 3).length,
+          liveStarving: aItems.filter((i: any) => i.status === 'active' && (c[i.id] || 0) <= 1).length,
+        })
+      }
+
       setOpenOrders(ordersCount || 0)
       setLoading(false)
     }
@@ -574,6 +599,63 @@ export default function AdminPage() {
           )
         })()}
 
+        {/* Snittbud per objekt – marknadens viktigaste hälsomätvärde */}
+        {(() => {
+          const h = bidHealth(bidKpi.avg, bidKpi.total)
+          const pct = (n: number) => (bidKpi.objects ? Math.round((n / bidKpi.objects) * 100) : 0)
+          const fill = Math.min(100, Math.round((bidKpi.avg / 5) * 100))
+          return (
+            <div className="card p-5 mb-6">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <h2 className="font-display text-lg text-espresso-900">Snittbud per objekt</h2>
+                <span className={`chip ${h.chip}`}>{h.label}</span>
+              </div>
+              <p className="text-xs text-espresso-400 mb-5 max-w-xl leading-relaxed">
+                Marknadens viktigaste mätvärde: hur många handlare som i snitt tävlar om varje föremål.
+                Sikta på 3+, då börjar konkurrensen driva priset på riktigt.
+              </p>
+              <div className="flex items-end gap-6 flex-wrap">
+                <div>
+                  <p className={`font-display text-4xl tabular-nums leading-none ${h.color}`}>
+                    {bidKpi.total > 0 ? bidKpi.avg.toFixed(1) : '–'}
+                  </p>
+                  <p className="text-xs text-espresso-400 mt-1.5">
+                    {bidKpi.total} bud på {bidKpi.objects} auktioner
+                  </p>
+                </div>
+                <div className="h-11 w-px bg-espresso-100" />
+                <MiniStat value={`${pct(bidKpi.threePlus)}%`} label="med 3+ bud" tone="emerald" />
+                <MiniStat value={`${pct(bidKpi.zeroOne)}%`} label="med 0–1 bud" tone="amber" />
+              </div>
+              {/* Skala 0–5 med tröskelmarkeringar (1.8 börjar funka, 3.2 stark) */}
+              <div className="mt-5">
+                <div className="relative h-2 rounded-full bg-espresso-100 overflow-hidden">
+                  <div className={`h-full rounded-full transition-all ${h.bar}`} style={{ width: `${fill}%` }} />
+                </div>
+                <div className="relative mt-1 h-3 text-[10px] text-espresso-300">
+                  <span className="absolute left-0">0</span>
+                  <span className="absolute -translate-x-1/2" style={{ left: '36%' }}>1,8</span>
+                  <span className="absolute -translate-x-1/2" style={{ left: '64%' }}>3,2</span>
+                  <span className="absolute right-0">5+</span>
+                </div>
+              </div>
+              {bidKpi.liveStarving > 0 && (
+                <a
+                  href="#auktioner"
+                  className="mt-5 flex items-center justify-between gap-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 hover:bg-amber-100 transition"
+                >
+                  <span>
+                    <span className="font-semibold">{bidKpi.liveStarving}</span>{' '}
+                    {bidKpi.liveStarving === 1 ? 'aktiv auktion' : 'aktiva auktioner'} har ännu 0–1 bud. Pusha fler
+                    handlare att buda.
+                  </span>
+                  <span aria-hidden className="shrink-0">→</span>
+                </a>
+              )}
+            </div>
+          )
+        })()}
+
         {/* Analytics overview */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
           <div className="card p-4">
@@ -910,6 +992,30 @@ function Info({ label, value }: { label: string; value?: string | null }) {
     <div>
       <dt className="text-[11px] uppercase tracking-wide text-espresso-400">{label}</dt>
       <dd className="text-espresso-800 break-words">{value || '—'}</dd>
+    </div>
+  )
+}
+
+// Hälsobedömning av snittbud per objekt, mot marknadströsklarna:
+// <1,8 svagt · 1,8–3,2 börjar funka · 3,2–5 stark · 5+ mycket stark.
+function bidHealth(avg: number, total: number) {
+  if (total === 0)
+    return { label: 'Inga bud än', chip: 'bg-espresso-100 text-espresso-500', color: 'text-espresso-300', bar: 'bg-espresso-200' }
+  if (avg >= 5)
+    return { label: 'Mycket stark', chip: 'bg-emerald-100 text-emerald-700', color: 'text-emerald-600', bar: 'bg-emerald-500' }
+  if (avg >= 3.2)
+    return { label: 'Stark marknad', chip: 'bg-emerald-100 text-emerald-700', color: 'text-emerald-600', bar: 'bg-emerald-500' }
+  if (avg >= 1.8)
+    return { label: 'Börjar funka', chip: 'bg-gold-100 text-gold-700', color: 'text-gold-700', bar: 'bg-gold-500' }
+  return { label: 'Svag konkurrens', chip: 'bg-amber-100 text-amber-700', color: 'text-amber-700', bar: 'bg-amber-500' }
+}
+
+function MiniStat({ value, label, tone }: { value: string; label: string; tone: 'emerald' | 'amber' }) {
+  const color = tone === 'emerald' ? 'text-emerald-600' : 'text-amber-700'
+  return (
+    <div>
+      <p className={`font-display text-2xl tabular-nums leading-none ${color}`}>{value}</p>
+      <p className="text-xs text-espresso-400 mt-1.5">{label}</p>
     </div>
   )
 }
