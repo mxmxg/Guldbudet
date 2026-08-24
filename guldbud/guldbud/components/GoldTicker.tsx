@@ -7,22 +7,24 @@ function fmt(n: number) {
 }
 
 /**
- * Dagens guldpris per karat på en rad. Priset är det RIKTIGA spotpriset som
- * hämtas live via /api/gold-price (uppdateras var 5:e minut), med en ärlig
- * fallback om hämtningen fallerar. Ingen simulerad rörelse: en tidigare version
- * lade på en Math.sin()-våg och en påhittad procentförändring märkt "live",
- * vilket krockade med löftet om ärliga priser. Nu visas bara det faktiska priset.
- * Desktop: statisk rad (allt får plats). Mobil: en scrollande marquee (pausas
- * automatiskt vid prefers-reduced-motion) så alla karat hinner passera.
+ * Dagens guldpris per karat på en rad, med en grön/röd rörelse-chip som visar
+ * VERKLIG dagsförändring (mot gårdagens stängning) från /api/gold-price. Priset
+ * uppdateras var 5:e minut, så chippen följer marknaden upp och ner på riktigt.
+ * (Ingen simulerad rörelse längre, en tidigare version lade på en Math.sin()-våg
+ * märkt "live", vilket krockade med löftet om ärliga siffror.)
+ * Desktop: statisk rad. Mobil: scrollande marquee (pausas vid prefers-reduced-motion).
  */
 export default function GoldTicker() {
-  const { price } = useGoldPrice()
+  const { price, changePct, up } = useGoldPrice()
   const karats = karatPrices(price)
 
   const Label = () => (
     <span className="inline-flex items-center gap-1.5 shrink-0 text-gold-400/90">
-      <span className="inline-flex rounded-full h-1.5 w-1.5 bg-gold-400" />
-      <span className="font-semibold tracking-wide uppercase text-[10px]">Dagens guldpris</span>
+      <span className="relative flex h-1.5 w-1.5">
+        <span className="absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-70 animate-pulse-ring" />
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold-400" />
+      </span>
+      <span className="font-semibold tracking-wide uppercase text-[10px]">Guldpris live</span>
     </span>
   )
 
@@ -35,11 +37,20 @@ export default function GoldTicker() {
       </span>
     ))
 
+  // Visas bara när vi har en faktisk förändringssiffra (inte på reservkällan).
+  const Change = () =>
+    changePct == null ? null : (
+      <span className={`shrink-0 font-semibold tabular-nums ${up ? 'text-emerald-400' : 'text-red-400'}`}>
+        {up ? '▲' : '▼'} {Math.abs(changePct).toFixed(2)}%
+      </span>
+    )
+
   // One full sequence of the ticker content (used twice in the marquee).
   const Segment = () => (
     <span className="flex items-center gap-4 pr-4 text-xs tabular-nums">
       <Label />
       <Prices />
+      <Change />
     </span>
   )
 
@@ -51,6 +62,7 @@ export default function GoldTicker() {
         <div className="flex items-center gap-4">
           <Prices />
         </div>
+        <Change />
       </div>
 
       {/* Mobile: continuously scrolling marquee */}

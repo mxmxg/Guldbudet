@@ -100,3 +100,50 @@ export async function fetchLiveGoldSekPerGram(signal?: AbortSignal): Promise<num
   }
   return Math.round(sekPerGram)
 }
+
+const OZ_TO_GRAM = 31.1034768
+
+export interface LiveGold {
+  /** 24K-pris, SEK per gram. */
+  pricePerGram24k: number
+  /** Dagens förändring i procent (mot gårdagens stängning), null om okänd. */
+  changePct: number | null
+  /** true = uppgång/oförändrad, false = nedgång. */
+  up: boolean
+}
+
+/**
+ * Hämtar 24K-guldpris i SEK/gram OCH dagens förändring i en enda källa
+ * (goldprice.org ger xauPrice + förändring direkt i SEK). Faller tillbaka till
+ * gold-api.com + frankfurter (endast pris, changePct = null) om den källan
+ * strular. Så kan tickern visa VERKLIG upp-/nedrörelse i stället för en
+ * simulerad våg. Kastar bara om även reservkällan misslyckas.
+ */
+export async function fetchLiveGold(signal?: AbortSignal): Promise<LiveGold> {
+  try {
+    const res = await fetch('https://data-asg.goldprice.org/dbXRates/SEK', {
+      signal,
+      headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' },
+      next: { revalidate: 300 },
+    } as any)
+    if (res.ok) {
+      const j = await res.json()
+      const it = j?.items?.[0]
+      const perGram = Number(it?.xauPrice) / OZ_TO_GRAM
+      if (perGram >= GOLD_MIN_SEK_PER_GRAM && perGram <= GOLD_MAX_SEK_PER_GRAM) {
+        const pc = Number(it?.pcXau)
+        const chg = Number(it?.chgXau)
+        return {
+          pricePerGram24k: Math.round(perGram),
+          changePct: Number.isFinite(pc) ? Math.round(pc * 100) / 100 : null,
+          up: Number.isFinite(chg) ? chg >= 0 : true,
+        }
+      }
+    }
+  } catch {
+    // faller igenom till reservkällan nedan
+  }
+  // Reserv: pris utan förändringsdata.
+  const price = await fetchLiveGoldSekPerGram(signal)
+  return { pricePerGram24k: price, changePct: null, up: true }
+}
