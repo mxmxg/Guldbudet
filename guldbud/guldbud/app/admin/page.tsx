@@ -606,14 +606,10 @@ export default function AdminPage() {
           const fill = Math.min(100, Math.round((bidKpi.avg / 5) * 100))
           return (
             <div className="card p-5 mb-6">
-              <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center justify-between gap-2 mb-5">
                 <h2 className="font-display text-lg text-espresso-900">Snittbud per objekt</h2>
                 <span className={`chip ${h.chip}`}>{h.label}</span>
               </div>
-              <p className="text-xs text-espresso-400 mb-5 max-w-xl leading-relaxed">
-                Marknadens viktigaste mätvärde: hur många handlare som i snitt tävlar om varje föremål.
-                Sikta på 3+, då börjar konkurrensen driva priset på riktigt.
-              </p>
               <div className="flex items-end gap-6 flex-wrap">
                 <div>
                   <p className={`font-display text-4xl tabular-nums leading-none ${h.color}`}>
