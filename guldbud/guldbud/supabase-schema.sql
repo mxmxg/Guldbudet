@@ -1531,3 +1531,33 @@ create index if not exists items_active_ends_idx on public.items (auction_ends_a
 create index if not exists auto_bids_dealer_id_idx on public.auto_bids (dealer_id);
 -- notify_ending_soon slår upp watchlist per item_id, men PK börjar på dealer_id.
 create index if not exists watchlist_item_id_idx on public.watchlist (item_id);
+
+-- ============================================================
+-- Aktiva auktioner med budstatistik i EN query. Ersätter mönstret "hämta alla
+-- aktiva items, hämta alla deras bud med .in(id-lista), aggregera i JS" som
+-- annars spricker på URL-längd (414) vid många auktioner. Aggregeringen sker i
+-- databasen via lateral join (träffar bids_item_amount_idx).
+-- SECURITY INVOKER (default) så RLS gäller fullt ut: anon får redan läsa aktiva
+-- items och deras bud, så funktionen är trygg att exponera. Returnerar hela
+-- item-raden som jsonb + top_bid + bid_count. min_price ingår (RLS är radnivå);
+-- servern skalar bort den innan payloaden når klienten, precis som tidigare.
+-- ============================================================
+create or replace function public.active_items_with_stats()
+returns setof jsonb
+language sql stable
+set search_path = public
+as $$
+  select to_jsonb(i) || jsonb_build_object(
+           'top_bid', coalesce(b.top_bid, 0),
+           'bid_count', coalesce(b.bid_count, 0)
+         )
+  from public.items i
+  left join lateral (
+    select max(amount)::int as top_bid, count(*)::int as bid_count
+    from public.bids
+    where item_id = i.id
+  ) b on true
+  where i.status = 'active'
+    and (i.auction_ends_at is null or i.auction_ends_at > now())
+  order by i.auction_ends_at asc nulls last;
+$$;
