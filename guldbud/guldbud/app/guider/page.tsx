@@ -61,6 +61,16 @@ const GUIDES = [
     title: 'Sälja trasigt guld och tandguld',
     desc: 'Trasigt, ostämplat eller tandguld, värdet sitter i metallen, inte i skicket.',
   },
+  {
+    href: '/guider/salja-guldmynt',
+    title: 'Sälja guldmynt',
+    desc: 'Krugerrand, dukater och sovereigns, värdet sitter i både guldvikt och samlarvärde.',
+  },
+  {
+    href: '/guider/pantbank-eller-auktion',
+    title: 'Pantbank eller auktion?',
+    desc: 'Var får du mest för guldet? En ärlig jämförelse av pris, avgifter och trygghet.',
+  },
 ]
 
 export default function GuidesIndex() {
