@@ -13,11 +13,14 @@ const nextConfig = {
     serverComponentsExternalPackages: ['sharp'],
   },
   images: {
-    // Serva bilderna direkt från Supabase CDN i stället för via Vercels
-    // bildoptimering. Vercels optimering har en månadskvot och började svara
-    // 402 OPTIMIZED_IMAGE_REQUEST_PAYMENT_REQUIRED (bilder blev svarta). Supabase
-    // levererar redan via CDN, så vi behöver inte mellanledet.
-    unoptimized: true,
+    // Egen loader (lib/imageLoader.js): routar Supabase-bilder genom render/image-
+    // transformendpointen NÄR NEXT_PUBLIC_SUPABASE_IMAGE_TRANSFORM='true' (kräver
+    // Supabase Pro-plan), för responsiva bilder + WebP och bättre Core Web Vitals.
+    // Avstängd som standard -> original-URL returneras oförändrad, precis som den
+    // gamla unoptimized-vägen. Inget går via Vercels bildoptimering, så kvoten som
+    // tidigare gav 402/svarta bilder är aldrig i bild.
+    loader: 'custom',
+    loaderFile: './lib/imageLoader.js',
     remotePatterns: [
       {
         protocol: 'https',
