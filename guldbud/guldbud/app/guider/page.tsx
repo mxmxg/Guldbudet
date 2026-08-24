@@ -71,6 +71,21 @@ const GUIDES = [
     title: 'Pantbank eller auktion?',
     desc: 'Var får du mest för guldet? En ärlig jämförelse av pris, avgifter och trygghet.',
   },
+  {
+    href: '/guider/salja-guld-stockholm',
+    title: 'Sälja guld i Stockholm',
+    desc: 'Slipp springa mellan guldsmeder i city, låt handlarna tävla hemifrån.',
+  },
+  {
+    href: '/guider/salja-guld-goteborg',
+    title: 'Sälja guld i Göteborg',
+    desc: 'Från Avenyn till Hisingen, låt flera handlare buda om ditt guld online.',
+  },
+  {
+    href: '/guider/salja-guld-malmo',
+    title: 'Sälja guld i Malmö',
+    desc: 'Bäst betalt i hela Skåne utan att lämna hemmet, marknaden sätter priset.',
+  },
 ]
 
 export default function GuidesIndex() {
