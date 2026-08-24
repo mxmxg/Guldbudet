@@ -12,6 +12,8 @@ import { SoldRow } from '@/components/RecentlySold'
 export const revalidate = 30
 
 const SITE = 'https://guldbud.com'
+export const metadata = { alternates: { canonical: '/' } }
+
 const orgLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -21,6 +23,14 @@ const orgLd = {
   description: 'Sveriges guldauktion – auktoriserade guldhandlare budar mot varandra om ditt guld.',
   areaServed: 'SE',
   email: 'info@guldbud.com',
+  sameAs: ['https://se.trustpilot.com/review/guldbud.com'],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    email: 'info@guldbud.com',
+    contactType: 'customer support',
+    areaServed: 'SE',
+    availableLanguage: 'Swedish',
+  },
 }
 const siteLd = {
   '@context': 'https://schema.org',

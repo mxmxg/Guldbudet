@@ -34,7 +34,9 @@ export const metadata: Metadata = {
     'guldhandlare',
     'värdera guld',
   ],
-  alternates: { canonical: '/' },
+  // Ingen canonical här: en canonical i rot-layouten ärvs av varje sida som inte
+  // sätter en egen (t.ex. klient-sidor som /verifiering), vilket felaktigt pekar
+  // dem mot startsidan. Startsidan sätter sin egen canonical i app/page.tsx.
   openGraph: {
     title: 'GuldBud · Låt guldköparna tävla om ditt guld',
     description:
