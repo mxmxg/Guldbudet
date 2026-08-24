@@ -183,6 +183,15 @@ create policy "own profile update" on public.profiles
       personal_number is not distinct from (select personal_number from public.profiles where id = auth.uid())
       or (select personal_number from public.profiles where id = auth.uid()) is null
     )
+    -- BankID-verifieringen (KYC) får bara sättas av service-role (callbacken) och
+    -- admin, aldrig av användaren själv. Annars kan vem som helst PATCH:a sin egen
+    -- rad och sätta identity_verified=true med påhittat personnummer, hela KYC/AML-
+    -- grunden kringgås. Admin uppdaterar via sin egen "for all"-policy (utan check),
+    -- och service-role kringgår RLS helt, så callbacken kan fortfarande skriva dem.
+    and identity_verified is not distinct from (select identity_verified from public.profiles where id = auth.uid())
+    and verified_name is not distinct from (select verified_name from public.profiles where id = auth.uid())
+    and verified_ssn is not distinct from (select verified_ssn from public.profiles where id = auth.uid())
+    and identity_verified_at is not distinct from (select identity_verified_at from public.profiles where id = auth.uid())
   );
 
 -- Admins får se OCH hantera alla profiler (t.ex. godkänna handlare).
@@ -920,6 +929,32 @@ drop trigger if exists on_bid_accepted on public.items;
 create trigger on_bid_accepted
   after update on public.items
   for each row execute procedure public.notify_bid_accepted();
+
+-- SÄKERHET: acceptera bara ett bud som faktiskt hör till föremålet. accepted_bid_id
+-- saknar FK och ägar-policyn tillåter att sätta status='closed' + valfritt bud-id.
+-- Utan denna spärr kan en ägare PATCH:a in ett bud-id från en ANNAN auktion (bud-id
+-- är publikt läsbara) och skapa en affär mot en handlare som aldrig budat, som sedan
+-- stängs av automatiskt för utebliven betalning. Kör som BEFORE så den blockerar
+-- innan notify_bid_accepted (AFTER) skapar affären.
+create or replace function public.enforce_accepted_bid_valid()
+returns trigger language plpgsql
+  set search_path = public as $$
+begin
+  if new.accepted_bid_id is not null
+     and new.accepted_bid_id is distinct from old.accepted_bid_id then
+    if not exists (
+      select 1 from public.bids b where b.id = new.accepted_bid_id and b.item_id = new.id
+    ) then
+      raise exception 'Det accepterade budet tillhör inte detta föremål.';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_item_accept_validate on public.items;
+create trigger on_item_accept_validate
+  before update on public.items
+  for each row execute procedure public.enforce_accepted_bid_valid();
 
 -- Notis när admin flyttar affären till nästa steg.
 create or replace function public.notify_order_status()
