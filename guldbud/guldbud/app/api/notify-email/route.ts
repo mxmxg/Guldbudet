@@ -151,7 +151,10 @@ function emailHtml(opts: {
       <p style="color:#c9a84c;font-size:14px;line-height:1.6;margin:10px 0 0">${esc(message)}</p>
       ${extra}
       ${button}
-      <p style="color:#5a4020;font-size:11px;margin-top:28px">Du får det här mejlet för att du har ett konto på GuldBud.</p>
+      <p style="color:#8a7038;font-size:11px;line-height:1.6;margin-top:28px">
+        Du får det här mejlet för att du har ett konto på GuldBud.<br>
+        GuldBud AB &middot; Org.nr 559291-4781 &middot; Box 6007, 102 31 Stockholm &middot; info@guldbud.com
+      </p>
     </div>
   </body></html>`
 }
