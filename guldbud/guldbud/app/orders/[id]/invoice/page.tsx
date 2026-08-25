@@ -6,11 +6,13 @@ import Link from 'next/link'
 import { formatSEK } from '@/lib/gold'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
 
-// GuldBud's own details. Box/fraktadress läggs till här när den är klar.
+// GuldBud's own details.
 const GULDBUD = {
   name: 'GuldBud AB',
   org: '559291-4781',
   email: 'info@guldbud.com',
+  box: 'Box 6007',
+  postal: '102 31 Stockholm',
 }
 
 function ref(orderNo?: number) {
@@ -98,6 +100,8 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
             <p className="font-sans font-semibold tracking-tight text-2xl text-espresso-900">GuldBud</p>
             <p className="text-xs text-espresso-400 mt-1">{GULDBUD.name}</p>
             <p className="text-xs text-espresso-400">Org.nr {GULDBUD.org}</p>
+            <p className="text-xs text-espresso-400">{GULDBUD.box}</p>
+            <p className="text-xs text-espresso-400">{GULDBUD.postal}</p>
             <p className="text-xs text-espresso-400">{GULDBUD.email}</p>
           </div>
           <div className="text-right">
