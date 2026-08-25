@@ -298,8 +298,6 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
 
             <Reveal delay={320}>
               <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
-                <Stat value="0 kr" label="Gratis att sälja" />
-                <div className="w-px h-11 bg-espresso-700" />
                 <LogoStat src="/brand/bankid-white.png" alt="BankID" label="Verifierad affär" h={30} />
                 <div className="w-px h-11 bg-espresso-700" />
                 <LogoStat src="/brand/swish.png" alt="Swish" label="Utbetalning omgående" h={34} />
@@ -722,17 +720,8 @@ function AuctionsSection({ items, title }: { items: EnrichedItem[]; title: strin
   )
 }
 
-function Stat({ value, label }: { value: React.ReactNode; label: string }) {
-  return (
-    <div>
-      <div className="font-display text-2xl sm:text-3xl text-gold-100">{value}</div>
-      <div className="text-xs text-espresso-100/50 mt-0.5">{label}</div>
-    </div>
-  )
-}
-
-// Trygghets-ankare med en officiell logotyp (BankID/Swish) i stället för en
-// sifferrubrik. Logotyphöjden matchar sifferankarnas teckenhöjd.
+// Trygghets-ankare med en officiell logotyp (BankID/Swish). Logotyphöjden
+// justeras per logga så raden blir optiskt jämn.
 function LogoStat({ src, alt, label, h }: { src: string; alt: string; label: string; h: number }) {
   return (
     <div>
