@@ -298,9 +298,9 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
 
             <Reveal delay={320}>
               <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
-                <LogoStat src="/brand/bankid-white.png" alt="BankID" label="Verifierad affär" h={30} />
-                <div className="w-px h-11 bg-espresso-700" />
-                <LogoStat src="/brand/swish.png" alt="Swish" label="Utbetalning omgående" h={34} />
+                <LogoStat src="/brand/bankid-white.png" alt="BankID" label="Verifierad affär" h={42} />
+                <div className="w-px h-14 bg-espresso-700" />
+                <LogoStat src="/brand/swish.png" alt="Swish" label="Utbetalning omgående" h={48} />
               </div>
             </Reveal>
           </div>
@@ -725,7 +725,7 @@ function AuctionsSection({ items, title }: { items: EnrichedItem[]; title: strin
 function LogoStat({ src, alt, label, h }: { src: string; alt: string; label: string; h: number }) {
   return (
     <div>
-      <div className="flex items-center" style={{ height: 34 }}>
+      <div className="flex items-center" style={{ height: 48 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src} alt={alt} style={{ height: h }} className="w-auto object-contain" />
       </div>
