@@ -7,7 +7,6 @@ import AuctionCard from '@/components/AuctionCard'
 import AuctionsBrowser from '@/components/AuctionsBrowser'
 import ValueEstimator from '@/components/ValueEstimator'
 import Reveal from '@/components/Reveal'
-import CountUp from '@/components/CountUp'
 import Footer from '@/components/Footer'
 import RecentlySold, { SoldRow } from '@/components/RecentlySold'
 import CountdownTimer from '@/components/CountdownTimer'
@@ -298,12 +297,12 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             </Reveal>
 
             <Reveal delay={320}>
-              <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-                <Stat value="0 kr" label="Avgift att lägga ut" />
-                <div className="w-px h-10 bg-espresso-700" />
-                <Stat value={<><CountUp end={100} />%</>} label="Verifierade handlare" />
-                <div className="w-px h-10 bg-espresso-700" />
-                <Stat value="Omgående" label="Utbetalning efter kontroll" />
+              <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
+                <Stat value="0 kr" label="Gratis att sälja" />
+                <div className="w-px h-11 bg-espresso-700" />
+                <LogoStat src="/brand/bankid-white.png" alt="BankID" label="Verifierad affär" h={30} />
+                <div className="w-px h-11 bg-espresso-700" />
+                <LogoStat src="/brand/swish.png" alt="Swish" label="Utbetalning omgående" h={34} />
               </div>
             </Reveal>
           </div>
@@ -321,11 +320,11 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
 
         {/* trust strip */}
         <div className="relative border-t border-espresso-800">
-          <div className="max-w-6xl mx-auto px-4 py-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-espresso-100/50">
-            <Trust><LockIcon size={14} className="text-gold-400/80" /> BankID-verifierade handlare</Trust>
-            <Trust><TruckIcon size={14} className="text-gold-400/80" /> Försäkrad frakt</Trust>
-            <Trust><WalletIcon size={14} className="text-gold-400/80" /> Utbetalning via Swish eller bank</Trust>
-            <Trust><CheckIcon size={14} className="text-gold-400/80" /> Kostnadsfritt att lägga ut</Trust>
+          <div className="max-w-6xl mx-auto px-4 py-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-espresso-100/70">
+            <Trust><LockIcon size={16} className="text-gold-400" /> BankID-verifierade handlare</Trust>
+            <Trust><TruckIcon size={16} className="text-gold-400" /> Försäkrad frakt</Trust>
+            <Trust><WalletIcon size={16} className="text-gold-400" /> Utbetalning via Swish eller bank</Trust>
+            <Trust><CheckIcon size={16} className="text-gold-400" /> Kostnadsfritt att lägga ut</Trust>
           </div>
         </div>
       </section>
@@ -728,6 +727,20 @@ function Stat({ value, label }: { value: React.ReactNode; label: string }) {
     <div>
       <div className="font-display text-2xl sm:text-3xl text-gold-100">{value}</div>
       <div className="text-xs text-espresso-100/50 mt-0.5">{label}</div>
+    </div>
+  )
+}
+
+// Trygghets-ankare med en officiell logotyp (BankID/Swish) i stället för en
+// sifferrubrik. Logotyphöjden matchar sifferankarnas teckenhöjd.
+function LogoStat({ src, alt, label, h }: { src: string; alt: string; label: string; h: number }) {
+  return (
+    <div>
+      <div className="flex items-center" style={{ height: 34 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt={alt} style={{ height: h }} className="w-auto object-contain" />
+      </div>
+      <div className="text-xs text-espresso-100/55 mt-1.5">{label}</div>
     </div>
   )
 }
