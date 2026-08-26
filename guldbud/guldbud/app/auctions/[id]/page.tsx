@@ -61,7 +61,9 @@ export default async function AuctionPage({ params }: { params: { id: string } }
   const clientItem: any = isOwnerView
     ? { ...item, has_reserve: hasReserve, reserve_met: reserveMet }
     : (() => {
-        const { min_price, ...rest } = item as any
+        // source_note (fritext om ursprung) och min_price skalas bort för alla
+        // utom ägaren, så de aldrig når köpare eller anonyma besökare.
+        const { min_price, source_note, ...rest } = item as any
         return { ...rest, has_reserve: hasReserve, reserve_met: reserveMet }
       })()
 
