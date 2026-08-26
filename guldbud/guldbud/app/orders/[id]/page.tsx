@@ -236,6 +236,8 @@ function SellerPanel({ order }: { order: any }) {
             {order.status === 'verified_paid' && 'Godkänt! Din utbetalning är på väg till ditt konto.'}
             {(order.status === 'shipped_to_dealer' || order.status === 'completed') &&
               'Affären är klar. Tack för att du sålde via GuldBud!'}
+            {order.status === 'cancelled' && !order.refunded_at &&
+              'Affären kunde tyvärr inte slutföras och har avbrutits. Har du frågor, skriv i meddelandena nedan.'}
           </p>
           {['verified_paid', 'shipped_to_dealer', 'completed'].includes(order.status) && (
             <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
@@ -364,6 +366,8 @@ function DealerPanel({ order }: { order: any }) {
           {order.status === 'shipped_to_dealer' &&
             `Föremålet är skickat till dig.${order.tracking_dealer ? ` Spårningsnummer: ${order.tracking_dealer}.` : ''}`}
           {order.status === 'completed' && 'Affären är slutförd. Tack!'}
+          {order.status === 'cancelled' && !order.refunded_at &&
+            (order.cancel_reason ? `Affären har avbrutits: ${order.cancel_reason}.` : 'Affären har avbrutits.')}
         </p>
       </div>
     </>
