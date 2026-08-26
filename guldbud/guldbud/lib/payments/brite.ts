@@ -113,10 +113,12 @@ export class BriteProvider implements PaymentProvider {
     // TODO(brite): confirm endpoint/payload against Brite sandbox docs
     const providerReference: string | undefined =
       body.id || body.session_id || body.payment_id
+    // Our order id, echoed back from the merchant_reference we sent at creation.
+    const reference: string | undefined = body.merchant_reference || body.reference
     const status = mapStatus(body.status)
     if (!providerReference || !status) return null
 
-    return { providerReference, status }
+    return { providerReference, reference, status }
   }
 }
 

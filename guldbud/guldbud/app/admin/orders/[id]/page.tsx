@@ -198,6 +198,11 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         refunded_at: new Date().toISOString(),
         refund_reason: reason || 'Föremålet godkändes inte vid kontroll',
         cancel_reason: 'Retur – ' + (reason || 'ej godkänt vid kontroll'),
+        // Pengarna går tillbaka till handlaren: nolla betalstatus så affären
+        // inte längre räknas som betald (annars skulle en återöppning kunna
+        // betala ut säljaren på redan återbetalda pengar).
+        dealer_paid_at: null,
+        payment_status: null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', order.id)
@@ -218,6 +223,10 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         refunded_at: null,
         refund_reason: null,
         cancel_reason: null,
+        // Starta betalningen från noll: en återöppnad affär ska betalas igen,
+        // aldrig ärva ett gammalt (återbetalt) dealer_paid_at.
+        dealer_paid_at: null,
+        payment_status: null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', order.id)

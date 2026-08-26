@@ -33,14 +33,27 @@ async function handle(req: NextRequest) {
     'Content-Type': 'application/json',
   }
 
-  // Locate the order by the reference the provider echoed back.
-  const ref = encodeURIComponent(verified.providerReference)
-  const found = await fetch(
-    `${supabaseUrl}/rest/v1/orders?payment_reference=eq.${ref}&select=id,dealer_paid_at,payment_status`,
-    { headers, cache: 'no-store' }
-  )
-  const rows = await found.json().catch(() => [])
-  const order = Array.isArray(rows) ? rows[0] : null
+  // Locate the order. Prefer OUR order id (echoed back by the provider), so a
+  // completed session settles the right order even if a newer session has since
+  // overwritten payment_reference. Fall back to the provider session id.
+  const select = 'select=id,dealer_paid_at,payment_status'
+  let order: any = null
+  if (verified.reference) {
+    const byId = await fetch(
+      `${supabaseUrl}/rest/v1/orders?id=eq.${encodeURIComponent(verified.reference)}&${select}`,
+      { headers, cache: 'no-store' }
+    )
+    const rows = await byId.json().catch(() => [])
+    order = Array.isArray(rows) ? rows[0] : null
+  }
+  if (!order) {
+    const byRef = await fetch(
+      `${supabaseUrl}/rest/v1/orders?payment_reference=eq.${encodeURIComponent(verified.providerReference)}&${select}`,
+      { headers, cache: 'no-store' }
+    )
+    const rows = await byRef.json().catch(() => [])
+    order = Array.isArray(rows) ? rows[0] : null
+  }
   if (!order) {
     return NextResponse.json({ error: 'order_not_found' }, { status: 404 })
   }

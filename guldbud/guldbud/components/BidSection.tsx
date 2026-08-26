@@ -87,7 +87,14 @@ export default function BidSection({
     setAutoLoading(true)
     const { data: { session } } = await supabase.auth.getSession()
     const user = session?.user
-    await supabase.from('auto_bids').delete().eq('item_id', itemId).eq('dealer_id', user?.id)
+    // Kolla felet: annars kan raden ligga kvar medan UI:t visar borttaget, och
+    // proxy-resolvern fortsätter buda upp till det gamla maxbudet.
+    const { error } = await supabase.from('auto_bids').delete().eq('item_id', itemId).eq('dealer_id', user?.id)
+    if (error) {
+      setAutoMsg('Kunde inte ta bort maxbudet. Försök igen.')
+      setAutoLoading(false)
+      return
+    }
     setMyAutoMax(null)
     setAutoMsg('')
     setAutoLoading(false)
