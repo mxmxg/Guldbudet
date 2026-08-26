@@ -13,7 +13,7 @@ export default function DealerTermsPage() {
       eyebrow="Villkor"
       title="Handlarvillkor"
       intro="Dessa villkor gäller för dig som är godkänd handlare på GuldBud och budar på föremål. De gäller utöver GuldBuds allmänna användarvillkor. Genom att registrera dig som handlare godkänner du villkoren."
-      updated="22 augusti 2026"
+      updated="26 augusti 2026"
       sections={[
         {
           heading: 'Vem som får vara handlare',
