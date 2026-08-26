@@ -203,6 +203,26 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     setSaving(false)
   }
 
+  // Återöppna en avbruten/krediterad affär: nolla även retur- och avbrottsfälten
+  // så ordern inte blir aktiv med "Affären återgick"-panel kvar för parterna.
+  const reopenOrder = async () => {
+    setSaving(true)
+    setSaveError('')
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        status: 'accepted',
+        refunded_at: null,
+        refund_reason: null,
+        cancel_reason: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', order.id)
+    if (error) setSaveError('Kunde inte återöppna affären: ' + error.message)
+    else await loadOrder()
+    setSaving(false)
+  }
+
   const saveTracking = async () => {
     setSaving(true)
     setSaveError('')
@@ -377,7 +397,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 ) : (
                   order.cancel_reason && <p className="text-sm text-red-600 mb-2">Avbruten: {order.cancel_reason}</p>
                 )}
-                <button onClick={() => setStatus('accepted')} disabled={saving} className="btn-ghost-gold !py-2">
+                <button onClick={() => reopenOrder()} disabled={saving} className="btn-ghost-gold !py-2">
                   Återöppna affär
                 </button>
               </div>
