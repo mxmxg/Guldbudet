@@ -26,6 +26,7 @@ export default function DealerTermsPage() {
           heading: 'Bindande bud och köpskyldighet',
           body: [
             'Varje bud du lägger är bindande och kan inte återkallas. Den handlare som har det högsta budet när auktionen avslutas har vunnit budgivningen. Ett bindande köpavtal uppstår när säljaren accepterar det vinnande budet.',
+            'Köpeavtalet ingås mellan dig som handlare och säljaren. GuldBud är förmedlare och auktionsplattform och är inte köpare eller säljare av föremålet, och inte part i köpeavtalet mellan dig och säljaren. GuldBud ansvarar för de tjänster vi själva tillhandahåller, det vill säga förmedling, äkthetskontroll, betalningsavveckling och frakt, enligt dessa villkor och användarvillkoren.',
             'När budgivningen är vunnen och budet accepterat är du skyldig att fullfölja köpet och betala omgående enligt nedan. Att vinna en auktion och sedan inte betala är ett väsentligt avtalsbrott.',
           ],
         },
