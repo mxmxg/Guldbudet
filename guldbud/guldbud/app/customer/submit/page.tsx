@@ -43,8 +43,9 @@ export default function SubmitPage() {
   useEffect(() => {
     const check = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser()
+        data: { session },
+      } = await supabase.auth.getSession()
+      const user = session?.user
       if (!user) {
         router.push('/auth/login')
         return
@@ -198,8 +199,9 @@ export default function SubmitPage() {
     setError('')
 
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) {
       setLoading(false)
       router.push('/auth/login')

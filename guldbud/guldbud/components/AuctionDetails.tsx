@@ -74,8 +74,9 @@ export default function AuctionDetails({ item }: { item: any }) {
   useEffect(() => {
     const load = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser()
+        data: { session },
+      } = await supabase.auth.getSession()
+      const user = session?.user
       if (user) {
         setUser(user)
         userRef.current = user

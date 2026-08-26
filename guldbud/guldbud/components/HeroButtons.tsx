@@ -8,8 +8,8 @@ export default function HeroButtons() {
   const supabase = createClient()
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setIsLoggedIn(!!data.user)
+    supabase.auth.getSession().then(({ data }) => {
+      setIsLoggedIn(!!data.session?.user)
     })
   }, [])
 

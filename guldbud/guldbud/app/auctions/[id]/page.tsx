@@ -52,8 +52,9 @@ export default async function AuctionPage({ params }: { params: { id: string } }
   // Reservationsnivån (min_price) skickas bara till ägaren själv. För alla andra
   // skalas talet bort och ersätts med booleaner, så köpare aldrig ser nivån.
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user
   const isOwnerView = !!user && user.id === item.owner_id
   const hasReserve = item.min_price != null
   const reserveMet = hasReserve && topBid >= item.min_price

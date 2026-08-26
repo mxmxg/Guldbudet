@@ -34,12 +34,13 @@ export default function BidSection({
   const supabase = createClient()
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (data.user) {
+    supabase.auth.getSession().then(async ({ data }) => {
+      const sessionUser = data.session?.user
+      if (sessionUser) {
         const { data: prof } = await supabase
           .from('profiles')
           .select('role, approved, suspended')
-          .eq('id', data.user.id)
+          .eq('id', sessionUser.id)
           .single()
         setRole(prof?.role ?? null)
         setApproved(prof?.approved ?? false)
@@ -48,7 +49,7 @@ export default function BidSection({
           .from('auto_bids')
           .select('max_amount')
           .eq('item_id', itemId)
-          .eq('dealer_id', data.user.id)
+          .eq('dealer_id', sessionUser.id)
           .maybeSingle()
         setMyAutoMax(ab?.max_amount ?? null)
       }
@@ -65,7 +66,8 @@ export default function BidSection({
       return
     }
     setAutoLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     const { error } = await supabase
       .from('auto_bids')
       .upsert({ item_id: itemId, dealer_id: user?.id, max_amount: val }, { onConflict: 'item_id,dealer_id' })
@@ -83,7 +85,8 @@ export default function BidSection({
 
   const removeAutoBid = async () => {
     setAutoLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { session } } = await supabase.auth.getSession()
+    const user = session?.user
     await supabase.from('auto_bids').delete().eq('item_id', itemId).eq('dealer_id', user?.id)
     setMyAutoMax(null)
     setAutoMsg('')
@@ -110,8 +113,9 @@ export default function BidSection({
     setLoading(true)
     setMsg('')
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     const { error } = await supabase.from('bids').insert({ item_id: itemId, dealer_id: user?.id, amount: val })
     if (error) {
       // Råa RLS-/policyfel ska aldrig visas för användaren.
