@@ -30,9 +30,13 @@ export default function OrderPage({ params }: { params: { id: string } }) {
   }, [])
 
   const init = async () => {
+    // getSession() läser sessionen från lagringen och förnyar en utgången
+    // access-token. getUser() gör bara ett nätverksanrop som misslyckas på en
+    // utgången token, vilket kastade ut handlaren vid återkomst från Stripe.
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) {
       router.push('/auth/login')
       return
