@@ -260,6 +260,10 @@ create or replace function public.enforce_bid_higher()
 returns trigger language plpgsql security definer
   set search_path = public as $$
 begin
+  -- Serialisera samtidiga bud på SAMMA föremål: utan lås är kontrollen nedan
+  -- ett check-then-insert (TOCTOU) där två parallella bud båda kan läsa samma
+  -- max() och båda passera. Ett transaktionslås per item gör budet atomiskt.
+  perform pg_advisory_xact_lock(hashtext(new.item_id::text)::bigint);
   if new.amount <= coalesce((select max(amount) from public.bids where item_id = new.item_id), 0) then
     raise exception 'Budet måste vara högre än nuvarande högsta bud.';
   end if;
@@ -942,13 +946,31 @@ create trigger on_bid_accepted
 create or replace function public.enforce_accepted_bid_valid()
 returns trigger language plpgsql
   set search_path = public as $$
+declare
+  v_amount bigint;
+  v_top_id uuid;
 begin
   if new.accepted_bid_id is not null
      and new.accepted_bid_id is distinct from old.accepted_bid_id then
-    if not exists (
-      select 1 from public.bids b where b.id = new.accepted_bid_id and b.item_id = new.id
-    ) then
+    -- Får inte byta accepterat bud i efterhand (ordern är redan skapad).
+    if old.accepted_bid_id is not null then
+      raise exception 'Det accepterade budet kan inte ändras.';
+    end if;
+    -- Budet måste tillhöra föremålet ...
+    select b.amount into v_amount
+      from public.bids b where b.id = new.accepted_bid_id and b.item_id = new.id;
+    if v_amount is null then
       raise exception 'Det accepterade budet tillhör inte detta föremål.';
+    end if;
+    -- ... och vara det vinnande (högsta) budet. Samma tie-break som avräkningen
+    -- (högsta belopp, äldst först), så en säljare inte kan tvinga fram en order
+    -- till ett lägre kompisbud och därmed även auto-avstänga andra budgivare.
+    select b.id into v_top_id
+      from public.bids b where b.item_id = new.id
+      order by b.amount desc, b.created_at asc
+      limit 1;
+    if v_top_id is distinct from new.accepted_bid_id then
+      raise exception 'Endast det högsta budet kan accepteras.';
     end if;
   end if;
   return new;
@@ -1597,3 +1619,13 @@ begin
   from per_item;
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- Defense-in-depth: underhålls-RPC:er ska inte gå att anropa direkt via
+-- PostgREST av vanliga användare. De körs av pg_cron (jobbägaren) och av
+-- security-definer-triggers, så att återkalla exec från anon/authenticated
+-- påverkar inte den schemalagda driften, bara direktanrop.
+-- ---------------------------------------------------------------------------
+revoke execute on function public.settle_ended_auctions() from anon, authenticated;
+revoke execute on function public.process_unpaid_orders() from anon, authenticated;
+revoke execute on function public.resolve_auto_bids(uuid) from anon, authenticated;
