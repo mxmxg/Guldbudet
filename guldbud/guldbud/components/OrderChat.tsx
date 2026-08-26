@@ -29,6 +29,7 @@ export default function OrderChat({
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [sendError, setSendError] = useState('')
   const endRef = useRef<HTMLDivElement>(null)
 
   const load = async () => {
@@ -68,13 +69,15 @@ export default function OrderChat({
     const body = text.trim()
     if (!body) return
     setSending(true)
+    setSendError('')
     const { error } = await supabase.from('order_messages').insert({
       order_id: orderId,
       sender_id: meId,
       party,
       body,
     })
-    if (!error) setText('')
+    if (error) setSendError('Meddelandet kunde inte skickas. Försök igen.')
+    else setText('')
     setSending(false)
   }
 
@@ -111,6 +114,7 @@ export default function OrderChat({
         <div ref={endRef} />
       </div>
 
+      {sendError && <p className="px-3 pt-2 text-xs text-red-600">{sendError}</p>}
       <div className="p-3 border-t border-espresso-100 flex gap-2">
         <input
           value={text}

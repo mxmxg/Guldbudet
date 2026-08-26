@@ -229,7 +229,8 @@ export default function CustomerProfilePage() {
                     .from('profiles')
                     .update({ email_notifications: v })
                     .eq('id', profile.id)
-                  if (!error) setProfile((p: any) => ({ ...p, email_notifications: v }))
+                  if (error) alert('Kunde inte spara notisinställningen. Försök igen.')
+                  else setProfile((p: any) => ({ ...p, email_notifications: v }))
                 }}
               />
             </section>
