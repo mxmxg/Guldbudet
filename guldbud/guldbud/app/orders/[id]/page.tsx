@@ -269,9 +269,17 @@ function PayNowButton({ orderId }: { orderId: string }) {
     setError('')
     setNotConfigured(false)
     try {
+      const supabase = createClient()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const token = session?.access_token
       const res = await fetch('/api/payments/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ orderId }),
       })
       if (res.status === 503) {

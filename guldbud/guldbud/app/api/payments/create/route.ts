@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { createRouteClient } from '@/lib/supabase-route'
 import { dealerTotal } from '@/lib/fees'
 import { getPaymentProvider, paymentsConfigured } from '@/lib/payments'
 
@@ -30,21 +30,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'missing_order_id' }, { status: 400 })
   }
 
-  // Authenticate the caller against Supabase (cookie session).
-  const supabase = createClient()
+  // Authenticate the caller the same way as the rest of the app's routes:
+  // a Bearer access token read straight from the request, not next/headers
+  // cookies (which do not reliably mirror the session in a route handler and
+  // gave a spurious 401 here).
+  const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+  if (!token) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   const {
     data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  } = await createRouteClient(req).auth.getUser(token)
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !serviceKey) {
+    return NextResponse.json({ error: 'server_misconfigured' }, { status: 500 })
+  }
+  const serviceHeaders = {
+    apikey: serviceKey,
+    Authorization: `Bearer ${serviceKey}`,
+    'Content-Type': 'application/json',
   }
 
-  // Load the order (RLS lets the dealer read their own order).
-  const { data: order } = await supabase
-    .from('orders')
-    .select('id, dealer_id, amount, dealer_paid_at, payment_status')
-    .eq('id', orderId)
-    .single()
+  // Read the order via the service role, then enforce ownership ourselves.
+  const found = await fetch(
+    `${supabaseUrl}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=id,dealer_id,amount,dealer_paid_at,payment_status`,
+    { headers: serviceHeaders, cache: 'no-store' }
+  )
+  const rows = await found.json().catch(() => [])
+  const order = Array.isArray(rows) ? rows[0] : null
   if (!order) {
     return NextResponse.json({ error: 'order_not_found' }, { status: 404 })
   }
@@ -82,11 +96,6 @@ export async function POST(req: NextRequest) {
   // Persist the pending payment with the service role so it is not blocked by
   // RLS. This runs alongside the manual admin dealer_paid_at path, never
   // replacing it: only the callback sets dealer_paid_at.
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!supabaseUrl || !serviceKey) {
-    return NextResponse.json({ error: 'server_misconfigured' }, { status: 500 })
-  }
   const patch = await fetch(
     `${supabaseUrl}/rest/v1/orders?id=eq.${encodeURIComponent(order.id)}`,
     {
