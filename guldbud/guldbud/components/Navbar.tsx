@@ -32,27 +32,31 @@ export default function Navbar() {
 
   useEffect(() => {
     let channel: any = null
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (data.user) {
-        setUser(data.user)
+    // getSession() förnyar en utgången token och överlever en kall sidladdning
+    // (t.ex. återkomst från Stripe), till skillnad från getUser() som då kan
+    // returnera null och få navbaren att felaktigt visa utloggat.
+    supabase.auth.getSession().then(async ({ data }) => {
+      const sessionUser = data.session?.user
+      if (sessionUser) {
+        setUser(sessionUser)
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
-          .eq('id', data.user.id)
+          .eq('id', sessionUser.id)
           .single()
         setRole(profile?.role ?? null)
         setReady(true)
-        loadNotifications(data.user.id)
-        loadMsgUnread(data.user.id)
+        loadNotifications(sessionUser.id)
+        loadMsgUnread(sessionUser.id)
         // Live-uppdatera notisklockan när en ny notis kommer in.
         channel = supabase
-          .channel(`notifs-${data.user.id}`)
+          .channel(`notifs-${sessionUser.id}`)
           .on(
             'postgres_changes',
-            { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${data.user.id}` },
+            { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${sessionUser.id}` },
             () => {
-              loadNotifications(data.user.id)
-              loadMsgUnread(data.user.id)
+              loadNotifications(sessionUser.id)
+              loadMsgUnread(sessionUser.id)
             }
           )
           .subscribe()
