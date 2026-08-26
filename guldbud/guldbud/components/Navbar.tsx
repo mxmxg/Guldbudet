@@ -32,6 +32,7 @@ export default function Navbar() {
 
   useEffect(() => {
     let channel: any = null
+    let cancelled = false
     // getSession() förnyar en utgången token och överlever en kall sidladdning
     // (t.ex. återkomst från Stripe), till skillnad från getUser() som då kan
     // returnera null och få navbaren att felaktigt visa utloggat.
@@ -60,6 +61,12 @@ export default function Navbar() {
             }
           )
           .subscribe()
+        // Om komponenten hann avmonteras medan getSession pågick, städa direkt
+        // så prenumerationen inte läcker (cleanup hann köra med channel = null).
+        if (cancelled) {
+          supabase.removeChannel(channel)
+          channel = null
+        }
       } else {
         setReady(true)
       }
@@ -79,6 +86,7 @@ export default function Navbar() {
     })
 
     return () => {
+      cancelled = true
       listener.subscription.unsubscribe()
       if (channel) supabase.removeChannel(channel)
     }

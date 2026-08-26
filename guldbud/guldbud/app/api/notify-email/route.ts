@@ -189,6 +189,23 @@ export async function POST(req: NextRequest) {
   }
 
   const uuid = /^[0-9a-f-]{36}$/i
+
+  // Härdning: lita inte på POST-body:ns innehåll. Har raden ett id, läs notisen
+  // från DB och använd dess fält, så en läckt webhook-hemlighet inte kan mejla
+  // godtyckligt innehåll (titel/text/länk) till godtycklig användare.
+  if (record?.id && uuid.test(String(record.id))) {
+    const rows = await (
+      await sb(
+        `notifications?id=eq.${encodeURIComponent(String(record.id))}&select=user_id,title,message,link,item_id`
+      )
+    )
+      .json()
+      .catch(() => [])
+    const row = Array.isArray(rows) ? rows[0] : null
+    if (!row) return NextResponse.json({ ok: true, skipped: 'notification not found' })
+    record = { ...record, ...row }
+  }
+
   const userId = String(record.user_id)
   if (!uuid.test(userId)) return NextResponse.json({ ok: true, skipped: 'bad user_id' })
 
