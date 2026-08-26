@@ -259,13 +259,23 @@ alter table public.bids add constraint bids_amount_positive check (amount > 0);
 create or replace function public.enforce_bid_higher()
 returns trigger language plpgsql security definer
   set search_path = public as $$
+declare
+  v_top bigint;
 begin
   -- Serialisera samtidiga bud på SAMMA föremål: utan lås är kontrollen nedan
   -- ett check-then-insert (TOCTOU) där två parallella bud båda kan läsa samma
   -- max() och båda passera. Ett transaktionslås per item gör budet atomiskt.
   perform pg_advisory_xact_lock(hashtext(new.item_id::text)::bigint);
-  if new.amount <= coalesce((select max(amount) from public.bids where item_id = new.item_id), 0) then
-    raise exception 'Budet måste vara högre än nuvarande högsta bud.';
+  v_top := coalesce((select max(amount) from public.bids where item_id = new.item_id), 0);
+  if v_top = 0 then
+    -- Öppningsbud: bara positivt belopp krävs.
+    if new.amount <= 0 then
+      raise exception 'Budet måste vara ett positivt belopp.';
+    end if;
+  elsif new.amount < v_top + 100 then
+    -- Minsta höjning 100 kr, server-side (matchar UI). Stänger +1 kr-nudge som
+    -- annars kunde hålla auktionen öppen billigt via anti-sniping.
+    raise exception 'Budet måste vara minst % kr (minsta höjning 100 kr).', v_top + 100;
   end if;
   return new;
 end;
@@ -718,6 +728,12 @@ declare
   r record;
   v_top record;
 begin
+  -- Bara en körning åt gången: om en tidigare körning överlappar sitt
+  -- minutfönster hoppar den nya över, så samma avslut inte notifieras dubbelt.
+  -- Transaktions-scoped lås släpps automatiskt när körningen är klar.
+  if not pg_try_advisory_xact_lock(hashtext('settle_ended_auctions')::bigint) then
+    return;
+  end if;
   for r in
     select * from public.items
     where status = 'active'
@@ -990,32 +1006,44 @@ declare
 begin
   select title into v_title from public.items where id = new.item_id;
   if new.status is distinct from old.status then
+    -- Dedupe: skicka bara milstolpsnotisen om den inte redan finns för samma
+    -- mottagare/affär/titel. En återöppnad affär (reopenOrder) som avancerar på
+    -- nytt skulle annars dubbel-mejla t.ex. utbetalning + Trustpilot-inbjudan.
     if new.status = 'received' then
-      -- Säljaren: mottaget, kontroll pågår. Handlaren: mottaget, vi skickar vidare.
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.seller_id, 'Vi har tagit emot ditt föremål',
+      select new.seller_id, 'Vi har tagit emot ditt föremål',
               'Vi har tagit emot "' || v_title || '" och äkthetskontrollerar det nu. Så snart kontrollen är godkänd betalar vi ut ' ||
               replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr omgående via Swish eller bankkonto. Fyll gärna i dina utbetalningsuppgifter i din profil så går det snabbt.',
-              new.item_id, '/orders/' || new.id);
+              new.item_id, '/orders/' || new.id
+      where not exists (select 1 from public.notifications n
+        where n.user_id = new.seller_id and n.link = '/orders/' || new.id and n.title = 'Vi har tagit emot ditt föremål');
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.dealer_id, 'Ditt föremål är mottaget och kontrollerat',
+      select new.dealer_id, 'Ditt föremål är mottaget och kontrollerat',
               '"' || v_title || '" är mottaget hos oss och äkthetskontrollerat. Vi packar och skickar det vidare till dig.',
-              new.item_id, '/orders/' || new.id);
+              new.item_id, '/orders/' || new.id
+      where not exists (select 1 from public.notifications n
+        where n.user_id = new.dealer_id and n.link = '/orders/' || new.id and n.title = 'Ditt föremål är mottaget och kontrollerat');
     elsif new.status = 'verified_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.seller_id, 'Du har fått betalt',
+      select new.seller_id, 'Du har fått betalt',
               replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr betalas ut omgående via Swish eller bankkonto. Tack för att du sålde via GuldBud!',
-              new.item_id, '/orders/' || new.id);
+              new.item_id, '/orders/' || new.id
+      where not exists (select 1 from public.notifications n
+        where n.user_id = new.seller_id and n.link = '/orders/' || new.id and n.title = 'Du har fått betalt');
     elsif new.status = 'shipped_to_dealer' then
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.dealer_id, 'Ditt föremål är på väg',
+      select new.dealer_id, 'Ditt föremål är på väg',
               'Vi har skickat "' || v_title || '" till dig. Tack för ditt köp via GuldBud. Hör av dig i affären om du undrar något.',
-              new.item_id, '/orders/' || new.id);
+              new.item_id, '/orders/' || new.id
+      where not exists (select 1 from public.notifications n
+        where n.user_id = new.dealer_id and n.link = '/orders/' || new.id and n.title = 'Ditt föremål är på väg');
     elsif new.status = 'completed' then
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (new.seller_id, 'Tack för din affär!',
+      select new.seller_id, 'Tack för din affär!',
               'Affären för "' || v_title || '" är helt klar. Tack för att du sålde via GuldBud, vi hoppas att vi ses igen.',
-              new.item_id, '/orders/' || new.id);
+              new.item_id, '/orders/' || new.id
+      where not exists (select 1 from public.notifications n
+        where n.user_id = new.seller_id and n.link = '/orders/' || new.id and n.title = 'Tack för din affär!');
     end if;
   end if;
   return new;
@@ -1116,6 +1144,11 @@ declare
   o record;
   v_title text;
 begin
+  -- Bara en körning åt gången (transaktions-scoped, auto-släpps), så en
+  -- överlappande cron-körning inte skickar dubbla påminnelser/avstängningar.
+  if not pg_try_advisory_xact_lock(hashtext('process_unpaid_orders')::bigint) then
+    return;
+  end if;
   for o in
     select * from public.orders
     where dealer_paid_at is null
@@ -1586,7 +1619,9 @@ returns setof jsonb
 language sql stable
 set search_path = public
 as $$
-  select to_jsonb(i) || jsonb_build_object(
+  -- source_note (fritext om ursprung, kan innehålla personligt) skalas bort ur
+  -- den publika payloaden. Bara admin/ägare ska se den.
+  select (to_jsonb(i) - 'source_note') || jsonb_build_object(
            'top_bid', coalesce(b.top_bid, 0),
            'bid_count', coalesce(b.bid_count, 0)
          )
