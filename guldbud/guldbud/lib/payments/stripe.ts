@@ -43,12 +43,17 @@ function toMinorUnits(sek: number): number {
   return Math.round((sek || 0) * 100)
 }
 
-// Map a Stripe event type onto our two terminal states, or null if the event
-// is one we do not settle on (nothing to persist).
-function mapEventType(type: string): PaymentStatus | null {
-  if (type === 'checkout.session.completed' || type === 'checkout.session.async_payment_succeeded') {
-    return 'paid'
+// Map a Stripe event to our terminal states, or null if it is not one we
+// settle on. `session` is event.data.object (the Checkout Session). A plain
+// checkout.session.completed only counts as paid when the session's own
+// payment_status is 'paid'; for delayed methods it can be 'unpaid' at
+// completion and only settles later via async_payment_succeeded, so we must
+// wait rather than release the seller's payout on unfunded money.
+function mapEvent(type: string, session: any): PaymentStatus | null {
+  if (type === 'checkout.session.completed') {
+    return session?.payment_status === 'paid' ? 'paid' : null
   }
+  if (type === 'checkout.session.async_payment_succeeded') return 'paid'
   if (type === 'checkout.session.expired' || type === 'checkout.session.async_payment_failed') {
     return 'failed'
   }
@@ -112,13 +117,15 @@ export class StripeProvider implements PaymentProvider {
       return null
     }
 
-    const status = mapEventType(String(event?.type || ''))
+    const session = event?.data?.object
+    const status = mapEvent(String(event?.type || ''), session)
     // The event object is the Checkout Session; its id is what we stored as
-    // payment_reference when the session was created.
-    const providerReference: string | undefined = event?.data?.object?.id
+    // payment_reference; client_reference_id is our order id (set at creation).
+    const providerReference: string | undefined = session?.id
+    const reference: string | undefined = session?.client_reference_id || session?.metadata?.order_id
     if (!providerReference || !status) return null
 
-    return { providerReference, status }
+    return { providerReference, reference, status }
   }
 }
 

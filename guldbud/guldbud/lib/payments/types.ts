@@ -32,7 +32,12 @@ export interface CreatePaymentResult {
 // The normalised result of verifying an inbound provider callback/webhook.
 // null means the request could not be authenticated or understood.
 export interface VerifiedCallback {
+  // The provider's own session id (stored as payment_reference for the record).
   providerReference: string
+  // OUR reference echoed back by the provider (the order id). The callback
+  // route matches on this first, so a completed session settles the right order
+  // even if a newer session has since overwritten payment_reference.
+  reference?: string
   status: PaymentStatus
 }
 

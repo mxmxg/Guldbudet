@@ -27,18 +27,32 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
     // Only advance to the success state if the write actually succeeds –
     // otherwise the seller would be told to ship an item for a deal that
     // was never created (the order is created by a DB trigger on this update).
-    const { error: updateError } = await supabase
+    const { data: updated, error: updateError } = await supabase
       .from('items')
       .update({ accepted_bid_id: bidId, accepted_at: new Date().toISOString(), status: 'closed' })
       .eq('id', itemId)
-    if (updateError) {
-      setError('Kunde inte acceptera budet: ' + updateError.message + ' Försök igen.')
+      .select('id')
+    // A write blocked by RLS returns no error AND zero rows. Only proceed if a
+    // row was actually updated, otherwise the seller would be told to ship an
+    // item for a deal that was never created.
+    if (updateError || !updated || updated.length === 0) {
+      setError(
+        'Kunde inte acceptera budet' +
+          (updateError ? ': ' + updateError.message : '') +
+          '. Försök igen, eller kontakta oss på info@guldbud.com.'
+      )
       setLoading(false)
       return
     }
-    // The order is created by a DB trigger; fetch its id so we can link to it.
+    // The order is created by a DB trigger on the update above. Confirm it
+    // exists before we instruct the seller to ship anything.
     const { data: order } = await supabase.from('orders').select('id').eq('item_id', itemId).single()
-    setOrderId(order?.id ?? null)
+    if (!order?.id) {
+      setError('Affären kunde inte skapas. Kontakta oss på info@guldbud.com innan du skickar föremålet.')
+      setLoading(false)
+      return
+    }
+    setOrderId(order.id)
     setLoading(false)
     setConfetti((c) => c + 1)
     setStep('done')

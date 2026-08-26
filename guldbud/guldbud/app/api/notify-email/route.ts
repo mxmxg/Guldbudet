@@ -199,7 +199,6 @@ export async function POST(req: NextRequest) {
   const prof = Array.isArray(profiles) ? profiles[0] : null
   const email = prof?.email
   if (!email) return NextResponse.json({ ok: true, skipped: 'no email' })
-  if (prof?.email_notifications === false) return NextResponse.json({ ok: true, skipped: 'opted out' })
 
   // Vissa notiser lever bara i klockan i appen, inte som mejl. Håller nere
   // mejlvolymen och skräpet: varje bud triggar annars ett "överbjuden"-mejl
@@ -212,6 +211,14 @@ export async function POST(req: NextRequest) {
   }
   if (titleLower.includes('nytt bud på ditt föremål')) {
     return NextResponse.json({ ok: true, skipped: 'in-app only (nytt bud)' })
+  }
+
+  // E-postavstängningen gäller BARA påminnelser (t.ex. "auktionen avslutas
+  // snart"), aldrig transaktions- och pengamejl: affär skapad, mottaget,
+  // utbetalning, kreditering, tvist och avstängning måste alltid nå mottagaren.
+  const isReminder = titleLower.includes('snart slut') || titleLower.includes('avslutas')
+  if (prof?.email_notifications === false && isReminder) {
+    return NextResponse.json({ ok: true, skipped: 'opted out (reminder)' })
   }
 
   // Enrich with the related item + current top bid, if any.

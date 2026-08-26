@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
   // Read the order via the service role, then enforce ownership ourselves.
   const found = await fetch(
-    `${supabaseUrl}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=id,dealer_id,amount,dealer_paid_at,payment_status`,
+    `${supabaseUrl}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=id,dealer_id,amount,status,dealer_paid_at,payment_status`,
     { headers: serviceHeaders, cache: 'no-store' }
   )
   const rows = await found.json().catch(() => [])
@@ -69,6 +69,20 @@ export async function POST(req: NextRequest) {
   }
   if (order.dealer_paid_at) {
     return NextResponse.json({ error: 'already_paid' }, { status: 409 })
+  }
+  // Never take money on a dead deal: a cancelled/completed order is not payable.
+  if (order.status === 'cancelled' || order.status === 'completed') {
+    return NextResponse.json({ error: 'order_not_payable' }, { status: 409 })
+  }
+
+  // A suspended dealer cannot pay (e.g. auto-suspended for a prior non-payment).
+  const profRes = await fetch(
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=suspended`,
+    { headers: serviceHeaders, cache: 'no-store' }
+  )
+  const profRows = await profRes.json().catch(() => [])
+  if (Array.isArray(profRows) && profRows[0]?.suspended) {
+    return NextResponse.json({ error: 'dealer_suspended' }, { status: 403 })
   }
 
   const amount = dealerTotal(order.amount)
