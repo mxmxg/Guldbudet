@@ -33,6 +33,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const [saveError, setSaveError] = useState('')
   const [trackingSeller, setTrackingSeller] = useState('')
   const [trackingDealer, setTrackingDealer] = useState('')
+  const [sealNumber, setSealNumber] = useState('')
   const [showRefund, setShowRefund] = useState(false)
   const [refundReason, setRefundReason] = useState('')
   const [disputes, setDisputes] = useState<any[]>([])
@@ -78,6 +79,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     setOrder(o)
     setTrackingSeller(o.tracking_seller || '')
     setTrackingDealer(o.tracking_dealer || '')
+    setSealNumber(o.seal_number || '')
     const [{ data: it }, { data: s }, { data: d }] = await Promise.all([
       supabase.from('items').select('*').eq('id', o.item_id).single(),
       supabase.from('profiles').select('*').eq('id', o.seller_id).single(),
@@ -231,6 +233,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
       .update({
         tracking_seller: trackingSeller || null,
         tracking_dealer: trackingDealer || null,
+        seal_number: sealNumber || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', order.id)
@@ -415,8 +418,13 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
               <span className="block text-xs font-medium text-espresso-500 mb-1.5">GuldBud → handlare</span>
               <input value={trackingDealer} onChange={(e) => setTrackingDealer(e.target.value)} placeholder="Spårningsnr" />
             </label>
+            <label className="block mb-4 pt-4 border-t border-espresso-100">
+              <span className="block text-xs font-medium text-espresso-500 mb-1.5">Säkerhetsförsegling (påsnummer)</span>
+              <input value={sealNumber} onChange={(e) => setSealNumber(e.target.value)} placeholder="Nr på förseglad säkerhetspåse" />
+              <span className="block text-[11px] text-espresso-400 mt-1.5">Registrera numret på den förseglade påsen så båda parter kan kontrollera att föremålet inte bytts ut.</span>
+            </label>
             <button onClick={saveTracking} disabled={saving} className="btn-gold !py-2">
-              {saving ? 'Sparar...' : 'Spara spårning'}
+              {saving ? 'Sparar...' : 'Spara'}
             </button>
           </div>
 

@@ -820,6 +820,9 @@ alter table public.orders add column if not exists payment_status text; -- 'pend
 -- Retur/kreditering: när ett föremål inte godkänns vid kontroll (fake/stämmer ej).
 alter table public.orders add column if not exists refunded_at timestamptz;
 alter table public.orders add column if not exists refund_reason text;
+-- Säkerhetsförsegling: numret på den förseglade säkerhetspåsen. Registreras av
+-- admin och visas för båda parter så ingen kan byta ut föremålet under transport.
+alter table public.orders add column if not exists seal_number text;
 -- Backfill: ge befintliga affärer en deadline utifrån när de skapades.
 update public.orders set payment_due_at = created_at + interval '3 days'
   where payment_due_at is null;

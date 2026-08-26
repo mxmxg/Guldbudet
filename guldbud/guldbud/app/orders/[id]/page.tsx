@@ -244,6 +244,11 @@ function SellerPanel({ order }: { order: any }) {
               Visa avräkningsnota →
             </Link>
           )}
+          {order.seal_number && (
+            <p className="mt-3 text-xs text-espresso-500">
+              Säkerhetsförsegling: <span className="font-medium text-espresso-700">{order.seal_number}</span>
+            </p>
+          )}
         </>
       )}
     </div>
@@ -369,6 +374,11 @@ function DealerPanel({ order }: { order: any }) {
           {order.status === 'cancelled' && !order.refunded_at &&
             (order.cancel_reason ? `Affären har avbrutits: ${order.cancel_reason}.` : 'Affären har avbrutits.')}
         </p>
+        {order.seal_number && (
+          <p className="mt-3 text-xs text-espresso-500">
+            Säkerhetsförsegling: <span className="font-medium text-espresso-700">{order.seal_number}</span>
+          </p>
+        )}
       </div>
     </>
   )
