@@ -4,15 +4,18 @@
 
 import type { PaymentProvider, PaymentProviderName } from './types'
 import { BriteProvider } from './brite'
+import { StripeProvider } from './stripe'
 
 function selectedProvider(): PaymentProviderName {
   const raw = (process.env.PAYMENT_PROVIDER || 'brite').toLowerCase()
-  // Only 'brite' is wired up today; anything else falls back to it.
-  return raw === 'brite' ? 'brite' : 'brite'
+  if (raw === 'stripe') return 'stripe'
+  return 'brite'
 }
 
 export function getPaymentProvider(): PaymentProvider {
   switch (selectedProvider()) {
+    case 'stripe':
+      return new StripeProvider()
     case 'brite':
     default:
       return new BriteProvider()
@@ -24,6 +27,8 @@ export function getPaymentProvider(): PaymentProvider {
 // Brite's sandbox keys are still pending.
 export function paymentsConfigured(): boolean {
   switch (selectedProvider()) {
+    case 'stripe':
+      return !!process.env.STRIPE_SECRET_KEY
     case 'brite':
     default:
       return !!process.env.BRITE_API_KEY

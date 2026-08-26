@@ -4,7 +4,7 @@
 // routes stay identical regardless of which A2A rail is live.
 
 // Registered provider identifiers. Add new rails here as they are onboarded.
-export type PaymentProviderName = 'brite'
+export type PaymentProviderName = 'brite' | 'stripe'
 
 // The two terminal states we persist on orders.payment_status after a callback.
 // (Orders start at 'pending' the moment a payment session is created.)
