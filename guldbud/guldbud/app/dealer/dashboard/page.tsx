@@ -40,8 +40,9 @@ export default function DealerDashboard() {
 
   const init = async () => {
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) {
       router.push('/auth/login?role=dealer')
       return
@@ -118,8 +119,9 @@ export default function DealerDashboard() {
     }
     setBidding(itemId)
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     const { error } = await supabase.from('bids').insert({ item_id: itemId, dealer_id: user!.id, amount })
     if (error) {
       setErr(error.message)
@@ -151,8 +153,9 @@ export default function DealerDashboard() {
     }
     setAutoBusy(itemId)
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     const { error } = await supabase
       .from('auto_bids')
       .upsert({ item_id: itemId, dealer_id: user!.id, max_amount: val }, { onConflict: 'item_id,dealer_id' })
@@ -170,8 +173,9 @@ export default function DealerDashboard() {
   const removeAutoBid = async (itemId: string) => {
     setAutoBusy(itemId)
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     await supabase.from('auto_bids').delete().eq('item_id', itemId).eq('dealer_id', user!.id)
     setAutoMax((prev) => {
       const next = { ...prev }

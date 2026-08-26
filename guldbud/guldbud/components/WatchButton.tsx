@@ -12,8 +12,9 @@ export default function WatchButton({ itemId }: { itemId: string }) {
   useEffect(() => {
     const check = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser()
+        data: { session },
+      } = await supabase.auth.getSession()
+      const user = session?.user
       if (!user) return
       const { data: prof } = await supabase.from('profiles').select('role, approved').eq('id', user.id).single()
       if (prof?.role !== 'dealer' || !prof?.approved) return
@@ -36,8 +37,9 @@ export default function WatchButton({ itemId }: { itemId: string }) {
     setBusy(true)
     try {
       const {
-        data: { user },
-      } = await supabase.auth.getUser()
+        data: { session },
+      } = await supabase.auth.getSession()
+      const user = session?.user
       if (!user) return
       if (watched) {
         const { error } = await supabase.from('watchlist').delete().eq('dealer_id', user.id).eq('item_id', itemId)

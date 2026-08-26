@@ -30,8 +30,9 @@ export default function MyItemsPage() {
     setRelisting(item.id)
     setRelistError('')
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
+    const user = session?.user
     if (!user) {
       router.push('/auth/login')
       return
@@ -64,8 +65,9 @@ export default function MyItemsPage() {
   useEffect(() => {
     const load = async () => {
       const {
-        data: { user },
-      } = await supabase.auth.getUser()
+        data: { session },
+      } = await supabase.auth.getSession()
+      const user = session?.user
       if (!user) {
         router.push('/auth/login')
         return
