@@ -40,6 +40,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const [resolutionText, setResolutionText] = useState<Record<string, string>>({})
   const [amlCumulative, setAmlCumulative] = useState<number | null>(null)
   const [amlNotes, setAmlNotes] = useState('')
+  const [aml, setAml] = useState<any>(null)
 
   useEffect(() => {
     init()
@@ -95,7 +96,10 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
       .eq('order_id', params.id)
       .order('created_at', { ascending: false })
     setDisputes(disp || [])
-    setAmlNotes(o.aml_notes || '')
+    // AML-data ligger i egen admin-only tabell (order_aml), inte på ordern.
+    const { data: amlRow } = await supabase.from('order_aml').select('*').eq('order_id', params.id).single()
+    setAml(amlRow || null)
+    setAmlNotes(amlRow?.aml_notes || '')
     // Säljarens sammanlagda volym (rullande 12 mån, exkl. avbrutna) för AML-vyn.
     const yearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
     const { data: sellerOrders } = await supabase
@@ -113,15 +117,17 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     setSaving(true)
     setSaveError('')
     const { error } = await supabase
-      .from('orders')
-      .update({
-        aml_status: status,
-        aml_notes: amlNotes.trim() || null,
-        aml_reviewed_by: me,
-        aml_reviewed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', order.id)
+      .from('order_aml')
+      .upsert(
+        {
+          order_id: order.id,
+          aml_status: status,
+          aml_notes: amlNotes.trim() || null,
+          aml_reviewed_by: me,
+          aml_reviewed_at: new Date().toISOString(),
+        },
+        { onConflict: 'order_id' }
+      )
     if (error) setSaveError('Kunde inte spara granskningen: ' + error.message)
     else await loadOrder()
     setSaving(false)
@@ -508,7 +514,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
 
           {/* AML / ursprungskontroll */}
           {(() => {
-            const amlStatus = (order.aml_status || null) as AmlStatus | null
+            const amlStatus = (aml?.aml_status || null) as AmlStatus | null
             const needsReview = amlStatus === 'review' || amlStatus === 'flagged'
             return (
               <div className={`card p-5 ${needsReview ? 'border border-amber-200' : ''}`}>
@@ -538,10 +544,10 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                       {amlCumulative != null ? formatSEK(amlCumulative) : '—'}
                     </dd>
                   </div>
-                  {order.aml_flag_reason && (
+                  {aml?.aml_flag_reason && (
                     <div className="flex justify-between gap-3">
                       <dt className="text-espresso-400">Orsak till granskning</dt>
-                      <dd className="text-amber-700 text-right">{order.aml_flag_reason}</dd>
+                      <dd className="text-amber-700 text-right">{aml.aml_flag_reason}</dd>
                     </div>
                   )}
                   {item?.source_note && (
