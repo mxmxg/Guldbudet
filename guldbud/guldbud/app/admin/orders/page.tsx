@@ -16,6 +16,7 @@ export default function AdminOrdersPage() {
   const supabase = createClient()
   const [orders, setOrders] = useState<any[]>([])
   const [disputedIds, setDisputedIds] = useState<Set<string>>(new Set())
+  const [amlByOrder, setAmlByOrder] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'open' | 'done'>('open')
 
@@ -56,6 +57,11 @@ export default function AdminOrdersPage() {
       .select('order_id')
       .in('status', ['open', 'under_review'])
     setDisputedIds(new Set((disp || []).map((d: { order_id: string }) => d.order_id)))
+    // AML-status ligger i egen admin-only tabell (order_aml) för listmarkeringen.
+    const { data: amlRows } = await supabase.from('order_aml').select('order_id, aml_status')
+    const amlMap: Record<string, string> = {}
+    ;(amlRows || []).forEach((r: any) => { amlMap[r.order_id] = r.aml_status })
+    setAmlByOrder(amlMap)
     setLoading(false)
   }
 
@@ -114,10 +120,10 @@ export default function AdminOrdersPage() {
                       {disputedIds.has(o.id) && (
                         <span className="chip bg-amber-100 text-amber-800 border border-amber-200">Ärende</span>
                       )}
-                      {o.aml_status === 'review' && (
+                      {amlByOrder[o.id] === 'review' && (
                         <span className="chip bg-amber-100 text-amber-800 border border-amber-200">Granska</span>
                       )}
-                      {o.aml_status === 'flagged' && (
+                      {amlByOrder[o.id] === 'flagged' && (
                         <span className="chip bg-red-100 text-red-700 border border-red-200">Flaggad</span>
                       )}
                     </div>

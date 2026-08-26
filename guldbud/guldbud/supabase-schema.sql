@@ -1390,13 +1390,24 @@ alter table public.items add column if not exists source_type text;         -- '
 alter table public.items add column if not exists source_note text;
 alter table public.items add column if not exists ownership_attested_at timestamptz;
 
--- AML-status på affären. null/'clear' = ok, 'review' = kräver granskning,
--- 'approved' = admin har godkänt, 'flagged' = misstänkt (utbetalning spärrad).
-alter table public.orders add column if not exists aml_status text;
-alter table public.orders add column if not exists aml_flag_reason text;
-alter table public.orders add column if not exists aml_reviewed_by uuid references public.profiles;
-alter table public.orders add column if not exists aml_reviewed_at timestamptz;
-alter table public.orders add column if not exists aml_notes text;
+-- AML-data i EGEN tabell, inte som kolumner på orders. Skäl: RLS är radnivå,
+-- så parternas "läs egen order"-policy exponerar annars hela raden inklusive
+-- admins granskningsanteckningar (en part kunde läsa AML-utredningen mot sig
+-- själv). order_aml är admin-only. status: 'clear' = ok, 'review' = kräver
+-- granskning, 'approved' = godkänd, 'flagged' = misstänkt (utbetalning spärrad).
+create table if not exists public.order_aml (
+  order_id uuid primary key references public.orders(id) on delete cascade,
+  aml_status text not null default 'clear',
+  aml_flag_reason text,
+  aml_reviewed_by uuid references public.profiles,
+  aml_reviewed_at timestamptz,
+  aml_notes text,
+  admin_notes text
+);
+alter table public.order_aml enable row level security;
+drop policy if exists "admins manage order_aml" on public.order_aml;
+create policy "admins manage order_aml" on public.order_aml
+  for all using (public.is_admin()) with check (public.is_admin());
 
 -- Riskbaserad flaggning när affären skapas. Små affärer går rakt igenom
 -- ('clear'); stora enskilda eller hög sammanlagd volym per person kräver
@@ -1409,67 +1420,40 @@ declare
   v_single constant integer := 25000;
   v_cumulative constant integer := 50000;
   v_prior integer;
+  v_status text;
+  v_reason text;
+  v_title text;
 begin
+  -- AFTER INSERT: den nya ordern finns nu, exkludera den ur summan.
   select coalesce(sum(amount), 0) into v_prior
   from public.orders
   where seller_id = new.seller_id
     and status <> 'cancelled'
+    and id <> new.id
     and created_at > now() - interval '12 months';
 
   if new.amount >= v_single then
-    new.aml_status := 'review';
-    new.aml_flag_reason := 'Enskild affär över ' || v_single || ' kr';
+    v_status := 'review';
+    v_reason := 'Enskild affär över ' || v_single || ' kr';
   elsif v_prior + new.amount >= v_cumulative then
-    new.aml_status := 'review';
-    new.aml_flag_reason := 'Sammanlagd volym över ' || v_cumulative || ' kr på 12 mån';
+    v_status := 'review';
+    v_reason := 'Sammanlagd volym över ' || v_cumulative || ' kr på 12 mån';
   else
-    new.aml_status := 'clear';
+    v_status := 'clear';
   end if;
-  return new;
-end;
-$$;
 
-drop trigger if exists on_order_set_aml on public.orders;
-create trigger on_order_set_aml
-  before insert on public.orders
-  for each row execute procedure public.set_order_aml_status();
+  insert into public.order_aml (order_id, aml_status, aml_flag_reason)
+  values (new.id, v_status, v_reason)
+  on conflict (order_id) do nothing;
 
--- Utbetalningsspärr utökad: släpp aldrig pengar (verified_paid/shipped_to_dealer)
--- medan AML-granskning pågår eller affären är flaggad. Befintliga rader har
--- aml_status = null och påverkas inte.
-create or replace function public.enforce_payment_before_release()
-returns trigger language plpgsql
-set search_path = public as $$
-begin
-  if new.status in ('verified_paid', 'shipped_to_dealer') and new.dealer_paid_at is null then
-    raise exception 'Handlarens betalning måste registreras (dealer_paid_at) innan utbetalning eller vidareskick.';
-  end if;
-  if new.status in ('verified_paid', 'shipped_to_dealer')
-     and new.aml_status is not null and new.aml_status not in ('clear', 'approved') then
-    raise exception 'AML-granskning krävs innan utbetalning (aml_status=%).', new.aml_status;
-  end if;
-  return new;
-end;
-$$;
-drop trigger if exists on_order_release_guard on public.orders;
-create trigger on_order_release_guard
-  before update on public.orders
-  for each row execute procedure public.enforce_payment_before_release();
-
--- Notis till admin när en affär skapas som kräver AML-granskning.
-create or replace function public.notify_admins_aml_review()
-returns trigger language plpgsql security definer
-  set search_path = public as $$
-declare
-  v_title text;
-begin
-  if new.aml_status = 'review' then
+  -- Notis till admin om affären kräver granskning (tidigare egen trigger).
+  if v_status = 'review' then
     select title into v_title from public.items where id = new.item_id;
     insert into public.notifications (user_id, title, message, item_id, link)
     select p.id,
            'Affär att granska (rutinkontroll)',
            'Affären för "' || coalesce(v_title, 'föremål') || '" behöver en snabb granskning innan utbetalning: ' ||
-             coalesce(new.aml_flag_reason, 'högre belopp') || '.',
+             coalesce(v_reason, 'högre belopp') || '.',
            new.item_id,
            '/admin/orders/' || new.id
     from public.profiles p
@@ -1479,10 +1463,40 @@ begin
 end;
 $$;
 
-drop trigger if exists on_order_aml_review on public.orders;
-create trigger on_order_aml_review
+drop trigger if exists on_order_set_aml on public.orders;
+create trigger on_order_set_aml
   after insert on public.orders
-  for each row execute procedure public.notify_admins_aml_review();
+  for each row execute procedure public.set_order_aml_status();
+
+-- Utbetalningsspärr utökad: släpp aldrig pengar (verified_paid/shipped_to_dealer)
+-- medan AML-granskning pågår eller affären är flaggad. Befintliga rader har
+-- aml_status = null och påverkas inte.
+create or replace function public.enforce_payment_before_release()
+returns trigger language plpgsql security definer
+set search_path = public as $$
+declare
+  v_aml text;
+begin
+  if new.status in ('verified_paid', 'shipped_to_dealer') and new.dealer_paid_at is null then
+    raise exception 'Handlarens betalning måste registreras (dealer_paid_at) innan utbetalning eller vidareskick.';
+  end if;
+  if new.status in ('verified_paid', 'shipped_to_dealer') then
+    select aml_status into v_aml from public.order_aml where order_id = new.id;
+    if v_aml is not null and v_aml not in ('clear', 'approved') then
+      raise exception 'AML-granskning krävs innan utbetalning (aml_status=%).', v_aml;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists on_order_release_guard on public.orders;
+create trigger on_order_release_guard
+  before update on public.orders
+  for each row execute procedure public.enforce_payment_before_release();
+
+-- (AML-granskningsnotisen är hopslagen i set_order_aml_status ovan, som nu
+-- körs AFTER INSERT och både beräknar status och notifierar admin.)
+drop trigger if exists on_order_aml_review on public.orders;
 
 -- ============================================================
 -- "Snart slut" till budgivare. ~10 min före avslut får varje handlare som
