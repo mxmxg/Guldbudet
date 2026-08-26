@@ -13,6 +13,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal, totalWithCommission } from '@/lib/fees'
+import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 
 const INCREMENTS = [100, 250, 500, 1000]
 
@@ -32,7 +33,8 @@ export default function DealerDashboard() {
   const [autoBusy, setAutoBusy] = useState<string | null>(null)
   const [profile, setProfile] = useState<any>(null)
   const [watchedIds, setWatchedIds] = useState<Set<string>>(new Set())
-  const [tab, setTab] = useState<'active' | 'mybids' | 'winning' | 'watched'>('active')
+  const [orders, setOrders] = useState<any[]>([])
+  const [tab, setTab] = useState<'active' | 'mybids' | 'winning' | 'watched' | 'won'>('active')
 
   useEffect(() => {
     init()
@@ -63,6 +65,14 @@ export default function DealerDashboard() {
 
     const { data: watch } = await supabase.from('watchlist').select('item_id').eq('dealer_id', user.id)
     setWatchedIds(new Set((watch || []).map((w: any) => w.item_id)))
+
+    // Vunna auktioner = handlarens ordrar (senast först).
+    const { data: myOrders } = await supabase
+      .from('orders')
+      .select('id, amount, status, dealer_paid_at, refunded_at, items(title, image_urls)')
+      .eq('dealer_id', user.id)
+      .order('created_at', { ascending: false })
+    setOrders(myOrders || [])
 
     setLoading(false)
   }
@@ -200,6 +210,7 @@ export default function DealerDashboard() {
     { key: 'mybids', label: 'Mina bud', count: items.filter((i) => myBids[i.id]).length },
     { key: 'winning', label: 'Ledande', count: winningCount },
     { key: 'watched', label: 'Bevakade', count: watchedIds.size },
+    { key: 'won', label: 'Vunna', count: orders.length },
   ]
 
   return (
@@ -256,6 +267,68 @@ export default function DealerDashboard() {
               <div key={i} className="h-32 rounded-2xl skeleton" />
             ))}
           </div>
+        ) : tab === 'won' ? (
+          orders.length === 0 ? (
+            <div className="card p-16 text-center text-espresso-400">
+              <div className="flex justify-center mb-3 text-gold-500/50 animate-float"><GemIcon size={30} strokeWidth={1.2} /></div>
+              <p>Du har inte vunnit någon auktion ännu.</p>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {orders.map((o) => {
+                const paid = !!o.dealer_paid_at
+                const refunded = !!o.refunded_at
+                const unpaid = !paid && !refunded && o.status !== 'cancelled'
+                return (
+                  <div
+                    key={o.id}
+                    className={`card overflow-hidden flex items-center gap-4 p-4 ${unpaid ? 'ring-2 ring-gold-300' : ''}`}
+                  >
+                    <Link
+                      href={`/orders/${o.id}`}
+                      className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0"
+                    >
+                      {o.items?.image_urls?.[0] && (
+                        <Image src={o.items.image_urls[0]} alt="" fill className="object-contain" />
+                      )}
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        href={`/orders/${o.id}`}
+                        className="font-display text-lg text-espresso-900 hover:text-gold-700 transition truncate block"
+                      >
+                        {o.items?.title || 'Föremål'}
+                      </Link>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                        <span className="chip bg-espresso-100 text-espresso-600">
+                          {ORDER_STATUS_LABEL[o.status as OrderStatus]}
+                        </span>
+                        {refunded ? (
+                          <span className="chip bg-amber-100 text-amber-700">Återgått</span>
+                        ) : paid ? (
+                          <span className="chip bg-emerald-100 text-emerald-700">Betald ✓</span>
+                        ) : o.status !== 'cancelled' ? (
+                          <span className="chip bg-gold-100 text-gold-800">Att betala</span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[11px] text-espresso-400">Ditt totalpris</p>
+                      <p className="font-semibold text-gold-700 tabular-nums">{formatSEK(dealerTotal(o.amount))}</p>
+                      <Link
+                        href={`/orders/${o.id}`}
+                        className={`inline-block mt-1.5 text-sm ${
+                          unpaid ? 'btn-gold !py-1.5 !px-4' : 'text-gold-600 hover:text-gold-700'
+                        }`}
+                      >
+                        {unpaid ? 'Betala nu' : 'Visa affär'}
+                      </Link>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
         ) : displayItems.length === 0 ? (
           <div className="card p-16 text-center text-espresso-400">
             <div className="flex justify-center mb-3 text-gold-500/50 animate-float"><GemIcon size={30} strokeWidth={1.2} /></div>

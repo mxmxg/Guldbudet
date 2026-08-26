@@ -127,7 +127,7 @@ export default function DealerProfilePage() {
 
     const { data: myOrders } = await supabase
       .from('orders')
-      .select('id, amount, status, items(title, image_urls)')
+      .select('id, amount, status, dealer_paid_at, refunded_at, items(title, image_urls)')
       .eq('dealer_id', user.id)
       .order('created_at', { ascending: false })
     setOrders(myOrders || [])
@@ -327,9 +327,18 @@ export default function DealerProfilePage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-espresso-900 truncate">{o.items?.title}</p>
-                        <span className="chip bg-espresso-100 text-espresso-600 mt-0.5">
-                          {ORDER_STATUS_LABEL[o.status as OrderStatus]}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                          <span className="chip bg-espresso-100 text-espresso-600">
+                            {ORDER_STATUS_LABEL[o.status as OrderStatus]}
+                          </span>
+                          {o.refunded_at ? (
+                            <span className="chip bg-amber-100 text-amber-700">Återgått</span>
+                          ) : o.dealer_paid_at ? (
+                            <span className="chip bg-emerald-100 text-emerald-700">Betald ✓</span>
+                          ) : o.status !== 'cancelled' ? (
+                            <span className="chip bg-gold-100 text-gold-800">Att betala</span>
+                          ) : null}
+                        </div>
                       </div>
                       <span className="text-sm font-semibold text-gold-700 tabular-nums shrink-0">
                         {formatSEK(o.amount)}
