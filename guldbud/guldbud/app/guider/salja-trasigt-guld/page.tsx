@@ -67,7 +67,7 @@ export default function Page() {
         <li>Väg gärna och notera stämplar om det finns, för en indikation.</li>
         <li>Räkna ut ungefärligt värde med <A href="/#estimator">värderingskalkylatorn</A>.</li>
         <li>Lägg ut det på <A href="/">GuldBud</A> och låt handlarna buda mot varandra.</li>
-        <li>Vi kontrollerar guldhalten, äkthetskontrollerar och betalar ut omgående via Swish eller bankkonto.</li>
+        <li>Vi kontrollerar guldhalten, äkthetskontrollerar och betalar ut inom 24 timmar via Swish eller bankkonto.</li>
       </UL>
       <P>
         Vill du veta mer? Läs <A href="/guider/salja-guld">hela guiden om att sälja guld</A> eller{' '}

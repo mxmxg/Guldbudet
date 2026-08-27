@@ -23,7 +23,7 @@ const faq = [
   },
   {
     q: 'När får jag pengarna?',
-    a: 'När vi tagit emot föremålet och kontrollerat äktheten betalar vi ut till dig omgående via Swish eller bankkonto.',
+    a: 'När vi tagit emot föremålet och kontrollerat äktheten betalar vi ut till dig inom 24 timmar via Swish eller bankkonto.',
   },
 ]
 
@@ -50,7 +50,7 @@ export default function Page() {
         <li>Handlarna budar mot varandra i realtid, du följer det live.</li>
         <li>Du accepterar det högsta budet, helt utan förpliktelser.</li>
         <li>Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr.</li>
-        <li>Vi äkthetskontrollerar och betalar ut omgående via Swish eller bankkonto.</li>
+        <li>Vi äkthetskontrollerar och betalar ut inom 24 timmar via Swish eller bankkonto.</li>
       </UL>
 
       <H2>Så säljer du guld online tryggt</H2>

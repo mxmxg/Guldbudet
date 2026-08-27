@@ -94,7 +94,7 @@ function instructionsFor(title: string): string {
         'Så fort du godkänt ditt slutpris skickar vi dig ett <strong style="color:#f5e6c8">kostnadsfritt, rekommenderat brev</strong> med förbetalt porto, försäkrat upp till <strong style="color:#f5e6c8">100 000 kr</strong>.',
         'Lägg föremålet i det och posta det <strong style="color:#f5e6c8">rekommenderat</strong>. Porto och adress är redan klara.',
         'Vi verifierar äktheten så snart vi tagit emot föremålet.',
-        `Du får betalt <strong style="color:#f5e6c8">omgående</strong> via Swish eller bankkonto när vi verifierat föremålet.`,
+        `Du får betalt <strong style="color:#f5e6c8">inom 24 timmar</strong> via Swish eller bankkonto när vi verifierat föremålet.`,
       ],
       'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
     )
