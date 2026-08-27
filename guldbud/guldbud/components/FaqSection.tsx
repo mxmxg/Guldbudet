@@ -12,7 +12,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Hur och när får jag betalt?',
-    a: 'När du godkänt ett bud skickar vi dig ett kostnadsfritt, försäkrat brev. Så snart vi tagit emot och äkthetskontrollerat föremålet betalar vi ut hela budet omgående via Swish eller bankkonto.',
+    a: 'När du godkänt ett bud skickar vi dig ett kostnadsfritt, försäkrat brev. Så snart vi tagit emot och äkthetskontrollerat föremålet betalar vi ut hela budet inom 24 timmar via Swish eller bankkonto.',
   },
   {
     q: 'Är det säkert att skicka in mitt guld?',

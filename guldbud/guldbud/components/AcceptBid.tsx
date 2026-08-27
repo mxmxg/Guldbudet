@@ -80,7 +80,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner, 
               'Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr.',
               'Lägg föremålet i det och posta det rekommenderat. Porto och adress är redan klara.',
               'Vi verifierar äktheten så snart vi mottagit föremålet.',
-              'Du får betalt omgående via Swish eller bankkonto när vi verifierat föremålet.',
+              'Du får betalt inom 24 timmar via Swish eller bankkonto när vi verifierat föremålet.',
             ].map((t, i) => (
               <li key={i} className="flex gap-2">
                 <span className="text-gold-600 font-semibold">{i + 1}.</span>

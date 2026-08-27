@@ -19,7 +19,7 @@ const faq = [
   },
   {
     q: 'Hur snabbt får jag betalt?',
-    a: 'När vi tagit emot och äkthetskontrollerat föremålet betalar vi ut omgående via Swish eller bankkonto. Att sälja är kostnadsfritt för dig.',
+    a: 'När vi tagit emot och äkthetskontrollerat föremålet betalar vi ut inom 24 timmar via Swish eller bankkonto. Att sälja är kostnadsfritt för dig.',
   },
 ]
 
