@@ -300,6 +300,9 @@ function LoginForm() {
                     <>
                       <Field label="Telefon" name="phone" type="tel" value={fields.phone} onChange={set('phone')} onBlur={blur('phone')} error={err('phone')} placeholder="0701234567" />
                       <Field label="Personnummer" name="personalNumber" value={fields.personalNumber} onChange={set('personalNumber')} onBlur={blur('personalNumber')} error={err('personalNumber')} placeholder="ÅÅMMDD-XXXX" />
+                      <p style={{ color: '#8a7038', fontSize: '12px', lineHeight: 1.5, marginTop: '-8px' }}>
+                        Personnummer för firmatecknaren behövs för identitetskontroll och regler mot penningtvätt. Det delas aldrig publikt.
+                      </p>
                       <Field label="Adress" name="address" value={fields.address} onChange={set('address')} onBlur={blur('address')} error={err('address')} placeholder="Storgatan 1" />
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <div style={{ width: '35%' }}>

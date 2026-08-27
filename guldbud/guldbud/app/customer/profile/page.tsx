@@ -162,6 +162,9 @@ export default function CustomerProfilePage() {
                     className={profile.personal_number ? '!bg-espresso-50 !text-espresso-400' : ''}
                     placeholder="ÅÅÅÅMMDD-XXXX"
                   />
+                  <p className="text-xs text-espresso-400 mt-1.5">
+                    Vi behöver personnummer för att kunna betala ut säkert och följa lagen mot penningtvätt. Det delas aldrig med handlarna.
+                  </p>
                 </Field>
                 <Field label="E-post (kan ej ändras här)">
                   <input value={profile.email} disabled className="!bg-espresso-50 !text-espresso-400" />
