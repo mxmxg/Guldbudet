@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 import { HomeIcon, StoreIcon } from '@/components/Icons'
 import Logo from '@/components/Logo'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
 
 function validateField(name: string, value: string, role: string): string {
   switch (name) {
@@ -224,9 +226,10 @@ function LoginForm() {
   }
 
   return (
-    <>
+    <div style={{ minHeight: '100vh', background: '#0f0a04', display: 'flex', flexDirection: 'column' }}>
       <style>{`@keyframes authReveal{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}`}</style>
-      <div className="auth-scope" style={{ minHeight: '100vh', background: '#0f0a04', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '56px 16px' }}>
+      <Navbar />
+      <div className="auth-scope" style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '56px 16px' }}>
         <div style={{ width: '100%', maxWidth: '440px' }}>
 
           {/* Logo */}
@@ -436,7 +439,8 @@ function LoginForm() {
           </div>
         </div>
       </div>
-    </>
+      <Footer />
+    </div>
   )
 }
 
