@@ -275,8 +275,8 @@ export default function SubmitPage() {
           </div>
           <h1 className="font-display text-3xl text-espresso-900 mb-3">Föremålet är inskickat</h1>
           <p className="text-espresso-500 mb-8 leading-relaxed">
-            Vi granskar det snabbt och öppnar budgivningen inom ett par timmar. Du får en
-            notifiering så fort auktionen är live.
+            Vi granskar det snabbt och öppnar budgivningen inom ett par timmar. Vi mejlar dig
+            så fort auktionen är live.
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
             <button
@@ -311,7 +311,7 @@ export default function SubmitPage() {
       <Navbar />
       <div className="flex-1 max-w-5xl w-full mx-auto px-4 py-10">
         <div className="mb-8">
-          <h1 className="font-display text-3xl sm:text-4xl text-espresso-900">Lägg ut ett smycke</h1>
+          <h1 className="font-display text-3xl sm:text-4xl text-espresso-900">Lägg ut ett föremål</h1>
           <p className="text-espresso-500 mt-2 max-w-xl">
             Kostnadsfritt och klart på fem minuter. Fyll i uppgifter och ladda upp foton –
             auktoriserade guldhandlare budar direkt, och du väljer själv det bud du är nöjd med.
