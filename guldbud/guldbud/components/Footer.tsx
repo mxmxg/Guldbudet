@@ -16,13 +16,13 @@ export default function Footer() {
               Vi får guldköparna att konkurrera om ditt guld. Auktoriserade handlare budar mot
               varandra i realtid, och du säljer till bäst betalt, tryggt och kostnadsfritt.
             </p>
-            <div className="flex items-center justify-between gap-4 mt-5 max-w-xs">
+            <div className="flex items-center gap-5 mt-5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/bankid-white.png" alt="BankID" className="h-9 w-auto" />
+              <img src="/brand/bankid-white.png" alt="BankID" className="h-8 w-auto" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/swish.png" alt="Swish" className="h-9 w-auto" />
+              <img src="/brand/swish.png" alt="Swish" className="h-8 w-auto" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/postnord-symbol.svg" alt="PostNord" className="h-9 w-auto" />
+              <img src="/brand/postnord-symbol.svg" alt="PostNord" className="h-6 w-auto" />
             </div>
           </div>
 
