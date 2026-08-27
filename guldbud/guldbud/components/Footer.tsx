@@ -16,13 +16,13 @@ export default function Footer() {
               Vi får guldköparna att konkurrera om ditt guld. Auktoriserade handlare budar mot
               varandra i realtid, och du säljer till bäst betalt, tryggt och kostnadsfritt.
             </p>
-            <div className="flex flex-wrap gap-3 mt-5">
-              <span className="inline-flex items-center gap-1.5 text-[11px] text-gold-200/80 border border-gold-500/20 rounded-full px-2.5 py-1">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/brand/bankid-white.png" alt="BankID" className="h-3.5 w-auto opacity-90" />
-                verifierad
-              </span>
-              <TrustBadge>Försäkrad frakt med PostNord</TrustBadge>
+            <div className="flex flex-wrap items-center gap-5 mt-5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/bankid-white.png" alt="BankID" className="h-6 w-auto" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/swish.png" alt="Swish" className="h-6 w-auto" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/postnord-symbol.svg" alt="PostNord" className="h-6 w-auto" />
             </div>
           </div>
 
@@ -98,14 +98,3 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
   )
 }
 
-function TrustBadge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 text-[11px] text-gold-200/80 border border-gold-500/20 rounded-full px-2.5 py-1">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2l7 3v6c0 4.5-3 8.3-7 9.5C8 19.3 5 15.5 5 11V5l7-3z" stroke="#e8c766" strokeWidth="2" strokeLinejoin="round" />
-        <path d="M9 12l2 2 4-4" stroke="#e8c766" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      {children}
-    </span>
-  )
-}
