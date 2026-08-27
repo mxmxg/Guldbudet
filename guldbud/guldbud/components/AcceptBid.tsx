@@ -5,12 +5,13 @@ import { createClient } from '@/lib/supabase-browser'
 import Confetti from '@/components/Confetti'
 import { CheckIcon } from '@/components/Icons'
 
-export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }: {
+export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner, onAccepted }: {
   itemId: string
   bidId: string
   amount: number
   dealerName: string
   isOwner: boolean
+  onAccepted?: () => void
 }) {
   const [step, setStep] = useState<'idle' | 'confirm' | 'done'>('idle')
   const [loading, setLoading] = useState(false)
@@ -56,6 +57,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
     setLoading(false)
     setConfetti((c) => c + 1)
     setStep('done')
+    onAccepted?.() // meddela auktionssidan så "Tacka nej" försvinner direkt
   }
 
   if (step === 'done') {
