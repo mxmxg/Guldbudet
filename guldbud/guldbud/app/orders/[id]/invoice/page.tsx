@@ -37,6 +37,7 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
   const [order, setOrder] = useState<any>(null)
   const [item, setItem] = useState<any>(null)
   const [party, setParty] = useState<any>(null) // the recipient's profile
+  const [seller, setSeller] = useState<any>(null) // säljarens identitet (bara på handlarens inköpsunderlag)
   const [kind, setKind] = useState<'invoice' | 'receipt' | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -69,6 +70,20 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
       const targetId = user.id === o.dealer_id ? user.id : o.dealer_id
       const { data: p } = await supabase.from('profiles').select('*').eq('id', targetId).single()
       setParty(p)
+      // Säljarens identitet hämtas via service-role-route (RLS döljer den annars
+      // för handlaren). Handlaren behöver den för sitt inköpsunderlag/VMB.
+      try {
+        const res = await fetch(`/api/orders/${o.id}/seller`, {
+          headers: { Authorization: `Bearer ${session!.access_token}` },
+          cache: 'no-store',
+        })
+        if (res.ok) {
+          const j = await res.json()
+          setSeller(j.seller)
+        }
+      } catch {
+        /* om det inte går att hämta visas fallback "Privatperson" */
+      }
     } else if (user.id === o.seller_id) {
       setKind('receipt') // säljaren: försäljnings-/utbetalningsunderlag
       const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single()
@@ -127,10 +142,18 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
             {/* ============ HANDLARE, dok 1: inköpsunderlag ============ */}
             <Doc>
               <DocHead title="Inköpsunderlag" sub="Köp av föremål från privatperson" order={order} date={date} />
-              <Recipient label="Köpare" party={party} />
+              <div className="grid sm:grid-cols-2 gap-6 mb-8">
+                <Recipient label="Köpare" party={party} />
+                <SellerBlock seller={seller} />
+              </div>
+              <div className="mb-6 rounded-xl bg-espresso-50 px-4 py-3">
+                <p className="text-xs text-espresso-400 uppercase tracking-wide mb-0.5">Förmedlare</p>
+                <p className="text-sm text-espresso-700">
+                  {GULDBUD.name}, org.nr {GULDBUD.org}. GuldBud har förmedlat affären mellan säljaren och köparen och är inte part i köpet av föremålet.
+                </p>
+              </div>
               <table className="w-full text-sm mb-5">
                 <tbody>
-                  <Row label="Säljare" value="Privatperson" plain />
                   <Row label={`Vara: ${item?.title || 'Föremål'}`} value={`${item?.weight_grams} g · ${item?.karat}`} plain />
                   <Total label={credit ? 'Inköpspris (återgått)' : 'Inköpspris'} value={(credit ? '−' : '') + kr2(bid)} />
                 </tbody>
@@ -138,7 +161,7 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
               <Fine>
                 {credit
                   ? `Inköpet har återgått. Föremålet godkändes inte vid äkthetskontroll${order.refund_reason ? ` (${order.refund_reason})` : ''} och affären krediteras i sin helhet.`
-                  : `Säljaren är privatperson och försäljningen är inte momsbelagd, ingen moms tas ut på föremålet. Affären är förmedlad av ${GULDBUD.name} (org.nr ${GULDBUD.org}). Referens: ${ref(order.order_no)}. Detta underlag styrker ditt inköp av föremålet.`}
+                  : `Säljaren är privatperson och försäljningen är inte momsbelagd, ingen moms tas ut på föremålet. Affären är förmedlad av ${GULDBUD.name} (org.nr ${GULDBUD.org}), som inte är part i själva köpet. Referens: ${ref(order.order_no)}. Detta underlag styrker ditt inköp av föremålet från säljaren ovan.`}
               </Fine>
             </Doc>
 
@@ -224,6 +247,27 @@ function Recipient({ label, party }: { label: string; party: any }) {
         <p className="text-sm text-espresso-500">
           {party.address}{party.postal_code || party.city ? `, ${party.postal_code || ''} ${party.city || ''}` : ''}
         </p>
+      )}
+    </div>
+  )
+}
+
+function SellerBlock({ seller }: { seller: any }) {
+  return (
+    <div>
+      <p className="text-xs text-espresso-400 uppercase tracking-wide mb-1">Säljare (privatperson)</p>
+      {seller ? (
+        <>
+          <p className="font-medium text-espresso-900">{seller.full_name || '—'}</p>
+          {seller.personal_number && <p className="text-sm text-espresso-500">Personnr {seller.personal_number}</p>}
+          {(seller.address || seller.city) && (
+            <p className="text-sm text-espresso-500">
+              {seller.address}{seller.postal_code || seller.city ? `, ${seller.postal_code || ''} ${seller.city || ''}` : ''}
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="text-sm text-espresso-500">Privatperson</p>
       )}
     </div>
   )
