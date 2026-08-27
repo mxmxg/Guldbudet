@@ -126,7 +126,7 @@ function LoginForm() {
     setTouched(t => ({ ...t, [name]: true }))
 
   const err = (name: string) =>
-    touched[name] ? validateField(name, fields[name], role) : ''
+    touched[name] ? validateField(name, fields[name as keyof typeof fields], role) : ''
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -146,7 +146,7 @@ function LoginForm() {
         : ['fullName']
       const allTouched = Object.fromEntries(registerFields.map(f => [f, true]))
       setTouched(t => ({ ...t, ...allTouched }))
-      const hasErrors = registerFields.some(f => validateField(f, fields[f], role))
+      const hasErrors = registerFields.some(f => validateField(f, fields[f as keyof typeof fields], role))
       if (hasErrors) {
         setSubmitError('Kontrollera fälten ovan.')
         setLoading(false)

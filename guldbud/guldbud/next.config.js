@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Typfel blockerar nu bygget igen, så riktiga buggar inte kan gå live
+  // oupptäckta. ESLint ignoreras fortfarande under bygget (separat städning),
+  // men typkontrollen är på.
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
     ignoreDuringBuilds: true,
