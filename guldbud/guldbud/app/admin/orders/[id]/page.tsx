@@ -11,7 +11,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STEPS, ORDER_STATUS_LABEL, OrderStatus, nextStatus, stepIndex } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, SHIPPING_FEE_EX_VAT, commission, dealerTotal, totalVat } from '@/lib/fees'
 import {
   DISPUTE_STATUS_LABEL,
   DISPUTE_STATUS_STYLE,
@@ -449,7 +449,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             <h2 className="font-display text-lg text-espresso-900 mb-4">Ekonomi</h2>
             <div className="flex flex-col gap-1.5 text-sm">
               <div className="flex justify-between text-espresso-600">
-                <span>Handlaren betalar (bud + provision + frakt)</span>
+                <span>Handlaren betalar (bud + provision + frakt + moms)</span>
                 <span className="tabular-nums font-medium">{formatSEK(dealerTotal(order.amount))}</span>
               </div>
               <div className="flex justify-between text-espresso-600">
@@ -457,11 +457,15 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 <span className="tabular-nums">{formatSEK(order.amount)}</span>
               </div>
               <div className="flex justify-between text-espresso-400">
-                <span>Frakt (genomströmning)</span>
-                <span className="tabular-nums">{formatSEK(DEALER_SHIPPING_FEE)}</span>
+                <span>Frakt exkl moms (genomströmning)</span>
+                <span className="tabular-nums">{formatSEK(SHIPPING_FEE_EX_VAT)}</span>
+              </div>
+              <div className="flex justify-between text-espresso-400">
+                <span>Moms att redovisa (25%)</span>
+                <span className="tabular-nums">{formatSEK(totalVat(order.amount))}</span>
               </div>
               <div className="flex justify-between font-semibold text-emerald-700 pt-2 mt-1 border-t border-espresso-100">
-                <span>GuldBuds provision ({DEALER_COMMISSION_LABEL})</span>
+                <span>GuldBuds provision exkl moms ({DEALER_COMMISSION_LABEL})</span>
                 <span className="tabular-nums">{formatSEK(commission(order.amount))}</span>
               </div>
             </div>

@@ -93,7 +93,7 @@ function instructionsFor(title: string): string {
     return stepsBox(
       'Så går affären vidare',
       [
-        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision + <strong style="color:#f5e6c8">${DEALER_SHIPPING_FEE} kr</strong> frakt <strong style="color:#f5e6c8">omgående</strong>. Betalningsinstruktioner finns i affären.`,
+        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision + <strong style="color:#f5e6c8">${DEALER_SHIPPING_FEE} kr</strong> frakt + moms <strong style="color:#f5e6c8">omgående</strong>. Betalningsinstruktioner finns i affären.`,
         'Föremålet är redan ditt, betalningen sätter igång affären.',
         'Säljaren skickar in det och vi äkthetskontrollerar det.',
         'Vi skickar sedan föremålet vidare till dig.',

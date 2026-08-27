@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
-import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, commissionVat, dealerTotal } from '@/lib/fees'
 
 const INCREMENTS = [100, 250, 500, 1000]
 
@@ -226,8 +226,12 @@ export default function BidSection({
               <span className="tabular-nums">+{commission(parseInt(amount)).toLocaleString('sv-SE')} kr</span>
             </div>
             <div className="flex justify-between">
-              <span>Frakt</span>
+              <span>Frakt (inkl moms)</span>
               <span className="tabular-nums">+{DEALER_SHIPPING_FEE.toLocaleString('sv-SE')} kr</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Moms 25% på provision</span>
+              <span className="tabular-nums">+{commissionVat(parseInt(amount)).toLocaleString('sv-SE')} kr</span>
             </div>
             <div className="flex justify-between font-semibold text-espresso-800 pt-1 mt-1 border-t border-espresso-100">
               <span>Ditt totalpris</span>
@@ -235,7 +239,7 @@ export default function BidSection({
             </div>
           </div>
         ) : (
-          <span>Provision {DEALER_COMMISSION_LABEL} + frakt {DEALER_SHIPPING_FEE} kr tillkommer på ditt bud. Säljaren får hela budbeloppet.</span>
+          <span>Provision {DEALER_COMMISSION_LABEL} + frakt {DEALER_SHIPPING_FEE} kr + moms tillkommer på ditt bud. Säljaren får hela budbeloppet.</span>
         )}
       </div>
 
