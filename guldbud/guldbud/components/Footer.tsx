@@ -22,7 +22,7 @@ export default function Footer() {
                 <img src="/brand/bankid-white.png" alt="BankID" className="h-3.5 w-auto opacity-90" />
                 verifierad
               </span>
-              <TrustBadge>Försäkrad frakt</TrustBadge>
+              <TrustBadge>Försäkrad frakt med PostNord</TrustBadge>
             </div>
           </div>
 
