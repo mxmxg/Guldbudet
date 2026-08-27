@@ -12,6 +12,7 @@ import RecentlySold, { SoldRow } from '@/components/RecentlySold'
 import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
 import { TRUSTPILOT_PROFILE_URL } from '@/components/TrustpilotInvite'
+import PendingApprovalBanner from '@/components/PendingApprovalBanner'
 import { formatSEK } from '@/lib/gold'
 import {
   CameraIcon,
@@ -143,6 +144,7 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
         </DashHeader>
 
         <div className="max-w-6xl mx-auto px-4 py-10">
+          <PendingApprovalBanner />
           <section className="mb-12">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display text-2xl text-espresso-900">Mina föremål</h2>
