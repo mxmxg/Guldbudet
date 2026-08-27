@@ -36,6 +36,7 @@ export default function AuctionDetails({ item }: { item: any }) {
   const [newBidToast, setNewBidToast] = useState<number | null>(null)
   const [confetti, setConfetti] = useState(0)
   const [watchers, setWatchers] = useState(0)
+  const [justAccepted, setJustAccepted] = useState(false)
   // Kept in state so anti-sniping extensions (server-side) reflect live.
   const [endsAt, setEndsAt] = useState<string | null>(item.auction_ends_at)
   const endsAtRef = useRef<string | null>(item.auction_ends_at)
@@ -430,10 +431,11 @@ export default function AuctionDetails({ item }: { item: any }) {
                   amount={topAmount}
                   dealerName={dealerLabel(topBid)}
                   isOwner={isOwner}
+                  onAccepted={() => setJustAccepted(true)}
                 />
-                {/* Tacka nej går bara att göra när auktionen är slut, inte mitt i
-                    en pågående budgivning. */}
-                {ended && <DeclineBid item={item} isOwner={isOwner} />}
+                {/* Tacka nej går bara att göra när auktionen är slut, och inte
+                    efter att budet just godkänts (då är valet redan gjort). */}
+                {ended && !justAccepted && <DeclineBid item={item} isOwner={isOwner} />}
               </>
             )}
 
