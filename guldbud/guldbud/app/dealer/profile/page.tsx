@@ -113,10 +113,12 @@ export default function DealerProfilePage() {
       })
       const { data: closedItems } = await supabase
         .from('items')
-        .select('id, status, accepted_at')
+        .select('id, status, accepted_at, accepted_bid_id')
         .in('id', itemIds)
         .eq('status', 'closed')
-      // A closed item that we were leading on counts as won.
+        .not('accepted_bid_id', 'is', null)
+      // A SOLD item (accepterat bud) som vi ledde på räknas som vunnen. Ett
+      // avböjt föremål är stängt utan accepterat bud och räknas inte.
       closedItems?.forEach((it: any) => {
         if (myMax[it.id] && myMax[it.id] >= top[it.id]) won += 1
       })
