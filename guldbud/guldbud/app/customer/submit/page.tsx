@@ -50,21 +50,32 @@ export default function SubmitPage() {
         router.push('/auth/login')
         return
       }
-      const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('role, identity_verified, personal_number, address, postal_code, city, payout_swish, payout_bank_clearing, payout_bank_account')
+        .eq('id', user.id)
+        .single()
       if (prof?.role !== 'customer') {
         router.push('/')
         return
       }
-      // Kräv BankID-verifiering innan listning – men bara när BankID är skarpt
-      // aktiverat. identity_verified läses bara då, så submit inte kraschar om
-      // kolumnen ännu inte finns (migrationen körs innan BankID aktiveras).
-      if (process.env.NEXT_PUBLIC_BANKID_ENABLED === 'true') {
-        const { data: v } = await supabase
-          .from('profiles')
-          .select('identity_verified')
-          .eq('id', user.id)
-          .single()
-        if (!v?.identity_verified) router.push('/verifiering')
+      // Hård identitetsgrind före listning: när BankID är skarpt krävs verifierad
+      // identitet, annars kan konton med bara e-post lägga upp fejkannonser.
+      const bankidLive = process.env.NEXT_PUBLIC_BANKID_ENABLED === 'true'
+      if (bankidLive && !prof?.identity_verified) {
+        router.push('/verifiering')
+        return
+      }
+      // Säljaren måste ha en komplett profil innan listning: identitet
+      // (personnummer som interim tills BankID är skarpt), leveransadress (dit vi
+      // skickar det förbetalda kuvertet) och utbetalningsuppgifter. Uppgifterna
+      // samlas här i stället för vid registreringen, där de sänkte konverteringen.
+      const addressOk = !!(prof?.address && prof?.postal_code && prof?.city)
+      const payoutOk = !!(prof?.payout_swish || (prof?.payout_bank_clearing && prof?.payout_bank_account))
+      const identityOk = bankidLive ? !!prof?.identity_verified : !!prof?.personal_number
+      if (!addressOk || !payoutOk || !identityOk) {
+        router.push('/customer/profile?from=submit')
+        return
       }
     }
     check()
