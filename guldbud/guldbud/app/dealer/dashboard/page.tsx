@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal } from '@/lib/fees'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
+import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
 
 const INCREMENTS = [100, 250, 500, 1000]
 
@@ -330,6 +331,9 @@ export default function DealerDashboard() {
                       >
                         {unpaid ? 'Betala nu' : 'Visa affär'}
                       </Link>
+                      <div className="mt-1.5">
+                        <DownloadInvoiceButton orderId={o.id} label="Ladda ner faktura (PDF)" className="text-xs text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
+                      </div>
                     </div>
                   </div>
                 )
