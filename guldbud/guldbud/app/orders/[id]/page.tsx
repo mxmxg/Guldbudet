@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import OrderStepper from '@/components/OrderStepper'
 import OrderChat from '@/components/OrderChat'
+import BidHistory from '@/components/BidHistory'
 import DisputePanel from '@/components/DisputePanel'
 import TrustpilotInvite from '@/components/TrustpilotInvite'
 import Image from 'next/image'
@@ -172,6 +173,9 @@ export default function OrderPage({ params }: { params: { id: string } }) {
           <DealerPanel order={order} />
         )}
 
+        {/* Budhistorik – vad som ledde fram till affären, anonymiserat */}
+        {order.item_id && <BidHistory itemId={order.item_id} />}
+
         {/* Betygsätt oss – vid det bästa tillfället, precis efter avslutad affär */}
         {party === 'seller' &&
           ['verified_paid', 'shipped_to_dealer', 'completed'].includes(order.status) && (
@@ -198,11 +202,11 @@ function SellerPanel({ order }: { order: any }) {
           <div className="flex items-center gap-2 mb-1">
             <span className="chip bg-gold-100 text-gold-800 border border-gold-200">Din tur</span>
           </div>
-          <h2 className="font-display text-xl text-espresso-900 mb-1">Skicka in föremålet nu</h2>
+          <h2 className="font-display text-xl text-espresso-900 mb-1">Grattis, ditt föremål är sålt!</h2>
           <p className="text-sm text-espresso-500 mb-5 leading-relaxed">
-            Budet är accepterat och affären är din. Så fort du godkänt ditt slutpris skickar vi dig ett kostnadsfritt,
-            rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat.
-            Ju snabbare det är på väg, desto snabbare får du betalt.
+            Du sålde för {formatSEK(order.amount)}, och pengarna är dina så snart vi tagit emot och kontrollerat föremålet.
+            Nu skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr.
+            Lägg föremålet i det och posta det rekommenderat. Ju snabbare det är på väg, desto snabbare får du betalt.
           </p>
 
           <ol className="grid gap-3 mb-5">
@@ -223,7 +227,7 @@ function SellerPanel({ order }: { order: any }) {
           <div className="rounded-xl bg-espresso-900 p-4 text-center">
             <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Frakt</p>
             <p className="text-gold-200 font-medium">Kostnadsfritt rekommenderat brev</p>
-            <p className="text-gold-200/80 text-sm">Förbetalt porto och adress, försäkrat upp till 100 000 kr. Skickas när du godkänt ditt slutpris.</p>
+            <p className="text-gold-200/80 text-sm">Förbetalt porto och adress, försäkrat upp till 100 000 kr. Vi skickar det till dig nu, posta så snart du kan.</p>
           </div>
           <p className="text-xs text-espresso-400 mt-3 leading-relaxed">
             Så fort vi tar emot och äkthetskontrollerat föremålet betalar vi ut hela budet till dig. Har
