@@ -50,7 +50,7 @@ function validateField(name: string, value: string, role: string): string {
   }
 }
 
-function Field({ label, name, type = 'text', value, onChange, onBlur, error, placeholder }: any) {
+function Field({ label, name, type = 'text', value, onChange, onBlur, error, placeholder, autoComplete }: any) {
   return (
     <div>
       <label htmlFor={name} className="block text-sm mb-1" style={{ color: '#c9a84c' }}>{label}</label>
@@ -62,6 +62,7 @@ function Field({ label, name, type = 'text', value, onChange, onBlur, error, pla
         onChange={onChange}
         onBlur={onBlur}
         placeholder={placeholder}
+        autoComplete={autoComplete}
         style={{
           width: '100%',
           background: error ? '#2a1a0a' : '#1a1208',
@@ -290,7 +291,7 @@ function LoginForm() {
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {mode === 'register' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', animation: 'authReveal .3s ease' }}>
-                  <Field label="Namn" name="fullName" value={fields.fullName} onChange={set('fullName')} onBlur={blur('fullName')} error={err('fullName')} placeholder="Anna Andersson" />
+                  <Field label="Namn" name="fullName" value={fields.fullName} onChange={set('fullName')} onBlur={blur('fullName')} error={err('fullName')} placeholder="För- och efternamn" />
                   {/* Privatpersonen skapar konto med bara namn, e-post och lösenord.
                       Personnummer (via BankID), adress och utbetalningsuppgifter samlas
                       först när de behövs, vid verifiering och listning. */}
@@ -301,34 +302,34 @@ function LoginForm() {
                   )}
                   {role === 'dealer' && (
                     <>
-                      <Field label="Telefon" name="phone" type="tel" value={fields.phone} onChange={set('phone')} onBlur={blur('phone')} error={err('phone')} placeholder="0701234567" />
-                      <Field label="Personnummer" name="personalNumber" value={fields.personalNumber} onChange={set('personalNumber')} onBlur={blur('personalNumber')} error={err('personalNumber')} placeholder="ÅÅMMDD-XXXX" />
+                      <Field label="Telefon" name="phone" type="tel" value={fields.phone} onChange={set('phone')} onBlur={blur('phone')} error={err('phone')} placeholder="Telefonnummer" />
+                      <Field label="Personnummer" name="personalNumber" value={fields.personalNumber} onChange={set('personalNumber')} onBlur={blur('personalNumber')} error={err('personalNumber')} placeholder="ÅÅÅÅMMDD-XXXX" />
                       <p style={{ color: '#8a7038', fontSize: '12px', lineHeight: 1.5, marginTop: '-8px' }}>
                         Personnummer för firmatecknaren behövs för identitetskontroll och regler mot penningtvätt. Det delas aldrig publikt.
                       </p>
-                      <Field label="Adress" name="address" value={fields.address} onChange={set('address')} onBlur={blur('address')} error={err('address')} placeholder="Storgatan 1" />
+                      <Field label="Adress" name="address" value={fields.address} onChange={set('address')} onBlur={blur('address')} error={err('address')} placeholder="Gatuadress" />
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <div style={{ width: '35%' }}>
-                          <Field label="Postnummer" name="postalCode" value={fields.postalCode} onChange={set('postalCode')} onBlur={blur('postalCode')} error={err('postalCode')} placeholder="123 45" />
+                          <Field label="Postnummer" name="postalCode" value={fields.postalCode} onChange={set('postalCode')} onBlur={blur('postalCode')} error={err('postalCode')} placeholder="Postnummer" />
                         </div>
                         <div style={{ flex: 1 }}>
-                          <Field label="Stad" name="city" value={fields.city} onChange={set('city')} onBlur={blur('city')} error={err('city')} placeholder="Stockholm" />
+                          <Field label="Stad" name="city" value={fields.city} onChange={set('city')} onBlur={blur('city')} error={err('city')} placeholder="Stad" />
                         </div>
                       </div>
                     </>
                   )}
                   {role === 'dealer' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', animation: 'authReveal .28s ease' }}>
-                      <Field label="Företagsnamn" name="company" value={fields.company} onChange={set('company')} onBlur={blur('company')} error={err('company')} placeholder="Stockholms Guldhandel AB" />
-                      <Field label="Organisationsnummer" name="orgNumber" value={fields.orgNumber} onChange={set('orgNumber')} onBlur={blur('orgNumber')} error={err('orgNumber')} placeholder="556789-1234" />
+                      <Field label="Företagsnamn" name="company" value={fields.company} onChange={set('company')} onBlur={blur('company')} error={err('company')} placeholder="Företagsnamn" />
+                      <Field label="Organisationsnummer" name="orgNumber" value={fields.orgNumber} onChange={set('orgNumber')} onBlur={blur('orgNumber')} error={err('orgNumber')} placeholder="XXXXXX-XXXX" />
                     </div>
                   )}
                 </div>
               )}
 
-              <Field label="E-post" name="email" type="email" value={fields.email} onChange={set('email')} onBlur={blur('email')} error="" placeholder="namn@exempel.se" />
+              <Field label="E-post" name="email" type="email" value={fields.email} onChange={set('email')} onBlur={blur('email')} error="" placeholder="namn@exempel.se" autoComplete={mode === 'register' ? 'off' : 'email'} />
               {!forgot && (
-                <Field label="Lösenord" name="password" type="password" value={fields.password} onChange={set('password')} onBlur={blur('password')} error="" placeholder="Minst 6 tecken" />
+                <Field label="Lösenord" name="password" type="password" value={fields.password} onChange={set('password')} onBlur={blur('password')} error="" placeholder="Minst 6 tecken" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} />
               )}
 
               {mode === 'login' && !forgot && (
@@ -379,7 +380,7 @@ function LoginForm() {
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={e => setTermsAccepted(e.target.checked)}
-                    style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0, accentColor: '#B8860B' }}
+                    style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0, accentColor: '#B8860B', colorScheme: 'dark' }}
                   />
                   <span style={{ color: '#c9a84c', fontSize: '12px', lineHeight: 1.5 }}>
                     Jag har läst och godkänner{' '}
@@ -398,7 +399,7 @@ function LoginForm() {
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={e => setTermsAccepted(e.target.checked)}
-                    style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0, accentColor: '#B8860B' }}
+                    style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0, accentColor: '#B8860B', colorScheme: 'dark' }}
                   />
                   <span style={{ color: '#c9a84c', fontSize: '12px', lineHeight: 1.5 }}>
                     Jag har läst och godkänner{' '}
