@@ -59,6 +59,17 @@ function stepsBox(heading: string, steps: string[], footer?: string) {
   </div>`
 }
 
+// Ruta som länkar in till affärens underlag/faktura i portalen. Ingen bilaga:
+// dokumenten (och säljarens personnummer på handlarens inköpsnota) stannar
+// bakom inloggning, mottagaren visar och sparar dem själv som PDF.
+function documentBox(href: string, label: string, desc: string) {
+  return `<div style="margin-top:18px;border:1px solid #3d2d0f;border-radius:12px;padding:16px;background:#0f0a04">
+    <p style="color:#f5e6c8;font-size:14px;font-weight:600;margin:0 0 6px">Dina dokument</p>
+    <p style="color:#c9a84c;font-size:13px;line-height:1.55;margin:0 0 14px">${esc(desc)}</p>
+    <a href="${href}" style="display:inline-block;background:#B8860B;color:#fff;text-decoration:none;padding:11px 20px;border-radius:8px;font-weight:600;font-size:13px">${esc(label)} &rarr;</a>
+  </div>`
+}
+
 // Färdiga instruktioner beroende på vilken notis det gäller, så varje part
 // vet exakt vad som händer efter en avslutad affär.
 function instructionsFor(title: string): string {
@@ -93,7 +104,7 @@ function instructionsFor(title: string): string {
     return stepsBox(
       'Så går affären vidare',
       [
-        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision + <strong style="color:#f5e6c8">${DEALER_SHIPPING_FEE} kr</strong> frakt <strong style="color:#f5e6c8">omgående</strong>. Betalningsinstruktioner finns i affären.`,
+        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision + <strong style="color:#f5e6c8">${DEALER_SHIPPING_FEE} kr</strong> frakt + moms <strong style="color:#f5e6c8">omgående</strong>. Betalningsinstruktioner finns i affären.`,
         'Föremålet är redan ditt, betalningen sätter igång affären.',
         'Säljaren skickar in det och vi äkthetskontrollerar det.',
         'Vi skickar sedan föremålet vidare till dig.',
@@ -275,7 +286,26 @@ export async function POST(req: NextRequest) {
     : record.item_id
     ? 'Öppna auktionen →'
     : 'Öppna på GuldBud →'
-  const extra = instructionsFor(String(record.title))
+  let extra = instructionsFor(String(record.title))
+
+  // Automatiskt underlag/faktura-länk in i portalen vid de två penninghändelserna:
+  // säljaren blir utbetald ("Du har fått betalt") och handlaren har betalat
+  // ("Vi har tagit emot din betalning"). Länken går till affärens dokumentvy,
+  // där mottagaren visar och sparar sitt underlag som PDF, allt bakom inloggning.
+  if (isOrder && link) {
+    const paidOut = titleLower.includes('fått betalt')
+    const dealerPaid = titleLower.includes('tagit emot din betalning')
+    if (paidOut || dealerPaid) {
+      const invoiceHref = `${SITE}${link}/invoice`
+      extra += documentBox(
+        invoiceHref,
+        paidOut ? 'Se ditt utbetalningsunderlag' : 'Se din faktura och inköpsnota',
+        paidOut
+          ? 'Underlaget för din försäljning finns nu i portalen. Där kan du visa det och spara det som PDF.'
+          : 'Din faktura och ditt inköpsunderlag finns nu i portalen. Där kan du visa dem och spara dem som PDF.'
+      )
+    }
+  }
 
   // Trustpilot-förfrågan bara på säljarens utbetalningsmejl ("Du har fått
   // betalt"), en gång per avslutad affär. Så slipper vi be om omdöme på varje

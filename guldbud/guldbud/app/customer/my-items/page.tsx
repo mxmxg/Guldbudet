@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { GemIcon } from '@/components/Icons'
 import InviteFriend from '@/components/InviteFriend'
+import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   pending: { label: 'Väntar på granskning', color: 'bg-amber-100 text-amber-700' },
@@ -134,8 +135,8 @@ export default function MyItemsPage() {
               const href = orderId ? `/orders/${orderId}` : `/auctions/${item.id}`
               const Wrapper: any = clickable ? Link : 'div'
               return (
+                <div key={item.id} className="grid gap-1.5">
                 <Wrapper
-                  key={item.id}
                   {...(clickable ? { href } : {})}
                   className={`card p-4 flex gap-4 items-center ${clickable ? 'card-hover' : ''}`}
                 >
@@ -185,6 +186,16 @@ export default function MyItemsPage() {
                     </button>
                   )}
                 </Wrapper>
+                {orderId && (
+                  <div className="pl-1">
+                    <DownloadInvoiceButton
+                      orderId={orderId}
+                      label="Ladda ner underlag (PDF)"
+                      className="text-xs text-espresso-500 hover:text-espresso-800 disabled:opacity-50"
+                    />
+                  </div>
+                )}
+                </div>
               )
             })}
           </div>

@@ -12,8 +12,9 @@ import { GemIcon } from '@/components/Icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal, totalWithCommission } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal } from '@/lib/fees'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
+import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
 
 const INCREMENTS = [100, 250, 500, 1000]
 
@@ -330,6 +331,9 @@ export default function DealerDashboard() {
                       >
                         {unpaid ? 'Betala nu' : 'Visa affär'}
                       </Link>
+                      <div className="mt-1.5">
+                        <DownloadInvoiceButton orderId={o.id} label="Ladda ner faktura (PDF)" className="text-xs text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
+                      </div>
                     </div>
                   </div>
                 )
@@ -448,8 +452,8 @@ export default function DealerDashboard() {
                       </div>
                       <p className="text-[11px] text-espresso-400 mt-1.5 lg:text-right">
                         {parseInt(bidInputs[item.id] || '0') > 0
-                          ? `Bud + ${DEALER_COMMISSION_LABEL} provision ${formatSEK(totalWithCommission(parseInt(bidInputs[item.id])))} · frakt ${formatSEK(DEALER_SHIPPING_FEE)} · totalt ${formatSEK(dealerTotal(parseInt(bidInputs[item.id])))}`
-                          : `Provision ${DEALER_COMMISSION_LABEL} + frakt ${DEALER_SHIPPING_FEE} kr tillkommer`}
+                          ? `Bud + ${DEALER_COMMISSION_LABEL} provision + frakt ${formatSEK(DEALER_SHIPPING_FEE)} inkl moms · totalt ${formatSEK(dealerTotal(parseInt(bidInputs[item.id])))}`
+                          : `Provision ${DEALER_COMMISSION_LABEL} + frakt ${DEALER_SHIPPING_FEE} kr + moms tillkommer`}
                       </p>
 
                       {/* Maxbud (autobud) */}

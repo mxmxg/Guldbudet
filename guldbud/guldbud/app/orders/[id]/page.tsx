@@ -12,7 +12,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, dealerTotal } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, commissionVat, dealerTotal } from '@/lib/fees'
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -334,8 +334,12 @@ function DealerPanel({ order }: { order: any }) {
             <span className="tabular-nums">+{formatSEK(commission(order.amount))}</span>
           </div>
           <div className="flex justify-between text-espresso-600">
-            <span>Frakt</span>
+            <span>Frakt (inkl moms)</span>
             <span className="tabular-nums">+{formatSEK(DEALER_SHIPPING_FEE)}</span>
+          </div>
+          <div className="flex justify-between text-espresso-600">
+            <span>Moms 25% på provision</span>
+            <span className="tabular-nums">+{formatSEK(commissionVat(order.amount))}</span>
           </div>
           <div className="flex justify-between font-semibold text-espresso-900 pt-2 mt-1 border-t border-espresso-100">
             <span>Ditt totalpris</span>
