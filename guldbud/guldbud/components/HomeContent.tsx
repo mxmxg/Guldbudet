@@ -478,6 +478,10 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
         )}
       </section>
 
+      {/* Avslutade auktioner (social proof) direkt efter pågående, för att lyfta
+          "andra har fått betalt" högt upp. Renderar inget om det saknas sålt. */}
+      <RecentlySold rows={sold} />
+
       {/* HONEST / NO BAIT PRICING */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
@@ -687,7 +691,6 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
         </Reveal>
       </section>
 
-      <RecentlySold rows={sold} />
       </main>
 
       <Footer />
