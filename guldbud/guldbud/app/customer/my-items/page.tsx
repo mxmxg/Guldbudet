@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { GemIcon } from '@/components/Icons'
 import InviteFriend from '@/components/InviteFriend'
 import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
+import PendingApprovalBanner from '@/components/PendingApprovalBanner'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   pending: { label: 'Väntar på granskning', color: 'bg-amber-100 text-amber-700' },
@@ -106,6 +107,8 @@ export default function MyItemsPage() {
         {relistError && (
           <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600">{relistError}</div>
         )}
+
+        <PendingApprovalBanner />
 
         {loading ? (
           <div className="grid gap-4">
