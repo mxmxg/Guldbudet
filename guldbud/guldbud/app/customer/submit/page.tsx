@@ -597,7 +597,7 @@ export default function SubmitPage() {
                     <p className="text-espresso-100/50 text-xs mt-2">
                       {hasGem
                         ? 'Uppskattad utbetalning utifrån guldvärdet. Diamanter och ädelstenar höjer värdet ytterligare.'
-                        : 'Uppskattad utbetalning, något under metallvärdet vid dagens guldpris. Handlarna budar i konkurrens om slutpriset.'}
+                        : 'Riktvärde utifrån dagens guldpris. Handlarna budar i konkurrens, så slutpriset kan bli högre.'}
                     </p>
                   </>
                 ) : (

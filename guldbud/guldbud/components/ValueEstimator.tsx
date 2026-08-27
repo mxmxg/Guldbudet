@@ -133,7 +133,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
           <ArrowIcon />
         </Link>
         <p className="text-center text-[11px] text-espresso-100/70 mt-3">
-          Uppskattad utbetalning, något under metallvärdet. Konkurrensen mellan handlare avgör slutpriset.
+          Riktvärde utifrån dagens guldpris. Handlarna budar i konkurrens, så slutpriset kan bli högre.
         </p>
       </div>
 
