@@ -325,8 +325,10 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             </Reveal>
           </div>
 
-          {/* Right — live featured auction (real data, with fallback) */}
-          <Reveal delay={200} className="hidden lg:block">
+          {/* Right — live featured auction (real data, with fallback). Visas även
+              på mobil (stackas under hero-texten) så förstaintrycket har ett
+              visuellt bevis, inte bara text. */}
+          <Reveal delay={200} className="mt-4 lg:mt-0">
             <div className="relative">
               <div className="absolute inset-0 -m-6 rounded-[2rem] bg-gold-500/10 blur-2xl" />
               <div className="relative">
