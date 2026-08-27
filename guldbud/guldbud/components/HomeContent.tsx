@@ -13,6 +13,8 @@ import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
 import { TRUSTPILOT_PROFILE_URL } from '@/components/TrustpilotInvite'
 import PendingApprovalBanner from '@/components/PendingApprovalBanner'
+import FaqSection from '@/components/FaqSection'
+import TrustpilotWidget from '@/components/TrustpilotWidget'
 import { formatSEK } from '@/lib/gold'
 import {
   CameraIcon,
@@ -21,7 +23,6 @@ import {
   ShieldIcon,
   BoltIcon,
   HeartIcon,
-  StarIcon,
   CheckIcon,
   ArrowRightIcon,
   SparkleIcon,
@@ -589,10 +590,8 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
       {/* OMDÖMEN — äkta, via Trustpilot (inga påhittade citat) */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <Reveal className="text-center max-w-2xl mx-auto">
-          <div className="flex justify-center gap-0.5 mb-4 text-gold-400">
-            {Array.from({ length: 5 }).map((_, s) => (
-              <StarIcon key={s} />
-            ))}
+          <div className="flex justify-center mb-5">
+            <TrustpilotWidget />
           </div>
           <h2 className="font-display text-3xl sm:text-4xl text-espresso-900">
             Läs vad säljare tycker
@@ -654,6 +653,9 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
           ))}
         </div>
       </section>
+
+      {/* FAQ */}
+      <FaqSection />
 
       {/* FINAL CTA */}
       <section className="max-w-6xl mx-auto px-4 pb-24">
