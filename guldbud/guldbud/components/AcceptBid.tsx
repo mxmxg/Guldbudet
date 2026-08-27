@@ -75,7 +75,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
           <p className="font-medium text-espresso-800 mb-3">Skicka in föremålet, gärna redan idag</p>
           <ol className="flex flex-col gap-2 text-sm text-espresso-600">
             {[
-              'Så fort du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr.',
+              'Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr.',
               'Lägg föremålet i det och posta det rekommenderat. Porto och adress är redan klara.',
               'Vi verifierar äktheten så snart vi mottagit föremålet.',
               'Du får betalt omgående via Swish eller bankkonto när vi verifierat föremålet.',
@@ -90,7 +90,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner }
         <div className="rounded-xl bg-espresso-900 p-4 text-center">
           <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Frakt</p>
           <p className="text-gold-200 font-medium">Kostnadsfritt rekommenderat brev</p>
-          <p className="text-gold-200/80 text-sm">Förbetalt porto och adress, försäkrat upp till 100 000 kr. Skickas när du godkänt ditt slutpris.</p>
+          <p className="text-gold-200/80 text-sm">Förbetalt porto och adress, försäkrat upp till 100 000 kr. Vi skickar det till dig nu, posta så snart du kan.</p>
           <p className="text-gold-500/70 text-xs mt-2">Vid frågor: info@guldbud.com</p>
         </div>
         {orderId && (
