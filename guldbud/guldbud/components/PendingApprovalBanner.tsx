@@ -63,7 +63,7 @@ export default function PendingApprovalBanner() {
             {pending.length === 1 ? 'Du har ett bud att godkänna' : `Du har ${pending.length} bud att godkänna`}
           </p>
           <p className="text-sm text-espresso-600 mb-3">
-            Budgivningen är avslutad. Godkänn budet så drar vi igång affären och du får betalt.
+            Budgivningen är avslutad. Öppna föremålet för att se budet och välja om du vill sälja.
           </p>
           <div className="flex flex-col gap-2">
             {pending.map((p) => (
@@ -76,7 +76,7 @@ export default function PendingApprovalBanner() {
                   <span className="block truncate font-medium text-espresso-900">{p.title}</span>
                   <span className="text-xs text-espresso-500">Högsta bud: {formatSEK(p.topBid)}</span>
                 </span>
-                <span className="shrink-0 text-sm font-medium text-gold-700">Godkänn budet →</span>
+                <span className="shrink-0 text-sm font-medium text-gold-700">Granska budet →</span>
               </Link>
             ))}
           </div>

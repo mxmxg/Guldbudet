@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Confetti from '@/components/Confetti'
 import BidSection from '@/components/BidSection'
 import AcceptBid from '@/components/AcceptBid'
+import DeclineBid from '@/components/DeclineBid'
 import WatchButton from '@/components/WatchButton'
 import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
@@ -317,8 +318,9 @@ export default function AuctionDetails({ item }: { item: any }) {
               <p className="text-espresso-600 mt-5 leading-relaxed">{item.description}</p>
             )}
 
-            {/* Sold banner (closed auctions) – social proof + SEO */}
-            {isClosed && topAmount ? (
+            {/* Sold banner (closed auctions) – social proof + SEO. Bara när ett
+                bud faktiskt accepterats; ett avböjt föremål är stängt utan bud. */}
+            {isClosed && item.accepted_bid_id && topAmount ? (
               <div className="mt-5 rounded-2xl bg-espresso-900 p-5 text-center shadow-soft">
                 <p className="eyebrow text-gold-500/80 mb-1">Såld</p>
                 <p className="font-display text-3xl text-gold-100 tabular-nums">{formatSEK(topAmount)}</p>
@@ -421,13 +423,18 @@ export default function AuctionDetails({ item }: { item: any }) {
 
             {/* Accept bid (owner) — works while active or after end, until accepted */}
             {isOwner && !isClosed && topBid && (
-              <AcceptBid
-                itemId={item.id}
-                bidId={topBid.id}
-                amount={topAmount}
-                dealerName={dealerLabel(topBid)}
-                isOwner={isOwner}
-              />
+              <>
+                <AcceptBid
+                  itemId={item.id}
+                  bidId={topBid.id}
+                  amount={topAmount}
+                  dealerName={dealerLabel(topBid)}
+                  isOwner={isOwner}
+                />
+                {/* Tacka nej går bara att göra när auktionen är slut, inte mitt i
+                    en pågående budgivning. */}
+                {ended && <DeclineBid item={item} isOwner={isOwner} />}
+              </>
             )}
 
             {/* Owner waiting for bids (live, not ended) */}
@@ -449,6 +456,16 @@ export default function AuctionDetails({ item }: { item: any }) {
                   Skicka föremålet till oss så betalar vi ut via Swish eller bankkonto efter verifiering.
                 </p>
                 <ShippingCard />
+              </div>
+            )}
+
+            {/* Closed utan accepterat bud = säljaren tackade nej */}
+            {isOwner && isClosed && !item.accepted_bid_id && (
+              <div className="mt-4 rounded-2xl bg-espresso-50 border border-espresso-200 p-5">
+                <p className="font-medium text-espresso-800 mb-1">Du tackade nej till budet</p>
+                <p className="text-sm text-espresso-500">
+                  Föremålet såldes inte. Du kan lägga ut det igen från Mina föremål när du vill.
+                </p>
               </div>
             )}
 
