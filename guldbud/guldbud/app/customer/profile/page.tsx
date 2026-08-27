@@ -15,6 +15,8 @@ export default function CustomerProfilePage() {
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [stats, setStats] = useState({ items: 0, deals: 0 })
+  // Sätts när man skickats hit från listningen (submit) för att komplettera profilen.
+  const [fromSubmit, setFromSubmit] = useState(false)
   const [form, setForm] = useState({
     full_name: '',
     phone: '',
@@ -48,6 +50,9 @@ export default function CustomerProfilePage() {
       return
     }
     setProfile(prof)
+    if (typeof window !== 'undefined') {
+      setFromSubmit(new URLSearchParams(window.location.search).get('from') === 'submit')
+    }
     setForm({
       full_name: prof.full_name || '',
       phone: prof.phone || '',
@@ -91,8 +96,17 @@ export default function CustomerProfilePage() {
       .eq('id', profile.id)
     if (error) setMsg({ ok: false, text: error.message })
     else {
-      setMsg({ ok: true, text: 'Dina uppgifter är sparade.' })
       setProfile((p: any) => ({ ...p, ...form }))
+      // Kom man hit från listningen och profilen nu är komplett, skicka tillbaka
+      // dit så flödet inte bryts.
+      const addressOk = !!(form.address && form.postal_code && form.city)
+      const payoutOk = !!(form.payout_swish || (form.payout_bank_clearing && form.payout_bank_account))
+      const identityOk = !!(profile.identity_verified || form.personal_number)
+      if (fromSubmit && addressOk && payoutOk && identityOk) {
+        router.push('/customer/submit')
+        return
+      }
+      setMsg({ ok: true, text: 'Dina uppgifter är sparade.' })
     }
     setSaving(false)
   }
@@ -123,6 +137,14 @@ export default function CustomerProfilePage() {
           <div className="h-64 rounded-2xl skeleton" />
         ) : (
           <div className="grid gap-6">
+            {fromSubmit && (
+              <div className="rounded-2xl border border-gold-300 bg-gold-50 p-5 ring-1 ring-gold-200">
+                <p className="font-medium text-espresso-900 mb-1">Ett steg kvar innan du lägger ut</p>
+                <p className="text-sm text-espresso-600">
+                  Fyll i din adress och hur du vill få betalt, så kan du lägga ut ditt föremål. Vi skickar ett förbetalt, försäkrat kuvert till adressen, och betalar ut till kontot när affären är klar. Uppgifterna delas aldrig publikt.
+                </p>
+              </div>
+            )}
             <section className="card p-6">
               <h2 className="font-display text-xl text-espresso-900 mb-1">Mina uppgifter</h2>
               <p className="text-xs text-espresso-400 mb-5">
