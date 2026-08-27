@@ -360,9 +360,9 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             </p>
             <ul className="mt-8 space-y-3">
               {[
-                'Inga dolda avgifter, det är gratis att lägga ut',
-                'Du bestämmer själv om du accepterar ett bud',
-                'Sätt ett reservationspris om du vill',
+                'Inga dolda avgifter, det är gratis att lägga ut.',
+                'Du bestämmer själv om du accepterar ett bud.',
+                'Sätt ett reservationspris om du vill.',
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3 text-sm text-espresso-600">
                   <CheckMark />
@@ -500,10 +500,10 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               </p>
               <ul className="flex flex-col gap-4">
                 {[
-                  'Lockpris på förstasidan som bara gäller vid stora mängder',
-                  'En enda värdering du inte kan påverka',
-                  'Du skickar in innan du vet vad du får',
-                  'Villkoren göms i det finstilta',
+                  'Lockpris på förstasidan som bara gäller vid stora mängder.',
+                  'En enda värdering du inte kan påverka.',
+                  'Du skickar in innan du vet vad du får.',
+                  'Villkoren göms i det finstilta.',
                 ].map((t) => (
                   <li key={t} className="flex gap-3 text-sm text-espresso-500">
                     <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center">
@@ -523,11 +523,11 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               <p className="text-sm font-semibold text-gold-700 mb-5 uppercase tracking-wide">GuldBud</p>
               <ul className="flex flex-col gap-4">
                 {[
-                  'Flera verifierade handlare budar mot varandra',
-                  'Du ser alla bud i realtid, innan du bestämmer dig',
-                  'Konkurrensen pressar priset uppåt, inte nedåt',
-                  'Metallvärdet visas ärligt, oavsett vikt',
-                  'Kostnadsfritt att lägga ut, och du säger ja först när du är nöjd',
+                  'Flera verifierade handlare budar mot varandra.',
+                  'Du ser alla bud i realtid, innan du bestämmer dig.',
+                  'Konkurrensen pressar priset uppåt, inte nedåt.',
+                  'Metallvärdet visas ärligt, oavsett vikt.',
+                  'Kostnadsfritt att lägga ut, och du säger ja först när du är nöjd.',
                 ].map((t) => (
                   <li key={t} className="flex gap-3 text-sm text-espresso-800">
                     <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center">

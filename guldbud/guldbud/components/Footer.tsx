@@ -16,8 +16,12 @@ export default function Footer() {
               Vi får guldköparna att konkurrera om ditt guld. Auktoriserade handlare budar mot
               varandra i realtid, och du säljer till bäst betalt, tryggt och kostnadsfritt.
             </p>
-            <div className="flex gap-3 mt-5">
-              <TrustBadge>BankID-verifierad</TrustBadge>
+            <div className="flex flex-wrap gap-3 mt-5">
+              <span className="inline-flex items-center gap-1.5 text-[11px] text-gold-200/80 border border-gold-500/20 rounded-full px-2.5 py-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/bankid-white.png" alt="BankID" className="h-3.5 w-auto opacity-90" />
+                verifierad
+              </span>
               <TrustBadge>Försäkrad frakt</TrustBadge>
             </div>
           </div>
