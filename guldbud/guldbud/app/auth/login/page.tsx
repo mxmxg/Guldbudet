@@ -138,8 +138,12 @@ function LoginForm() {
     setSubmitError('')
 
     if (mode === 'register') {
-      const registerFields = ['fullName', 'phone', 'personalNumber', 'address', 'postalCode', 'city']
-      if (role === 'dealer') registerFields.push('company', 'orgNumber')
+      // Privatpersonen skapar konto med bara namn (+ e-post/lösenord). Övriga
+      // uppgifter samlas när de behövs (BankID, adress och utbetalning vid
+      // listning). Handlaren fyller i mer redan här eftersom admin granskar dem.
+      const registerFields = role === 'dealer'
+        ? ['fullName', 'phone', 'personalNumber', 'address', 'postalCode', 'city', 'company', 'orgNumber']
+        : ['fullName']
       const allTouched = Object.fromEntries(registerFields.map(f => [f, true]))
       setTouched(t => ({ ...t, ...allTouched }))
       const hasErrors = registerFields.some(f => validateField(f, fields[f], role))
@@ -185,13 +189,15 @@ function LoginForm() {
           data: {
             full_name: fields.fullName,
             role,
-            phone: fields.phone,
-            personal_number: fields.personalNumber,
-            address: fields.address,
-            postal_code: fields.postalCode,
-            city: fields.city,
-            company_name: fields.company,
-            org_number: fields.orgNumber,
+            // Tomma fält skickas som null (inte ''), så nullable-kolumner förblir
+            // null och t.ex. personnummer-låset inte triggas på en tom sträng.
+            phone: fields.phone || null,
+            personal_number: fields.personalNumber || null,
+            address: fields.address || null,
+            postal_code: fields.postalCode || null,
+            city: fields.city || null,
+            company_name: fields.company || null,
+            org_number: fields.orgNumber || null,
             dealer_terms_accepted_at: role === 'dealer' ? new Date().toISOString() : null,
             customer_terms_accepted_at: role === 'dealer' ? null : new Date().toISOString(),
           }
@@ -282,17 +288,29 @@ function LoginForm() {
               {mode === 'register' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', animation: 'authReveal .3s ease' }}>
                   <Field label="Namn" name="fullName" value={fields.fullName} onChange={set('fullName')} onBlur={blur('fullName')} error={err('fullName')} placeholder="Anna Andersson" />
-                  <Field label="Telefon" name="phone" type="tel" value={fields.phone} onChange={set('phone')} onBlur={blur('phone')} error={err('phone')} placeholder="0701234567" />
-                  <Field label="Personnummer" name="personalNumber" value={fields.personalNumber} onChange={set('personalNumber')} onBlur={blur('personalNumber')} error={err('personalNumber')} placeholder="ÅÅMMDD-XXXX" />
-                  <Field label="Adress" name="address" value={fields.address} onChange={set('address')} onBlur={blur('address')} error={err('address')} placeholder="Storgatan 1" />
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <div style={{ width: '35%' }}>
-                      <Field label="Postnummer" name="postalCode" value={fields.postalCode} onChange={set('postalCode')} onBlur={blur('postalCode')} error={err('postalCode')} placeholder="123 45" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <Field label="Stad" name="city" value={fields.city} onChange={set('city')} onBlur={blur('city')} error={err('city')} placeholder="Stockholm" />
-                    </div>
-                  </div>
+                  {/* Privatpersonen skapar konto med bara namn, e-post och lösenord.
+                      Personnummer (via BankID), adress och utbetalningsuppgifter samlas
+                      först när de behövs, vid verifiering och listning. */}
+                  {role === 'customer' && (
+                    <p style={{ color: '#8a7038', fontSize: '12px', lineHeight: 1.5, marginTop: '-4px' }}>
+                      Du legitimerar dig med BankID och fyller i adress och utbetalning först när du lägger ut ditt första föremål.
+                    </p>
+                  )}
+                  {role === 'dealer' && (
+                    <>
+                      <Field label="Telefon" name="phone" type="tel" value={fields.phone} onChange={set('phone')} onBlur={blur('phone')} error={err('phone')} placeholder="0701234567" />
+                      <Field label="Personnummer" name="personalNumber" value={fields.personalNumber} onChange={set('personalNumber')} onBlur={blur('personalNumber')} error={err('personalNumber')} placeholder="ÅÅMMDD-XXXX" />
+                      <Field label="Adress" name="address" value={fields.address} onChange={set('address')} onBlur={blur('address')} error={err('address')} placeholder="Storgatan 1" />
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{ width: '35%' }}>
+                          <Field label="Postnummer" name="postalCode" value={fields.postalCode} onChange={set('postalCode')} onBlur={blur('postalCode')} error={err('postalCode')} placeholder="123 45" />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <Field label="Stad" name="city" value={fields.city} onChange={set('city')} onBlur={blur('city')} error={err('city')} placeholder="Stockholm" />
+                        </div>
+                      </div>
+                    </>
+                  )}
                   {role === 'dealer' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', animation: 'authReveal .28s ease' }}>
                       <Field label="Företagsnamn" name="company" value={fields.company} onChange={set('company')} onBlur={blur('company')} error={err('company')} placeholder="Stockholms Guldhandel AB" />
