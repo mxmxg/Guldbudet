@@ -52,6 +52,7 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [myItems, setMyItems] = useState<any[]>([])
+  const [orderByItem, setOrderByItem] = useState<Record<string, string>>({})
   const [myBidIds, setMyBidIds] = useState<Set<string>>(new Set())
   const [leadingIds, setLeadingIds] = useState<Set<string>>(new Set())
   const [watchedIds, setWatchedIds] = useState<Set<string>>(new Set())
@@ -80,6 +81,12 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
             .order('created_at', { ascending: false })
             .limit(3)
           setMyItems(mi || [])
+          // Vilka av föremålen som blivit affärer, så en avslutad rad kan öppna
+          // affären (med underlag) i stället för att vara en död rad.
+          const { data: orders } = await supabase.from('orders').select('id, item_id').eq('seller_id', user.id)
+          const map: Record<string, string> = {}
+          orders?.forEach((o: any) => (map[o.item_id] = o.id))
+          setOrderByItem(map)
         }
         if (p?.role === 'dealer') {
           // Vilka auktioner handlaren budat på + vilka hen leder (mitt maxbud === högsta bud).
@@ -160,8 +167,17 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
                     label: item.status,
                     color: 'bg-espresso-100 text-espresso-500',
                   }
+                  const orderId = orderByItem[item.id]
+                  // Avslutade föremål som blivit en affär öppnar affären (med
+                  // underlag), pågående auktioner länkar till auktionssidan.
+                  const href = orderId ? `/orders/${orderId}` : item.status === 'active' ? `/auctions/${item.id}` : null
+                  const Wrapper: any = href ? Link : 'div'
                   return (
-                    <div key={item.id} className="card p-4 flex gap-4 items-center card-hover">
+                    <Wrapper
+                      key={item.id}
+                      {...(href ? { href } : {})}
+                      className="card p-4 flex gap-4 items-center card-hover"
+                    >
                       <div className="w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden relative bg-espresso-100">
                         {item.image_urls?.[0] && (
                           <Image src={item.image_urls[0]} alt={item.title} fill className="object-contain" />
@@ -176,12 +192,12 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
                           {item.weight_grams} g · {item.karat}
                         </p>
                       </div>
-                      {item.status === 'active' && (
-                        <Link href={`/auctions/${item.id}`} className="text-sm text-gold-600 hover:text-gold-700 shrink-0">
-                          Följ →
-                        </Link>
-                      )}
-                    </div>
+                      {orderId ? (
+                        <span className="text-sm text-gold-600 shrink-0">Visa affär →</span>
+                      ) : item.status === 'active' ? (
+                        <span className="text-sm text-gold-600 shrink-0">Följ →</span>
+                      ) : null}
+                    </Wrapper>
                   )
                 })}
               </div>
