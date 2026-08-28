@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { KARAT_OPTIONS, estimateRange, formatSEK, isPlatinum } from '@/lib/gold'
 import { CATEGORIES, GEMSTONES } from '@/lib/catalog'
 import { SOURCE_OPTIONS } from '@/lib/aml'
+import { TERMS_VERSION } from '@/lib/terms'
 import { CheckIcon } from '@/components/Icons'
 
 export default function SubmitPage() {
@@ -253,6 +254,13 @@ export default function SubmitPage() {
       image_urls: imageUrls,
       source_type: sourceType,
       ownership_attested_at: new Date().toISOString(),
+      // Förmedlingsuppdraget. Villkoren som säljaren godkände vid
+      // registreringen bär uppdraget, och publiceringen är instruktionen att
+      // förmedla. Vi noterar när den lämnades och vilken lydelse som gällde,
+      // så uppdragskvittot kan renderas korrekt även efter att villkoren
+      // ändrats. Ingen separat signering behövs.
+      mandate_accepted_at: new Date().toISOString(),
+      terms_version: TERMS_VERSION,
       status: 'pending',
     })
 
@@ -573,9 +581,18 @@ export default function SubmitPage() {
               <p className="text-red-500 text-sm bg-red-50 border border-red-100 p-3 rounded-xl">{error}</p>
             )}
 
-            <button type="submit" disabled={loading} className="btn-gold">
-              {loading ? 'Lägger ut...' : 'Lägg ut föremålet'}
-            </button>
+            <div className="space-y-2">
+              <button type="submit" disabled={loading} className="btn-gold">
+                {loading ? 'Lägger ut...' : 'Lägg ut föremålet'}
+              </button>
+              {/* Förmedlingsuppdraget bor i villkoren som säljaren godkände vid
+                  registreringen. Publiceringen är instruktionen, så ingen ny
+                  kryssruta behövs, bara att det sägs rakt ut. */}
+              <p className="text-xs text-espresso-400 max-w-md">
+                När du publicerar ger du GuldBud i uppdrag att sälja föremålet åt dig enligt{' '}
+                <Link href="/terms" className="underline hover:text-espresso-600">villkoren</Link>.
+              </p>
+            </div>
           </form>
 
           {/* Sidebar */}

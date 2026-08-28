@@ -1,4 +1,5 @@
 import LegalPage from '@/components/LegalPage'
+import { TERMS_UPDATED_LABEL } from '@/lib/terms'
 
 export const metadata = {
   title: 'Användarvillkor · GuldBud',
@@ -11,7 +12,7 @@ export default function TermsPage() {
       eyebrow="Villkor"
       title="Användarvillkor"
       intro="Dessa villkor gäller när du använder GuldBud för att sälja föremål som privatperson eller för att buda som auktoriserad handlare."
-      updated="26 augusti 2026"
+      updated={TERMS_UPDATED_LABEL}
       sections={[
         {
           heading: 'Om GuldBud och tjänsten',
