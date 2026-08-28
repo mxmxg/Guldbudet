@@ -125,7 +125,15 @@ export class StripeProvider implements PaymentProvider {
     const reference: string | undefined = session?.client_reference_id || session?.metadata?.order_id
     if (!providerReference || !status) return null
 
-    return { providerReference, reference, status }
+    // What Stripe actually collected on this session. amount_total is in minor
+    // units (öre for SEK). Passed up so the route can verify it against the
+    // order rather than trusting that "paid" means "paid the right amount".
+    const amountMinor: number | undefined =
+      typeof session?.amount_total === 'number' ? session.amount_total : undefined
+    const currency: string | undefined =
+      typeof session?.currency === 'string' ? session.currency.toLowerCase() : undefined
+
+    return { providerReference, reference, status, amountMinor, currency }
   }
 }
 

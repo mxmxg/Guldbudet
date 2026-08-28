@@ -6,8 +6,10 @@
 // Registered provider identifiers. Add new rails here as they are onboarded.
 export type PaymentProviderName = 'brite' | 'stripe'
 
-// The two terminal states we persist on orders.payment_status after a callback.
-// (Orders start at 'pending' the moment a payment session is created.)
+// The two terminal states a provider can report back to us. (Orders start at
+// 'pending' the moment a payment session is created.) orders.payment_status can
+// additionally hold 'amount_mismatch', which the callback route sets on its own
+// when a verified 'paid' callback carries the wrong amount or currency.
 export type PaymentStatus = 'paid' | 'failed'
 
 // What the API route hands the provider to open a hosted A2A payment session.
@@ -39,6 +41,14 @@ export interface VerifiedCallback {
   // even if a newer session has since overwritten payment_reference.
   reference?: string
   status: PaymentStatus
+  // What the provider says was ACTUALLY collected: the amount in the currency's
+  // minor unit (öre for SEK) and the currency it was charged in. Optional
+  // because not every rail reports it. When present, the callback route checks
+  // both against the order's own expected total before settling, so a session
+  // that was not created for this order's current price (or in the wrong
+  // currency) can never release the seller's payout.
+  amountMinor?: number
+  currency?: string
 }
 
 export interface PaymentProvider {
