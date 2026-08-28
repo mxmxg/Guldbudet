@@ -94,12 +94,19 @@ aldrig gissa.
 
 **Pengar**
 
-- Handlarens betalning tas emot på **klientmedelskonto**, avskilt från
-  bolagets egna medel. Säljarens del blandas aldrig med bolagets tillgångar.
+- Handlarens betalning ska tas emot på **klientmedelskonto**, avskilt från
+  bolagets egna medel, så kundernas pengar tydligt skiljs från företagets.
+- Stripes utbetalningar ska gå till klientmedelskontot, inte till
+  rörelsekontot.
+- Kontot ligger hos **SEB**, samma bank som bolagets ordinarie konto.
+- **Kontot är ännu inte skapat.** Skriv därför aldrig om upplägget i presens
+  som om det redan gäller. Det är den beslutade ordningen, inte nuläget.
+- Detta ligger på kritiska linjen före lansering: skapas inte kontot, och
+  sätts det inte som mottagare i Stripe, hamnar de första riktiga
+  utbetalningarna på rörelsekontot. Då sker precis den sammanblandning
+  upplägget ska förhindra.
 - Kortbetalning via Stripe är en **tillfällig lösning**. Planen är direkt
   banköverföring när avtal finns.
-- OBEKRÄFTAT: vilken bank klientmedelskontot ligger hos, och om Stripes
-  utbetalningar går till klientmedelskontot eller till rörelsekontot.
 
 **Leverantörer**
 
