@@ -1423,6 +1423,20 @@ alter table public.items add column if not exists source_type text;         -- '
 alter table public.items add column if not exists source_note text;
 alter table public.items add column if not exists ownership_attested_at timestamptz;
 
+-- ============================================================
+-- Förmedlingsuppdraget. Säljaren godkänner villkoren vid registrering, och
+-- villkoren bär uppdraget. Publiceringen av föremålet ÄR instruktionen, så
+-- ingen separat signering behövs. Det som krävs är en notering per föremål:
+-- när uppdraget lämnades och vilken lydelse av villkoren som då gällde.
+--
+-- terms_version är det som bär hela lösningen. Villkorstexten ändras över
+-- tid, och utan versionen går det inte att i efterhand visa vad en viss
+-- säljare faktiskt godkände. Med den kan uppdragskvittot renderas exakt som
+-- villkoren löd den dagen.
+-- ============================================================
+alter table public.items add column if not exists mandate_accepted_at timestamptz;
+alter table public.items add column if not exists terms_version text;
+
 -- AML-data i EGEN tabell, inte som kolumner på orders. Skäl: RLS är radnivå,
 -- så parternas "läs egen order"-policy exponerar annars hela raden inklusive
 -- admins granskningsanteckningar (en part kunde läsa AML-utredningen mot sig
