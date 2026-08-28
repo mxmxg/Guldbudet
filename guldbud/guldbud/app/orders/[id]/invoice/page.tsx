@@ -17,7 +17,7 @@ import {
 const GULDBUD = {
   name: 'GuldBud AB',
   org: '559291-4781',
-  vat: 'SE559291478101', // momsregistreringsnummer – bekräfta mot Skatteverket
+  vat: 'SE559291478101', // momsregistreringsnummer, bekräftat mot Skatteverket
   email: 'info@guldbud.com',
   box: 'Box 6007',
   postal: '102 31 Stockholm',
