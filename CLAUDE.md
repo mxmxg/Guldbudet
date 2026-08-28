@@ -102,8 +102,20 @@ aldrig gissa.
 
 Fram till att båda gått igenom heter bolaget Hey Consulting Nordic AB med
 adress i Järfälla. **Påstå aldrig att namnbytet eller adressbytet är klart.**
-Sajten, villkoren och fakturadokumenten säger GuldBud AB, vilket är avsikten,
-men det är inte samma sak som vad registret säger idag.
+
+**Beslutat: vilket namn som ska stå var**
+
+- **Villkor, förmedlingsuppdrag och fakturadokument skrivs för GuldBud AB.**
+  De används först vid transaktioner, och inga transaktioner tillåts innan
+  namnbytet gått igenom. Rätta alltså inte tillbaka dem till det gamla namnet.
+- **Handlingar som skickas ut före namnbytet använder det registrerade
+  namnet**, med en not om att bytet pågår. Det gäller underlaget till
+  revisorn, bankansökan och allt som en mottagare slår upp i registret. Ett
+  namn som inte matchar registret stoppar ärendet.
+
+Följden av beslutet: namnbytet ligger nu på kritiska linjen. Tjänsten kan inte
+öppnas för transaktioner förrän Verksamt är klart, eftersom de juridiska
+handlingarna förutsätter det.
 
 **Adresser, tre olika och lätta att blanda ihop**
 
