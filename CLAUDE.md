@@ -125,6 +125,15 @@ handlingarna förutsätter det.
   sidfoten och i fraktinstruktionerna.
 - E-post: info@guldbud.com
 
+**Domäner**
+
+- **guldbud.com** är sajten och varumärket. Allt juridiskt, alla dokument och
+  all uppsättning hos leverantörer bygger på den.
+- **guldformedlingen.se** och **guldformedlarna.se** ägs också, men används
+  inte. De är inte uppsatta någonstans. Använd dem aldrig som avsändare eller
+  varumärke, och nämn dem inte i handlingar till revisor, bank eller
+  leverantörer. Det skulle bara göra identiteten otydlig i en granskning.
+
 Blanda aldrig gatuadressen med boxens postnummer. Kombinationen
 "Kvarnvingevägen 2, 102 31 Stockholm" existerar inte och stoppar
 registerkontroller.
