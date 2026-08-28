@@ -85,18 +85,37 @@ och fråga.
 Sådant som inte går att läsa ur koden. Står det OBEKRÄFTAT här ska du fråga,
 aldrig gissa.
 
-**Bolaget**
+**Bolaget, så som det ser ut i registret idag**
 
-- Org.nr 559291-4781. Momsregistrerat, SE559291478101, bekräftat mot
-  Skatteverket.
-- **Registrerat bolagsnamn är ännu inte GuldBud AB.** Namnbytet är inskickat
-  till Bolagsverket och ligger i handläggning. Fram till dess heter bolaget
-  fortfarande sitt gamla namn i registret. Sajten, villkoren och
-  fakturadokumenten säger GuldBud AB. Påstå aldrig att bytet är genomfört.
+- Namn: **Hey Consulting Nordic AB**
+- Org.nr: **559291-4781**
+- Registrerad adress: **Kvarnvingevägen 2, 177 41 Järfälla**
+- Momsregistrerat, SE559291478101, bekräftat mot Skatteverket
 - SNI-koden är ändrad till **47.910, Förmedling**. Klart.
-- Box 6007, 102 31 Stockholm. Boxen är tilldelad och ligger på sajten.
-  Ändringen hos Bolagsverket ligger i handläggning.
-- info@guldbud.com
+
+**Vad som ligger i handläggning**
+
+- Namnbyte till **GuldBud AB**. Inskickat, väntar på Verksamt.
+- Byte av adress till postboxen. Inskickat, väntar på Verksamt.
+- Adressen och nycklarna är mottagna från PostNord, men registerändringen är
+  inte genomförd.
+
+Fram till att båda gått igenom heter bolaget Hey Consulting Nordic AB med
+adress i Järfälla. **Påstå aldrig att namnbytet eller adressbytet är klart.**
+Sajten, villkoren och fakturadokumenten säger GuldBud AB, vilket är avsikten,
+men det är inte samma sak som vad registret säger idag.
+
+**Adresser, tre olika och lätta att blanda ihop**
+
+- **Registrerad adress:** Kvarnvingevägen 2, 177 41 Järfälla. Den som gäller
+  mot Bolagsverket, Skatteverket och vid verifieringar hos leverantörer.
+- **Postbox:** Box 6007, 102 31 Stockholm. Dit guldet skickas. Ligger i
+  sidfoten och i fraktinstruktionerna.
+- E-post: info@guldbud.com
+
+Blanda aldrig gatuadressen med boxens postnummer. Kombinationen
+"Kvarnvingevägen 2, 102 31 Stockholm" existerar inte och stoppar
+registerkontroller.
 
 **Läs de egna dokumenten, inte bara koden**
 
