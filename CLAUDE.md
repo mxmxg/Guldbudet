@@ -87,10 +87,22 @@ aldrig gissa.
 
 **Bolaget**
 
-- GuldBud AB, org.nr 559291-4781
-- Momsregistrerat, SE559291478101, bekräftat mot Skatteverket
-- Box 6007, 102 31 Stockholm
+- Org.nr 559291-4781. Momsregistrerat, SE559291478101, bekräftat mot
+  Skatteverket.
+- **Registrerat bolagsnamn är ännu inte GuldBud AB.** Namnbytet är inskickat
+  till Bolagsverket och ligger i handläggning. Fram till dess heter bolaget
+  fortfarande sitt gamla namn i registret. Sajten, villkoren och
+  fakturadokumenten säger GuldBud AB. Påstå aldrig att bytet är genomfört.
+- SNI-koden är ändrad till **47.910, Förmedling**. Klart.
+- Box 6007, 102 31 Stockholm. Boxen är tilldelad och ligger på sajten.
+  Ändringen hos Bolagsverket ligger i handläggning.
 - info@guldbud.com
+
+**Läs de egna dokumenten, inte bara koden**
+
+Affärsstatus som namnbyte, SNI, postbox och kontouppsättning står i artifacts
+på claude.ai, inte i repot. Kolla dem innan du frågar användaren om sådant,
+och innan du påstår något om bolagets status.
 
 **Pengar**
 
@@ -99,6 +111,9 @@ aldrig gissa.
 - Stripes utbetalningar ska gå till klientmedelskontot, inte till
   rörelsekontot.
 - Kontot ligger hos **SEB**, samma bank som bolagets ordinarie konto.
+- Upplägget är **två konton**: klientmedelskonto för säljarens pengar, och
+  driftkonto för GuldBuds provision. Stripe betalar dock ut hela summan till
+  **en** mottagare, så uppdelningen sker efter utbetalningen.
 - **Kontot är ännu inte skapat.** Skriv därför aldrig om upplägget i presens
   som om det redan gäller. Det är den beslutade ordningen, inte nuläget.
 - Detta ligger på kritiska linjen före lansering: skapas inte kontot, och
