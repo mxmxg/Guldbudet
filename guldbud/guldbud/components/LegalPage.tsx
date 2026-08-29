@@ -1,7 +1,9 @@
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
-export type LegalSection = { heading: string; body: string[] }
+// bullets renderas efter body, för uppräkningar som blir oläsliga som löptext
+// (t.ex. GuldBuds åtaganden mot säljaren).
+export type LegalSection = { heading: string; body: string[]; bullets?: string[] }
 
 export default function LegalPage({
   eyebrow,
@@ -45,6 +47,15 @@ export default function LegalPage({
                     {p}
                   </p>
                 ))}
+                {s.bullets && (
+                  <ul className="list-disc pl-5 flex flex-col gap-1.5">
+                    {s.bullets.map((b, j) => (
+                      <li key={j} className="text-sm text-espresso-600 leading-relaxed">
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </section>
           ))}

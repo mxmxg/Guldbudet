@@ -11,108 +11,145 @@ export default function TermsPage() {
     <LegalPage
       eyebrow="Villkor"
       title="Användarvillkor"
-      intro="Dessa villkor gäller när du använder GuldBud för att sälja föremål som privatperson eller för att buda som auktoriserad handlare."
+      intro="Dessa villkor gäller när du som privatperson använder GuldBud för att sälja ett föremål. Genom att registrera dig godkänner du villkoren."
       updated={TERMS_UPDATED_LABEL}
       sections={[
         {
           heading: 'Om GuldBud och tjänsten',
           body: [
-            'Tjänsten tillhandahålls av GuldBud AB (org.nr 559291-4781), nedan kallat GuldBud. GuldBud är en marknadsplats där privatpersoner kan lägga ut guld, ädelmetaller och smycken för budgivning, och där verifierade handlare budar mot varandra.',
-            'GuldBud förmedlar affären och hanterar den säkra avvecklingen: föremålet skickas till GuldBud som kontrollerar äktheten, betalar ut till säljaren och skickar vidare till den vinnande handlaren. Handlarna är anonyma gentemot varandra och gentemot säljaren.',
-            'GuldBud är förmedlare och auktionsplattform. Köpeavtalet ingås mellan säljaren och den vinnande handlaren. GuldBud är inte köpare eller säljare av föremålet och är inte part i köpeavtalet mellan dem. GuldBud ansvarar för de tjänster vi själva tillhandahåller, det vill säga förmedling, äkthetskontroll, betalningsavveckling och frakt, enligt dessa villkor. Detta påverkar inte de rättigheter du som konsument har enligt tvingande lag.',
+            'Tjänsten tillhandahålls av GuldBud AB, org.nr 559291-4781, nedan kallat GuldBud. GuldBud driver en digital marknadsplats där privatpersoner kan lägga ut guld, ädelmetaller och smycken för budgivning och där verifierade handlare kan lämna bud.',
+            'När du som privatperson använder GuldBud för att sälja ett föremål ger du GuldBud i uppdrag att förmedla försäljningen i ditt namn och för din räkning till en godkänd handlare. GuldBud är därmed förmedlare och plattform och är inte köpare eller säljare av föremålet.',
+            'Det köp som uppstår genom tjänsten ingås mellan dig som säljare och den vinnande handlaren. GuldBud är inte part i köpeavtalet mellan säljaren och handlaren.',
+            'GuldBud tillhandahåller egna tjänster i form av förmedling, kontroll av föremål, administrering av betalningsavveckling och transport enligt dessa villkor.',
+            'GuldBud hanterar betalning av köpeskillingen till säljaren för säljarens räkning. Den del av betalningen som avser säljarens köpeskilling tillhör säljaren och är inte GuldBuds ersättning.',
+            'Inom ramen för förmedlingsuppdraget åtar sig GuldBud att:',
+          ],
+          bullets: [
+            'tillvarata ditt intresse och utföra uppdraget med omsorg,',
+            'hålla dig underrättad om bud, accept, mottagande, kontroll och utbetalning,',
+            'hålla dina medel åtskilda från GuldBuds egna medel fram till utbetalning,',
+            'redovisa affären för dig genom det underlag som tillhandahålls i tjänsten,',
+            'betala ut din köpeskilling utan avdrag enligt dessa villkor,',
+            'förvara föremålet aktsamt så länge det är i GuldBuds besittning,',
+            'samt kostnadsfritt återlämna föremålet till dig om någon affär inte kommer till stånd.',
           ],
         },
         {
           heading: 'Definitioner',
           body: [
-            '"Föremål" avser det som säljaren lägger ut och skickar in till GuldBud. "Säljare" avser den privatperson som lägger ut ett föremål. "Handlare" avser den granskade och godkända näringsidkare som lägger bud. "Affär" avser den uppgörelse som uppstår när säljaren accepterar ett vinnande bud.',
+            '"Föremål" avser det som säljaren lägger ut i tjänsten och skickar till GuldBud. "Säljare" avser den privatperson som lägger ut ett föremål och lämnar GuldBud uppdrag att förmedla försäljningen. "Handlare" avser den granskade och godkända näringsidkare som lämnar bud i tjänsten. "Affär" avser köpeavtalet mellan säljaren och den vinnande handlaren.',
+            '"Förmedlingsuppdraget" avser det uppdrag du lämnar GuldBud att förmedla försäljningen av föremålet i ditt namn och för din räkning. Uppdraget lämnas när du publicerar ett föremål i tjänsten.',
           ],
         },
         {
           heading: 'Konto, ålder och identitet',
           body: [
-            'För att sälja måste du vara minst 18 år, ha svenskt personnummer och vara folkbokförd på fast adress i Sverige. Du måste vara den rättmätiga ägaren till föremålet och ha rätt att fritt överlåta det.',
-            'GuldBud kan komma att verifiera din identitet, till exempel med BankID, innan en utbetalning genomförs. Handlare granskas och godkänns manuellt utifrån organisationsnummer och företagsuppgifter innan de får buda.',
-            'Du ansvarar för att de uppgifter du lämnar är korrekta och för att hålla dina inloggningsuppgifter säkra.',
+            'För att sälja måste du vara minst 18 år, ha svenskt personnummer och vara folkbokförd på fast adress i Sverige. Du måste vara rättmätig ägare till föremålet och ha rätt att fritt överlåta det.',
+            'Du legitimerar dig med BankID innan du kan lägga ut ditt första föremål. GuldBud kan därutöver komma att verifiera din identitet på nytt före en utbetalning.',
+            'Handlare granskas och godkänns manuellt utifrån organisationsnummer och företagsuppgifter innan de får lämna bud.',
+            'Du ansvarar för att de uppgifter du lämnar är korrekta och för att skydda dina inloggningsuppgifter.',
           ],
         },
         {
           heading: 'Att lägga ut ett föremål',
           body: [
-            'Som säljare ansvarar du för att uppgifter om föremålet – såsom bilder, vikt, karat och eventuella ädelstenar – är korrekta efter bästa förmåga. GuldBud granskar varje föremål innan auktionen öppnas och kan avböja föremål utan att ange skäl.',
+            'Du ansvarar för att uppgifter om föremålet, såsom bilder, vikt, karat och eventuella ädelstenar, är korrekta efter bästa förmåga.',
+            'GuldBud granskar varje föremål innan auktionen öppnas och kan avstå från att publicera eller vidareförmedla ett föremål som inte uppfyller tjänstens krav.',
+            'Att GuldBud tar emot föremålet för kontroll innebär inte att GuldBud blir ägare till föremålet eller part i det köp som förmedlas.',
           ],
         },
         {
-          heading: 'Budgivning och när avtal uppstår',
+          heading: 'Budgivning och när köpeavtal uppstår',
           body: [
-            'Ett lagt bud är bindande. Den handlare som har det högsta budet när auktionen avslutas har vunnit budgivningen. Ett bindande avtal om köp uppstår först när säljaren accepterar det vinnande budet.',
-            'Har säljaren angett ett reservationspris (minimipris) är säljaren inte skyldig att acceptera ett bud som understiger det.',
+            'Ett lagt bud från en handlare är bindande enligt de regler som gäller för budgivningen. När auktionen avslutas utses vinnande bud enligt tjänstens regler.',
+            'Ett köp av föremålet uppstår mellan säljaren och den vinnande handlaren först när säljaren accepterar det vinnande budet. GuldBud är inte part i detta köp utan förmedlar affären på säljarens uppdrag.',
+            'Har säljaren angett ett reservationspris är säljaren inte skyldig att acceptera ett bud som understiger reservationspriset.',
           ],
         },
         {
           heading: 'Frakt och ansvar under transport',
           body: [
-            'Efter att säljaren accepterat det vinnande budet tillhandahåller GuldBud ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Säljaren lägger föremålet i det tillhandahållna brevet och postar det rekommenderat enligt de instruktioner som ges i tjänsten. Säljaren ansvarar för att föremålet är korrekt och säkert paketerat i brevet.',
-            'GuldBud ansvarar för föremål under transport inom ramen för nämnda försäkring, det vill säga upp till 100 000 kr, förutsatt att säljaren har använt det tillhandahållna rekommenderade brevet och följt de fraktinstruktioner som anges i tjänsten. Vid skadad eller förlorad försändelse ska säljaren spara inlämningskvitto och kontakta GuldBud. Föremål som skickas på annat sätt än enligt instruktionerna sker på säljarens egen risk.',
+            'Efter att säljaren accepterat det vinnande budet tillhandahåller GuldBud ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr.',
+            'Säljaren ska använda det tillhandahållna brevet och följa de fraktinstruktioner som lämnas i tjänsten. Säljaren ansvarar för att föremålet är korrekt och säkert paketerat.',
+            'GuldBud ansvarar för hanteringen av försändelsen inom ramen för den försäkring som anges ovan, under förutsättning att säljaren följt instruktionerna. Vid skadad eller förlorad försändelse ska säljaren spara inlämningskvittot och kontakta GuldBud.',
+            'Föremål som skickas på annat sätt än enligt instruktionerna sker på säljarens egen risk.',
           ],
         },
         {
           heading: 'Kontroll av föremål',
           body: [
-            'GuldBud har rätt att kontrollera föremålets äkthet och sammansättning i syfte att bekräfta uppgifterna. Kontrollen kan innefatta kemiska och tekniska tester (probering). Vid behov kan föremål monteras isär för att separat kunna väga ädelmetallen eller undersöka ingående stenar.',
+            'GuldBud kontrollerar föremålets äkthet och sammansättning i syfte att verifiera uppgifter som ligger till grund för förmedlingen. Kontrollen kan innefatta kemiska och tekniska tester, såsom probering. Vid behov kan ett föremål monteras isär för att separat väga ädelmetall eller undersöka ingående stenar.',
+            'Kontrollen innebär inte att GuldBud köper eller förvärvar föremålet.',
+            'Om kontrollen visar att föremålet väsentligt avviker från de uppgifter som låg till grund för det accepterade budet kan den förmedlade affären inte fullföljas enligt de villkor som accepterats. GuldBud underrättar då både säljaren och handlaren om vad kontrollen visat.',
+            'Handlaren kan därefter lämna ett nytt bud utifrån föremålets faktiska egenskaper, och säljaren kan acceptera eller avböja det. GuldBud fastställer inte priset, utan förmedlar parternas nya överenskommelse på samma sätt som den ursprungliga. Säljaren är aldrig skyldig att acceptera ett nytt bud.',
+            'Kommer ingen ny överenskommelse till stånd genomförs ingen utbetalning till säljaren, handlarens betalning krediteras, och föremålet returneras kostnadsfritt till säljaren.',
+            'GuldBud har inte rätt att själv köpa föremålet i stället för den ursprungliga handlaren inom ramen för denna tjänst.',
           ],
         },
         {
-          heading: 'Pris och betalning',
+          heading: 'Pris, betalning och GuldBuds ersättning',
           body: [
-            'Det slutliga priset motsvarar det accepterade budet, men kan justeras om äkthetskontrollen visar att föremålet väsentligt avviker från de uppgifter som angavs. Priset påverkas av bland annat guldmängd samt ädelstenars vikt, klarhet, färg och slipning.',
-            'När kontrollen är godkänd betalar GuldBud ut till säljaren inom 24 timmar via Swish eller bankkonto. Utbetalning sker till det konto som säljaren anger i inloggat läge. Säljaren ansvarar för att angivna konto- och clearinguppgifter är korrekta; GuldBud ansvarar inte för utbetalning till felaktigt angivet konto.',
-            'GuldBud tar inte ut någon avgift av säljaren. Säljaren får hela det vinnande budbeloppet. GuldBud tar i stället ut en köparprovision av den vinnande handlaren. Provisionen är för närvarande 8 % av det vinnande budet och läggs ovanpå budet. Utöver provisionen tillkommer en fast fraktavgift på 199 kr (inklusive moms) för försäkrad leverans av föremålet till handlaren. På provisionen och frakten tillkommer moms med 25 %. Handlaren betalar alltså bud plus provision plus frakt plus moms, och ser sitt totalpris innan budet läggs.',
-            'GuldBud är förmedlare och inte part i köpet av föremålet. Köpet sker mellan säljaren och den vinnande handlaren. Eftersom handlaren köper föremålet av en privatperson behöver handlaren enligt bokförings- och skatteregler kunna dokumentera vem föremålet köpts av. När din vara sålts lämnar GuldBud därför dina identitetsuppgifter (namn, personnummer och adress) till den köpande handlaren för dennes bokföring. Under pågående auktion förblir du anonym.',
+            'Köpeskillingen för föremålet är det belopp som säljaren och den vinnande handlaren kommit överens om genom det accepterade budet, med de kontrollregler som anges i dessa villkor.',
+            'GuldBud tar inte ut någon provision eller annan avgift från säljaren. Säljaren har rätt till hela den köpeskilling som tillkommer säljaren enligt köpeavtalet mellan säljaren och handlaren.',
+            'GuldBud får sin ersättning från handlaren för de tjänster GuldBud tillhandahåller. Provisionen är för närvarande 8 procent av det vinnande budet. Därutöver tillkommer en fast avgift om 199 kr inklusive moms för transport av föremålet till handlaren. På GuldBuds egna ersättningar tas moms ut enligt gällande regler. Handlaren får se det totala belopp som ska betalas innan bud lämnas.',
+            'När föremålet har godkänts genom kontroll administrerar GuldBud utbetalningen av säljarens köpeskilling inom 24 timmar via Swish eller bankkonto. Utbetalning sker till det konto som säljaren anger i inloggat läge. Säljaren ansvarar för att angivna konto- och clearinguppgifter är korrekta.',
+            'Utbetalningen görs för säljarens räkning. GuldBud gör inget avdrag från säljarens köpeskilling och har inte rätt till säljarens köpeskilling utöver den ersättning som uttryckligen avser GuldBuds egna tjänster.',
           ],
         },
         {
-          heading: 'Ångerrätt, retur och outlösta försändelser',
+          heading: 'Identifiering av säljaren',
           body: [
-            'Som privatperson kan du enligt distansavtalslagen dra tillbaka ett föremål fram till dess att en bindande affär genomförts. Vill du dra tillbaka ett föremål innan budgivningen avslutats, kontakta oss på info@guldbud.com.',
-            'Accepterar säljaren inte det pris som slutligen erbjuds returneras föremålet kostnadsfritt. Löses en returnerad försändelse inte ut inom rimlig tid kontaktar vi säljaren innan vidare åtgärd.',
+            'Under pågående auktion är säljaren anonym för handlarna.',
+            'När ett köp har kommit till stånd får den köpande handlaren de uppgifter om säljaren som krävs för att dokumentera handlarens köp och uppfylla tillämpliga bokförings-, skatte- och andra rättsliga krav. Det kan exempelvis omfatta säljarens namn, personnummer och adress.',
+          ],
+        },
+        {
+          heading: 'Återkallelse, retur och outlösta försändelser',
+          body: [
+            'Säljaren kan återkalla ett föremål från försäljning fram till dess att en bindande affär enligt punkt 5 har uppstått, under förutsättning att tjänsten inte anger annat för den aktuella auktionen. Vill du dra tillbaka ett föremål innan budgivningen avslutats, kontakta oss på info@guldbud.com.',
+            'Återkallelse efter att ett bindande köp har uppstått kan inte ske ensidigt, om inte annat följer av lag eller av dessa villkor.',
+            'Om en auktion avslutas utan att säljaren accepterar något bud returneras föremålet till säljaren enligt de rutiner som anges i tjänsten. Löses en returnerad försändelse inte ut inom rimlig tid kontaktar GuldBud säljaren innan vidare åtgärd vidtas.',
           ],
         },
         {
           heading: 'Personuppgifter och cookies',
           body: [
-            'GuldBud behandlar personuppgifter i enlighet med dataskyddsförordningen (GDPR). Hur vi samlar in och behandlar uppgifter, samt hur vi använder cookies, beskrivs i vår integritetspolicy.',
+            'GuldBud behandlar personuppgifter i enlighet med dataskyddsförordningen (GDPR). Information om hur GuldBud samlar in, använder och lagrar personuppgifter samt information om cookies finns i GuldBuds integritetspolicy.',
           ],
         },
         {
           heading: 'Missbruk och rapportering',
           body: [
-            'GuldBud polisanmäler misstänkt hantering av stöldgods, bedrägeri och annat missbruk samt försök därtill. GuldBud kan komma att lämna uppgifter till myndigheter i enlighet med gällande lag.',
+            'GuldBud kan komma att polisanmäla misstänkt hantering av stöldgods, bedrägeri och annat missbruk samt försök därtill.',
+            'GuldBud kan lämna information till myndigheter när detta följer av lag eller annars är tillåtet eller nödvändigt för att uppfylla rättsliga skyldigheter.',
           ],
         },
         {
           heading: 'Kontrollsamtal',
           body: [
-            'GuldBud har rätt att kontakta säljaren för att verifiera identitet, bekräfta lämnade uppgifter eller stämma av villkoren för en affär innan utbetalning genomförs.',
+            'GuldBud har rätt att kontakta säljaren för att verifiera identitet, bekräfta lämnade uppgifter eller kontrollera omständigheter kring ett föremål eller en affär innan utbetalning genomförs.',
           ],
         },
         {
           heading: 'Meddelanden',
           body: [
-            'Meddelanden som GuldBud skickar via e-post, SMS eller aviseringar i tjänsten anses ha nått dig samma dag som de skickas till de kontaktuppgifter du angett. Du ansvarar för att hålla dina kontaktuppgifter uppdaterade.',
+            'Meddelanden som GuldBud skickar via e-post, SMS eller aviseringar i tjänsten anses skickade till de kontaktuppgifter som säljaren har registrerat. Säljaren ansvarar för att kontaktuppgifterna hålls aktuella.',
           ],
         },
         {
           heading: 'Ansvarsbegränsning',
           body: [
-            'GuldBud ansvarar inte för skada som beror på felaktiga uppgifter från säljare eller handlare, eller för indirekta skador. GuldBud ansvarar inte heller för störningar i data- eller banksystem, eller för skada som beror på lag, myndighetsåtgärd, krig, strejk, naturhändelse eller annan omständighet utanför vår kontroll (force majeure).',
-            'Ansvarsbegränsningarna påverkar inte de rättigheter du som konsument har enligt tvingande lag.',
+            'GuldBud ansvarar inte för skada som beror på felaktiga eller ofullständiga uppgifter som lämnats av säljare eller handlare. GuldBud ansvarar inte för indirekta skador i den utsträckning sådan begränsning är tillåten enligt lag.',
+            'GuldBud ansvarar inte heller för störningar i data-, kommunikations- eller banksystem eller för omständigheter utanför GuldBuds rimliga kontroll, såsom myndighetsåtgärd, krig, strejk eller naturhändelse.',
+            'Ansvarsbegränsningarna gäller inte i den utsträckning de strider mot tvingande lag.',
           ],
         },
         {
           heading: 'Ändringar, tillämplig lag och tvist',
           body: [
-            'GuldBud kan uppdatera dessa villkor. Väsentliga ändringar meddelas på webbplatsen. Svensk lag tillämpas. Tvist med anledning av dessa villkor ska i första hand lösas i samförstånd och prövas annars av svensk allmän domstol, med Stockholms tingsrätt som första instans om inte annat följer av tvingande lag.',
+            'GuldBud kan uppdatera dessa villkor. Väsentliga ändringar ska kommuniceras på lämpligt sätt.',
+            'Svensk lag tillämpas. Tvist med anledning av avtalet ska i första hand försöka lösas i samförstånd. Kan tvisten inte lösas i samförstånd får den prövas av svensk allmän domstol.',
+            'Tvingande konsumenträttsliga regler gäller alltid i den utsträckning de är tillämpliga.',
           ],
         },
       ]}

@@ -117,6 +117,18 @@ Följden av beslutet: namnbytet ligger nu på kritiska linjen. Tjänsten kan int
 öppnas för transaktioner förrän Verksamt är klart, eftersom de juridiska
 handlingarna förutsätter det.
 
+**Inget riktigt föremål släpps igenom före lansering. Sluta ta upp det.**
+
+Varje föremål skapas som `pending` och måste godkännas manuellt av admin
+innan det blir aktivt. Användaren är admin och släpper igenom ingenting
+förrän BankID är skarpt, klientmedelskontot är öppnat och namnbytet är klart.
+
+Det betyder att villkor och dokument får beskriva tjänsten som den fungerar
+vid lansering, i presens, utan reservationer. Påpeka alltså **inte** varje
+gång att BankID ligger i testläge eller att kontot inte är öppnat. Det är
+redan hanterat av att ingenting släpps igenom. Undantaget är handlingar som
+skickas till utomstående före lansering, se ovan.
+
 **Adresser, tre olika och lätta att blanda ihop**
 
 - **Registrerad adress:** Kvarnvingevägen 2, 177 41 Järfälla. Den som gäller
