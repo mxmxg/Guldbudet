@@ -55,6 +55,8 @@ export default function TermsPage() {
           body: [
             'Du ansvarar för att uppgifter om föremålet, såsom bilder, vikt, karat och eventuella ädelstenar, är korrekta efter bästa förmåga.',
             'GuldBud granskar varje föremål innan auktionen öppnas och kan avstå från att publicera eller vidareförmedla ett föremål som inte uppfyller tjänstens krav.',
+            'GuldBud kan också avbryta ett förmedlingsuppdrag efter att auktionen öppnat, om det uppkommer tveksamhet om föremålets äkthet, om din äganderätt till föremålet eller om din rätt att sälja det. Föremålet returneras då kostnadsfritt till dig, om inte annat följer av punkt 12.',
+            'Genom att lägga ut ett föremål ger du GuldBud rätt att använda de bilder och uppgifter du lämnat för att presentera föremålet i tjänsten samt i marknadsföring av tjänsten, inklusive i digitala och sociala medier. Rätten gäller även efter att föremålet sålts. Du behåller upphovsrätten till dina egna bilder.',
             'Att GuldBud tar emot föremålet för kontroll innebär inte att GuldBud blir ägare till föremålet eller part i det köp som förmedlas.',
           ],
         },
@@ -94,6 +96,7 @@ export default function TermsPage() {
             'GuldBud får sin ersättning från handlaren för de tjänster GuldBud tillhandahåller. Provisionen är för närvarande 8 procent av det vinnande budet. Därutöver tillkommer en fast avgift om 199 kr inklusive moms för transport av föremålet till handlaren. På GuldBuds egna ersättningar tas moms ut enligt gällande regler. Handlaren får se det totala belopp som ska betalas innan bud lämnas.',
             'När föremålet har godkänts genom kontroll administrerar GuldBud utbetalningen av säljarens köpeskilling inom 24 timmar via Swish eller bankkonto. Utbetalning sker till det konto som säljaren anger i inloggat läge. Säljaren ansvarar för att angivna konto- och clearinguppgifter är korrekta.',
             'Utbetalningen görs för säljarens räkning. GuldBud gör inget avdrag från säljarens köpeskilling och har inte rätt till säljarens köpeskilling utöver den ersättning som uttryckligen avser GuldBuds egna tjänster.',
+            'Säljaren ansvarar för eventuella skatter som försäljningen kan medföra för säljaren, till exempel om försäljningen får sådan omfattning att den bedöms som näringsverksamhet. GuldBud gör ingen skattemässig bedömning av säljarens situation och lämnar inte skatterådgivning.',
           ],
         },
         {
@@ -109,6 +112,7 @@ export default function TermsPage() {
             'Säljaren kan återkalla ett föremål från försäljning fram till dess att en bindande affär enligt punkt 5 har uppstått, under förutsättning att tjänsten inte anger annat för den aktuella auktionen. Vill du dra tillbaka ett föremål innan budgivningen avslutats, kontakta oss på info@guldbud.com.',
             'Återkallelse efter att ett bindande köp har uppstått kan inte ske ensidigt, om inte annat följer av lag eller av dessa villkor.',
             'Om en auktion avslutas utan att säljaren accepterar något bud returneras föremålet till säljaren enligt de rutiner som anges i tjänsten. Löses en returnerad försändelse inte ut inom rimlig tid kontaktar GuldBud säljaren innan vidare åtgärd vidtas.',
+            'Föremål återlämnas endast till säljaren själv, till den folkbokföringsadress säljaren registrerat i tjänsten. Ska föremålet gå till någon annan krävs att GuldBud på förhand kan verifiera behörigheten.',
           ],
         },
         {
@@ -121,6 +125,7 @@ export default function TermsPage() {
           heading: 'Missbruk och rapportering',
           body: [
             'GuldBud kan komma att polisanmäla misstänkt hantering av stöldgods, bedrägeri och annat missbruk samt försök därtill.',
+            'Visar det sig att ett inlämnat föremål är stöldgods överlämnas föremålet till Polismyndigheten och förmedlingsuppdraget upphör. Föremålet återlämnas då inte till säljaren, som själv får styrka sin äganderätt gentemot Polismyndigheten.',
             'GuldBud kan lämna information till myndigheter när detta följer av lag eller annars är tillåtet eller nödvändigt för att uppfylla rättsliga skyldigheter.',
           ],
         },
