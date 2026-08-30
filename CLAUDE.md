@@ -586,6 +586,44 @@ direkt banköverföring senare är fortfarande en ändring på ett enda ställe.
 `PAYMENT_PROVIDER_NAME`, inte från en miljövariabel, så bokföringsspåret alltid
 namnger den rail som faktiskt tog pengarna.
 
+**Sena och dubbla callbacks larmar i stället för att skriva.** Två fall i
+`/api/payments/callback` får aldrig röra ordern, men får heller aldrig försvinna
+tyst. De larmar admin via `notifications`, som också går vidare till mejl.
+
+- **Krediterad eller avbruten affär.** Kontrollen ligger *före*
+  idempotenskontrollen, med flit. Krediteringen i `admin/orders/[id]`
+  (`refundOrder`) nollar `dealer_paid_at`, så en sen callback hade mött ett tomt
+  fält och satt betalningen på nytt. Det hade återarmerat utbetalningsspärren på
+  pengar som redan gått tillbaka till handlaren.
+- **Dubbel betalning.** Är ordern redan betald jämförs sessionen som anmäler sig
+  mot `payment_reference`. Samma session är en omleverans och passerar tyst.
+  En annan session betyder att handlaren betalat två gånger. Därför skriver
+  settle-grenen numera `payment_reference` till den session som *faktiskt*
+  betalade, inte den senast skapade.
+
+Ingen av dem skriver `payment_status`, eftersom det värdet är något admin satt
+med avsikt vid kreditering. Båda svarar 200 med `ok: false`, av samma skäl som
+beloppsavvikelsen: en retry levererar samma händelse igen och kan aldrig lösa
+något. Svaret blir 500 bara om själva larmet inte gick att skriva, för då vill
+vi ha en retry.
+
+**Två betalsessioner kan fortfarande vara öppna samtidigt. Det är ett val.**
+En övergiven Stripe-session stängs aldrig av oss, och vi lagrar ingen tidsstämpel
+för när en session skapades. Att blockera på en `pending`-session hade därför
+låst ute varje handlare som råkat stänga betalfönstret, permanent. Luckan är i
+stället stängd i andra änden: en andra betalning kan inte längre passera
+oregistrerad. Vill man stänga den helt krävs antingen `expires_at` på sessionen
+plus en tidsstämpel på ordern, eller ett anrop till leverantören för att se om
+den gamla sessionen fortfarande lever.
+
+**`amount_mismatch` blockerar en ny betalsession.** `/api/payments/create` vägrar
+öppna en session på en flaggad order. Annars hade `payment_status: 'pending'`
+skrivit över flaggan, alltså det enda beständiga spåret av att pengar kommit in
+med fel belopp eller fel valuta. Admin rensar flaggan genom att kreditera eller
+återöppna affären, som båda nollar `payment_status`. Handlaren får en text som
+säger att betalningen granskas, inte "försök igen", eftersom ett nytt försök
+aldrig hjälper.
+
 **Bildkrympningen i adminpanelen** (`/api/admin/optimize-images`) byggdes för
 att krympa redan uppladdade råa telefonfoton innan transformeringen fanns. Den
 skriver över originalen. Med transformeringen på är originalet det som
@@ -595,9 +633,10 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Fem är åtgärdade: tre i
-PR #260, en i #262 och en i #263.** Ta inte tag i något här utan att fråga
-först, flera rör spärrade filer.
+Funna i en genomgång av hela kodbasen 2026-08-30. **Åtta är åtgärdade: tre i
+PR #260, en i #262, en i #263, en i #264 och två i #269.** Därmed är alla
+åtta som rör pengar eller juridik stängda utom fakturaomräkningen, punkt 9.
+Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
 
@@ -622,11 +661,16 @@ först, flera rör spärrade filer.
 6. ~~`paymentsConfigured()` kontrollerade aldrig webhook-hemligheten.~~
    **Åtgärdad i PR #263.** Båda halvorna krävs nu, så betalningen öppnas aldrig
    om den inte kan kvitteras.
-7. Callbacken kontrollerar aldrig `order.status` eller `refunded_at`. En sen
-   callback kan markera en krediterad eller avbruten affär som betald.
-8. `/api/payments/create` blockerar bara på `dealer_paid_at`. Två parallella
-   sessioner kan båda betalas, och den andra betalningen registreras aldrig.
-   Samma lucka skriver över en `amount_mismatch`-flagga med `pending`.
+7. ~~Callbacken kontrollerar aldrig `order.status` eller `refunded_at`.~~
+   **Åtgärdad i PR #269.** En krediterad eller avbruten affär settlas aldrig.
+   Kontrollen ligger före idempotenskontrollen, eftersom krediteringen nollar
+   `dealer_paid_at`.
+8. ~~`/api/payments/create` skriver över en `amount_mismatch`-flagga, och en
+   andra betalning registreras aldrig.~~ **Åtgärdad i PR #269.** Rutten
+   vägrar öppna en ny session på en flaggad order, och callbacken skiljer nu
+   en omleverans av samma session från en betalning via en annan session.
+   Kvar med avsikt: två sessioner kan fortfarande vara öppna samtidigt, se
+   beslutsloggen.
 9. Fakturorna räknar om beloppen vid varje visning. Ändras `lib/fees.ts` får
    gamla fakturor nya belopp.
 

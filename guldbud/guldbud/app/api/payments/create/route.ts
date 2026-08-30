@@ -74,6 +74,14 @@ export async function POST(req: NextRequest) {
   if (order.status === 'cancelled' || order.status === 'completed') {
     return NextResponse.json({ error: 'order_not_payable' }, { status: 409 })
   }
+  // A flagged payment is waiting for a human. Opening a new session here would
+  // overwrite payment_status with 'pending' and erase the only durable trace of
+  // a payment that arrived with the wrong amount or currency, which is exactly
+  // the case that must not disappear. Admin clears it by crediting or reopening
+  // the order, both of which reset payment_status.
+  if (order.payment_status === 'amount_mismatch') {
+    return NextResponse.json({ error: 'payment_under_review' }, { status: 409 })
+  }
 
   // A suspended dealer cannot pay (e.g. auto-suspended for a prior non-payment).
   const profRes = await fetch(
