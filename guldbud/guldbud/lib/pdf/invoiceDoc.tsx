@@ -6,15 +6,7 @@
  */
 import React from 'react'
 import { Document, Page, View, Text, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
-import {
-  DEALER_COMMISSION_LABEL,
-  SHIPPING_FEE_EX_VAT,
-  SHIPPING_FEE_VAT,
-  commission,
-  commissionVat,
-  guldbudServiceTotal,
-  dealerTotal,
-} from '@/lib/fees'
+import { feesAt } from '@/lib/fees'
 
 export const GULDBUD = {
   name: 'GuldBud AB',
@@ -187,6 +179,8 @@ function InvoiceDocument({ data }: { data: InvoiceData }) {
   const bid = order.amount
   const neg = (str: string) => (credit ? '-' : '') + str
   const itemSpec = `${item?.weight_grams ?? ''} g · ${item?.karat ?? ''}`
+  // Avgifterna som gällde när affären slöts, se lib/fees.
+  const fees = feesAt(order.created_at)
 
   if (kind === 'receipt') {
     return (
@@ -251,14 +245,14 @@ function InvoiceDocument({ data }: { data: InvoiceData }) {
           <Text style={[s.th, { flex: 1 }]}>Beskrivning</Text>
           <Text style={s.th}>Belopp exkl moms</Text>
         </View>
-        <Row label={`Förmedlingsprovision ${DEALER_COMMISSION_LABEL}`} value={neg(kr2(commission(bid)))} />
-        <Row label="Frakt" value={neg(kr2(SHIPPING_FEE_EX_VAT))} />
-        <Row label="Summa exkl moms" value={neg(kr2(commission(bid) + SHIPPING_FEE_EX_VAT))} />
-        <Row label="Moms 25%" value={neg(kr2(commissionVat(bid) + SHIPPING_FEE_VAT))} />
-        <Total label={credit ? 'Att återbetala' : 'Att betala till GuldBud'} value={neg(kr2(guldbudServiceTotal(bid)))} />
+        <Row label={`Förmedlingsprovision ${fees.commissionLabel}`} value={neg(kr2(fees.commission(bid)))} />
+        <Row label="Frakt" value={neg(kr2(fees.shippingFeeExVat))} />
+        <Row label="Summa exkl moms" value={neg(kr2(fees.commission(bid) + fees.shippingFeeExVat))} />
+        <Row label={`Moms ${fees.vatLabel}`} value={neg(kr2(fees.commissionVat(bid) + fees.shippingFeeVat))} />
+        <Total label={credit ? 'Att återbetala' : 'Att betala till GuldBud'} value={neg(kr2(fees.guldbudServiceTotal(bid)))} />
         <Text style={s.fine}>
           Avser GuldBuds förmedlingstjänst (provision + frakt). Föremålets pris ({kr2(bid)}) faktureras separat enligt inköpsunderlaget och tillfaller säljaren.{' '}
-          {credit ? '' : `Handlaren betalar hela affären som en summa: ${kr2(dealerTotal(bid))} (föremål ${kr2(bid)} + denna faktura ${kr2(guldbudServiceTotal(bid))}). `}
+          {credit ? '' : `Handlaren betalar hela affären som en summa: ${kr2(fees.dealerTotal(bid))} (föremål ${kr2(bid)} + denna faktura ${kr2(fees.guldbudServiceTotal(bid))}). `}
           Referens: {ref(order.order_no)}.
         </Text>
         <Text style={s.footer} fixed>Automatiskt genererat dokument från GuldBud. Vid frågor, kontakta {GULDBUD.email}.</Text>

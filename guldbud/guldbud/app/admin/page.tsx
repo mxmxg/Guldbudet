@@ -9,7 +9,7 @@ import { TrashIcon } from '@/components/Icons'
 import CountdownTimer from '@/components/CountdownTimer'
 import ImageOptimizeButton from '@/components/ImageOptimizeButton'
 import { estimateRange, formatSEK } from '@/lib/gold'
-import { commission } from '@/lib/fees'
+import { feesAt } from '@/lib/fees'
 import { OPEN_ORDER_STATES } from '@/lib/orders'
 
 function toLocalInput(iso?: string | null) {
@@ -89,7 +89,9 @@ export default function AdminPage() {
         .select('id', { count: 'exact', head: true })
         .in('status', OPEN_ORDER_STATES)
 
-      const { data: allOrders } = await supabase.from('orders').select('amount, status, dealer_paid_at')
+      const { data: allOrders } = await supabase
+        .from('orders')
+        .select('amount, status, dealer_paid_at, created_at')
       // Affärsvolym = värdet på alla affärer som inte avbrutits.
       const settled = (allOrders || []).filter((o: any) => o.status !== 'cancelled')
       // Provisionsintäkt = realiserad. Handlarens betalning är registrerad
@@ -102,8 +104,16 @@ export default function AdminPage() {
       const unpaid = settled.filter((o: any) => !isRealized(o))
       setAnalytics({
         gmv: settled.reduce((s: number, o: any) => s + (o.amount || 0), 0),
-        commission: paid.reduce((s: number, o: any) => s + commission(o.amount || 0), 0),
-        pendingCommission: unpaid.reduce((s: number, o: any) => s + commission(o.amount || 0), 0),
+        // Varje affär räknas med de avgifter som gällde när den slöts, aldrig
+        // med dagens. Annars skulle en avgiftsändring skriva om historiken.
+        commission: paid.reduce(
+          (s: number, o: any) => s + feesAt(o.created_at).commission(o.amount || 0),
+          0
+        ),
+        pendingCommission: unpaid.reduce(
+          (s: number, o: any) => s + feesAt(o.created_at).commission(o.amount || 0),
+          0
+        ),
         completed: (allOrders || []).filter((o: any) => o.status === 'completed').length,
       })
 

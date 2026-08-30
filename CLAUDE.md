@@ -262,6 +262,21 @@ Räkneexempel, bud 30 000 kr, uträknat ur `lib/fees.ts`:
 Provisionen avrundas till hela kronor, och momsen räknas på den redan
 avrundade provisionen. Fraktens momsdelning har två decimaler.
 
+**Avgifterna är en daterad historik, inte konstanter.** `FEE_SCHEDULES` i
+`lib/fees.ts` är en lista med ett `effectiveFrom` per post. Två vägar in, och
+att välja fel är misstaget att undvika:
+
+- `feesAt(order.created_at)` för allt som rör en **befintlig affär**: de tre
+  dokumenten, båda betalrutterna, ordervyn, adminvyn, handlarens panel och
+  nyckeltalen. Handlaren ska debiteras exakt det fakturan visar.
+- `CURRENT_FEES`, eller de gamla exporterna som numera pekar på den, för allt
+  som är **framåtblickande**: budformuläret, "så här mycket kostar det om du
+  vinner".
+
+Ska avgifterna ändras: **lägg till en ny post med det datum den börjar gälla.
+Ändra aldrig en befintlig post.** Att ändra en gammal post är samma sak som att
+skriva om redan utfärdade fakturor.
+
 ---
 
 ## Arkitekturen
@@ -624,6 +639,32 @@ med fel belopp eller fel valuta. Admin rensar flaggan genom att kreditera eller
 säger att betalningen granskas, inte "försök igen", eftersom ett nytt försök
 aldrig hjälper.
 
+**Avgifterna daterades i stället för att frysas på ordern.** En faktura ska visa
+samma belopp för alltid. Två vägar fanns.
+
+Den ena var att skriva ner de färdiga beloppen på ordern när den skapas. Den
+valdes bort: ordern skapas av en databastrigger, så avgiftsmodellen hade fått
+finnas en gång till i SQL. Två sanningar om pengar som kan glida isär är precis
+det `lib/fees.ts` finns för att förhindra.
+
+Den andra, som gäller: modellen förblir en enda fil, men blir en lista av
+perioder med `effectiveFrom`. Ankaret är `orders.created_at`, alltså när
+säljaren accepterade budet och beloppen blev bindande för båda parter. Det
+krävde ingen ny kolumn, ingen migrering och ingen ändring av triggern, och det
+gäller retroaktivt för varje rad som redan finns.
+
+Följden: en affär som slöts före en avgiftsändring behåller de gamla avgifterna
+även om den betalas efteråt. Det är avsikten, inte en bieffekt. Handlaren bjöd
+under de villkor som var publicerade då.
+
+Ett oläsbart datum faller tillbaka på den **äldsta** perioden, aldrig den
+nyaste. En rad vi inte kan datera är per definition inte ny.
+
+**Betalrutterna följde med, och det var inte valfritt.** Hade bara dokumenten
+daterats skulle fakturan visa gamla avgifter medan Stripe drog nya. Då hade
+beloppskontrollen i callbacken flaggat varenda affär som slöts före ändringen
+som `amount_mismatch`. Det hade varit sämre än felet vi rättade.
+
 **Bildkrympningen i adminpanelen** (`/api/admin/optimize-images`) byggdes för
 att krympa redan uppladdade råa telefonfoton innan transformeringen fanns. Den
 skriver över originalen. Med transformeringen på är originalet det som
@@ -633,9 +674,10 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Åtta är åtgärdade: tre i
-PR #260, en i #262, en i #263, en i #264 och två i #269.** Därmed är alla
-åtta som rör pengar eller juridik stängda utom fakturaomräkningen, punkt 9.
+Funna i en genomgång av hela kodbasen 2026-08-30. **Nio är åtgärdade: tre i
+PR #260, en i #262, en i #263, en i #264, två i #269 och en i #270.** Därmed
+är alla nio som rör pengar eller juridik stängda. Kvar är personuppgifter och
+identitet, trasig funktion, ärliga siffror och städning.
 Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
@@ -671,8 +713,9 @@ Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
    en omleverans av samma session från en betalning via en annan session.
    Kvar med avsikt: två sessioner kan fortfarande vara öppna samtidigt, se
    beslutsloggen.
-9. Fakturorna räknar om beloppen vid varje visning. Ändras `lib/fees.ts` får
-   gamla fakturor nya belopp.
+9. ~~Fakturorna räknar om beloppen vid varje visning.~~ **Åtgärdad i PR #270.**
+   `lib/fees.ts` är en daterad historik, och allt som rör en befintlig affär
+   läser `feesAt(order.created_at)`. Se affärsmodellen ovan.
 
 **Rör personuppgifter och identitet**
 
