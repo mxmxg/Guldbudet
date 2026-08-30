@@ -14,8 +14,8 @@
 // den i takt med datumet som visas på /terms. Gamla föremål behåller sin
 // version, så historiken går inte förlorad.
 
-export const TERMS_VERSION = '2026-08-26'
+export const TERMS_VERSION = '2026-08-29'
 
 // Samma datum i läsbar form. Villkorssidan använder detta, så versionen och
 // det publicerade datumet inte kan glida isär.
-export const TERMS_UPDATED_LABEL = '26 augusti 2026'
+export const TERMS_UPDATED_LABEL = '29 augusti 2026'
