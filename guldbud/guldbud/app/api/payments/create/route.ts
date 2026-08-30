@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteClient } from '@/lib/supabase-route'
 import { dealerTotal } from '@/lib/fees'
-import { getPaymentProvider, paymentsConfigured } from '@/lib/payments'
+import { getPaymentProvider, paymentsConfigured, PAYMENT_PROVIDER_NAME } from '@/lib/payments'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// POST { orderId } — the winning dealer starts an A2A payment for their order.
+// POST { orderId }: the winning dealer starts the payment for their order.
 // Authenticates the caller, verifies they are the order's dealer and that the
 // order is still unpaid, opens a provider payment session, records it on the
 // order (privileged write), and returns the hosted redirect URL.
@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
 
 export async function POST(req: NextRequest) {
-  // While Brite's sandbox keys are pending this is the normal state.
+  // Until the live Stripe keys are set in Vercel this is the normal state.
   if (!paymentsConfigured()) {
     return NextResponse.json({ error: 'payments_not_configured' }, { status: 503 })
   }
@@ -121,7 +121,9 @@ export async function POST(req: NextRequest) {
         Prefer: 'return=minimal',
       },
       body: JSON.stringify({
-        payment_provider: process.env.PAYMENT_PROVIDER || 'brite',
+        // The constant, not an env value: what gets recorded must be the rail
+        // that actually ran, and env and adapter could drift apart.
+        payment_provider: PAYMENT_PROVIDER_NAME,
         payment_reference: providerReference,
         payment_status: 'pending',
       }),

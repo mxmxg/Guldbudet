@@ -1,7 +1,7 @@
 // Stripe payment adapter (dealer pay-in via Stripe Checkout).
 //
 // Server-only. Never import this into a client component: it reads STRIPE_*
-// secrets. Mirrors the Brite adapter so the API routes stay identical.
+// secrets. Implements PaymentProvider so the API routes stay identical.
 //
 // Flow: createPayment opens a hosted Stripe Checkout Session and returns its
 // URL + id. The id is stored on the order as payment_reference. Stripe then
