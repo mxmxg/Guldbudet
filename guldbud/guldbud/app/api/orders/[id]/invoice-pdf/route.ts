@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteClient } from '@/lib/supabase-route'
 import { renderInvoicePdf, ref, type InvoiceData } from '@/lib/pdf/invoiceDoc'
+import { mayReleaseSellerIdentity, logIdentityDisclosure } from '@/lib/identityRelease'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 
   const order = await sb(
-    `orders?id=eq.${encodeURIComponent(orderId)}&select=id,order_no,amount,created_at,refunded_at,refund_reason,seller_id,dealer_id,item_id`
+    `orders?id=eq.${encodeURIComponent(orderId)}&select=id,order_no,amount,created_at,refunded_at,refund_reason,seller_id,dealer_id,item_id,status,dealer_paid_at`
   )
   if (!order) return NextResponse.json({ error: 'order_not_found' }, { status: 404 })
 
@@ -64,9 +65,29 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     party = await sb(
       `profiles?id=eq.${encodeURIComponent(dealerId)}&select=company_name,full_name,org_number,address,postal_code,city`
     )
-    seller = await sb(
-      `profiles?id=eq.${encodeURIComponent(order.seller_id)}&select=full_name,personal_number,address,postal_code,city`
-    )
+    // Säljarens identitet lämnas ut på samma villkor som i seller-rutten, och
+    // med samma spår. Är villkoren inte uppfyllda renderas inköpsunderlaget
+    // ändå, men med "Privatperson" i stället för namn och personnummer.
+    const decision = mayReleaseSellerIdentity(order, user.id, isAdmin)
+    if (decision.allowed) {
+      const logged = await logIdentityDisclosure(
+        supabaseUrl,
+        { ...headers, 'Content-Type': 'application/json' },
+        {
+          orderId: order.id,
+          sellerId: order.seller_id,
+          requestedBy: user.id,
+          requesterRole: decision.role,
+          channel: 'invoice_pdf',
+        }
+      )
+      if (!logged) {
+        return NextResponse.json({ error: 'disclosure_log_failed' }, { status: 500 })
+      }
+      seller = await sb(
+        `profiles?id=eq.${encodeURIComponent(order.seller_id)}&select=full_name,personal_number,address,postal_code,city`
+      )
+    }
   } else {
     kind = 'receipt'
     party = await sb(

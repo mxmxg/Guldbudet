@@ -1831,3 +1831,73 @@ drop trigger if exists on_item_listing_requirements on public.items;
 create trigger on_item_listing_requirements
   before insert or update on public.items
   for each row execute procedure public.enforce_listing_requirements();
+
+
+-- ===========================================================================
+-- Identitet: ett personnummer hör till ett konto
+--
+-- Penningtvättströskeln i set_order_aml_status räknas kumulativt per konto
+-- över 12 månader. Utan den här spärren kan samma person verifiera obegränsat
+-- många konton med samma BankID och sprida sina affärer över dem, varpå den
+-- kumulativa tröskeln aldrig slår till. Spärren är alltså inte städning, den
+-- är det som gör den rullande tröskeln meningsfull.
+--
+-- Partiellt index: rader utan verified_ssn (alla som inte kört BankID) berörs
+-- inte, och null räknas ändå aldrig som lika med null i ett unikt index.
+--
+-- Personnumret lagras normaliserat till tolv siffror av callbacken
+-- (lib/identity.ts). Utan normaliseringen hade 900101-1234 och 199001011234
+-- varit två olika strängar och indexet hade inte hindrat något.
+-- ===========================================================================
+
+-- Kör den här först om indexet vägrar skapas. Den visar vilka personnummer som
+-- redan finns på fler än ett konto, och de måste redas ut för hand.
+--   select verified_ssn, count(*), array_agg(id)
+--   from public.profiles
+--   where verified_ssn is not null
+--   group by verified_ssn having count(*) > 1;
+
+create unique index if not exists profiles_verified_ssn_unique
+  on public.profiles (verified_ssn)
+  where verified_ssn is not null;
+
+
+-- ===========================================================================
+-- Logg över utlämnad säljaridentitet
+--
+-- Säljaren är privatperson och anonym överallt utom mot den handlare som
+-- faktiskt köpt föremålet. Varje gång namn, personnummer och adress lämnar
+-- servern skrivs en rad här, av lib/identityRelease via servicerollen.
+-- Rutterna lämnar inte ut något om raden inte gick att skriva.
+--
+-- Syftet är dubbelt: att kunna svara en säljare som frågar vem som tagit del
+-- av uppgifterna, och att se om en handlare hämtar identiteter i en takt som
+-- inte hör ihop med deras affärer.
+-- ===========================================================================
+create table if not exists public.identity_disclosures (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid references public.orders on delete cascade,
+  seller_id uuid references public.profiles on delete set null,
+  requested_by uuid references public.profiles on delete set null,
+  requester_role text not null check (requester_role in ('admin', 'dealer')),
+  channel text not null check (channel in ('seller_api', 'invoice_pdf')),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists identity_disclosures_order_idx
+  on public.identity_disclosures (order_id);
+create index if not exists identity_disclosures_seller_idx
+  on public.identity_disclosures (seller_id, created_at desc);
+create index if not exists identity_disclosures_requester_idx
+  on public.identity_disclosures (requested_by, created_at desc);
+
+alter table public.identity_disclosures enable row level security;
+
+-- Ingen klient skriver hit. Servicerollen går förbi RLS, och den är enda
+-- vägen in. Bara admin läser: loggen visar vem som hämtat vems personnummer
+-- och är i sig känslig.
+drop policy if exists "admin reads identity disclosures" on public.identity_disclosures;
+create policy "admin reads identity disclosures" on public.identity_disclosures
+  for select using (
+    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
+  );

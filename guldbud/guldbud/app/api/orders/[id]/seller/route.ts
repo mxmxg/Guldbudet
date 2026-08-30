@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteClient } from '@/lib/supabase-route'
+import { mayReleaseSellerIdentity, logIdentityDisclosure } from '@/lib/identityRelease'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -10,7 +11,11 @@ export const dynamic = 'force-dynamic'
 // winning dealer legally needs to document who they bought the item from
 // (inköpsunderlag, VMB, handel med begagnade varor). RLS deliberately hides
 // customer profiles from dealers, so this runs with the service role and
-// enforces access itself: only the order's own dealer, or an admin, may read it.
+// enforces access itself.
+//
+// Who and when is decided in lib/identityRelease, shared with the invoice-pdf
+// route so the two cannot drift apart, and every release is written to
+// identity_disclosures before the data leaves the server.
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const orderId = params.id
@@ -39,7 +44,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
   // Read the order with the service role, then enforce access ourselves.
   const found = await fetch(
-    `${supabaseUrl}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=id,seller_id,dealer_id`,
+    `${supabaseUrl}/rest/v1/orders?id=eq.${encodeURIComponent(
+      orderId
+    )}&select=id,seller_id,dealer_id,status,dealer_paid_at,refunded_at`,
     { headers: serviceHeaders, cache: 'no-store' }
   )
   const rows = await found.json().catch(() => [])
@@ -48,18 +55,32 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ error: 'order_not_found' }, { status: 404 })
   }
 
-  // Only the winning dealer of this order, or an admin, may see the seller.
-  let allowed = order.dealer_id === user.id
-  if (!allowed) {
-    const profRes = await fetch(
-      `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=role`,
-      { headers: serviceHeaders, cache: 'no-store' }
-    )
-    const profRows = await profRes.json().catch(() => [])
-    allowed = Array.isArray(profRows) && profRows[0]?.role === 'admin'
+  const profRes = await fetch(
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=role`,
+    { headers: serviceHeaders, cache: 'no-store' }
+  )
+  const profRows = await profRes.json().catch(() => [])
+  const isAdmin = Array.isArray(profRows) && profRows[0]?.role === 'admin'
+
+  const decision = mayReleaseSellerIdentity(order, user.id, isAdmin)
+  if (!decision.allowed) {
+    // Ett utlämnande som inte är tillåtet ska inte gå att skilja från en affär
+    // som inte finns, annars går det att kartlägga vilka affärer som existerar.
+    const status = decision.reason === 'not_a_party' ? 403 : 409
+    return NextResponse.json({ error: decision.reason }, { status })
   }
-  if (!allowed) {
-    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+
+  // Spåret skrivs INNAN uppgifterna lämnar servern. Går det inte att skriva
+  // lämnar vi inte ut något: ett utlämnande utan spår är det vi bygger bort.
+  const logged = await logIdentityDisclosure(supabaseUrl, serviceHeaders, {
+    orderId: order.id,
+    sellerId: order.seller_id,
+    requestedBy: user.id,
+    requesterRole: decision.role,
+    channel: 'seller_api',
+  })
+  if (!logged) {
+    return NextResponse.json({ error: 'disclosure_log_failed' }, { status: 500 })
   }
 
   // Return only the identification fields the dealer needs for their books.

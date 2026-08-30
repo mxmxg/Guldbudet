@@ -13,6 +13,8 @@ const ERROR_TEXT: Record<string, string> = {
   verifiering_misslyckades: 'Verifieringen kunde inte slutföras. Försök igen.',
   serverkonfig: 'Ett tekniskt fel uppstod hos oss. Försök igen om en liten stund.',
   kunde_ej_spara: 'Vi kunde inte spara verifieringen just nu. Försök igen.',
+  personnummer_upptaget:
+    'Det här personnumret är redan kopplat till ett annat konto hos oss. Logga in på det kontot, eller kontakta info@guldbud.com så hjälper vi dig.',
 }
 
 export default function VerifieringPage() {
