@@ -117,10 +117,19 @@ export default function SubmitPage() {
   // Stora telefonfoton (flera MB) blir små utan synlig kvalitetsförlust (2560px
   // längsta sida räcker även för fullskärm/zoom, kvalitet 0.92), och HEIC från
   // iPhone blir en renderbar JPEG. imageOrientation bakar in EXIF-rotationen så
-  // liggande/stående blir rätt. Faller tillbaka på originalfilen om avkodningen
-  // inte går (t.ex. HEIC i vissa webbläsare), så inskicket aldrig går sönder.
+  // liggande/stående blir rätt.
+  //
+  // Går avkodningen inte igenom (t.ex. HEIC i en webbläsare som saknar stöd)
+  // laddas originalet upp bara om det är rimligt stort. Tidigare skickades
+  // råfilen upp tyst oavsett storlek, vilket gav enstaka bilder på flera MB och
+  // stod för merparten av lagringen. Är originalet för stort avbryts i stället
+  // uppladdningen med ett begripligt fel, så användaren kan välja ett annat
+  // format i stället för att tyst kosta oss bandbredd.
   const prepareForUpload = async (file: File): Promise<{ data: Blob; ext: string }> => {
     const MAX_EDGE = 2560
+    // Tak för en obehandlad originalfil. Väl tilltaget för ett normalt foto,
+    // men stoppar råa kamerafiler och HEIC-original på flera MB.
+    const MAX_RAW_BYTES = 1_500_000
     try {
       const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
       const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height))
@@ -139,6 +148,12 @@ export default function SubmitPage() {
       if (!blob) throw new Error('toBlob gav null')
       return { data: blob, ext: 'jpg' }
     } catch {
+      if (file.size > MAX_RAW_BYTES) {
+        throw new Error(
+          `Bilden "${file.name}" kunde inte behandlas och är för stor att ladda upp som den är. ` +
+            'Spara om den som JPEG eller PNG och försök igen.'
+        )
+      }
       const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
       return { data: file, ext }
     }
@@ -222,7 +237,17 @@ export default function SubmitPage() {
 
     const imageUrls: string[] = []
     for (const file of files) {
-      const { data: fileData, ext } = await prepareForUpload(file)
+      let fileData: Blob
+      let ext: string
+      try {
+        // Kan kasta om bilden varken går att behandla eller är rimlig att ladda
+        // upp orörd. Felet är skrivet för användaren och visas som det är.
+        ;({ data: fileData, ext } = await prepareForUpload(file))
+      } catch (err: any) {
+        setError(err?.message || 'Bilden kunde inte behandlas. Försök med ett annat format.')
+        setLoading(false)
+        return
+      }
       const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const { error: uploadError } = await supabase.storage
         .from('item-images')
