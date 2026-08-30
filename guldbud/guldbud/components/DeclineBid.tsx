@@ -50,6 +50,16 @@ export default function DeclineBid({ item, isOwner }: { item: any; isOwner: bool
       setRelisting(false)
       return
     }
+    // Föremål som lades ut innan ursprungsvalet fanns saknar source_type.
+    // Databasspärren kräver det vid publicering, så vi fångar det här och
+    // skickar säljaren till formuläret i stället för att visa ett SQL-fel.
+    if (!item.source_type) {
+      setError(
+        'Det här föremålet lades ut innan vi började fråga om ursprung. Lägg ut det via formuläret så fyller du i de uppgifter som behövs.'
+      )
+      setRelisting(false)
+      return
+    }
     const { error: insErr } = await supabase.from('items').insert({
       owner_id: user.id,
       title: item.title,

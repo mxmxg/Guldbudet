@@ -1692,3 +1692,98 @@ $$;
 revoke execute on function public.settle_ended_auctions() from anon, authenticated;
 revoke execute on function public.process_unpaid_orders() from anon, authenticated;
 revoke execute on function public.resolve_auto_bids(uuid) from anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Listningskraven, flyttade från klienten till databasen.
+--
+-- Kravet på identitet, ägarintyg och förmedlingsuppdrag fanns tidigare bara i
+-- app/customer/submit/page.tsx. Policyn "owner manages own items" kräver bara
+-- ägarskap och status pending, och kolumnerna är nullable. Ett anrop direkt
+-- mot PostgREST med säljarens egen session kunde alltså skapa ett föremål helt
+-- utan den rättsliga konstruktionen: inget uppdrag, ingen villkorsversion,
+-- inget ägarintyg och ingen identitet. Föremålet hamnade i admins
+-- granskningskö och såg ut som vilket annat som helst.
+--
+-- Två medvetna avgränsningar:
+--
+-- 1. INSERT kräver att uppgifterna finns. UPDATE kräver dem inte, men
+--    förbjuder att ett satt värde nollas. Skälet är att föremål som skapades
+--    innan kolumnerna fanns har null, och de ska fortfarande gå att godkänna,
+--    avsluta och sälja. Nya rader kan inte skapas utan uppgifterna, gamla kan
+--    inte tömmas på dem.
+--
+-- 2. Identitetskravet speglar klienten: verifierad med BankID ELLER ett
+--    angivet personnummer. Databasen kan inte läsa NEXT_PUBLIC_BANKID_ENABLED,
+--    som är en byggtidsflagga i webbläsaren. När BankID är skarpt skärps
+--    kravet genom att ta bort or-grenen på raden som är märkt nedan.
+--
+-- Adress och utbetalningsuppgifter kontrolleras INTE här. De behövs först vid
+-- utbetalning, och den vägen har redan sin spärr i
+-- enforce_payment_before_release. Klientgrinden samlar in dem vid listning.
+--
+-- security definer behövs för att läsningen av profiles ska vara deterministisk
+-- oavsett vem som skriver. Kontrollen är skriven fail-closed: hittas ingen
+-- profil blockeras insert.
+-- ---------------------------------------------------------------------------
+create or replace function public.enforce_listing_requirements()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_identity_ok boolean;
+begin
+  if tg_op = 'INSERT' then
+    if new.mandate_accepted_at is null
+       or new.terms_version is null
+       or btrim(new.terms_version) = '' then
+      raise exception 'Formedlingsuppdraget saknas: mandate_accepted_at och terms_version kravs vid publicering.';
+    end if;
+
+    if new.ownership_attested_at is null then
+      raise exception 'Agarintyget saknas: ownership_attested_at kravs vid publicering.';
+    end if;
+
+    if new.source_type is null
+       or new.source_type not in ('eget_smycke', 'arv', 'eget_kop', 'annat') then
+      raise exception 'Ursprungsdeklarationen saknas eller ar ogiltig (source_type=%).',
+        coalesce(new.source_type, 'null');
+    end if;
+
+    -- Identitetskravet. Ta bort or-grenen nar BankID ar skarpt.
+    select (p.identity_verified is true)
+        or (p.personal_number is not null and btrim(p.personal_number) <> '')
+      into v_identity_ok
+      from public.profiles p
+     where p.id = new.owner_id;
+
+    if v_identity_ok is not true then
+      raise exception 'Saljaren ar inte identifierad: BankID eller personnummer kravs innan ett foremal kan laggas ut.';
+    end if;
+
+    return new;
+  end if;
+
+  -- UPDATE: gamla rader slipper kravet, men uppgifterna far aldrig raderas.
+  if old.mandate_accepted_at is not null and new.mandate_accepted_at is null then
+    raise exception 'mandate_accepted_at kan inte tas bort fran ett foremal.';
+  end if;
+  if old.terms_version is not null and new.terms_version is null then
+    raise exception 'terms_version kan inte tas bort fran ett foremal.';
+  end if;
+  if old.ownership_attested_at is not null and new.ownership_attested_at is null then
+    raise exception 'ownership_attested_at kan inte tas bort fran ett foremal.';
+  end if;
+  if old.source_type is not null and new.source_type is null then
+    raise exception 'source_type kan inte tas bort fran ett foremal.';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_item_listing_requirements on public.items;
+create trigger on_item_listing_requirements
+  before insert or update on public.items
+  for each row execute procedure public.enforce_listing_requirements();

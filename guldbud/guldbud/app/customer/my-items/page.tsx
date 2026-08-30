@@ -40,6 +40,16 @@ export default function MyItemsPage() {
       router.push('/auth/login')
       return
     }
+    // Föremål som lades ut innan ursprungsvalet fanns saknar source_type.
+    // Databasspärren kräver det vid publicering, så vi fångar det här och
+    // skickar säljaren till formuläret i stället för att visa ett SQL-fel.
+    if (!item.source_type) {
+      setRelisting(null)
+      setRelistError(
+        'Det här föremålet lades ut innan vi började fråga om ursprung. Lägg ut det via formuläret så fyller du i de uppgifter som behövs.'
+      )
+      return
+    }
     const { data: created, error } = await supabase
       .from('items')
       .insert({
