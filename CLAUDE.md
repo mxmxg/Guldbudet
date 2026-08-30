@@ -495,6 +495,15 @@ villkoren att priset "kan justeras", vilket beskriver en köpare och inte en
 förmedlare. Nu lämnar handlaren ett nytt bud som säljaren får acceptera eller
 avböja. GuldBud fastställer aldrig priset.
 
+**`paymentsConfigured()` kräver både nyckel och webhook-hemlighet.** Utan
+hemligheten bailar `verifyCallback` ut innan den tittar på något, så varje
+callback besvaras 400 och `dealer_paid_at` sätts aldrig. Handlaren hade betalat
+på riktigt in i en session ingenting kan bekräfta, utbetalningsspärren fortsatt
+blockerat, och `process_unpaid_orders` till slut stängt av en handlare som inte
+gjort något fel. Att vägra öppna betalningen alls är den säkra änden av den
+avvägningen. Adminens manuella `dealer_paid_at` skriver rakt mot tabellen och
+berörs inte.
+
 **Brite togs bort 2026-08-30.** Adaptern var aldrig färdig, elva öppna TODO om
 ett obekräftat API-kontrakt, och den returnerade aldrig något belopp. Ändå var
 den standardvalet: `PAYMENT_PROVIDER` behövde vara exakt strängen `stripe`,
@@ -514,9 +523,9 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Fyra är åtgärdade, tre i
-PR #260 och en i #262.** Ta inte tag i något här utan att fråga först, flera rör
-spärrade filer.
+Funna i en genomgång av hela kodbasen 2026-08-30. **Fem är åtgärdade: tre i
+PR #260, en i #262 och en i #263.** Ta inte tag i något här utan att fråga
+först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
 
@@ -532,9 +541,9 @@ spärrade filer.
    publiceringen är instruktionen.
 5. ~~Beloppskontrollen urkopplad när leverantören inte var Stripe.~~
    **Åtgärdad i PR #262**, Brite är borttagen och Stripe är enda leverantören.
-6. `paymentsConfigured()` kontrollerar aldrig webhook-hemligheten. Med API-nyckel
-   men utan hemlighet kan handlare betala medan varje callback avvisas.
-   **Detta är nu det enklaste kvarvarande fyndet i betalflödet.**
+6. ~~`paymentsConfigured()` kontrollerade aldrig webhook-hemligheten.~~
+   **Åtgärdad i PR #263.** Båda halvorna krävs nu, så betalningen öppnas aldrig
+   om den inte kan kvitteras.
 7. Callbacken kontrollerar aldrig `order.status` eller `refunded_at`. En sen
    callback kan markera en krediterad eller avbruten affär som betald.
 8. `/api/payments/create` blockerar bara på `dealer_paid_at`. Två parallella

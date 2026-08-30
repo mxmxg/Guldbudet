@@ -23,16 +23,22 @@ export function getPaymentProvider(): PaymentProvider {
   return new StripeProvider()
 }
 
-// True when the provider has the key env it needs to actually run. The API
-// routes use this to answer 503 payments_not_configured cleanly while the live
-// keys are still missing from Vercel.
+// True when the provider can both take a payment AND settle it. The API routes
+// use this to answer 503 payments_not_configured cleanly while the live keys
+// are still missing from Vercel.
 //
-// NOTE: this deliberately does not check STRIPE_WEBHOOK_SECRET. That gap is a
-// known finding: with an API key but no signing secret, dealers can pay while
-// every callback is rejected, so the order never settles. Left as-is here to
-// keep this change to removing Brite; see the findings list in CLAUDE.md.
+// Both halves are required, and the webhook secret is not optional. Without it
+// verifyCallback() bails out before it looks at anything (see stripe.ts), so
+// every callback is answered 400 and dealer_paid_at is never set. The dealer
+// would have paid for real into a session nothing can confirm: the payout guard
+// keeps blocking release, and process_unpaid_orders eventually suspends a dealer
+// who did nothing wrong. Refusing to open the payment at all is the safe end of
+// that trade.
+//
+// This does not touch the admin's manual dealer_paid_at path, which writes
+// straight to the orders table and never goes through this route.
 export function paymentsConfigured(): boolean {
-  return !!process.env.STRIPE_SECRET_KEY
+  return !!process.env.STRIPE_SECRET_KEY && !!process.env.STRIPE_WEBHOOK_SECRET
 }
 
 export type { PaymentProvider, PaymentProviderName } from './types'
