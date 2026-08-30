@@ -61,15 +61,13 @@ export default function LegalPage({
           ))}
         </div>
 
-        <div className="mt-12 rounded-2xl bg-amber-50 border border-amber-200 p-5">
-          <p className="text-xs text-amber-700 leading-relaxed">
-            Detta dokument är en utgångspunkt och behöver granskas av jurist innan lansering för att
-            säkerställa att det uppfyller kraven i GDPR, distansavtalslagen och övrig tillämplig
-            lagstiftning. Kontakta oss på{' '}
-            <a href="mailto:info@guldbud.com" className="underline hover:text-amber-800">
+        <div className="mt-12 rounded-2xl bg-espresso-50 border border-espresso-200 p-5">
+          <p className="text-xs text-espresso-600 leading-relaxed">
+            Har du frågor om villkoren når du oss på{' '}
+            <a href="mailto:info@guldbud.com" className="underline hover:text-espresso-800">
               info@guldbud.com
-            </a>{' '}
-            vid frågor.
+            </a>
+            .
           </p>
         </div>
       </div>

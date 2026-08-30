@@ -10,6 +10,7 @@ import { GemIcon } from '@/components/Icons'
 import InviteFriend from '@/components/InviteFriend'
 import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
 import PendingApprovalBanner from '@/components/PendingApprovalBanner'
+import { TERMS_VERSION } from '@/lib/terms'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   pending: { label: 'Väntar på granskning', color: 'bg-amber-100 text-amber-700' },
@@ -52,6 +53,16 @@ export default function MyItemsPage() {
         gemstone: item.gemstone,
         min_price: item.min_price,
         image_urls: item.image_urls,
+        // Ursprunget följer med föremålet, det ändras inte av att annonsen görs om.
+        source_type: item.source_type,
+        source_note: item.source_note,
+        // Att lägga ut igen är en ny publicering, alltså ett nytt ägarintyg och ett
+        // nytt förmedlingsuppdrag under den lydelse som gäller idag. Utan de här
+        // fälten skulle uppdragskvittot sakna version och adminpanelen visa att
+        // ägarintyget saknas.
+        ownership_attested_at: new Date().toISOString(),
+        mandate_accepted_at: new Date().toISOString(),
+        terms_version: TERMS_VERSION,
         status: 'pending',
       })
       .select('*')

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { TERMS_VERSION } from '@/lib/terms'
 
 // Säljaren tackar nej till högsta budet efter avslutad auktion. Föremålet stängs
 // utan accepterat bud (sålt = stängt MED accepterat bud, avböjt = stängt UTAN),
@@ -60,6 +61,16 @@ export default function DeclineBid({ item, isOwner }: { item: any; isOwner: bool
       gemstone: item.gemstone,
       min_price: item.min_price,
       image_urls: item.image_urls,
+      // Ursprunget följer med föremålet, det ändras inte av att annonsen görs om.
+      source_type: item.source_type,
+      source_note: item.source_note,
+      // Att lägga ut igen är en ny publicering, alltså ett nytt ägarintyg och ett
+      // nytt förmedlingsuppdrag under den lydelse som gäller idag. Utan de här
+      // fälten skulle uppdragskvittot sakna version och adminpanelen visa att
+      // ägarintyget saknas.
+      ownership_attested_at: new Date().toISOString(),
+      mandate_accepted_at: new Date().toISOString(),
+      terms_version: TERMS_VERSION,
       status: 'pending',
     })
     setRelisting(false)
