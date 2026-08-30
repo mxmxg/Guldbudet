@@ -507,23 +507,22 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Ingen av dem är åtgärdad.**
-Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
+Funna i en genomgång av hela kodbasen 2026-08-30. **Tre är åtgärdade i PR #260,
+resten inte.** Ta inte tag i något här utan att fråga först, flera rör spärrade
+filer.
 
 **Rör pengar eller juridik**
 
-1. `components/LegalPage.tsx:66` visar publikt på `/terms`,
-   `/handlarvillkor` och `/privacy` att dokumentet "behöver granskas av jurist
-   innan lansering".
-2. `lib/terms.ts` är inte höjd sedan villkoren ändrades i sak i PR #254 och
-   #255. Varje nytt föremål stämplas med fel `terms_version`.
+1. ~~Juristvarningen i `components/LegalPage.tsx`.~~ **Åtgärdad i PR #260.**
+2. ~~`lib/terms.ts` var inte höjd.~~ **Åtgärdad i PR #260**, versionen är
+   `2026-08-29`, samma dag som villkoren senast ändrades i sak.
 3. Kravet på BankID, ägarintyg och förmedlingsuppdrag finns bara i
    `app/customer/submit/page.tsx`. RLS-policyn på `items` kräver bara ägarskap,
    och kolumnerna är nullable. Ett anrop förbi den sidan tar med sig hela den
-   rättsliga konstruktionen.
-4. Återlistning i `DeclineBid.tsx:52` och `my-items:43` skapar nya föremål utan
-   `mandate_accepted_at`, `terms_version`, `source_type` och
-   `ownership_attested_at`.
+   rättsliga konstruktionen. **Detta är det tyngsta kvarvarande fyndet.**
+4. ~~Återlistning skapade föremål utan uppdrag.~~ **Åtgärdad i PR #260.**
+   Ursprunget ärvs, medan ägarintyg och uppdrag sätts på nytt eftersom
+   publiceringen är instruktionen.
 5. Beloppskontrollen i betalcallbacken är helt urkopplad om `PAYMENT_PROVIDER`
    inte är exakt strängen `stripe`. Brite är standardvalet och returnerar
    aldrig något belopp.
