@@ -953,6 +953,43 @@ create trigger on_bid_accepted
   after update on public.items
   for each row execute procedure public.notify_bid_accepted();
 
+-- Motparten till accept: säljaren tackar nej. Föremålet blir 'closed' UTAN
+-- accepterat bud, så ingen affär skapas. Utan den här notisen tystnar det bara
+-- för handlaren som låg högst, och hen får aldrig veta att affären inte blev av.
+--
+-- Fanns bara i databasen fram till 2026-08-30, skriven direkt i Supabase och
+-- aldrig införd i den här filen. Texten nedan är hämtad ur den skarpa databasen
+-- med pg_get_functiondef, inte omskriven.
+create or replace function public.notify_bid_declined()
+returns trigger language plpgsql security definer
+set search_path = public as $$
+declare
+  v_dealer uuid;
+begin
+  if new.status = 'closed' and new.accepted_bid_id is null
+     and old.status is distinct from 'closed' then
+    select dealer_id into v_dealer
+    from public.bids
+    where item_id = new.id
+    order by amount desc, created_at asc
+    limit 1;
+
+    if v_dealer is not null then
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (v_dealer, 'Säljaren tackade nej till budet',
+              'Säljaren valde att inte sälja "' || new.title || '". Ditt bud gick tyvärr inte igenom den här gången. Håll utkik, föremålet kan dyka upp igen.',
+              new.id, '/auctions/' || new.id);
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_bid_declined on public.items;
+create trigger on_bid_declined
+  after update on public.items
+  for each row execute procedure public.notify_bid_declined();
+
 -- SÄKERHET: acceptera bara ett bud som faktiskt hör till föremålet. accepted_bid_id
 -- saknar FK och ägar-policyn tillåter att sätta status='closed' + valfritt bud-id.
 -- Utan denna spärr kan en ägare PATCH:a in ett bud-id från en ANNAN auktion (bud-id
@@ -1131,6 +1168,13 @@ create trigger on_order_release_guard
 -- ska aldrig uppleva att vi tvekar på handlaren.)
 drop trigger if exists on_dealer_paid on public.orders;
 drop function if exists public.notify_dealer_paid();
+
+-- Dödkod: äldre budnotiser som ersattes av notify_new_bid. Ingen trigger pekar
+-- på dem, kontrollerat mot pg_trigger 2026-08-30, men funktionerna låg kvar i
+-- den skarpa databasen. notify_on_bid saknade dessutom kontrollen av att ägaren
+-- inte själv är budgivaren, som den nya har.
+drop function if exists public.notify_on_bid();
+drop function if exists public.notify_on_outbid();
 
 -- ============================================================
 -- Obetalda affärer – påminnelser och avstängning av handlare som backar.
