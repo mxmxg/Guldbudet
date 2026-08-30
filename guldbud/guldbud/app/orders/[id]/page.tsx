@@ -295,6 +295,14 @@ function PayNowButton({ orderId }: { orderId: string }) {
         return
       }
       const data = await res.json().catch(() => ({}))
+      // En flaggad betalning väntar på handläggning. Att försöka igen hjälper
+      // aldrig där, så handlaren ska inte uppmanas till det.
+      if (data?.error === 'payment_under_review') {
+        setError(
+          'En tidigare betalning på den här affären granskas. Vi hör av oss så snart den är kontrollerad.'
+        )
+        return
+      }
       if (!res.ok || !data?.redirectUrl) {
         setError('Betalningen kunde inte startas just nu. Försök igen om en stund.')
         return
