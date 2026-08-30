@@ -608,6 +608,12 @@ först, flera rör spärrade filer.
    **Åtgärdad i PR #264.** `enforce_listing_requirements` är skriven och
    **körd mot databasen 2026-08-30**, verifierad i `pg_trigger`. Se
    beslutsloggen för hur den är avgränsad.
+   **Bevisad genom genomklickning samma dag:** ett föremål lades ut via
+   formuläret och gick igenom. Eftersom spärren kräver uppdrag, villkorsversion,
+   ägarintyg, ursprung och identitet är det samtidigt bevisat att
+   `submit/page.tsx` faktiskt skickar alla fem fälten. Mejlet "Nytt föremål att
+   granska" nådde fram, så hela kedjan från trigger via webhook till Resend är
+   verifierad i drift efter rotationen av `EMAIL_WEBHOOK_SECRET`.
 4. ~~Återlistning skapade föremål utan uppdrag.~~ **Åtgärdad i PR #260.**
    Ursprunget ärvs, medan ägarintyg och uppdrag sätts på nytt eftersom
    publiceringen är instruktionen.
