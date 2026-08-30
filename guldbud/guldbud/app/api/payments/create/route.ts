@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteClient } from '@/lib/supabase-route'
-import { dealerTotal } from '@/lib/fees'
+import { feesAt } from '@/lib/fees'
 import { getPaymentProvider, paymentsConfigured, PAYMENT_PROVIDER_NAME } from '@/lib/payments'
 
 export const runtime = 'nodejs'
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
   // Read the order via the service role, then enforce ownership ourselves.
   const found = await fetch(
-    `${supabaseUrl}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=id,dealer_id,amount,status,dealer_paid_at,payment_status`,
+    `${supabaseUrl}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=id,dealer_id,amount,status,created_at,dealer_paid_at,payment_status`,
     { headers: serviceHeaders, cache: 'no-store' }
   )
   const rows = await found.json().catch(() => [])
@@ -93,7 +93,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'dealer_suspended' }, { status: 403 })
   }
 
-  const amount = dealerTotal(order.amount)
+  // The fees that applied when the deal was struck, not today's: the dealer must
+  // be charged exactly what their invoice shows.
+  const amount = feesAt(order.created_at).dealerTotal(order.amount)
   const returnUrl = `${SITE}/orders/${order.id}`
 
   let redirectUrl: string

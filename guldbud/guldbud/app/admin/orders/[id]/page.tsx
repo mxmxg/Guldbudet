@@ -11,7 +11,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STEPS, ORDER_STATUS_LABEL, OrderStatus, nextStatus, stepIndex } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, SHIPPING_FEE_EX_VAT, commission, dealerTotal, totalVat } from '@/lib/fees'
+import { feesAt } from '@/lib/fees'
 import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
 import {
   DISPUTE_STATUS_LABEL,
@@ -274,6 +274,9 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const status = order.status as OrderStatus
   const next = nextStatus(status)
   const isFinalOrCancelled = status === 'completed' || status === 'cancelled'
+  // Avgifterna som gällde när affären slöts, samma som på fakturan och samma
+  // som handlaren faktiskt debiteras.
+  const fees = feesAt(order.created_at)
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -451,7 +454,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             <div className="flex flex-col gap-1.5 text-sm">
               <div className="flex justify-between text-espresso-600">
                 <span>Handlaren betalar (bud + provision + frakt + moms)</span>
-                <span className="tabular-nums font-medium">{formatSEK(dealerTotal(order.amount))}</span>
+                <span className="tabular-nums font-medium">{formatSEK(fees.dealerTotal(order.amount))}</span>
               </div>
               <div className="flex justify-between text-espresso-600">
                 <span>Säljaren får (hela budet)</span>
@@ -459,15 +462,15 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
               </div>
               <div className="flex justify-between text-espresso-400">
                 <span>Frakt exkl moms (genomströmning)</span>
-                <span className="tabular-nums">{formatSEK(SHIPPING_FEE_EX_VAT)}</span>
+                <span className="tabular-nums">{formatSEK(fees.shippingFeeExVat)}</span>
               </div>
               <div className="flex justify-between text-espresso-400">
-                <span>Moms att redovisa (25%)</span>
-                <span className="tabular-nums">{formatSEK(totalVat(order.amount))}</span>
+                <span>Moms att redovisa ({fees.vatLabel})</span>
+                <span className="tabular-nums">{formatSEK(fees.totalVat(order.amount))}</span>
               </div>
               <div className="flex justify-between font-semibold text-emerald-700 pt-2 mt-1 border-t border-espresso-100">
-                <span>GuldBuds provision exkl moms ({DEALER_COMMISSION_LABEL})</span>
-                <span className="tabular-nums">{formatSEK(commission(order.amount))}</span>
+                <span>GuldBuds provision exkl moms ({fees.commissionLabel})</span>
+                <span className="tabular-nums">{formatSEK(fees.commission(order.amount))}</span>
               </div>
             </div>
             <div className="mt-4 flex items-center gap-4">
@@ -500,7 +503,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             ) : (
               <>
                 <p className="text-sm text-espresso-500 mb-2 leading-relaxed">
-                  Väntar på {formatSEK(dealerTotal(order.amount))}. Registrera betalningen när pengarna
+                  Väntar på {formatSEK(fees.dealerTotal(order.amount))}. Registrera betalningen när pengarna
                   kommit in. Utbetalning till säljaren och vidareskick är låsta tills dess.
                 </p>
                 {order.payment_due_at && (() => {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPaymentProvider } from '@/lib/payments'
-import { dealerTotal } from '@/lib/fees'
+import { feesAt } from '@/lib/fees'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -93,7 +93,7 @@ async function handle(req: NextRequest) {
   // completed session settles the right order even if a newer session has since
   // overwritten payment_reference. Fall back to the provider session id.
   const select =
-    'select=id,item_id,amount,status,dealer_paid_at,payment_reference,payment_status,refunded_at'
+    'select=id,item_id,amount,status,created_at,dealer_paid_at,payment_reference,payment_status,refunded_at'
   let order: any = null
   if (verified.reference) {
     const byId = await fetch(
@@ -186,7 +186,12 @@ async function handle(req: NextRequest) {
   // would release the seller's full payout against money we did not receive, so
   // we flag it for a human instead and leave dealer_paid_at unset.
   if (verified.status === 'paid' && typeof verified.amountMinor === 'number') {
-    const expectedMinor = Math.round(dealerTotal(Number(order.amount) || 0) * 100)
+    // Same schedule the session was created under: the fees that applied when
+    // the deal was struck. Using today's would flag every deal struck before a
+    // fee change as a mismatch.
+    const expectedMinor = Math.round(
+      feesAt(order.created_at).dealerTotal(Number(order.amount) || 0) * 100
+    )
     const currencyOk = !verified.currency || verified.currency === SETTLEMENT_CURRENCY
     if (verified.amountMinor !== expectedMinor || !currencyOk) {
       const detail =

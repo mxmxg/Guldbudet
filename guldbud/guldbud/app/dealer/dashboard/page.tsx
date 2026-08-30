@@ -12,7 +12,7 @@ import { GemIcon } from '@/components/Icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal } from '@/lib/fees'
+import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal, feesAt } from '@/lib/fees'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
 
@@ -70,7 +70,7 @@ export default function DealerDashboard() {
     // Vunna auktioner = handlarens ordrar (senast först).
     const { data: myOrders } = await supabase
       .from('orders')
-      .select('id, amount, status, dealer_paid_at, refunded_at, items(title, image_urls)')
+      .select('id, amount, status, dealer_paid_at, refunded_at, created_at, items(title, image_urls)')
       .eq('dealer_id', user.id)
       .order('created_at', { ascending: false })
     setOrders(myOrders || [])
@@ -322,7 +322,7 @@ export default function DealerDashboard() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-[11px] text-espresso-400">Ditt totalpris</p>
-                      <p className="font-semibold text-gold-700 tabular-nums">{formatSEK(dealerTotal(o.amount))}</p>
+                      <p className="font-semibold text-gold-700 tabular-nums">{formatSEK(feesAt(o.created_at).dealerTotal(o.amount))}</p>
                       <Link
                         href={`/orders/${o.id}`}
                         className={`inline-block mt-1.5 text-sm ${

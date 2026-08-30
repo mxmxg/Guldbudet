@@ -3,15 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
-import {
-  DEALER_COMMISSION_LABEL,
-  SHIPPING_FEE_EX_VAT,
-  SHIPPING_FEE_VAT,
-  commission,
-  commissionVat,
-  guldbudServiceTotal,
-  dealerTotal,
-} from '@/lib/fees'
+import { feesAt } from '@/lib/fees'
 
 // GuldBud's own details.
 const GULDBUD = {
@@ -107,6 +99,9 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
   const credit = kind === 'invoice' && !!order.refunded_at
   const date = new Date(order.created_at).toLocaleDateString('sv-SE')
   const bid = order.amount
+  // Avgifterna som gällde när affären slöts, inte dagens. En faktura är ett
+  // kvitto på vad som avtalades och ska visa samma belopp för alltid.
+  const fees = feesAt(order.created_at)
   const spec = `${item?.title || 'Föremål'} · ${item?.weight_grams} g · ${item?.karat}`
 
   return (
@@ -183,16 +178,16 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
                   </tr>
                 </thead>
                 <tbody>
-                  <Row label={`Förmedlingsprovision ${DEALER_COMMISSION_LABEL}`} value={(credit ? '−' : '') + kr2(commission(bid))} />
-                  <Row label="Frakt" value={(credit ? '−' : '') + kr2(SHIPPING_FEE_EX_VAT)} />
-                  <Row label="Summa exkl moms" value={(credit ? '−' : '') + kr2(commission(bid) + SHIPPING_FEE_EX_VAT)} />
-                  <Row label="Moms 25%" value={(credit ? '−' : '') + kr2(commissionVat(bid) + SHIPPING_FEE_VAT)} />
-                  <Total label={credit ? 'Att återbetala' : 'Att betala till GuldBud'} value={(credit ? '−' : '') + kr2(guldbudServiceTotal(bid))} />
+                  <Row label={`Förmedlingsprovision ${fees.commissionLabel}`} value={(credit ? '−' : '') + kr2(fees.commission(bid))} />
+                  <Row label="Frakt" value={(credit ? '−' : '') + kr2(fees.shippingFeeExVat)} />
+                  <Row label="Summa exkl moms" value={(credit ? '−' : '') + kr2(fees.commission(bid) + fees.shippingFeeExVat)} />
+                  <Row label={`Moms ${fees.vatLabel}`} value={(credit ? '−' : '') + kr2(fees.commissionVat(bid) + fees.shippingFeeVat)} />
+                  <Total label={credit ? 'Att återbetala' : 'Att betala till GuldBud'} value={(credit ? '−' : '') + kr2(fees.guldbudServiceTotal(bid))} />
                 </tbody>
               </table>
               <Fine>
                 Avser GuldBuds förmedlingstjänst (provision + frakt). Föremålets pris ({kr2(bid)}) faktureras separat enligt inköpsunderlaget och tillfaller säljaren.{' '}
-                {credit ? '' : `Handlaren betalar hela affären som en summa: ${kr2(dealerTotal(bid))} (föremål ${kr2(bid)} + denna faktura ${kr2(guldbudServiceTotal(bid))}). `}
+                {credit ? '' : `Handlaren betalar hela affären som en summa: ${kr2(fees.dealerTotal(bid))} (föremål ${kr2(bid)} + denna faktura ${kr2(fees.guldbudServiceTotal(bid))}). `}
                 Referens: {ref(order.order_no)}.
               </Fine>
             </Doc>

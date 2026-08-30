@@ -13,7 +13,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
-import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, commissionVat, dealerTotal } from '@/lib/fees'
+import { feesAt } from '@/lib/fees'
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -332,6 +332,8 @@ function PayNowButton({ orderId }: { orderId: string }) {
 function DealerPanel({ order }: { order: any }) {
   const paid = !!order.dealer_paid_at
   const awaitingPayment = !paid && order.status !== 'cancelled'
+  // Avgifterna som gällde när affären slöts, samma som på fakturan.
+  const fees = feesAt(order.created_at)
   return (
     <>
       <div className={`card p-6 ${awaitingPayment ? 'ring-2 ring-gold-300' : ''}`}>
@@ -342,20 +344,20 @@ function DealerPanel({ order }: { order: any }) {
             <span className="tabular-nums">{formatSEK(order.amount)}</span>
           </div>
           <div className="flex justify-between text-espresso-600">
-            <span>Provision {DEALER_COMMISSION_LABEL}</span>
-            <span className="tabular-nums">+{formatSEK(commission(order.amount))}</span>
+            <span>Provision {fees.commissionLabel}</span>
+            <span className="tabular-nums">+{formatSEK(fees.commission(order.amount))}</span>
           </div>
           <div className="flex justify-between text-espresso-600">
             <span>Frakt (inkl moms)</span>
-            <span className="tabular-nums">+{formatSEK(DEALER_SHIPPING_FEE)}</span>
+            <span className="tabular-nums">+{formatSEK(fees.shippingFee)}</span>
           </div>
           <div className="flex justify-between text-espresso-600">
-            <span>Moms 25% på provision</span>
-            <span className="tabular-nums">+{formatSEK(commissionVat(order.amount))}</span>
+            <span>Moms {fees.vatLabel} på provision</span>
+            <span className="tabular-nums">+{formatSEK(fees.commissionVat(order.amount))}</span>
           </div>
           <div className="flex justify-between font-semibold text-espresso-900 pt-2 mt-1 border-t border-espresso-100">
             <span>Ditt totalpris</span>
-            <span className="tabular-nums">{formatSEK(dealerTotal(order.amount))}</span>
+            <span className="tabular-nums">{formatSEK(fees.dealerTotal(order.amount))}</span>
           </div>
         </div>
         {awaitingPayment && (() => {
