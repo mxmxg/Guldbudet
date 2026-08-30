@@ -495,6 +495,36 @@ villkoren att priset "kan justeras", vilket beskriver en köpare och inte en
 förmedlare. Nu lämnar handlaren ett nytt bud som säljaren får acceptera eller
 avböja. GuldBud fastställer aldrig priset.
 
+**Schemafilen och databasen hade glidit isär.** Kontrollerat 2026-08-30 genom
+att lista `pg_proc` och `pg_trigger` i den skarpa databasen och jämföra mot
+filen. Fem avvikelser, alla åt samma håll: databasen innehöll mer än filen.
+
+- `notify_bid_declined` och triggern `on_bid_declined` fanns bara i databasen.
+  Nu införda i filen, hämtade med `pg_get_functiondef` och inte omskrivna.
+- `email_notification_webhook` och triggern `on_notification_email` fanns bara
+  i databasen. **Den är fortfarande inte i filen**, se nedan.
+- `notify_dealer_paid` och triggern `on_dealer_paid` levde i databasen trots
+  att filen tar bort dem på rad 1132. Att drop-satsen inte fått effekt visade
+  att **filen inte hade körts hela vägen igenom på länge.** Nu borttagna.
+  Triggern gjorde skada: den bad säljaren skicka in föremålet först när
+  handlaren betalat, tvärtemot modellen, och titeln innehöll "skicka in"
+  vilket fick mejlrutten att klistra på samma instruktionsruta en andra gång.
+- `notify_on_bid` och `notify_on_outbid` låg kvar utan trigger, ren dödkod.
+  Nu borttagna.
+
+Avvikelserna är hopfogade 2026-08-30 och kontrollerade mot `pg_trigger` efteråt.
+
+Slutsats att bära vidare: **läs inte filen som om den vore databasen.** Vill du
+veta vad som faktiskt körs, fråga `pg_proc` och `pg_trigger`.
+
+**`email_notification_webhook` har hemligheten hårdkodad i funktionskroppen.**
+Den anropar `/api/notify-email` med `x-webhook-secret` i klartext i SQL:en.
+Därför är den medvetet inte införd i schemafilen: en commit hade lagt
+`EMAIL_WEBHOOK_SECRET` i git för alltid. Två vägar finns, platshållare i filen
+eller `current_setting('app.email_webhook_secret', true)` plus en
+`alter database`. Beslut saknas. Funktionen saknar dessutom `set search_path`,
+till skillnad från alla andra `security definer`-funktioner i systemet.
+
 **Listningskraven ligger i en trigger, inte i en constraint.** En check-constraint
 kan inte läsa `profiles`, och identitetskravet behöver det.
 `enforce_listing_requirements` är därför en `before insert or update`-trigger
@@ -552,10 +582,10 @@ först, flera rör spärrade filer.
 1. ~~Juristvarningen i `components/LegalPage.tsx`.~~ **Åtgärdad i PR #260.**
 2. ~~`lib/terms.ts` var inte höjd.~~ **Åtgärdad i PR #260**, versionen är
    `2026-08-29`, samma dag som villkoren senast ändrades i sak.
-3. Kravet på BankID, ägarintyg och förmedlingsuppdrag fanns bara i
-   `app/customer/submit/page.tsx`. Spärren `enforce_listing_requirements` är
-   **skriven i PR #264 men inte körd mot databasen.** Tills SQL:en körts i
-   Supabase gäller fyndet fortfarande fullt ut. Se beslutsloggen.
+3. ~~Kravet på BankID, ägarintyg och förmedlingsuppdrag fanns bara i klienten.~~
+   **Åtgärdad i PR #264.** `enforce_listing_requirements` är skriven och
+   **körd mot databasen 2026-08-30**, verifierad i `pg_trigger`. Se
+   beslutsloggen för hur den är avgränsad.
 4. ~~Återlistning skapade föremål utan uppdrag.~~ **Åtgärdad i PR #260.**
    Ursprunget ärvs, medan ägarintyg och uppdrag sätts på nytt eftersom
    publiceringen är instruktionen.
