@@ -10,7 +10,7 @@ export const maxDuration = 10
 // Engångsverktyg: krymper redan uppladdade bilder i item-images-bucketen till
 // max 2048px JPEG, så de gamla råa telefonfotona (flera MB) blir några hundra kB.
 // Behåller SAMMA sökväg, så befintliga bild-URL:er fortsätter fungera.
-// Skyddas med EMAIL_WEBHOOK_SECRET (?secret=...). Servicerollen läses ur env och
+// Kräver inloggad admin (Bearer access_token). Servicerollen läses ur env och
 // lämnar aldrig servern. Idempotent: en redan krympt bild hoppas över nästa gång,
 // så kör om tills "done": true.
 const BUCKET = 'item-images'
@@ -30,13 +30,15 @@ export async function GET(req: NextRequest) {
   if (!SB || !KEY) return NextResponse.json({ error: 'missing env' }, { status: 500 })
   const H = { apikey: KEY, Authorization: `Bearer ${KEY}` }
 
-  // Auth: antingen en inloggad admin (Bearer access_token) eller
-  // EMAIL_WEBHOOK_SECRET som ?secret= (för direktanrop). Adminknappen i
-  // adminpanelen använder det första, så ingen nyckel behövs i URL:en.
+  // Auth: inloggad admin med Bearer access_token. Inget annat.
+  //
+  // Tidigare gick det även att skicka EMAIL_WEBHOOK_SECRET som ?secret= i
+  // URL:en. En hemlighet i en query-sträng hamnar i varje loggrad den passerar,
+  // hos Vercel och i webbläsarhistoriken, och det är samma hemlighet som
+  // skyddar mejlwebhooken. Vägen är borttagen. Adminknappen i adminpanelen
+  // använde redan Bearer, så den påverkas inte.
   let authed = false
-  const secret = url.searchParams.get('secret')
-  if (process.env.EMAIL_WEBHOOK_SECRET && secret === process.env.EMAIL_WEBHOOK_SECRET) authed = true
-  if (!authed) {
+  {
     const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
     if (token) {
       const sb = createRouteClient(req)

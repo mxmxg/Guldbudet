@@ -665,6 +665,63 @@ daterats skulle fakturan visa gamla avgifter medan Stripe drog nya. Då hade
 beloppskontrollen i callbacken flaggat varenda affär som slöts före ändringen
 som `amount_mismatch`. Det hade varit sämre än felet vi rättade.
 
+**Säljarens identitet lämnas ut efter betalning, inte vid vunnen auktion.**
+Handlaren behöver namn, personnummer och adress för sitt inköpsunderlag, alltså
+för att bokföra ett köp av begagnade varor från en privatperson. Det behovet
+uppstår när köpet är gjort. Tidigare räckte det att ordern fanns, så en handlare
+som vunnit och sedan aldrig betalat fick ändå ut en privatpersons fullständiga
+identitet, och detsamma gällde efter kreditering.
+
+Grinden ligger i `lib/identityRelease.ts` och **delas av två rutter**,
+`/api/orders/[id]/seller` och `/api/orders/[id]/invoice-pdf`. Den senare hade
+exakt samma läcka utan att stå i fyndlistan. En grind som finns på två ställen
+glider isär, därför en fil.
+
+Admin är undantagen: adminvyn är arbetsverktyget för penningtvättsgranskning och
+tvister och behöver identiteten även på en affär som gått tillbaka.
+
+**Loggen skrivs före utlämnandet, och stoppar det om den misslyckas.** Går raden
+inte att skriva till `identity_disclosures` svarar rutten 500 och inget lämnas
+ut. Ett utlämnande utan spår är precis det konstruktionen finns för att
+förhindra. Följden är att **tabellen måste finnas i databasen**, annars får
+handlaren "Privatperson" på sitt inköpsunderlag.
+
+**Ett personnummer hör till ett konto, och därför normaliseras det.** Det unika
+indexet på `verified_ssn` gör den kumulativa penningtvättströskeln meningsfull:
+utan det kan samma person verifiera obegränsat många konton och sprida sina
+affärer så att tröskeln aldrig nås. Indexet ensamt räcker dock inte, eftersom
+`900101-1234` och `199001011234` är olika strängar. Callbacken lagrar därför
+alltid den normaliserade tolvsiffriga formen, via `lib/identity.ts`.
+
+**`payload.sub` togs bort som personnummerreserv.** `sub` är ett ogenomskinligt
+subject-id hos leverantören, inte ett personnummer. Reserven skrev in en
+identifierare som såg ut som ett verifierat personnummer utan att vara det, och
+den gamla `if (!ssn)`-kontrollen kunde per definition inte fånga det eftersom
+fältet var ifyllt. Kravet är nu Luhn-kontroll, vilket både ett GUID och ett
+`auth0|...`-subject faller på.
+
+**Utfärdare och nycklar hämtas ur discovery-dokumentet, inte ur domännamnet.**
+`id_token` verifieras med RS256 mot leverantörens JWKS. Både `issuer` och
+`jwks_uri` läses ur `/.well-known/openid-configuration`. Att i stället bygga
+issuer-strängen av `IDURA_DOMAIN` hade varit en gissning, och gissar man fel
+slutar BankID fungera först den dag det slås på skarpt.
+
+Algoritmen låses till RS256 i stället för att läsas ur token. Att lita på
+`alg` i headern är det klassiska JWT-felet: `none` gör signaturen meningslös.
+Nonce, aud, iss och exp är nu **obligatoriska**. Tidigare kontrollerades de
+bara om fältet fanns, så en token utan nonce passerade.
+
+**`/api/notify-email` läser alltid innehållet ur databasen.** Tidigare gällde
+det bara när body:n råkade ha ett id. Saknades id:t användes body:ns egna fält,
+så den som har webhook-hemligheten kunde skicka ett mejl med valfri rubrik, text
+och länk till valfri användare, avsänt från GuldBuds egen adress. Body:n får nu
+bara peka ut vilken rad som ska skickas.
+
+**Bildverktyget tar inte längre `?secret=`.** En hemlighet i en query-sträng
+hamnar i varje loggrad den passerar, och det var samma hemlighet som skyddar
+mejlwebhooken. Adminknappen använde redan Bearer, så den påverkades inte.
+Direktanrop via URL fungerar däremot inte längre.
+
 **Bildkrympningen i adminpanelen** (`/api/admin/optimize-images`) byggdes för
 att krympa redan uppladdade råa telefonfoton innan transformeringen fanns. Den
 skriver över originalen. Med transformeringen på är originalet det som
@@ -674,10 +731,10 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Nio är åtgärdade: tre i
-PR #260, en i #262, en i #263, en i #264, två i #269 och en i #270.** Därmed
-är alla nio som rör pengar eller juridik stängda. Kvar är personuppgifter och
-identitet, trasig funktion, ärliga siffror och städning.
+Funna i en genomgång av hela kodbasen 2026-08-30. **Femton är åtgärdade: tre
+i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270 och sex i
+#271.** Därmed är både pengar och juridik, och personuppgifter och identitet,
+helt stängda. Kvar är trasig funktion, ärliga siffror och städning.
 Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
@@ -719,18 +776,28 @@ Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör personuppgifter och identitet**
 
-10. `GET /api/orders/[id]/seller` lämnar ut säljarens personnummer och adress
-    så snart ordern finns, utan kontroll av betalning eller avbrott, och utan
-    loggning.
-11. `verified_ssn` saknar unikt index. Samma BankID kan verifiera obegränsat
-    många konton, vilket kringgår den kumulativa penningtvättströskeln.
-12. `lib/idura.ts:95` faller tillbaka på `payload.sub` som personnummer om
-    ssn-claimen saknas. Kontrollen på rad 107 fångar det inte.
-13. `id_token` signaturverifieras inte, TODO på `lib/idura.ts:82`.
-14. `/api/notify-email` litar på POST-body när `record.id` saknas. Med
-    hemligheten kan godtyckligt GuldBud-mejl skickas till valfri användare.
-15. `EMAIL_WEBHOOK_SECRET` accepteras som `?secret=` i bildverktyget och hamnar
-    därmed i loggar. Samma hemlighet skyddar mejlwebhooken.
+10. ~~`GET /api/orders/[id]/seller` lämnar ut säljarens personnummer och
+    adress så snart ordern finns, utan kontroll och utan loggning.~~
+    **Åtgärdad i PR #271.** Grinden ligger i `lib/identityRelease.ts` och
+    delas med `invoice-pdf`, som hade samma läcka utan att stå i listan.
+    Kräver körd SQL, se nedan.
+11. ~~`verified_ssn` saknar unikt index.~~ **Åtgärdad i PR #271.** Personnumret
+    normaliseras till tolv siffror innan det lagras, och ett partiellt unikt
+    index binder det till ett konto. **Kräver körd SQL.**
+12. ~~`lib/idura.ts` faller tillbaka på `payload.sub` som personnummer.~~
+    **Åtgärdad i PR #271.** Reserven är borttagen och numret måste klara
+    Luhn-kontrollen i `lib/identity.ts`.
+13. ~~`id_token` signaturverifieras inte.~~ **Åtgärdad i PR #271.** RS256 mot
+    leverantörens JWKS, med issuer och nycklar hämtade ur discovery-dokumentet.
+14. ~~`/api/notify-email` litar på POST-body när `record.id` saknas.~~
+    **Åtgärdad i PR #271.** Innehållet läses alltid ur databasen.
+15. ~~`EMAIL_WEBHOOK_SECRET` accepteras som `?secret=` i bildverktyget.~~
+    **Åtgärdad i PR #271.** Bara inloggad admin med Bearer.
+
+**SQL som måste köras för att 10 och 11 ska ha effekt.** Ligger sist i
+`supabase-schema.sql`: det unika indexet på `verified_ssn` och tabellen
+`identity_disclosures`. Utan tabellen svarar utlämnandet 500 och handlaren får
+"Privatperson" i stället för säljarens namn på inköpsunderlaget.
 
 **Trasig funktion**
 

@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
   try {
     const tokens = await exchangeCode(code, flow.verifier)
     if (!tokens.id_token) throw new Error('Inget id_token')
-    identity = extractIdentity(tokens.id_token, flow.nonce)
+    // Signaturverifieringen hämtar leverantörens nycklar, därför async.
+    identity = await extractIdentity(tokens.id_token, flow.nonce)
   } catch (e: any) {
     return back(`error=${encodeURIComponent('verifiering_misslyckades')}`)
   }
@@ -45,16 +46,37 @@ export async function GET(req: NextRequest) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceKey) return back('error=serverkonfig')
 
+  const serviceHeaders = {
+    apikey: serviceKey,
+    Authorization: `Bearer ${serviceKey}`,
+    'Content-Type': 'application/json',
+  }
+
+  // Ett personnummer hör till ett konto. Utan den regeln kan samma person
+  // verifiera hur många konton som helst, och eftersom penningtvättströskeln
+  // räknas kumulativt per konto över 12 månader skulle den aldrig slå till:
+  // det räcker att sprida affärerna på flera konton.
+  //
+  // Det slutgiltiga skyddet är det unika indexet i databasen, som håller även
+  // om två verifieringar sker samtidigt. Den här kontrollen finns för att
+  // kunna ge ett begripligt besked i stället för ett generellt sparfel.
+  const taken = await fetch(
+    `${supabaseUrl}/rest/v1/profiles?verified_ssn=eq.${encodeURIComponent(
+      identity.ssn
+    )}&select=id`,
+    { headers: serviceHeaders, cache: 'no-store' }
+  )
+  const takenRows = await taken.json().catch(() => [])
+  const owner = Array.isArray(takenRows) ? takenRows[0] : null
+  if (owner && owner.id !== flow.userId) {
+    return back('error=personnummer_upptaget')
+  }
+
   const patch = await fetch(
     `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(flow.userId)}`,
     {
       method: 'PATCH',
-      headers: {
-        apikey: serviceKey,
-        Authorization: `Bearer ${serviceKey}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal',
-      },
+      headers: { ...serviceHeaders, Prefer: 'return=minimal' },
       body: JSON.stringify({
         identity_verified: true,
         verified_name: identity.name,
@@ -63,7 +85,15 @@ export async function GET(req: NextRequest) {
       }),
     }
   )
-  if (!patch.ok) return back('error=kunde_ej_spara')
+  if (!patch.ok) {
+    // 23505 är unique_violation: indexet stoppade en kapplöpning som kontrollen
+    // ovan hann före. Samma besked till användaren.
+    const detail = await patch.text().catch(() => '')
+    if (patch.status === 409 || detail.includes('23505')) {
+      return back('error=personnummer_upptaget')
+    }
+    return back('error=kunde_ej_spara')
+  }
 
   const res = back('ok=1')
   res.cookies.set('bankid_flow', '', { path: '/', maxAge: 0 })

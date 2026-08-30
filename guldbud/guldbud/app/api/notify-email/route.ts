@@ -195,26 +195,32 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'bad payload' }, { status: 400 })
   }
-  if (!record?.user_id || !record?.title) {
-    return NextResponse.json({ ok: true, skipped: 'no record' })
-  }
-
   const uuid = /^[0-9a-f-]{36}$/i
 
-  // Härdning: lita inte på POST-body:ns innehåll. Har raden ett id, läs notisen
-  // från DB och använd dess fält, så en läckt webhook-hemlighet inte kan mejla
-  // godtyckligt innehåll (titel/text/länk) till godtycklig användare.
-  if (record?.id && uuid.test(String(record.id))) {
-    const rows = await (
-      await sb(
-        `notifications?id=eq.${encodeURIComponent(String(record.id))}&select=user_id,title,message,link,item_id`
-      )
+  // Innehållet kommer ALLTID från databasen, aldrig från POST-body:n.
+  //
+  // Tidigare gällde det bara när body:n råkade ha ett id. Saknades id:t
+  // användes body:ns egna fält, vilket gjorde att den som har webhook-
+  // hemligheten kunde skicka ett mejl med valfri rubrik, text och länk till
+  // valfri användare, avsänt från GuldBuds egen adress. Ett perfekt
+  // nätfiskeverktyg. Databasen är enda källan nu: body:n får bara peka ut
+  // vilken rad som ska skickas.
+  if (!record?.id || !uuid.test(String(record.id))) {
+    return NextResponse.json({ ok: true, skipped: 'no notification id' })
+  }
+  const rows = await (
+    await sb(
+      `notifications?id=eq.${encodeURIComponent(String(record.id))}&select=user_id,title,message,link,item_id`
     )
-      .json()
-      .catch(() => [])
-    const row = Array.isArray(rows) ? rows[0] : null
-    if (!row) return NextResponse.json({ ok: true, skipped: 'notification not found' })
-    record = { ...record, ...row }
+  )
+    .json()
+    .catch(() => [])
+  const row = Array.isArray(rows) ? rows[0] : null
+  if (!row) return NextResponse.json({ ok: true, skipped: 'notification not found' })
+  record = { id: record.id, ...row }
+
+  if (!record?.user_id || !record?.title) {
+    return NextResponse.json({ ok: true, skipped: 'no record' })
   }
 
   const userId = String(record.user_id)
