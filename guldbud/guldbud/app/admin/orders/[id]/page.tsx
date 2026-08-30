@@ -306,7 +306,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             <div className="flex gap-4 mb-5">
               <div className="w-24 h-24 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
                 {item?.image_urls?.[0] && (
-                  <Image src={item.image_urls[0]} alt={item.title} fill className="object-contain" />
+                  <Image src={item.image_urls[0]} alt={item.title} fill sizes="96px" className="object-contain" />
                 )}
               </div>
               <div className="text-sm text-espresso-500">

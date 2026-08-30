@@ -110,7 +110,7 @@ export default function AdminOrdersPage() {
                 <Link key={o.id} href={`/admin/orders/${o.id}`} className="card card-hover p-4 flex gap-4 items-center">
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
                     {o.items?.image_urls?.[0] && (
-                      <Image src={o.items.image_urls[0]} alt="" fill className="object-contain" />
+                      <Image src={o.items.image_urls[0]} alt="" fill sizes="64px" className="object-contain" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

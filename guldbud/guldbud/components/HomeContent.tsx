@@ -183,7 +183,7 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
                     >
                       <div className="w-16 h-16 flex-shrink-0 rounded-xl overflow-hidden relative bg-espresso-100">
                         {item.image_urls?.[0] && (
-                          <Image src={item.image_urls[0]} alt={item.title} fill className="object-contain" />
+                          <Image src={item.image_urls[0]} alt={item.title} fill sizes="64px" className="object-contain" />
                         )}
                       </div>
                       <div className="flex-1">
@@ -828,7 +828,7 @@ function FeaturedAuction({ items }: { items: EnrichedItem[] }) {
         </div>
         <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-5 relative bg-espresso-900 flex items-center justify-center">
           {img ? (
-            <Image src={img} alt={item.title} fill className="object-contain transition-transform duration-700 group-hover:scale-105" />
+            <Image src={img} alt={item.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-contain transition-transform duration-700 group-hover:scale-105" />
           ) : (
             <CategoryIcon category={item.category} size={70} className="text-gold-500/40" strokeWidth={1} />
           )}

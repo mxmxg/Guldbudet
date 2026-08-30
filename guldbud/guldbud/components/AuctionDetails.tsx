@@ -284,7 +284,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                       activeImg === i ? 'border-gold-400 shadow-gold' : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
-                    <Image src={url} alt="" fill className="object-contain" />
+                    <Image src={url} alt="" fill sizes="(max-width: 768px) 20vw, 110px" className="object-contain" />
                   </button>
                 ))}
               </div>

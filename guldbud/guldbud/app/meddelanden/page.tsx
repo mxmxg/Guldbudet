@@ -141,7 +141,7 @@ export default function MessagesPage() {
                 className="card card-hover p-4 flex items-center gap-4"
               >
                 <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
-                  {t.image && <Image src={t.image} alt="" fill className="object-contain" />}
+                  {t.image && <Image src={t.image} alt="" fill sizes="48px" className="object-contain" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">

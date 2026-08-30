@@ -325,7 +325,7 @@ export default function DealerProfilePage() {
                     >
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
                         {o.items?.image_urls?.[0] && (
-                          <Image src={o.items.image_urls[0]} alt="" fill className="object-contain" />
+                          <Image src={o.items.image_urls[0]} alt="" fill sizes="48px" className="object-contain" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">

@@ -145,7 +145,7 @@ export default function MyItemsPage() {
                 >
                   <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative">
                     {item.image_urls?.[0] && (
-                      <Image src={item.image_urls[0]} alt={item.title} fill className="object-contain" />
+                      <Image src={item.image_urls[0]} alt={item.title} fill sizes="80px" className="object-contain" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
