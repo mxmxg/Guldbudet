@@ -525,6 +525,25 @@ eller `current_setting('app.email_webhook_secret', true)` plus en
 `alter database`. Beslut saknas. Funktionen saknar dessutom `set search_path`,
 till skillnad från alla andra `security definer`-funktioner i systemet.
 
+**Att byta den hemligheten tar fyra steg, och hoppar du över ett slutar alla
+mejl fungera.** Den finns på exakt två ställen som måste ha samma sträng:
+`EMAIL_WEBHOOK_SECRET` i Vercel och funktionskroppen i databasen. Ordningen är
+Vercel, **omdeploy**, sedan databasen. Omdeployen är inte valfri: en miljövariabel
+slår aldrig igenom på en deploy som redan kör, så utan den jämför sajten med det
+gamla värdet.
+
+Rutten trimmar inte och har ingen reservväg (`route.ts:174`), så minsta avvikelse
+ger 401 på varje anrop och noll mejl. Rotationen den 2026-08-30 tog fyra försök,
+eftersom Vercel-värdet sattes innan den slutliga strängen fanns. Generera alltid
+en ny sträng, klistra in den i en textfil, och kopiera därifrån till båda
+ställena i samma sittning. Skriv aldrig av den.
+
+Felsök i `net._http_response`, som visar vad databasens anrop faktiskt fick
+tillbaka. 401 betyder att strängarna skiljer sig, 200 att kedjan är hel. Testa
+utan att skicka mejl genom att posta ett påhittat notis-id: rutten godkänner
+nyckeln, hittar ingen rad och svarar 200 med `skipped`. Tabellen rensas efter
+några timmar, så historik längre bak finns inte.
+
 **Listningskraven ligger i en trigger, inte i en constraint.** En check-constraint
 kan inte läsa `profiles`, och identitetskravet behöver det.
 `enforce_listing_requirements` är därför en `before insert or update`-trigger
