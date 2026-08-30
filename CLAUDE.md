@@ -180,10 +180,8 @@ och innan du påstår något om bolagets status.
 - Vercel (drift), Supabase (databas, auth, lagring)
 - Stripe (kortbetalning), under granskning sedan 2026-08-28 i kategorin
   ädelmetaller. Live-nycklar är ännu inte inlagda i Vercel.
-- Brite (direkt banköverföring). Adaptern finns byggd i `lib/payments/brite.ts`
-  men är inte färdig: elva öppna TODO om att API-kontraktet ännu inte är
-  bekräftat mot Brites dokumentation. Brite är dessutom **standardvalet i
-  koden**, se beslutsloggen.
+- Direkt banköverföring är planen på sikt, men **ingen sådan leverantör är
+  inkopplad**. Brite-adaptern togs bort 2026-08-30, se beslutsloggen.
 - Resend (transaktionsmejl), Zoho (mänsklig inkorg)
 - Anthropic (AI-värdering), Trustpilot (omdömen), PostNord (rekommenderat
   brev med kundavtal)
@@ -377,8 +375,8 @@ flaggar handlare som vinner för lätt.
    `payment_due_at = now() + interval '1 day'`.
 2. `set_order_aml_status` sätter `clear` eller `review` direkt vid orderns
    skapande. Trösklar: 25 000 kr per affär, 50 000 kr rullande 12 månader.
-3. Handlaren startar betalningen via `/api/payments/create`, som väljer
-   leverantör ur `PAYMENT_PROVIDER` och skriver `payment_status = 'pending'`.
+3. Handlaren startar betalningen via `/api/payments/create`, som öppnar en
+   Stripe-session och skriver `payment_status = 'pending'`.
 4. Leverantörens webhook träffar `/api/payments/callback`. Signaturen
    verifieras, beloppet kontrolleras, och vid träff sätts `dealer_paid_at`.
 5. Admin flyttar affären framåt. `enforce_payment_before_release` blockerar
@@ -423,7 +421,8 @@ tomma fält för dokumentägare och fastställandedatum.
 
 ## Miljövariabler
 
-27 stycken. Namnen står här, aldrig värden. De sätts i Vercel.
+20 stycken. Namnen står här, aldrig värden. De sätts i Vercel.
+Sju försvann när Brite togs bort: `PAYMENT_PROVIDER` och de sex `BRITE_`.
 
 **Publika**, bakas in i webbläsarbundlen: `NEXT_PUBLIC_SUPABASE_URL`,
 `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`,
@@ -435,10 +434,8 @@ En `NEXT_PUBLIC_`-variabel kan aldrig vara hemlig, och den läses vid bygget.
 **Hemliga**: `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`,
 `EMAIL_WEBHOOK_SECRET`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `TRUSTPILOT_AFS_BCC`,
 `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `IDURA_DOMAIN`, `IDURA_CLIENT_ID`,
-`IDURA_CLIENT_SECRET`, `PAYMENT_PROVIDER`, `STRIPE_SECRET_KEY`,
-`STRIPE_API_BASE`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CURRENCY`,
-`BRITE_API_KEY`, `BRITE_API_BASE`, `BRITE_WEBHOOK_SECRET`,
-`BRITE_CREATE_PATH`, `BRITE_CURRENCY`, `BRITE_SIGNATURE_HEADER`.
+`IDURA_CLIENT_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_API_BASE`,
+`STRIPE_WEBHOOK_SECRET`, `STRIPE_CURRENCY`.
 
 Det finns ingen `.env.local.example` i repot, trots att `README.md` hänvisar
 till en.
@@ -498,6 +495,16 @@ villkoren att priset "kan justeras", vilket beskriver en köpare och inte en
 förmedlare. Nu lämnar handlaren ett nytt bud som säljaren får acceptera eller
 avböja. GuldBud fastställer aldrig priset.
 
+**Brite togs bort 2026-08-30.** Adaptern var aldrig färdig, elva öppna TODO om
+ett obekräftat API-kontrakt, och den returnerade aldrig något belopp. Ändå var
+den standardvalet: `PAYMENT_PROVIDER` behövde vara exakt strängen `stripe`,
+annars föll koden tillbaka på Brite och beloppskontrollen i callbacken slog av
+sig själv. Ett stavfel räckte. Abstraktionen finns kvar, så att koppla in
+direkt banköverföring senare är fortfarande en ändring på ett enda ställe.
+`payment_provider` på ordern skrivs numera från konstanten
+`PAYMENT_PROVIDER_NAME`, inte från en miljövariabel, så bokföringsspåret alltid
+namnger den rail som faktiskt tog pengarna.
+
 **Bildkrympningen i adminpanelen** (`/api/admin/optimize-images`) byggdes för
 att krympa redan uppladdade råa telefonfoton innan transformeringen fanns. Den
 skriver över originalen. Med transformeringen på är originalet det som
@@ -507,9 +514,9 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Tre är åtgärdade i PR #260,
-resten inte.** Ta inte tag i något här utan att fråga först, flera rör spärrade
-filer.
+Funna i en genomgång av hela kodbasen 2026-08-30. **Fyra är åtgärdade, tre i
+PR #260 och en i #262.** Ta inte tag i något här utan att fråga först, flera rör
+spärrade filer.
 
 **Rör pengar eller juridik**
 
@@ -523,11 +530,11 @@ filer.
 4. ~~Återlistning skapade föremål utan uppdrag.~~ **Åtgärdad i PR #260.**
    Ursprunget ärvs, medan ägarintyg och uppdrag sätts på nytt eftersom
    publiceringen är instruktionen.
-5. Beloppskontrollen i betalcallbacken är helt urkopplad om `PAYMENT_PROVIDER`
-   inte är exakt strängen `stripe`. Brite är standardvalet och returnerar
-   aldrig något belopp.
+5. ~~Beloppskontrollen urkopplad när leverantören inte var Stripe.~~
+   **Åtgärdad i PR #262**, Brite är borttagen och Stripe är enda leverantören.
 6. `paymentsConfigured()` kontrollerar aldrig webhook-hemligheten. Med API-nyckel
    men utan hemlighet kan handlare betala medan varje callback avvisas.
+   **Detta är nu det enklaste kvarvarande fyndet i betalflödet.**
 7. Callbacken kontrollerar aldrig `order.status` eller `refunded_at`. En sen
    callback kan markera en krediterad eller avbruten affär som betald.
 8. `/api/payments/create` blockerar bara på `dealer_paid_at`. Två parallella

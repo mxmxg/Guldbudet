@@ -831,7 +831,7 @@ alter table public.orders add column if not exists payment_due_at timestamptz;
 alter table public.orders add column if not exists payment_reminded_at timestamptz;
 alter table public.orders add column if not exists cancel_reason text;
 
--- A2A-betalning (Brite m.fl.): leverantörsagnostisk referens + status för
+-- Handlarens inbetalning: leverantörsagnostisk referens + status för
 -- handlarens inbetalning. dealer_paid_at sätts automatiskt när callbacken
 -- bekräftar en lyckad betalning; admin kan fortfarande sätta den manuellt.
 alter table public.orders add column if not exists payment_provider text;

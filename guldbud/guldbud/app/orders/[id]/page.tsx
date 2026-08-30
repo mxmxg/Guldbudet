@@ -263,7 +263,7 @@ function SellerPanel({ order }: { order: any }) {
   )
 }
 
-// Startar en A2A-betalning (Brite som första leverantör). Skickar dealern till
+// Startar handlarens betalning hos Stripe. Skickar dealern till
 // leverantörens hostade betalsida. Servern svarar 503 payments_not_configured
 // tills betalnycklarna är på plats, och då visar vi bara en lugn notis och
 // låter den befintliga omgående-texten stå kvar som fallback.

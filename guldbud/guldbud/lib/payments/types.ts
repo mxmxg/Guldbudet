@@ -1,10 +1,13 @@
 // Provider-agnostic dealer-payment layer.
 // The winning dealer pays their bid + commission + shipping (see lib/fees).
-// Each concrete provider (Brite first) implements PaymentProvider so the API
-// routes stay identical regardless of which A2A rail is live.
+// Each concrete provider implements PaymentProvider so the API routes stay
+// identical regardless of which rail is live.
 
 // Registered provider identifiers. Add new rails here as they are onboarded.
-export type PaymentProviderName = 'brite' | 'stripe'
+// Stripe is the only one today; the Brite adapter was removed on 2026-08-30
+// because it was never finished and its silent fallback disarmed the amount
+// check in the callback route.
+export type PaymentProviderName = 'stripe'
 
 // The two terminal states a provider can report back to us. (Orders start at
 // 'pending' the moment a payment session is created.) orders.payment_status can
