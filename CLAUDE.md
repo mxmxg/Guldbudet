@@ -495,6 +495,26 @@ villkoren att priset "kan justeras", vilket beskriver en köpare och inte en
 förmedlare. Nu lämnar handlaren ett nytt bud som säljaren får acceptera eller
 avböja. GuldBud fastställer aldrig priset.
 
+**Listningskraven ligger i en trigger, inte i en constraint.** En check-constraint
+kan inte läsa `profiles`, och identitetskravet behöver det.
+`enforce_listing_requirements` är därför en `before insert or update`-trigger
+på `items`, sist i schemafilen. Tre val är medvetna:
+
+- **INSERT kräver uppgifterna, UPDATE gör det inte.** Föremål som skapades
+  innan kolumnerna fanns har null. De ska fortfarande gå att godkänna och
+  sälja. UPDATE-grenen förbjuder däremot att ett satt värde nollas, så
+  historiken kan inte raderas i efterhand.
+- **Identitetskravet speglar klienten:** BankID eller angivet personnummer.
+  Databasen kan inte läsa `NEXT_PUBLIC_BANKID_ENABLED`, som är en
+  byggtidsflagga i webbläsaren. När BankID är skarpt skärps kravet genom att
+  ta bort or-grenen på den märkta raden.
+- **Adress och utbetalningsuppgifter kontrolleras inte där.** De behövs först
+  vid utbetalning, och den vägen har redan sin egen spärr.
+
+Följden: ett gammalt föremål utan `source_type` går inte att återlista med ett
+klick längre. Båda återlistningsvägarna fångar det och hänvisar till
+formuläret, i stället för att visa ett databasfel.
+
 **`paymentsConfigured()` kräver både nyckel och webhook-hemlighet.** Utan
 hemligheten bailar `verifyCallback` ut innan den tittar på något, så varje
 callback besvaras 400 och `dealer_paid_at` sätts aldrig. Handlaren hade betalat
@@ -532,10 +552,10 @@ först, flera rör spärrade filer.
 1. ~~Juristvarningen i `components/LegalPage.tsx`.~~ **Åtgärdad i PR #260.**
 2. ~~`lib/terms.ts` var inte höjd.~~ **Åtgärdad i PR #260**, versionen är
    `2026-08-29`, samma dag som villkoren senast ändrades i sak.
-3. Kravet på BankID, ägarintyg och förmedlingsuppdrag finns bara i
-   `app/customer/submit/page.tsx`. RLS-policyn på `items` kräver bara ägarskap,
-   och kolumnerna är nullable. Ett anrop förbi den sidan tar med sig hela den
-   rättsliga konstruktionen. **Detta är det tyngsta kvarvarande fyndet.**
+3. Kravet på BankID, ägarintyg och förmedlingsuppdrag fanns bara i
+   `app/customer/submit/page.tsx`. Spärren `enforce_listing_requirements` är
+   **skriven i PR #264 men inte körd mot databasen.** Tills SQL:en körts i
+   Supabase gäller fyndet fortfarande fullt ut. Se beslutsloggen.
 4. ~~Återlistning skapade föremål utan uppdrag.~~ **Åtgärdad i PR #260.**
    Ursprunget ärvs, medan ägarintyg och uppdrag sätts på nytt eftersom
    publiceringen är instruktionen.
