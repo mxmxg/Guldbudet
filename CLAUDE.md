@@ -179,7 +179,10 @@ och innan du påstår något om bolagets status.
 
 - Vercel (drift), Supabase (databas, auth, lagring)
 - Stripe (kortbetalning), under granskning sedan 2026-08-28 i kategorin
-  ädelmetaller. Live-nycklar är ännu inte inlagda i Vercel.
+  ädelmetaller. **Testnycklar ligger i Vercel sedan 2026-08-26 och ska ersättas
+  med skarpa.** Att `STRIPE_SECRET_KEY` och `STRIPE_WEBHOOK_SECRET` finns i
+  listan betyder alltså inte att live är påslaget. Värdena syns inte i Vercel,
+  de är av typen Secret, så avgör aldrig frågan genom att titta på listan.
 - Direkt banköverföring är planen på sikt, men **ingen sådan leverantör är
   inkopplad**. Brite-adaptern togs bort 2026-08-30, se beslutsloggen.
 - Resend (transaktionsmejl), Zoho (mänsklig inkorg)
