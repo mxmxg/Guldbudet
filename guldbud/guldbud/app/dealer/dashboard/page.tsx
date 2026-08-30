@@ -297,7 +297,7 @@ export default function DealerDashboard() {
                       className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0"
                     >
                       {o.items?.image_urls?.[0] && (
-                        <Image src={o.items.image_urls[0]} alt="" fill className="object-contain" />
+                        <Image src={o.items.image_urls[0]} alt="" fill sizes="64px" className="object-contain" />
                       )}
                     </Link>
                     <div className="flex-1 min-w-0">
@@ -373,7 +373,7 @@ export default function DealerDashboard() {
                     className="w-full sm:w-40 h-40 sm:h-auto flex-shrink-0 bg-gradient-to-br from-espresso-800 to-espresso-600 relative group"
                   >
                     {item.image_urls?.[0] ? (
-                      <Image src={item.image_urls[0]} alt={item.title} fill className="object-contain group-hover:scale-105 transition-transform duration-500" />
+                      <Image src={item.image_urls[0]} alt={item.title} fill sizes="(max-width: 640px) 100vw, 160px" className="object-contain group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="flex items-center justify-center h-full"><CategoryIcon category={item.category} size={40} className="text-gold-500/40" strokeWidth={1.2} /></div>
                     )}

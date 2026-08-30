@@ -137,7 +137,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
         <div className="card p-6 grid sm:grid-cols-[auto_1fr] gap-6">
           <div className="w-full sm:w-32 h-32 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
             {item?.image_urls?.[0] && (
-              <Image src={item.image_urls[0]} alt={item.title} fill className="object-contain" />
+              <Image src={item.image_urls[0]} alt={item.title} fill sizes="(max-width: 640px) 100vw, 128px" className="object-contain" />
             )}
           </div>
           <div>
