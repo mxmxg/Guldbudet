@@ -7,12 +7,16 @@ import Footer from '@/components/Footer'
 import Image from 'next/image'
 import Link from 'next/link'
 import { KARAT_OPTIONS, estimateRange, formatSEK, isPlatinum } from '@/lib/gold'
+import { useGoldPrice } from '@/lib/useGoldPrice'
 import { CATEGORIES, GEMSTONES } from '@/lib/catalog'
 import { SOURCE_OPTIONS } from '@/lib/aml'
 import { TERMS_VERSION } from '@/lib/terms'
 import { CheckIcon } from '@/components/Icons'
 
 export default function SubmitPage() {
+  // 24K-priset per gram, live. Faller tillbaka på riktvärdet i lib/gold
+  // tills /api/gold-price svarat.
+  const { price: spot } = useGoldPrice()
   const router = useRouter()
   const supabase = createClient()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -86,8 +90,8 @@ export default function SubmitPage() {
   const est = useMemo(() => {
     const w = parseFloat(weight)
     if (!w || !karat) return null
-    return estimateRange(w, karat)
-  }, [weight, karat])
+    return estimateRange(w, karat, spot)
+  }, [weight, karat, spot])
 
   const handleFiles = (newFiles: FileList | null) => {
     if (!newFiles) return

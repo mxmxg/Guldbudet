@@ -722,6 +722,47 @@ hamnar i varje loggrad den passerar, och det var samma hemlighet som skyddar
 mejlwebhooken. Adminknappen använde redan Bearer, så den påverkades inte.
 Direktanrop via URL fungerar däremot inte längre.
 
+**Guldkursen visas bara där den finns, aldrig simulerad.** `/api/gold-price`
+levererar tre saker: priset, `changePct` mot gårdagens stängning, och `live`
+som säger om det är kursen eller reservkonstanten. Alla tre ska respekteras.
+
+`LiveGoldPrice` la tidigare tre sinusvågor ovanpå baspriset, ritade en sparkline
+av dem och räknade fram "X procent idag" ur avståndet mellan det vandrande
+värdet och basen. Ingen av siffrorna kom från en marknad. Det stod på
+`/guider/guldpris-idag`, alltså exakt den sida där en besökare litar mest på
+talet. `GoldTicker` hade redan tagit bort samma sak av samma skäl.
+
+Sparklinen är borttagen och ska inte tillbaka utan en källa. Vi har ett pris nu
+och en dagsförändring, ingen historik över dagen. En kurva utan data är
+dekoration som utger sig för att vara mätning. Vill man ha den behövs faktiska
+sparade mätpunkter, alltså en tabell och ett schemalagt jobb.
+
+Rörelsesiffran visas nu bara när `changePct` inte är null.
+
+**Kursen ska alltid komma från marknaden.** Cachen i `/api/gold-price` är en
+minut, och `useGoldPrice` hämtar om lika ofta, så en öppen sida följer
+marknaden i stället för att frysa vid första hämtningen. Tätare än så ger
+inget: källorna uppdaterar ungefär i den takten.
+
+Reservkonstanten finns kvar för att gränssnittet inte ska gå sönder, men den
+får aldrig presenteras som en kurs. Är `live` false säger `LiveGoldPrice`,
+`GoldTicker` och metallvärdet i `AuctionDetails` alla "riktvärde" i stället.
+Lägger du till en ny yta som visar priset: läs `live`, inte bara `price`.
+
+**Konstanten 1295 kr per gram är ett reservvärde, inte en kurs.** Den bor i
+`GOLD_SPOT_SEK_PER_GRAM` och är default-argumentet i `meltValue` och
+`estimateRange`. Just därför blev den fel överallt: den som glömde skicka in
+kursen fick tyst ett hårdkodat tal, medan rutan bredvid sa "vid dagens kurs".
+
+Alla sju anropsställen skickar nu in `useGoldPrice()`. Ska ett nytt läggas till,
+skicka med kursen. Konstanten ska bara nås genom att `/api/gold-price`
+misslyckas.
+
+`/admin/overvakning` är ett undantag värt att förstå: den jämför avslutade
+affärer mot en uppskattning, men vi sparar ingen historisk kurs, så jämförelsen
+görs mot dagens. Det är trubbigt för äldre affärer och står nu utskrivet i
+gränssnittet i stället för att låtsas vara exakt.
+
 **Bildkrympningen i adminpanelen** (`/api/admin/optimize-images`) byggdes för
 att krympa redan uppladdade råa telefonfoton innan transformeringen fanns. Den
 skriver över originalen. Med transformeringen på är originalet det som
@@ -731,10 +772,11 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Femton är åtgärdade: tre
-i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270 och sex i
-#271.** Därmed är både pengar och juridik, och personuppgifter och identitet,
-helt stängda. Kvar är trasig funktion, ärliga siffror och städning.
+Funna i en genomgång av hela kodbasen 2026-08-30. **Sjutton är åtgärdade: tre
+i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i #271
+och två i #273.** Därmed är pengar och juridik, personuppgifter och identitet,
+samt två av tre om ärliga siffror stängda. Kvar är trasig funktion, påståendet
+om BankID-verifierade handlare, och städning.
 Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
@@ -820,14 +862,14 @@ eftersom loggen skrivs före utlämnandet och stoppar det om den misslyckas.
 
 **Rör löftet om ärliga siffror**
 
-22. `LiveGoldPrice.tsx:9` lägger på tre sinusvågor ovanpå baspriset och visar
-    en påhittad dagsförändring. Den renderas på `/guider/guldpris-idag`, en
-    sida som utger sig för att visa faktiskt guldpris. `GoldTicker.tsx:12`
-    tog uttryckligen bort samma sak med motiveringen att den krockade med
-    löftet om ärliga siffror.
-23. "Metallvärde vid dagens kurs" använder inte dagens kurs utan konstanten
-    1295 kr per gram. Gäller `AuctionDetails`, `dealer/dashboard`, `admin` och
-    `overvakning`. Bara `ValueEstimator` använder live-priset.
+22. ~~`LiveGoldPrice.tsx` lägger på tre sinusvågor och visar en påhittad
+    dagsförändring.~~ **Åtgärdad i PR #273.** Vågorna och sparklinen är borta,
+    och komponenten visar leverantörens verkliga `changePct`, eller ingenting
+    när den saknas.
+23. ~~"Metallvärde vid dagens kurs" använder konstanten 1295 kr per gram.~~
+    **Åtgärdad i PR #273.** Samtliga sju anropsställen skickar nu in
+    live-kursen. Konstanten finns kvar enbart som reservvärde i `lib/gold.ts`
+    och som startvärde i `useGoldPrice`.
 24. `components/HomeContent.tsx:344` säger "BankID-verifierade handlare".
     Handlare går aldrig genom BankID-flödet.
 

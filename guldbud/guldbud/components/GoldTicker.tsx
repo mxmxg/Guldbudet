@@ -15,7 +15,7 @@ function fmt(n: number) {
  * Desktop: statisk rad. Mobil: scrollande marquee (pausas vid prefers-reduced-motion).
  */
 export default function GoldTicker() {
-  const { price, changePct, up } = useGoldPrice()
+  const { price, changePct, up, live } = useGoldPrice()
   const karats = karatPrices(price)
 
   const Label = () => (
@@ -24,7 +24,9 @@ export default function GoldTicker() {
         <span className="absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-70 animate-pulse-ring" />
         <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold-400" />
       </span>
-      <span className="font-semibold tracking-wide uppercase text-[10px]">Guldpris live</span>
+      <span className="font-semibold tracking-wide uppercase text-[10px]">
+        {live ? 'Guldpris live' : 'Guldpris riktvärde'}
+      </span>
     </span>
   )
 

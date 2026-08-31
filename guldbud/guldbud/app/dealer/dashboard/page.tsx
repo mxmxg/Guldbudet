@@ -12,6 +12,7 @@ import { GemIcon } from '@/components/Icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
+import { useGoldPrice } from '@/lib/useGoldPrice'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal, feesAt } from '@/lib/fees'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
@@ -19,6 +20,9 @@ import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
 const INCREMENTS = [100, 250, 500, 1000]
 
 export default function DealerDashboard() {
+  // 24K-priset per gram, live. Faller tillbaka på riktvärdet i lib/gold
+  // tills /api/gold-price svarat.
+  const { price: spot } = useGoldPrice()
   const router = useRouter()
   const supabase = createClient()
   const [items, setItems] = useState<Item[]>([])
@@ -360,7 +364,7 @@ export default function DealerDashboard() {
               const mine = myBids[item.id]
               const isWinning = mine && mine === top
               const count = bidCounts[item.id] || 0
-              const est = estimateRange(item.weight_grams || 0, item.karat || '')
+              const est = estimateRange(item.weight_grams || 0, item.karat || '', spot)
               return (
                 <div
                   key={item.id}
