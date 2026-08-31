@@ -10,11 +10,6 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  // sharp är en native-modul och ska laddas från node_modules i runtime, inte
-  // bundlas in (används i engångs-routen /api/admin/optimize-images).
-  experimental: {
-    serverComponentsExternalPackages: ['sharp'],
-  },
   images: {
     // Egen loader (lib/imageLoader.js): routar Supabase-bilder genom render/image-
     // transformendpointen NÄR NEXT_PUBLIC_SUPABASE_IMAGE_TRANSFORM='true' (kräver

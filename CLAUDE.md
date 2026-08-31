@@ -334,8 +334,9 @@ noll rader utan felmeddelande.
   anon-klient, eftersom `revalidate = 30` kräver det
 
 **Servicerollen** används i sju API-rutter för att gå förbi RLS med avsikt:
-bankid-callbacken, betalrutterna, fakturarutterna, mejlrutten och
-bildverktyget. Den lämnar aldrig servern.
+bankid-callbacken, båda betalrutterna, båda fakturarutterna, mejlrutten och
+auktionsavslutet. Den lämnar aldrig servern. Bildverktyget var den åttonde och
+är borttaget, se beslutsloggen.
 
 ---
 
@@ -887,10 +888,28 @@ kör funktionen med servicerollen. **Ge inte tillbaka rätten till
 `authenticated`** för att "fixa" ett liknande fel: det öppnar funktionen för
 varje inloggad användare. Gör en rutt.
 
-**Bildkrympningen i adminpanelen** (`/api/admin/optimize-images`) byggdes för
-att krympa redan uppladdade råa telefonfoton innan transformeringen fanns. Den
-skriver över originalen. Med transformeringen på är originalet det som
-Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
+**Bildkrympningen i adminpanelen är borttagen 2026-08-31.** Beslutat av
+användaren. `/api/admin/optimize-images`, `components/ImageOptimizeButton.tsx`
+och knappen i `/admin` är borta, liksom `sharp`, som bara den rutten använde.
+
+Verktyget byggdes för att krympa redan uppladdade råa telefonfoton innan
+transformeringen fanns, och det skrev över originalen. Med transformeringen på
+är originalet det som Supabase skalar ifrån, så varje körning hade sänkt
+källkvaliteten permanent för alla framtida storlekar. Det förstörde alltså sin
+egen förutsättning.
+
+Uppladdningens nedskalning till 2560 px vid kvalitet 0,92 i webbläsaren är en
+annan sak och finns kvar. Se posten om bilderna ovan.
+
+**Vercels plan har ingenting med bilderna att göra.** `next.config.js` sätter
+`loader: 'custom'`, så Vercels bildoptimering används aldrig, oavsett plan.
+Det som krävs för skalade bilder är Supabase Pro, som finns, plus att
+`NEXT_PUBLIC_SUPABASE_IMAGE_TRANSFORM` är exakt `true` i Vercel följt av en
+omdeploy. Miljövariabler kostar ingenting på någon Vercel-plan.
+
+Så avgörs läget utan att gissa: titta på en annonsbilds adress. Står det
+`/storage/v1/render/image/public/` med `width=` är transformeringen på, står
+det `/storage/v1/object/public/` är flaggan av och originalet levereras.
 
 **Ingen chattwidget på sajten. Avskrivet 2026-08-31.** Frågan gällde en
 bemannad chattruta av Weplys typ, alltså en tjänst där utomstående svarar i
