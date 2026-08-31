@@ -66,3 +66,12 @@ export function normalizeSsn(raw: string | null | undefined): string | null {
 export function isValidSsn(raw: string | null | undefined): boolean {
   return normalizeSsn(raw) !== null
 }
+
+// Är BankID skarpt? Byggtidsflagga, bakas in i webbläsarbundlen.
+//
+// Ligger här som en enda export i stället för att jämförelsen upprepas i varje
+// komponent som behöver den. Fyra ytor läser den nu: säljarens listningsgrind,
+// handlarens budruta, handlarpanelen och verifieringssidan. Databasen kan inte
+// läsa den alls, så motsvarande krav i schemat är skrivet för hand och märkt
+// med var or-grenen ska bort på lanseringsdagen.
+export const BANKID_LIVE = process.env.NEXT_PUBLIC_BANKID_ENABLED === 'true'

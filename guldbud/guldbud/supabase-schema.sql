@@ -225,12 +225,53 @@ create policy "admins manage all items" on public.items
   for all using (public.is_admin());
 
 -- ---- Bids ----
+-- ---------------------------------------------------------------------------
+-- Vem som får buda. Ett predikat, inte tre kopior.
+--
+-- Startsidan lovar "BankID-verifierade handlare". Kravet fanns inte: en
+-- handlare kom in via ett formulär och admins godkännande och gick aldrig genom
+-- BankID-flödet. Nu är löftet en spärr.
+--
+-- Regeln behövs på tre ställen: buda, sätta autobud, och när ett autobud löses
+-- ut. Tre kopior glider isär, och på lanseringsdagen ska kravet skärpas på ett
+-- ställe, inte tre.
+--
+-- Precis som listningskravet för säljaren speglar den här klienten: BankID
+-- ELLER angivet personnummer. Databasen kan inte läsa
+-- NEXT_PUBLIC_BANKID_ENABLED, som är en byggtidsflagga i webbläsaren.
+-- NÄR BANKID ÄR SKARPT: ta bort or-grenen på den märkta raden.
+-- ---------------------------------------------------------------------------
+create or replace function public.dealer_may_bid(p_dealer uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+      from public.profiles p
+     where p.id = p_dealer
+       and p.role = 'dealer'
+       and p.approved = true
+       and p.suspended = false
+       -- Identitetskravet. Ta bort or-grenen nar BankID ar skarpt.
+       and (p.identity_verified is true
+            or (p.personal_number is not null and btrim(p.personal_number) <> ''))
+  );
+$$;
+
+-- Predikatet måste gå att köra av den inloggade användaren, annars kan policyn
+-- nedan inte utvärderas. Det är en ren läsning som bara svarar ja eller nej,
+-- och lämnar inget ut.
+grant execute on function public.dealer_may_bid(uuid) to authenticated;
+
 -- Endast godkända handlare får buda, och bara på aktiva auktioner vars
 -- sluttid inte passerat. Stoppar bud efter auktionens slut på servernivå.
 drop policy if exists "dealers can bid" on public.bids;
 create policy "dealers can bid" on public.bids
   for insert with check (
-    exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'dealer' and p.approved = true and p.suspended = false)
+    public.dealer_may_bid(auth.uid())
     and exists (
       select 1 from public.items i
       where i.id = item_id
@@ -307,7 +348,7 @@ create policy "dealers set own autobid" on public.auto_bids
   for all using (auth.uid() = dealer_id)
   with check (
     auth.uid() = dealer_id
-    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'dealer' and p.approved = true and p.suspended = false)
+    and public.dealer_may_bid(auth.uid())
     and exists (
       select 1 from public.items i
       where i.id = item_id and i.status = 'active'
@@ -348,7 +389,10 @@ begin
       select ab.dealer_id, ab.max_amount as m
         from public.auto_bids ab
         join public.profiles p on p.id = ab.dealer_id
-       where ab.item_id = p_item and p.role = 'dealer' and p.approved = true and p.suspended = false
+       -- Samma predikat som budpolicyn, inklusive identitetskravet: ett
+       -- autobud som lades innan kravet fanns ska inte kunna losa ut ett bud
+       -- fran en handlare som inte far buda idag.
+       where ab.item_id = p_item and public.dealer_may_bid(ab.dealer_id)
       union all
       select b.dealer_id, b.amount from public.bids b where b.item_id = p_item
     ) x group by dealer_id

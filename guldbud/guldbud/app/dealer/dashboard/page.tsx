@@ -13,6 +13,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
 import { useGoldPrice } from '@/lib/useGoldPrice'
+import { BANKID_LIVE } from '@/lib/identity'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, dealerTotal, feesAt } from '@/lib/fees'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
@@ -247,6 +248,27 @@ export default function DealerDashboard() {
       </div>
 
       <div className="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+        {/* Handlaren måste vara legitimerad med BankID för att få buda.
+            Databasen stoppar budet via dealer_may_bid; det här är beskedet om
+            varför, och vägen dit. Panelen är fortfarande läsbar: att kunna se
+            auktionerna är det som gör att en ny handlare orkar legitimera sig. */}
+        {BANKID_LIVE && profile && !profile.identity_verified && (
+          <div className="mb-6 rounded-2xl bg-amber-50 border border-amber-200 p-5">
+            <p className="font-medium text-amber-800 mb-1">Legitimera dig med BankID för att kunna buda</p>
+            <p className="text-sm text-amber-700 leading-relaxed">
+              Säljarna hos oss är privatpersoner, och vi lovar dem att varje handlare är legitimerad.
+              Du kan titta på auktionerna redan nu, men bud går inte igenom förrän du är verifierad.
+              Det tar en minut och behöver bara göras en gång.
+            </p>
+            <Link
+              href="/verifiering"
+              className="inline-block mt-3 bg-gold-500 hover:bg-gold-600 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition"
+            >
+              Legitimera med BankID
+            </Link>
+          </div>
+        )}
+
         {/* Tabs — scroll within their own row on small screens */}
         <div className="-mx-4 px-4 mb-6 overflow-x-auto no-scrollbar">
         <div className="flex gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-max shadow-soft">
