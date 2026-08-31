@@ -49,6 +49,14 @@ export default async function AuctionPage({ params }: { params: { id: string } }
     .limit(1)
   const topBid = topBids?.[0]?.amount || 0
 
+  // Är säljaren legitimerad med BankID? Hämtas via en security definer-funktion
+  // som bara ger tillbaka ett ja eller nej. Att i stället läsa profiles hade
+  // krävt en läspolicy, och RLS kan inte begränsa kolumner, så hela raden hade
+  // blivit läsbar. Se noten i schemat vid "public reads dealer names".
+  const { data: sellerVerified } = await supabase.rpc('item_seller_verified', {
+    p_item: params.id,
+  })
+
   // Reservationsnivån (min_price) skickas bara till ägaren själv. För alla andra
   // skalas talet bort och ersätts med booleaner, så köpare aldrig ser nivån.
   const {
@@ -129,7 +137,7 @@ export default async function AuctionPage({ params }: { params: { id: string } }
       <JsonLd data={productLd} />
       <JsonLd data={breadcrumbLd} />
       <Navbar />
-      <AuctionDetails item={clientItem} />
+      <AuctionDetails item={clientItem} sellerVerified={!!sellerVerified} />
     </div>
   )
 }

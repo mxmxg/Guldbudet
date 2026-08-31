@@ -14,6 +14,7 @@ import Footer from '@/components/Footer'
 import { GemIcon, HourglassIcon, CheckIcon } from '@/components/Icons'
 import { estimateRange, formatSEK, isPlatinum } from '@/lib/gold'
 import { useGoldPrice } from '@/lib/useGoldPrice'
+import VerifiedBadge from '@/components/VerifiedBadge'
 
 function relTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime()
@@ -25,7 +26,16 @@ function relTime(iso: string) {
   return `${Math.floor(h / 24)} d sedan`
 }
 
-export default function AuctionDetails({ item }: { item: any }) {
+export default function AuctionDetails({
+  item,
+  sellerVerified = false,
+}: {
+  item: any
+  /** Har säljaren legitimerat sig med BankID? Kommer från servern via
+      item_seller_verified, som bara ger ett ja eller nej och aldrig något ur
+      profilen. */
+  sellerVerified?: boolean
+}) {
   // 24K-priset per gram, live. Faller tillbaka på riktvärdet i lib/gold
   // tills /api/gold-price svarat.
   const { price: spot, live: spotLive } = useGoldPrice()
@@ -378,6 +388,21 @@ export default function AuctionDetails({ item }: { item: any }) {
                   </div>
                 )}
               </div>
+
+              {/* Vem man handlar med. Säljaren är och förblir anonym, men att hen
+                  legitimerat sig är det som gör att en handlare vågar buda på
+                  gods från någon de aldrig träffat. Visas inte för säljaren
+                  själv, som redan ser sitt märke på profilen. */}
+              {!isOwner && (
+                <div className="mt-4 pt-4 border-t border-espresso-100 flex flex-wrap items-center gap-3 text-xs text-espresso-500">
+                  <VerifiedBadge
+                    verified={sellerVerified}
+                    label="Säljaren är legitimerad med BankID"
+                    unverifiedLabel="Säljaren är inte legitimerad än"
+                  />
+                  <span>Privatperson. Namn och adress lämnas ut först efter genomförd affär.</span>
+                </div>
+              )}
 
               {/* indicative value + reserve */}
               <div className="mt-4 pt-4 border-t border-espresso-100 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-espresso-500">
