@@ -1,5 +1,5 @@
 -- ============================================================
--- GuldBud – Supabase Schema
+-- GuldBud, Supabase Schema
 -- Kör hela filen i Supabase > SQL Editor.
 -- Säker att köra på nytt: använder "if not exists" där det går.
 -- ============================================================
@@ -202,7 +202,7 @@ create policy "admins manage all profiles" on public.profiles
 
 -- SÄKERHET: Tidigare fanns en policy "public reads dealer names" som gjorde
 -- HELA handlarraden (personnummer, adress, telefon, e-post, org.nr) läsbar för
--- vem som helst – RLS kan inte begränsa kolumner. Vi tar bort den. Handlare
+-- vem som helst, RLS kan inte begränsa kolumner. Vi tar bort den. Handlare
 -- visas ändå bara som anonyma kundnummer publikt, så ingen behöver läsa
 -- handlarprofiler. Admin läser allt via is_admin, handlaren läser sin egen.
 drop policy if exists "public reads dealer names" on public.profiles;
@@ -598,7 +598,7 @@ declare
 begin
   select owner_id, title into v_owner, v_title from public.items where id = new.item_id;
 
-  -- Notify owner – men inte om ägaren själv råkar vara budgivaren.
+  -- Notify owner, men inte om ägaren själv råkar vara budgivaren.
   if v_owner is not null and v_owner <> new.dealer_id then
     insert into public.notifications (user_id, title, message, item_id, link)
     values (v_owner, 'Nytt bud på ditt föremål',
@@ -1208,7 +1208,7 @@ create trigger on_order_release_guard
 
 -- Modellen: säljaren gör affär med GuldBud och skickar in direkt vid accept.
 -- Vi står bakom affären mot säljaren; handlaren är vår verifierade leverantörssida.
--- (Tidigare fas 3-trigger som väntade in handlarens betalning togs bort – säljaren
+-- (Tidigare fas 3-trigger som väntade in handlarens betalning togs bort, säljaren
 -- ska aldrig uppleva att vi tvekar på handlaren.)
 drop trigger if exists on_dealer_paid on public.orders;
 drop function if exists public.notify_dealer_paid();
@@ -1221,7 +1221,7 @@ drop function if exists public.notify_on_bid();
 drop function if exists public.notify_on_outbid();
 
 -- ============================================================
--- Obetalda affärer – påminnelser och avstängning av handlare som backar.
+-- Obetalda affärer, påminnelser och avstängning av handlare som backar.
 -- Handlaren betalar vid vinst. Betalar hen inte i tid skickar vi först en
 -- påminnelse (max en per dygn) och avbryter sedan affären efter en frist.
 -- ============================================================
@@ -1252,7 +1252,7 @@ begin
       -- Sätt status='cancelled' så affären lämnar det öppna flödet och grenen
       -- inte kan fyra igen varje timme (loopen exkluderar 'cancelled').
       update public.orders
-        set status = 'cancelled', cancel_reason = 'Betalning uteblev – handlaren avstängd', updated_at = now()
+        set status = 'cancelled', cancel_reason = 'Betalning uteblev, handlaren avstängd', updated_at = now()
         where id = o.id;
 
       insert into public.notifications (user_id, title, message, item_id, link)
@@ -1386,7 +1386,7 @@ end $$;
 
 -- ============================================================
 -- Tvistehantering ("ärenden"): en part i en affär kan formellt
--- anmäla ett problem. Skilt från order_messages (löpande prat) –
+-- anmäla ett problem. Skilt från order_messages (löpande prat),
 -- en tvist har en orsak, en status och en lösning, så plattformen
 -- har spårbarhet på vad som gått fel och hur det lösts. Endast admin
 -- avgör; parten skriver bara in ärendet.
@@ -1429,7 +1429,7 @@ create policy "parties read own disputes" on public.disputes
 
 -- En part öppnar en tvist på sin egen affär, och bara i sin egen roll
 -- (säljaren som 'seller', handlaren som 'dealer'). raised_by måste vara
--- en själv. Parten kan inte uppdatera/avgöra – det gör bara admin.
+-- en själv. Parten kan inte uppdatera/avgöra, det gör bara admin.
 drop policy if exists "parties open own disputes" on public.disputes;
 create policy "parties open own disputes" on public.disputes
   for insert with check (
@@ -1663,7 +1663,7 @@ begin
 
     insert into public.notifications (user_id, title, message, item_id, link)
     select distinct b.dealer_id,
-           'Snart slut – du är överbjuden',
+           'Snart slut, du är överbjuden',
            '"' || r.title || '" avslutas inom 10 minuter och du är inte högsta bud just nu. Höj ditt bud för att ta ledningen innan det är för sent.',
            r.id,
            '/auctions/' || r.id

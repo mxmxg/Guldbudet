@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
         data: { user },
       } = await sb.auth.getUser(token)
       if (user) {
-        // Slå upp rollen med service role – RLS döljer profilen för ett
+        // Slå upp rollen med service role, RLS döljer profilen för ett
         // oautentiserat anon-anrop, så vi frågar rakt via REST med den
         // redan validerade user-iden.
         const r = await fetch(`${SB}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=role`, {

@@ -2,7 +2,7 @@
 import { useState } from 'react'
 
 // Delningskit för admins affärssida: en dynamiskt genererad Instagram-bild
-// plus en färdig, kopierbar bildtext. Halvautomatisk delning – admin
+// plus en färdig, kopierbar bildtext. Halvautomatisk delning, admin
 // granskar och postar själv (steg 2 mot full auto-postning).
 
 function groupSek(n: number): string {
@@ -56,9 +56,9 @@ export default function ShareKit({
       if (nav.canShare && nav.canShare({ files: [file] })) {
         await nav.share({ files: [file], text: caption })
       } else {
-        // Delning av filer stöds inte (t.ex. desktop) – ladda ner i stället.
+        // Delning av filer stöds inte (t.ex. desktop), ladda ner i stället.
         triggerDownload(blob)
-        setErr('Fildelning stöds inte här – bilden laddades ner i stället.')
+        setErr('Fildelning stöds inte här, bilden laddades ner i stället.')
       }
     } catch (e: any) {
       if (e?.name !== 'AbortError') setErr('Delning misslyckades. Prova Ladda ner i stället.')

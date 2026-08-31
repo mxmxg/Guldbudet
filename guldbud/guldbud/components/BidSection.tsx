@@ -79,7 +79,7 @@ export default function BidSection({
     } else {
       setMyAutoMax(val)
       setMaxBid('')
-      setAutoMsg('✓ Maxbud satt – vi budar åt dig upp till ' + val.toLocaleString('sv-SE') + ' kr.')
+      setAutoMsg('✓ Maxbud satt, vi budar åt dig upp till ' + val.toLocaleString('sv-SE') + ' kr.')
       if (onPlaced) await onPlaced()
       router.refresh()
     }
@@ -113,7 +113,7 @@ export default function BidSection({
     const val = parseInt(amount)
     setOk(false)
     if (endsAt && new Date(endsAt).getTime() < Date.now()) {
-      setMsg('Auktionen är avslutad – det går inte längre att buda.')
+      setMsg('Auktionen är avslutad, det går inte längre att buda.')
       return
     }
     if (!val || val <= currentTop) {
@@ -238,7 +238,7 @@ export default function BidSection({
         </button>
       </div>
 
-      {/* Buyer's premium — always visible, live total when a bid is entered */}
+      {/* Buyer's premium, always visible, live total when a bid is entered */}
       <div className="mt-3 rounded-xl bg-espresso-50 border border-espresso-100 px-3 py-2 text-xs text-espresso-500">
         {parseInt(amount) > 0 ? (
           <div className="flex flex-col gap-0.5">

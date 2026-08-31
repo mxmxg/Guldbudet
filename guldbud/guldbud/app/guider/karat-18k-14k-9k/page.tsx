@@ -34,22 +34,22 @@ export default function Page() {
       <H2>Karat = renhet</H2>
       <P>
         Rent guld är för mjukt för smycken, så det legeras (blandas) med andra metaller. Karat anger hur stor del som
-        är rent guld. Ofta står renheten som ett tresiffrigt tal – tusendelar rent guld – instämplat i föremålet.
+        är rent guld. Ofta står renheten som ett tresiffrigt tal, tusendelar rent guld, instämplat i föremålet.
       </P>
 
       <H2>Vanliga karat och stämplar</H2>
       <UL>
-        <li><strong>24K (999)</strong> – rent guld, 99,9 %. Mjukt, mest i mynt och tackor.</li>
-        <li><strong>22K (916)</strong> – 91,6 % guld. Vanligt i mynt och en del smycken.</li>
-        <li><strong>18K (750)</strong> – 75 % guld. Klassiskt för kvalitetssmycken.</li>
-        <li><strong>14K (585)</strong> – 58,5 % guld. Hårdare, tål slitage.</li>
-        <li><strong>9K (375)</strong> – 37,5 % guld. Vanligt i äldre och brittiska smycken.</li>
+        <li><strong>24K (999)</strong>, rent guld, 99,9 %. Mjukt, mest i mynt och tackor.</li>
+        <li><strong>22K (916)</strong>, 91,6 % guld. Vanligt i mynt och en del smycken.</li>
+        <li><strong>18K (750)</strong>, 75 % guld. Klassiskt för kvalitetssmycken.</li>
+        <li><strong>14K (585)</strong>, 58,5 % guld. Hårdare, tål slitage.</li>
+        <li><strong>9K (375)</strong>, 37,5 % guld. Vanligt i äldre och brittiska smycken.</li>
       </UL>
 
       <H2>Vad betyder det för värdet?</H2>
       <P>
         Värdet per gram följer guldhalten. Ett 18K-smycke innehåller dubbelt så mycket rent guld som ett lika tungt
-        9K-smycke – och är därför värt ungefär dubbelt så mycket i metall. Räkna på ditt föremål med{' '}
+        9K-smycke, och är därför värt ungefär dubbelt så mycket i metall. Räkna på ditt föremål med{' '}
         <A href="/#estimator">värderingskalkylatorn</A> vid <A href="/guider/guldpris-idag">dagens guldpris</A>.
       </P>
       <P>

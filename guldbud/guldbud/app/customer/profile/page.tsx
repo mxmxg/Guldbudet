@@ -91,7 +91,7 @@ export default function CustomerProfilePage() {
       .update({
         full_name: form.full_name,
         phone: form.phone || null,
-        // Personnummer är en identitetsuppgift – låst när det väl är satt.
+        // Personnummer är en identitetsuppgift, låst när det väl är satt.
         // (Skickas bara med om det ännu inte finns, så det kan sättas en gång.)
         ...(profile.personal_number ? {} : { personal_number: normalizeSsn(form.personal_number) }),
         address: form.address || null,

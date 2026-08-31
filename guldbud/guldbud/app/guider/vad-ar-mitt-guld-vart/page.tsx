@@ -39,7 +39,7 @@ export default function Page() {
       <H2>Så fungerar värderingen</H2>
       <P>
         Kalkylatorn tar vikten du fyller i, multiplicerar med guldhalten för din karat och med dagens guldpris. Det
-        ger ett <strong>indikativt metallvärde</strong> – ett riktmärke för vad föremålet borde vara värt.
+        ger ett <strong>indikativt metallvärde</strong>, ett riktmärke för vad föremålet borde vara värt.
       </P>
       <P>
         Det verkliga slutpriset avgörs sedan av <strong>konkurrensen mellan handlare</strong>. På{' '}
@@ -49,7 +49,7 @@ export default function Page() {
 
       <H2>Vad kan jag värdera?</H2>
       <UL>
-        <li>Guldsmycken – ringar, halsband, armband, örhängen</li>
+        <li>Guldsmycken, ringar, halsband, armband, örhängen</li>
         <li>Trasiga eller omoderna smycken (guldvärdet finns kvar ändå)</li>
         <li>Guldmynt och tackor</li>
         <li>Tandguld och arvegods</li>

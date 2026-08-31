@@ -126,7 +126,7 @@ export default function DealerDashboard() {
     const setErr = (m: string) => setBidError((p) => ({ ...p, [itemId]: m }))
     setBidError((p) => ({ ...p, [itemId]: '' }))
     if (item?.auction_ends_at && new Date(item.auction_ends_at).getTime() < Date.now()) {
-      setErr('Auktionen är avslutad – det går inte längre att buda.')
+      setErr('Auktionen är avslutad, det går inte längre att buda.')
       return
     }
     if (!amount || amount <= currentTop) {
@@ -180,7 +180,7 @@ export default function DealerDashboard() {
     } else {
       setAutoMax((prev) => ({ ...prev, [itemId]: val }))
       setMaxInputs((prev) => ({ ...prev, [itemId]: '' }))
-      // Resolvern kan ha budat åt dig direkt – läs om.
+      // Resolvern kan ha budat åt dig direkt, läs om.
       await refreshBids(user!.id)
     }
     setAutoBusy(null)
@@ -269,7 +269,7 @@ export default function DealerDashboard() {
           </div>
         )}
 
-        {/* Tabs — scroll within their own row on small screens */}
+        {/* Tabs, scroll within their own row on small screens */}
         <div className="-mx-4 px-4 mb-6 overflow-x-auto no-scrollbar">
         <div className="flex gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-max shadow-soft">
           {tabs.map((t) => (
@@ -437,7 +437,7 @@ export default function DealerDashboard() {
                           </span>
                         )}
                         <span className="text-espresso-400 text-xs">
-                          Est. utbetalning {formatSEK(est.low)}–{formatSEK(est.high)}
+                          Est. utbetalning {formatSEK(est.low)}-{formatSEK(est.high)}
                         </span>
                       </div>
                     </div>

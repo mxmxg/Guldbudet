@@ -80,7 +80,7 @@ export default function AdminPage() {
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
       // Bara aktiva auktioner. Så fort ett bud godkänts blir föremålet en
-      // affär (status 'closed' + order) och hanteras under Affärer i stället –
+      // affär (status 'closed' + order) och hanteras under Affärer i stället,
       // det ska inte skräpa i auktionslistan.
       const { data: active } = await supabase
         .from('items')
@@ -99,7 +99,7 @@ export default function AdminPage() {
       // Affärsvolym = värdet på alla affärer som inte avbrutits.
       const settled = (allOrders || []).filter((o: any) => o.status !== 'cancelled')
       // Provisionsintäkt = realiserad. Handlarens betalning är registrerad
-      // (dealer_paid_at) ELLER affären är slutförd – en affär kan inte nå
+      // (dealer_paid_at) ELLER affären är slutförd, en affär kan inte nå
       // 'completed' utan att betalningen passerat spärren, så slutförd innebär
       // alltid att provisionen är intjänad (även om paid-flaggan råkat nollas).
       const isRealized = (o: any) => o.status === 'completed' || !!o.dealer_paid_at
@@ -165,7 +165,7 @@ export default function AdminPage() {
         setBidCounts(counts)
       }
 
-      // KPI: snittbud per objekt – marknadens viktigaste hälsomätvärde. Räknas
+      // KPI: snittbud per objekt, marknadens viktigaste hälsomätvärde. Räknas
       // över alla föremål som gått till auktion (aktiva + avslutade) via DB-
       // funktionen bid_kpi_summary, som aggregerar server-side i en query i
       // stället för att hämta alla items + alla deras bud (som växer med hela
@@ -376,7 +376,7 @@ export default function AdminPage() {
             {item.status === 'closed' ? (
               <span className="chip bg-espresso-100 text-espresso-500">Avslutad</span>
             ) : ended ? (
-              <span className="chip bg-amber-100 text-amber-700">Slut – inväntar säljare</span>
+              <span className="chip bg-amber-100 text-amber-700">Slut, inväntar säljare</span>
             ) : (
               <span className="chip bg-emerald-100 text-emerald-700">Aktiv</span>
             )}
@@ -389,7 +389,7 @@ export default function AdminPage() {
             <p className="text-xs text-espresso-500 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
               <span>
                 Säljare:{' '}
-                <span className="font-medium text-espresso-800">{sellers[item.owner_id].full_name || '—'}</span>
+                <span className="font-medium text-espresso-800">{sellers[item.owner_id].full_name || '-'}</span>
                 {sellers[item.owner_id].city ? ` · ${sellers[item.owner_id].city}` : ''}
               </span>
               {sellers[item.owner_id].email && (
@@ -582,7 +582,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Att göra – allt som kräver åtgärd, med hopplänkar så inget glöms */}
+        {/* Att göra, allt som kräver åtgärd, med hopplänkar så inget glöms */}
         {(() => {
           const awaitingCount = liveItems.filter((i) => isEnded(i)).length
           const todos = [
@@ -629,7 +629,7 @@ export default function AdminPage() {
           )
         })()}
 
-        {/* Snittbud per objekt – marknadens viktigaste hälsomätvärde */}
+        {/* Snittbud per objekt, marknadens viktigaste hälsomätvärde */}
         {(() => {
           const h = bidHealth(bidKpi.avg, bidKpi.total)
           const pct = (n: number) => (bidKpi.objects ? Math.round((n / bidKpi.objects) * 100) : 0)
@@ -643,7 +643,7 @@ export default function AdminPage() {
               <div className="flex items-end gap-6 flex-wrap">
                 <div>
                   <p className={`font-display text-4xl tabular-nums leading-none ${h.color}`}>
-                    {bidKpi.total > 0 ? bidKpi.avg.toFixed(1) : '–'}
+                    {bidKpi.total > 0 ? bidKpi.avg.toFixed(1) : '-'}
                   </p>
                   <p className="text-xs text-espresso-400 mt-1.5">
                     {bidKpi.total} bud på {bidKpi.objects} auktioner
@@ -651,9 +651,9 @@ export default function AdminPage() {
                 </div>
                 <div className="h-11 w-px bg-espresso-100" />
                 <MiniStat value={`${pct(bidKpi.threePlus)}%`} label="med 3+ bud" tone="emerald" />
-                <MiniStat value={`${pct(bidKpi.zeroOne)}%`} label="med 0–1 bud" tone="amber" />
+                <MiniStat value={`${pct(bidKpi.zeroOne)}%`} label="med 0-1 bud" tone="amber" />
               </div>
-              {/* Skala 0–5 med tröskelmarkeringar (1.8 börjar funka, 3.2 stark) */}
+              {/* Skala 0-5 med tröskelmarkeringar (1.8 börjar funka, 3.2 stark) */}
               <div className="mt-5">
                 <div className="relative h-2 rounded-full bg-espresso-100 overflow-hidden">
                   <div className={`h-full rounded-full transition-all ${h.bar}`} style={{ width: `${fill}%` }} />
@@ -672,7 +672,7 @@ export default function AdminPage() {
                 >
                   <span>
                     <span className="font-semibold">{bidKpi.liveStarving}</span>{' '}
-                    {bidKpi.liveStarving === 1 ? 'aktiv auktion' : 'aktiva auktioner'} har ännu 0–1 bud. Pusha fler
+                    {bidKpi.liveStarving === 1 ? 'aktiv auktion' : 'aktiva auktioner'} har ännu 0-1 bud. Pusha fler
                     handlare att buda.
                   </span>
                   <span aria-hidden className="shrink-0">→</span>
@@ -859,7 +859,7 @@ export default function AdminPage() {
                         </p>
                       )}
                       <p className="text-xs text-espresso-400 mt-1">
-                        {sellers[item.owner_id]?.full_name || '—'}
+                        {sellers[item.owner_id]?.full_name || '-'}
                         {sellers[item.owner_id]?.email ? ` · ${sellers[item.owner_id].email}` : ''}
                       </p>
                       {item.description && (
@@ -887,7 +887,7 @@ export default function AdminPage() {
           )}
         </section>
 
-        {/* Active / closed auctions — manage & delete */}
+        {/* Active / closed auctions, manage & delete */}
         {(() => {
           const q = search.trim().toLowerCase()
           const match = (i: any) =>
@@ -1029,13 +1029,13 @@ function Info({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
       <dt className="text-[11px] uppercase tracking-wide text-espresso-400">{label}</dt>
-      <dd className="text-espresso-800 break-words">{value || '—'}</dd>
+      <dd className="text-espresso-800 break-words">{value || '-'}</dd>
     </div>
   )
 }
 
 // Hälsobedömning av snittbud per objekt, mot marknadströsklarna:
-// <1,8 svagt · 1,8–3,2 börjar funka · 3,2–5 stark · 5+ mycket stark.
+// <1,8 svagt · 1,8-3,2 börjar funka · 3,2-5 stark · 5+ mycket stark.
 function bidHealth(avg: number, total: number) {
   if (total === 0)
     return { label: 'Inga bud än', chip: 'bg-espresso-100 text-espresso-500', color: 'text-espresso-300', bar: 'bg-espresso-200' }

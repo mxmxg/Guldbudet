@@ -11,7 +11,7 @@ const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001'
 
 // Enkel rate limit per användare (best-effort per serverinstans). Skyddar den
 // betalda AI-modellen mot loop-missbruk. Legitimt annonsflöde gör bara ett fåtal
-// anrop, så taket är rymligt. En instans kan nollställas vid cold start – det är
+// anrop, så taket är rymligt. En instans kan nollställas vid cold start, det är
 // ok, det verkliga skyddet är inloggningskravet nedan.
 const RL_MAX = 20
 const RL_WINDOW_MS = 5 * 60 * 1000
@@ -31,7 +31,7 @@ function allowRequest(userId: string): boolean {
 export async function POST(req: NextRequest) {
   const key = process.env.ANTHROPIC_API_KEY
   if (!key) {
-    // Funktionen är byggd men inte aktiverad än – klienten döljer knappen snyggt.
+    // Funktionen är byggd men inte aktiverad än, klienten döljer knappen snyggt.
     return NextResponse.json({ error: 'ai_unavailable' }, { status: 503 })
   }
 
@@ -68,17 +68,17 @@ export async function POST(req: NextRequest) {
 Svara ENDAST med giltig JSON, inga andra ord, i formatet:
 {"title": "...", "description": "...", "category": "..."}
 
-STEG 1 – avgör exakt vilken typ av föremål det är, det är det viktigaste:
+STEG 1, avgör exakt vilken typ av föremål det är, det är det viktigaste:
 - Är det en ring, ett armband, ett halsband, ett par örhängen eller ett hänge? Blanda ALDRIG ihop en ring med ett armband. En liten cirkel som får plats på ett finger är en ring, inte ett armband.
 - Ringtyper: en ring med en rad infattade stenar runt om är en alliansring (eller eternityring om stenarna går hela varvet). Andra: vigselring/slätring, solitär (en stor sten), signetring, kattfotsring.
 - Länktyper (halsband/armband): pansarlänk, kejsarlänk, cordell/kordel, ankarlänk, bismarck, figaro, bröstlänk.
 - Sätt category till exakt en ur denna lista, matchande typen: ${CATEGORIES.join(', ')}.
 
-STEG 2 – skriv annonsen:
+STEG 2, skriv annonsen:
 - Ton: professionell, självsäker och lyftande, som ett auktionshus. Skriv i påståendeform.
 - Referera ALDRIG till fotot/bilden och använd ALDRIG osäkra ord ("verkar", "ser ut att", "det går inte att avgöra", "från bilden").
 - title: kort, säljande, max 6 ord, och måste innehålla rätt föremålstyp (t.ex. "Elegant alliansring i vitguld").
-- description: 2–3 säljande meningar som nämner rätt modell/typ, stil och uttryck.
+- description: 2-3 säljande meningar som nämner rätt modell/typ, stil och uttryck.
 
 Viktigt:
 - Nämn INTE vikt, längd eller exakt karat, och skriv inga meningar om att sådant inte kan avgöras. Säljaren fyller i det separat.

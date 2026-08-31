@@ -114,7 +114,7 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
     load()
   }, [])
 
-  // ============ GUEST — full marketing landing ============
+  // ============ GUEST, full marketing landing ============
   // Gästvyn renderas DIREKT, även server-side (ISR i app/page.tsx), så
   // förstasidans innehåll, H1 och sökord finns i HTML:en för besökare och
   // sökmotorer. Tidigare låg allt bakom en spinner tills klientens auth-koll
@@ -325,7 +325,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             </Reveal>
           </div>
 
-          {/* Right — live featured auction (real data, with fallback). Visas även
+          {/* Right, live featured auction (real data, with fallback). Visas även
               på mobil (stackas under hero-texten) så förstaintrycket har ett
               visuellt bevis, inte bara text. */}
           <Reveal delay={200} className="mt-4 lg:mt-0">
@@ -489,7 +489,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             Inga lockpriser. Bara riktiga bud.
           </h2>
           <p className="mt-4 text-espresso-500 leading-relaxed">
-            Många guldköpare lockar med ett högt gram-pris på förstasidan – men betalar bara ut det om du
+            Många guldköpare lockar med ett högt gram-pris på förstasidan, men betalar bara ut det om du
             skickar in stora mängder. Hos GuldBud finns ingen dold värdetrappa. Priset sätts av att flera
             verifierade handlare budar mot varandra, i realtid, framför dina ögon.
           </p>
@@ -593,7 +593,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
         </div>
       </section>
 
-      {/* OMDÖMEN — äkta, via Trustpilot (inga påhittade citat) */}
+      {/* OMDÖMEN, äkta, via Trustpilot (inga påhittade citat) */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <Reveal className="text-center max-w-2xl mx-auto">
           <div className="flex justify-center mb-5">

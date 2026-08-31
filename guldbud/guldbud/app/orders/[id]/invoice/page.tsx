@@ -4,16 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 import { feesAt } from '@/lib/fees'
-
-// GuldBud's own details.
-const GULDBUD = {
-  name: 'GuldBud AB',
-  org: '559291-4781',
-  vat: 'SE559291478101', // momsregistreringsnummer, bekräftat mot Skatteverket
-  email: 'info@guldbud.com',
-  box: 'Box 6007',
-  postal: '102 31 Stockholm',
-}
+import { GULDBUD } from '@/lib/company'
 
 function ref(orderNo?: number) {
   return 'GB-' + String(orderNo ?? 0).padStart(6, '0')
@@ -235,7 +226,7 @@ function Recipient({ label, party }: { label: string; party: any }) {
   return (
     <div className="mb-8">
       <p className="text-xs text-espresso-400 uppercase tracking-wide mb-1">{label}</p>
-      <p className="font-medium text-espresso-900">{party?.company_name || party?.full_name || '—'}</p>
+      <p className="font-medium text-espresso-900">{party?.company_name || party?.full_name || '-'}</p>
       {party?.company_name && <p className="text-sm text-espresso-500">{party.full_name}</p>}
       {party?.org_number && <p className="text-sm text-espresso-500">Org.nr {party.org_number}</p>}
       {(party?.address || party?.city) && (
@@ -253,7 +244,7 @@ function SellerBlock({ seller }: { seller: any }) {
       <p className="text-xs text-espresso-400 uppercase tracking-wide mb-1">Säljare (privatperson)</p>
       {seller ? (
         <>
-          <p className="font-medium text-espresso-900">{seller.full_name || '—'}</p>
+          <p className="font-medium text-espresso-900">{seller.full_name || '-'}</p>
           {seller.personal_number && <p className="text-sm text-espresso-500">Personnr {seller.personal_number}</p>}
           {(seller.address || seller.city) && (
             <p className="text-sm text-espresso-500">

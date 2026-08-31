@@ -7,15 +7,11 @@
 import React from 'react'
 import { Document, Page, View, Text, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
 import { feesAt } from '@/lib/fees'
+import { GULDBUD } from '@/lib/company'
 
-export const GULDBUD = {
-  name: 'GuldBud AB',
-  org: '559291-4781',
-  vat: 'SE559291478101',
-  email: 'info@guldbud.com',
-  box: 'Box 6007',
-  postal: '102 31 Stockholm',
-}
+// Vidareexporteras här för att befintliga importer inte ska gå sönder.
+// Källan är lib/company.
+export { GULDBUD }
 
 export type InvoiceParty = {
   company_name?: string | null

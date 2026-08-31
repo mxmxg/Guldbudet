@@ -10,7 +10,7 @@ export default function OrderStepper({ status }: { status: OrderStatus }) {
     )
   }
   const current = stepIndex(status)
-  // 'completed' is the terminal state – every step (incl. the last) is done,
+  // 'completed' is the terminal state, every step (incl. the last) is done,
   // so nothing should still read as "Pågår".
   const allDone = status === 'completed'
   return (

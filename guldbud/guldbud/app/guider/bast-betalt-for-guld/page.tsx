@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 
 export const metadata: Metadata = {
-  title: 'Bäst betalt för guld – vem ger mest och hur får du det? (2026)',
+  title: 'Bäst betalt för guld, vem ger mest och hur får du det? (2026)',
   description:
     'Vill du ha bäst betalt för ditt guld? Så jämför du guldköpare, undviker låga förstabud och får marknadens högsta pris genom att låta handlare buda mot varandra.',
   alternates: { canonical: '/guider/bast-betalt-for-guld' },

@@ -228,7 +228,7 @@ export default function DealerProfilePage() {
                 <p className="text-amber-800 font-medium text-sm">Ditt handlarkonto granskas</p>
                 <p className="text-amber-700 text-xs mt-1 leading-relaxed">
                   Vi kontrollerar dina uppgifter manuellt innan du får buda. Du får ett mejl så snart du är
-                  godkänd. Kontrollera gärna att uppgifterna nedan är kompletta – det gör granskningen snabbare.
+                  godkänd. Kontrollera gärna att uppgifterna nedan är kompletta, det gör granskningen snabbare.
                 </p>
               </div>
             )}
@@ -238,7 +238,7 @@ export default function DealerProfilePage() {
               <h2 className="font-display text-xl text-espresso-900 mb-1">Företags- och kontaktuppgifter</h2>
               <p className="text-xs text-espresso-400 mb-5">
                 Dessa uppgifter visas aldrig publikt. I budgivningen syns du bara som ett anonymt handlarnummer.
-                Företagsnamn och organisationsnummer är låsta efter verifieringen – kontakta GuldBud om något behöver ändras.
+                Företagsnamn och organisationsnummer är låsta efter verifieringen, kontakta GuldBud om något behöver ändras.
               </p>
               <div className="grid sm:grid-cols-2 gap-4">
                 <Field label="Företagsnamn (kan ej ändras)">
@@ -373,7 +373,7 @@ export default function DealerProfilePage() {
               </Link>
               <Link href="/dealer/guide" className="card p-5 hover:shadow-gold transition group">
                 <p className="font-medium text-espresso-900 group-hover:text-gold-700 transition">Så fungerar budgivningen</p>
-                <p className="text-xs text-espresso-400 mt-1">Från bud till vunnet föremål – steg för steg.</p>
+                <p className="text-xs text-espresso-400 mt-1">Från bud till vunnet föremål, steg för steg.</p>
               </Link>
             </section>
 

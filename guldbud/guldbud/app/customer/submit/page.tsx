@@ -179,7 +179,7 @@ export default function SubmitPage() {
         body: JSON.stringify({ dataUrls }),
       })
       if (res.status === 503) {
-        // AI inte aktiverad (ingen nyckel) – dölj knappen tyst.
+        // AI inte aktiverad (ingen nyckel), dölj knappen tyst.
         setAiHidden(true)
         return
       }
@@ -346,7 +346,7 @@ export default function SubmitPage() {
         <div className="mb-8">
           <h1 className="font-display text-3xl sm:text-4xl text-espresso-900">Lägg ut ett föremål</h1>
           <p className="text-espresso-500 mt-2 max-w-xl">
-            Kostnadsfritt och klart på fem minuter. Fyll i uppgifter och ladda upp foton –
+            Kostnadsfritt och klart på fem minuter. Fyll i uppgifter och ladda upp foton,
             auktoriserade guldhandlare budar direkt, och du väljer själv det bud du är nöjd med.
           </p>
         </div>
@@ -565,7 +565,7 @@ export default function SubmitPage() {
               />
             </div>
 
-            {/* Ägarbekräftelse – trygghet, inte förhör. Enkelt val + intyg. */}
+            {/* Ägarbekräftelse, trygghet, inte förhör. Enkelt val + intyg. */}
             <div className="rounded-2xl border border-gold-200/70 bg-gold-50/40 p-5">
               <div className="flex items-center gap-2 mb-1">
                 <CheckIcon size={16} />

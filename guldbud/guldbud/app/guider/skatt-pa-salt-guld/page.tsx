@@ -44,12 +44,12 @@ export default function Page() {
       </P>
       <UL>
         <li>
-          <strong>Personligt lösöre</strong> – smycken och guld du haft för eget bruk (ärvda ringar, en gammal kedja).
+          <strong>Personligt lösöre</strong>, smycken och guld du haft för eget bruk (ärvda ringar, en gammal kedja).
           Vinsten är normalt <strong>skattefri upp till 50 000 kr per år</strong> sammanlagt. Vinst över det beskattas
           som kapital.
         </li>
         <li>
-          <strong>Investeringsguld</strong> – tackor och mynt du köpt som ren placering. Räknas oftast inte som
+          <strong>Investeringsguld</strong>, tackor och mynt du köpt som ren placering. Räknas oftast inte som
           personligt lösöre, och vinsten är då skattepliktig fullt ut.
         </li>
       </UL>

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Logo from '@/components/Logo'
 import { TrustpilotFooterLink } from '@/components/TrustpilotInvite'
+import { GULDBUD } from '@/lib/company'
 
 export default function Footer() {
   return (
@@ -43,10 +44,10 @@ export default function Footer() {
           </FooterCol>
 
           <FooterCol title="Kontakt">
-            <li className="text-sm">GuldBud AB</li>
-            <li className="text-sm">Org.nr 559291-4781</li>
-            <li className="text-sm">Box 6007</li>
-            <li className="text-sm">102 31 Stockholm</li>
+            <li className="text-sm">{GULDBUD.name}</li>
+            <li className="text-sm">Org.nr {GULDBUD.org}</li>
+            <li className="text-sm">{GULDBUD.box}</li>
+            <li className="text-sm">{GULDBUD.postal}</li>
             <li className="text-sm">
               <a href="mailto:info@guldbud.com" className="hover:text-gold-300 transition">
                 info@guldbud.com

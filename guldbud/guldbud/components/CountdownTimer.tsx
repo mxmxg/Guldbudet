@@ -29,7 +29,7 @@ export default function CountdownTimer({
 }) {
   const target = endsAt ? new Date(endsAt).getTime() : 0
   // Compute the time only on the client (in useEffect) so the server-rendered
-  // HTML and the first client render agree – otherwise Date.now() differs
+  // HTML and the first client render agree, otherwise Date.now() differs
   // between them and React throws a hydration mismatch on every card.
   const [parts, setParts] = useState<ReturnType<typeof diffParts> | null>(null)
 
@@ -48,7 +48,7 @@ export default function CountdownTimer({
       return (
         <span className={`chip tabular-nums bg-gold-50 text-gold-700 ${className}`}>
           <ClockIcon className="text-gold-500" />
-          <span className="opacity-60">–</span>
+          <span className="opacity-60">-</span>
         </span>
       )
     }

@@ -180,7 +180,7 @@ export default function EditItemPage({ params }: { params: { id: string } }) {
           </label>
 
           {est && (
-            <p className="text-xs text-espresso-400">Uppskattad utbetalning: {formatSEK(est.low)}–{formatSEK(est.high)}</p>
+            <p className="text-xs text-espresso-400">Uppskattad utbetalning: {formatSEK(est.low)}-{formatSEK(est.high)}</p>
           )}
 
           <p className="text-xs text-espresso-400">Bilderna behåller du från din ursprungliga uppladdning.</p>

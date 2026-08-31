@@ -10,6 +10,7 @@ export const dynamic = 'force-dynamic'
 // `x-webhook-secret: <EMAIL_WEBHOOK_SECRET>`.
 
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE } from '@/lib/fees'
+import { GULDBUD, GULDBUD_ADDRESS_LINE } from '@/lib/company'
 
 const FROM = process.env.EMAIL_FROM || 'GuldBud <no-reply@guldbud.com>'
 // Svar på notismejl ska landa i den riktiga brevlådan, inte i no-reply-tomrummet.
@@ -74,7 +75,7 @@ function documentBox(href: string, label: string, desc: string) {
 // vet exakt vad som händer efter en avslutad affär.
 function instructionsFor(title: string): string {
   const t = title.toLowerCase()
-  // Välkomstbrev – så kommer man igång.
+  // Välkomstbrev, så kommer man igång.
   if (t.includes('välkommen')) {
     return stepsBox(
       'Så kommer du igång',
@@ -86,7 +87,7 @@ function instructionsFor(title: string): string {
       'Det tar under fem minuter att lägga ut ditt första föremål.'
     )
   }
-  // Säljaren – affären är skapad, skicka in direkt (brevet är på väg men behöver inte inväntas).
+  // Säljaren, affären är skapad, skicka in direkt (brevet är på väg men behöver inte inväntas).
   if (t.includes('affär skapad') || t.includes('skicka in')) {
     return stepsBox(
       'Så här slutför du affären',
@@ -99,7 +100,7 @@ function instructionsFor(title: string): string {
       'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
     )
   }
-  // Handlaren – du vann budgivningen, betala så går affären vidare.
+  // Handlaren, du vann budgivningen, betala så går affären vidare.
   if (t.includes('vann')) {
     return stepsBox(
       'Så går affären vidare',
@@ -164,7 +165,7 @@ function emailHtml(opts: {
       ${button}
       <p style="color:#8a7038;font-size:11px;line-height:1.6;margin-top:28px">
         Du får det här mejlet för att du har ett konto på GuldBud.<br>
-        GuldBud AB &middot; Org.nr 559291-4781 &middot; Box 6007, 102 31 Stockholm &middot; info@guldbud.com
+        ${GULDBUD.name} &middot; Org.nr ${GULDBUD.org} &middot; ${GULDBUD_ADDRESS_LINE} &middot; ${GULDBUD.email}
       </p>
     </div>
   </body></html>`

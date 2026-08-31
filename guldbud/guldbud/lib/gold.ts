@@ -1,4 +1,4 @@
-// Gold value helpers — shared by the estimator, auction cards and detail view.
+// Gold value helpers, shared by the estimator, auction cards and detail view.
 // The spot price is a sensible baseline used for indicative estimates; the live
 // price is fetched from /api/gold-price and falls back to this constant.
 // Prices in SEK per gram of pure (24K) gold.

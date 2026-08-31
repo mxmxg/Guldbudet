@@ -16,7 +16,7 @@ const STEPS = [
   {
     n: '2',
     title: 'Buda i realtid',
-    desc: 'Du ser alla aktiva auktioner med bilder, vikt, karat och metallvärde. Buden uppdateras live och du budar anonymt – för säljaren och övriga handlare syns du bara som ett kundnummer. Ett lagt bud är bindande.',
+    desc: 'Du ser alla aktiva auktioner med bilder, vikt, karat och metallvärde. Buden uppdateras live och du budar anonymt, för säljaren och övriga handlare syns du bara som ett kundnummer. Ett lagt bud är bindande.',
   },
   {
     n: '3',
@@ -26,12 +26,12 @@ const STEPS = [
   {
     n: '4',
     title: 'Vinn budgivningen',
-    desc: 'När auktionen avslutas har den med högsta budet vunnit. En affär skapas under "Mina affärer". Du behöver inte göra något just nu – vi hör av oss när föremålet är hos oss och kontrollerat.',
+    desc: 'När auktionen avslutas har den med högsta budet vunnit. En affär skapas under "Mina affärer". Du behöver inte göra något just nu, vi hör av oss när föremålet är hos oss och kontrollerat.',
   },
   {
     n: '5',
     title: 'Vi tar emot och kontrollerar',
-    desc: 'Säljaren skickar in föremålet försäkrat i det kostnadsfria rekommenderade brev GuldBud tillhandahåller. Vi kontrollerar äkthet, vikt och karat innan något går vidare – du behöver aldrig lita blint på en okänd motpart.',
+    desc: 'Säljaren skickar in föremålet försäkrat i det kostnadsfria rekommenderade brev GuldBud tillhandahåller. Vi kontrollerar äkthet, vikt och karat innan något går vidare, du behöver aldrig lita blint på en okänd motpart.',
   },
   {
     n: '6',
@@ -58,7 +58,7 @@ export default function DealerGuidePage() {
           <h1 className="font-display text-4xl text-gold-100 mb-4">Så fungerar budgivningen</h1>
           <p className="text-gold-200/70 max-w-xl mx-auto text-sm leading-relaxed">
             Från ditt första bud till att det vunna föremålet ligger i din hand. GuldBud sitter mellan dig
-            och säljaren och sköter kontroll, betalning och frakt – tryggt hela vägen.
+            och säljaren och sköter kontroll, betalning och frakt, tryggt hela vägen.
           </p>
         </div>
       </div>

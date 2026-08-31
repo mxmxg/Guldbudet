@@ -1,5 +1,5 @@
 // Delade definitioner för ursprungskontroll / AML. Trösklarna speglar
-// triggern set_order_aml_status i supabase-schema.sql – håll dem i synk.
+// triggern set_order_aml_status i supabase-schema.sql, håll dem i synk.
 
 export const AML_SINGLE_THRESHOLD = 25000 // kr per affär
 export const AML_CUMULATIVE_THRESHOLD = 50000 // kr sammanlagt, rullande 12 mån
@@ -20,7 +20,7 @@ export const AML_STATUS_STYLE: Record<AmlStatus, string> = {
   flagged: 'bg-red-100 text-red-700 border border-red-200',
 }
 
-// Ursprungsalternativ. Vänligt formulerade – detta är en trygghets- och
+// Ursprungsalternativ. Vänligt formulerade, detta är en trygghets- och
 // ägarbekräftelse för säljaren, inte ett förhör. Dubblar som fin
 // annonsinfo (t.ex. arvguld).
 export type SourceOption = { key: string; label: string }

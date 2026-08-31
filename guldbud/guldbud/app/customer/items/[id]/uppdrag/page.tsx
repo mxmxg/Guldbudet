@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-browser'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
+import { GULDBUD } from '@/lib/company'
 
 // Kvitto på förmedlingsuppdraget för ett enskilt föremål.
 //
@@ -17,14 +18,6 @@ import Link from 'next/link'
 // kan spara, och som går att ta fram per affär om revisor eller Skatteverket
 // frågar. Den dokumenterar alltså vad som skett, i stället för att stå i
 // vägen för det.
-
-const GULDBUD = {
-  name: 'GuldBud AB',
-  org: '559291-4781',
-  email: 'info@guldbud.com',
-  box: 'Box 6007',
-  postal: '102 31 Stockholm',
-}
 
 function fmt(ts?: string | null) {
   if (!ts) return null
