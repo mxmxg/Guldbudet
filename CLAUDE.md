@@ -816,6 +816,25 @@ att få buda, se `dealer_may_bid`.
 med texten "du kan lägga ut föremål" och en knapp till `/customer/submit`. En
 handlare som legitimerade sig skickades alltså in i säljarflödet.
 
+**Märket syns för motparten, men bara som ett ja eller nej.** Auktionssidan
+visar om säljaren legitimerat sig. Uppgiften hämtas med
+`item_seller_verified(item_id)`, en `security definer`-funktion som returnerar
+en boolean och aldrig något ur profilen.
+
+Att i stället lägga en läspolicy på `profiles` vore samma misstag som redan är
+dokumenterat i schemat vid borttagandet av `public reads dealer names`: **RLS
+kan inte begränsa kolumner**, så en läspolicy hade gjort hela raden läsbar,
+personnummer och adress inklusive. Behöver en ny yta veta något om en annan
+användare: gör en funktion som svarar på just den frågan.
+
+Funktionen är öppen även för utloggade, eftersom auktionssidan är publik och
+uppgiften säger att någon legitimerat sig, inte vem.
+
+**Åt andra hållet är det ett påstående, inte ett märke per rad.** Budhistoriken
+säger att alla som budar är legitimerade handlare, vilket är sant genom
+`dealer_may_bid`. Ett märke per budrad hade dessutom röjt något om enskilda
+anonyma budgivare, alltså vilken av dem som inte är legitimerad.
+
 **Underhålls-RPC:erna anropas via en adminrutt, aldrig från webbläsaren.**
 `settle_ended_auctions`, `process_unpaid_orders` och `resolve_auto_bids` har med
 flit exekveringsrätten återkallad från `anon` och `authenticated` i schemat, som

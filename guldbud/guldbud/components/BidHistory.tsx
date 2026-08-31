@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import VerifiedBadge from '@/components/VerifiedBadge'
 
 // Budhistorik för ett föremål, anonymiserad (handlarna visas som "Kund XXXXXX",
 // aldrig med namn). Läsbar för säljaren på sin egen affär: RLS tillåter select
@@ -49,6 +50,16 @@ export default function BidHistory({ itemId }: { itemId: string }) {
         Budhistorik
         <span className="chip bg-espresso-100 text-espresso-500">{bids.length}</span>
       </h2>
+      {/* Ett pastaende om alla budgivare, inte ett markt per rad. Kravet ligger
+          i dealer_may_bid, sa varje bud i listan kommer per definition fran en
+          godkand och legitimerad handlare. Ett markt per rad hade dessutom
+          rojt nagot om enskilda anonyma budgivare. */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <VerifiedBadge verified label="Legitimerade handlare" />
+        <span className="text-xs text-espresso-400">
+          Alla som budar är godkända av oss och legitimerade med BankID.
+        </span>
+      </div>
       <div className="rounded-2xl border border-espresso-100 overflow-hidden bg-white">
         {bids.map((bid: any, i: number) => (
           <div

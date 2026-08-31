@@ -1945,3 +1945,38 @@ create policy "admin reads identity disclosures" on public.identity_disclosures
   for select using (
     exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin')
   );
+
+
+-- ===========================================================================
+-- Är säljaren på ett föremål legitimerad med BankID?
+--
+-- Motparten ska kunna se att den anonyma privatpersonen bakom en auktion har
+-- legitimerat sig. Handlaren budar riktiga pengar på gods från någon hen aldrig
+-- träffat, så det är precis den upplysning som betyder något.
+--
+-- Funktionen returnerar EN boolean och aldrig något ur profilen. Skälet står
+-- redan i filen, vid borttagandet av policyn "public reads dealer names": RLS
+-- kan inte begränsa kolumner, så en läspolicy på profiles hade gjort hela raden
+-- läsbar, personnummer och adress inklusive. En security definer-funktion som
+-- lämnar ut ett ja eller nej är den smala vägen.
+--
+-- Auktionssidan är publik, så även utloggade får fråga. Uppgiften är inte
+-- personlig: den säger att någon legitimerat sig, inte vem.
+-- ===========================================================================
+create or replace function public.item_seller_verified(p_item uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (select p.identity_verified
+       from public.items i
+       join public.profiles p on p.id = i.owner_id
+      where i.id = p_item),
+    false
+  );
+$$;
+
+grant execute on function public.item_seller_verified(uuid) to anon, authenticated;
