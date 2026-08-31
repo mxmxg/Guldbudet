@@ -11,7 +11,7 @@ import DisputePanel from '@/components/DisputePanel'
 import TrustpilotInvite from '@/components/TrustpilotInvite'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
+import { ORDER_STATUS_LABEL, OrderStatus, SELLER_DOC_STATES } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
 import { feesAt } from '@/lib/fees'
 
@@ -254,7 +254,7 @@ function SellerPanel({ order }: { order: any }) {
             {order.status === 'cancelled' && !order.refunded_at &&
               'Affären kunde tyvärr inte slutföras och har avbrutits. Har du frågor, skriv i meddelandena nedan.'}
           </p>
-          {['verified_paid', 'shipped_to_dealer', 'completed'].includes(order.status) && (
+          {SELLER_DOC_STATES.includes(order.status) && (
             <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
               Visa avräkningsnota →
             </Link>

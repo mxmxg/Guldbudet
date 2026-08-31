@@ -48,7 +48,18 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
     const { data: it } = await supabase.from('items').select('title, weight_grams, karat').eq('id', o.item_id).single()
     setItem(it)
 
-    if (prof?.role === 'admin' || user.id === o.dealer_id) {
+    // ?doc=receipt låter ADMIN öppna säljarens handling i stället för
+    // handlarens. Utan den hamnade admin alltid i handlarens gren, så det
+    // tredje dokumentet gick inte att nå alls, trots att det är just den
+    // handling en revisor eller Skatteverket frågar efter. Handlaren får
+    // medvetet inte skicka med den: säljarens underlag visar vad säljaren får
+    // betalt, vilket inte angår handlaren. Säljaren får sin egen handling med
+    // eller utan parameter.
+    const isAdmin = prof?.role === 'admin'
+    const wantsSellerDoc =
+      isAdmin && new URLSearchParams(window.location.search).get('doc') === 'receipt'
+
+    if ((isAdmin || user.id === o.dealer_id) && !wantsSellerDoc) {
       setKind('invoice') // handlaren: inköpsunderlag + GuldBuds faktura
       const targetId = user.id === o.dealer_id ? user.id : o.dealer_id
       const { data: p } = await supabase.from('profiles').select('*').eq('id', targetId).single()
@@ -67,9 +78,11 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
       } catch {
         /* om det inte går att hämta visas fallback "Privatperson" */
       }
-    } else if (user.id === o.seller_id) {
+    } else if (wantsSellerDoc || user.id === o.seller_id) {
       setKind('receipt') // säljaren: försäljnings-/utbetalningsunderlag
-      const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      // Säljarens profil, inte den inloggades. För säljaren själv är det samma
+      // rad. För admin ger policyn "admins manage all profiles" läsrätten.
+      const { data: p } = await supabase.from('profiles').select('*').eq('id', o.seller_id).single()
       setParty(p)
     }
     setLoading(false)
