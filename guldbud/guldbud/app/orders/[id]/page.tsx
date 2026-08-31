@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus, SELLER_DOC_STATES } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
 import { feesAt } from '@/lib/fees'
+import { GULDBUD, CLIENT_FUNDS_ACCOUNT } from '@/lib/company'
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -270,68 +271,42 @@ function SellerPanel({ order }: { order: any }) {
   )
 }
 
-// Startar handlarens betalning hos Stripe. Skickar dealern till
-// leverantörens hostade betalsida. Servern svarar 503 payments_not_configured
-// tills betalnycklarna är på plats, och då visar vi bara en lugn notis och
-// låter den befintliga omgående-texten stå kvar som fallback.
-function PayNowButton({ orderId }: { orderId: string }) {
-  const [loading, setLoading] = useState(false)
-  const [notConfigured, setNotConfigured] = useState(false)
-  const [error, setError] = useState('')
+// Handlarens betalningsinstruktion: banköverföring till klientmedelskontot
+// med ordernumret som referens, beslutat 2026-09-01 i stället för
+// kortbetalning via Stripe. Betalningen prickas av manuellt av admin
+// (dealer_paid_at), och kortflödets API-rutter ligger kvar vilande.
+// Referensformatet GB-XXXXXX är samma som fakturans ref(), medvetet
+// kopierat: att importera lib/pdf/invoiceDoc hit hade dragit in
+// react-pdf i klientbundlen.
+function payRef(orderNo?: number | null) {
+  return 'GB-' + String(orderNo ?? 0).padStart(6, '0')
+}
 
-  const pay = async () => {
-    setLoading(true)
-    setError('')
-    setNotConfigured(false)
-    try {
-      const supabase = createClient()
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      const token = session?.access_token
-      const res = await fetch('/api/payments/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ orderId }),
-      })
-      if (res.status === 503) {
-        setNotConfigured(true)
-        return
-      }
-      const data = await res.json().catch(() => ({}))
-      // En flaggad betalning väntar på handläggning. Att försöka igen hjälper
-      // aldrig där, så handlaren ska inte uppmanas till det.
-      if (data?.error === 'payment_under_review') {
-        setError(
-          'En tidigare betalning på den här affären granskas. Vi hör av oss så snart den är kontrollerad.'
-        )
-        return
-      }
-      if (!res.ok || !data?.redirectUrl) {
-        setError('Betalningen kunde inte startas just nu. Försök igen om en stund.')
-        return
-      }
-      window.location.href = data.redirectUrl
-    } catch {
-      setError('Betalningen kunde inte startas just nu. Försök igen om en stund.')
-    } finally {
-      setLoading(false)
-    }
+function BankTransferBox({ order, total }: { order: any; total: number }) {
+  if (!CLIENT_FUNDS_ACCOUNT.number) {
+    return (
+      <p className="mt-4 text-sm text-espresso-600">
+        Betalningen sker via banköverföring. Kontouppgifterna meddelas i affärens meddelanden.
+      </p>
+    )
   }
-
-  if (notConfigured) {
-    return <p className="mt-4 text-xs text-espresso-400">Onlinebetalning aktiveras inom kort.</p>
-  }
-
   return (
-    <div className="mt-4">
-      <button type="button" onClick={pay} disabled={loading} className="btn-gold w-full sm:w-auto disabled:opacity-60">
-        {loading ? 'Öppnar betalning…' : 'Betala nu'}
-      </button>
-      {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
+    <div className="mt-4 rounded-xl bg-white border border-espresso-100 p-4 text-sm">
+      <p className="font-medium text-espresso-900 mb-2">Betala via banköverföring</p>
+      <dl className="grid grid-cols-[120px_1fr] gap-y-1.5 gap-x-3">
+        <dt className="text-espresso-400">Belopp</dt>
+        <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{formatSEK(total)}</dd>
+        <dt className="text-espresso-400">Mottagare</dt>
+        <dd className="m-0 text-espresso-700">{GULDBUD.name}</dd>
+        <dt className="text-espresso-400">{CLIENT_FUNDS_ACCOUNT.label}</dt>
+        <dd className="m-0 text-espresso-700 tabular-nums">{CLIENT_FUNDS_ACCOUNT.number}</dd>
+        <dt className="text-espresso-400">Referens</dt>
+        <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{payRef(order.order_no)}</dd>
+      </dl>
+      <p className="mt-3 text-xs text-espresso-500">
+        Märk betalningen med referensen, den kopplar pengarna till din affär. Vi prickar av
+        inkomna betalningar löpande och bekräftar här i affären, i regel samma bankdag.
+      </p>
     </div>
   )
 }
@@ -378,14 +353,14 @@ function DealerPanel({ order }: { order: any }) {
               <p className="text-espresso-600 mt-1 leading-relaxed">
                 {overdue
                   ? 'Betala snart så håller vi affären öppen. Uteblir betalningen avbryts affären automatiskt.'
-                  : <>Föremålet är ditt. Betala bud + provision + frakt <span className="font-medium">omgående</span>, så tar säljaren emot din instruktion att skicka in det. Vi kontrollerar äktheten och skickar det sedan vidare till dig. Betalningsinstruktioner finns i meddelandena nedan.</>}
+                  : <>Föremålet är ditt. Betala bud + provision + frakt <span className="font-medium">omgående</span>, så tar säljaren emot din instruktion att skicka in det. Vi kontrollerar äktheten och skickar det sedan vidare till dig.</>}
               </p>
               {due && (
                 <p className={`mt-2 font-medium ${overdue ? 'text-red-700' : 'text-espresso-700'}`}>
                   Betala senast {due.toLocaleDateString('sv-SE')}
                 </p>
               )}
-              <PayNowButton orderId={order.id} />
+              <BankTransferBox order={order} total={fees.dealerTotal(order.amount)} />
             </div>
           )
         })()}

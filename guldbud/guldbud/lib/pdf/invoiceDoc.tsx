@@ -7,7 +7,7 @@
 import React from 'react'
 import { Document, Page, View, Text, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
 import { feesAt } from '@/lib/fees'
-import { GULDBUD } from '@/lib/company'
+import { GULDBUD, CLIENT_FUNDS_ACCOUNT } from '@/lib/company'
 
 // Vidareexporteras här för att befintliga importer inte ska gå sönder.
 // Källan är lib/company.
@@ -249,6 +249,13 @@ function InvoiceDocument({ data }: { data: InvoiceData }) {
         <Text style={s.fine}>
           Avser GuldBuds förmedlingstjänst (provision + frakt). Föremålets pris ({kr2(bid)}) faktureras separat enligt inköpsunderlaget och tillfaller säljaren.{' '}
           {credit ? '' : `Handlaren betalar hela affären som en summa: ${kr2(fees.dealerTotal(bid))} (föremål ${kr2(bid)} + denna faktura ${kr2(fees.guldbudServiceTotal(bid))}). `}
+          {credit
+            ? ''
+            : `Betalningsvillkor: omgående, via banköverföring${
+                CLIENT_FUNDS_ACCOUNT.number
+                  ? ` till ${CLIENT_FUNDS_ACCOUNT.label.toLowerCase()} ${CLIENT_FUNDS_ACCOUNT.number}`
+                  : ''
+              }, märkt med referensen. `}
           Referens: {ref(order.order_no)}.
         </Text>
         <Text style={s.footer} fixed>Automatiskt genererat dokument från GuldBud. Vid frågor, kontakta {GULDBUD.email}.</Text>

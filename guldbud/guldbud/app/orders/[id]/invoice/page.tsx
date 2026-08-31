@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 import { feesAt } from '@/lib/fees'
-import { GULDBUD } from '@/lib/company'
+import { GULDBUD, CLIENT_FUNDS_ACCOUNT } from '@/lib/company'
 
 function ref(orderNo?: number) {
   return 'GB-' + String(orderNo ?? 0).padStart(6, '0')
@@ -192,6 +192,13 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
               <Fine>
                 Avser GuldBuds förmedlingstjänst (provision + frakt). Föremålets pris ({kr2(bid)}) faktureras separat enligt inköpsunderlaget och tillfaller säljaren.{' '}
                 {credit ? '' : `Handlaren betalar hela affären som en summa: ${kr2(fees.dealerTotal(bid))} (föremål ${kr2(bid)} + denna faktura ${kr2(fees.guldbudServiceTotal(bid))}). `}
+                {credit
+                  ? ''
+                  : `Betalningsvillkor: omgående, via banköverföring${
+                      CLIENT_FUNDS_ACCOUNT.number
+                        ? ` till ${CLIENT_FUNDS_ACCOUNT.label.toLowerCase()} ${CLIENT_FUNDS_ACCOUNT.number}`
+                        : ''
+                    }, märkt med referensen. `}
                 Referens: {ref(order.order_no)}.
               </Fine>
             </Doc>

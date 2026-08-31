@@ -174,25 +174,28 @@ och innan du påstår något om bolagets status.
   **en** mottagare, så uppdelningen sker efter utbetalningen.
 - **Kontot är ännu inte skapat.** Skriv därför aldrig om upplägget i presens
   som om det redan gäller. Det är den beslutade ordningen, inte nuläget.
-- Detta ligger på kritiska linjen före lansering: skapas inte kontot, och
-  sätts det inte som mottagare i Stripe, hamnar de första riktiga
-  utbetalningarna på rörelsekontot. Då sker precis den sammanblandning
-  upplägget ska förhindra.
-- Kortbetalning via Stripe är en **tillfällig lösning**. Planen är direkt
-  banköverföring när avtal finns.
+- Detta ligger på kritiska linjen före lansering: skapas inte kontot hamnar
+  de första riktiga betalningarna på rörelsekontot. Då sker precis den
+  sammanblandning upplägget ska förhindra.
+- **Beslutat 2026-09-01: lansering med faktura och banköverföring, inte
+  Stripe.** Handlaren betalar via banköverföring direkt till
+  klientmedelskontot med ordernumret som referens, och admin prickar av
+  betalningen manuellt. Kortflödet ligger kvar vilande i koden. Se
+  beslutsloggen.
+- Hos SEB önskas även **Swish-utbetalningar för företag** för säljarnas
+  utbetalningar.
 
 **Leverantörer**
 
 - Vercel (drift), Supabase (databas, auth, lagring)
-- Stripe (kortbetalning), **godkänt** efter granskningen i kategorin
-  ädelmetaller, enligt användaren 2026-08-31. Avgiften är **1,5 procent** av
-  hela summan handlaren betalar, alltså även av säljarens pengar som bara
-  passerar. Uppgiften är användarens, 2026-08-31. Räknat mot `lib/fees.ts` äter
-  den 15 till 20 procent av GuldBuds intäkt exklusive moms, växande med budet.
-  **Testnycklar ligger i Vercel sedan 2026-08-26 och ska ersättas
-  med skarpa.** Att `STRIPE_SECRET_KEY` och `STRIPE_WEBHOOK_SECRET` finns i
-  listan betyder alltså inte att live är påslaget. Värdena syns inte i Vercel,
-  de är av typen Secret, så avgör aldrig frågan genom att titta på listan.
+- Stripe (kortbetalning), **vilande sedan beslutet 2026-09-01** att lansera
+  med faktura och banköverföring. Kontot är godkänt i kategorin ädelmetaller
+  och testnycklar ligger kvar i Vercel, men inga skarpa nycklar ska läggas in
+  och ingen live-webhook sättas upp utan nytt beslut. Skälet till bytet:
+  avgiften 1,5 procent tas på hela summan handlaren betalar, vilket räknat
+  mot `lib/fees.ts` äter 15 till 20 procent av GuldBuds intäkt exklusive
+  moms, och banköverföring saknar chargebacks. Koden och API-rutterna ligger
+  kvar orörda som option.
 - Direkt banköverföring är planen på sikt, men **ingen sådan leverantör är
   inkopplad**. Brite-adaptern togs bort 2026-08-30, se beslutsloggen.
 - Resend (transaktionsmejl), Zoho (mänsklig inkorg)
@@ -446,6 +449,11 @@ flaggar handlare som vinner för lätt.
 ---
 
 ## Betalning och pengaflöde
+
+**Obs 2026-09-01: steg 3 och 4 beskriver det vilande kortflödet.** I drift
+betalar handlaren via banköverföring enligt instruktionen på ordersidan, och
+admin sätter `dealer_paid_at` manuellt. Se beslutsloggen om faktura och
+banköverföring.
 
 1. Säljaren accepterar. `enforce_accepted_bid_valid` kontrollerar att budet är
    det högsta och tillhör föremålet. `notify_bid_accepted` skapar ordern med
@@ -1000,6 +1008,37 @@ villkoren, i verifieringsflödet och på auktionssidan, och `/meddelanden` ger t
 trådar per affär. Det som saknas är bara den anonyme besökaren. Ska något ändå
 byggas: en egen "fråga oss"-ruta som mejlar `info@guldbud.com`, alltså inget
 tredjepartsskript, inga nya cookies, inget nytt biträdesavtal.
+
+**Lanseringen sker med faktura och banköverföring, inte Stripe. Beslutat
+2026-09-01.** Handlaren faktureras hela summan vid vunnet bud, betalar via
+banköverföring direkt till klientmedelskontot, och märker betalningen med
+ordernumrets referens (GB-XXXXXX). Admin prickar av betalningen manuellt via
+`dealer_paid_at`, som alltid varit byggd för det. Skälen: Stripes 1,5 procent
+på hela summan äter 15 till 20 procent av intäkten, banköverföringar saknar
+chargebacks (viktigt för guldhandel), och köparna är granskade
+B2B-handlare där korträlsens tillit inte behövs.
+
+Så här ligger det i koden:
+
+- Kontouppgiften bor i `CLIENT_FUNDS_ACCOUNT` i `lib/company.ts` och är
+  **tom tills klientmedelskontot är öppnat**. Tills dess visar ordersidan att
+  kontouppgifter meddelas i affärens meddelanden, och fakturan utelämnar
+  kontodelen ur betalningsvillkoret. När kontot finns: fyll i numret,
+  committa, deploya.
+- Ordersidans betalknapp (`PayNowButton`) är ersatt av `BankTransferBox` med
+  belopp, mottagare, konto och referens. Referensformatet är medvetet en
+  lokal kopia av fakturans `ref()`: att importera `lib/pdf/invoiceDoc` i en
+  klientsida hade dragit in react-pdf i webbläsarbundlen.
+- Fakturans finstilta har betalningsvillkoret: omgående, via banköverföring,
+  märkt med referensen. Speglad i båda fakturafilerna, ändrade på
+  användarens uttryckliga instruktion (spärrade filer).
+- **Kortflödet är vilande, inte borttaget:** `lib/payments/`, båda
+  betalrutterna och beloppskontrollen ligger kvar orörda. Utan skarpa nycklar
+  öppnas ingen kortbetalning. Riv inget av det utan beslut, och lägg inte in
+  skarpa Stripe-nycklar utan nytt beslut.
+- Med manuell avprickning är det admin som är beloppskontrollen. Vid volym
+  över ungefär femtio affärer i månaden bör avprickningen automatiseras,
+  bankkoppling eller Swish Handel är kandidaterna.
 
 **Svarslöftet i affärschatten är fast text, inte ett robotsvar i tråden.**
 Beslutat av användaren 2026-08-31, som också valde formuleringen. Under
