@@ -58,21 +58,6 @@ De här hänger ihop. Ingen riktig affär får släppas igenom förrän alla är
 
 ---
 
-## Obekräftat, kontrollera innan lansering
-
-Det här vet vi inte statusen på. Kolla, och skriv in svaret här.
-
-- [ ] **Supabase Auth och e-post.** Transaktionsmejlen via `/api/notify-email`
-      och Resend är verifierade i drift 2026-08-30. Men om Supabases egna
-      auth-mejl, alltså kontobekräftelse och lösenordsåterställning, går via
-      egen SMTP eller fortfarande via Supabases testmejl är inte kontrollerat.
-      Går de via testmejlet stryps de vid volym och hamnar i skräpposten.
-- [ ] **"Confirm email" i Supabase.** Var avstängd under test för att komma runt
-      e-postgränsen. Om den fortfarande är det kan vem som helst registrera sig
-      på en adress de inte äger. Kontrollera och slå på den.
-
----
-
 ## Redan klart
 
 Skrivs upp här så det inte görs om.
@@ -83,3 +68,22 @@ Skrivs upp här så det inte görs om.
 - Trustpilot-profilen hävdad, se.trustpilot.com/review/guldbud.com
 - Kedjan trigger via webhook till Resend verifierad i drift
 - Adminpanelen godkänner handlare och föremål, ingen handpåläggning i Supabase
+- **"Confirm email" är påslagen** i Supabase, kontrollerat 2026-08-31. Var
+  avstängd under test. Bekräftelsemallen är dessutom anpassad på svenska med
+  GuldBuds formgivning och rätt bolagsuppgifter i sidfoten. Anonyma
+  inloggningar är avstängda, vilket är rätt för oss.
+- **Egen SMTP är påslagen**, kontrollerat 2026-08-31. Auth-mejlen går via
+  Resend, `smtp.resend.com` på port 465, avsändare `no-reply@guldbud.com` med
+  namnet GuldBud. Samma avsändare som notismejlen använder, så en mottagare ser
+  ett och samma GuldBud i inkorgen.
+
+  Två saker värda att komma ihåg om den uppsättningen:
+
+  Supabases testmejl används alltså inte, så registreringarna stryps inte av
+  dess timgräns. Resends egna gränser gäller i stället, och de beror på
+  kontoplanen.
+
+  **Minsta intervall per användare är 60 sekunder.** Begär någon en
+  lösenordsåterställning två gånger inom en minut skickas bara den första. Det
+  är rimligt som spärr mot missbruk, men förklarar ett supportärende som annars
+  ser ut som ett fel.
