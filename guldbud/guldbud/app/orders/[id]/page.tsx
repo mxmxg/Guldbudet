@@ -283,30 +283,34 @@ function payRef(orderNo?: number | null) {
 }
 
 function BankTransferBox({ order, total }: { order: any; total: number }) {
-  if (!CLIENT_FUNDS_ACCOUNT.number) {
-    return (
-      <p className="mt-4 text-sm text-espresso-600">
-        Betalningen sker via banköverföring. Kontouppgifterna meddelas i affärens meddelanden.
-      </p>
-    )
-  }
   return (
     <div className="mt-4 rounded-xl bg-white border border-espresso-100 p-4 text-sm">
       <p className="font-medium text-espresso-900 mb-2">Betala via banköverföring</p>
-      <dl className="grid grid-cols-[120px_1fr] gap-y-1.5 gap-x-3">
-        <dt className="text-espresso-400">Belopp</dt>
-        <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{formatSEK(total)}</dd>
-        <dt className="text-espresso-400">Mottagare</dt>
-        <dd className="m-0 text-espresso-700">{GULDBUD.name}</dd>
-        <dt className="text-espresso-400">{CLIENT_FUNDS_ACCOUNT.label}</dt>
-        <dd className="m-0 text-espresso-700 tabular-nums">{CLIENT_FUNDS_ACCOUNT.number}</dd>
-        <dt className="text-espresso-400">Referens</dt>
-        <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{payRef(order.order_no)}</dd>
-      </dl>
-      <p className="mt-3 text-xs text-espresso-500">
-        Märk betalningen med referensen, den kopplar pengarna till din affär. Vi prickar av
-        inkomna betalningar löpande och bekräftar här i affären, i regel samma bankdag.
-      </p>
+      {CLIENT_FUNDS_ACCOUNT.number ? (
+        <>
+          <dl className="grid grid-cols-[120px_1fr] gap-y-1.5 gap-x-3">
+            <dt className="text-espresso-400">Belopp</dt>
+            <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{formatSEK(total)}</dd>
+            <dt className="text-espresso-400">Mottagare</dt>
+            <dd className="m-0 text-espresso-700">{GULDBUD.name}</dd>
+            <dt className="text-espresso-400">{CLIENT_FUNDS_ACCOUNT.label}</dt>
+            <dd className="m-0 text-espresso-700 tabular-nums">{CLIENT_FUNDS_ACCOUNT.number}</dd>
+            <dt className="text-espresso-400">Referens</dt>
+            <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{payRef(order.order_no)}</dd>
+          </dl>
+          <p className="mt-3 text-xs text-espresso-500">
+            Märk betalningen med referensen, den kopplar pengarna till din affär. Vi prickar av
+            inkomna betalningar löpande och bekräftar här i affären, i regel samma bankdag.
+          </p>
+        </>
+      ) : (
+        <p className="text-espresso-600">
+          Kontouppgifterna meddelas i affärens meddelanden. Beloppet och referensen står på fakturan.
+        </p>
+      )}
+      <Link href={`/orders/${order.id}/invoice`} className="btn-gold w-full sm:w-auto mt-4 inline-flex justify-center">
+        Öppna fakturan
+      </Link>
     </div>
   )
 }
@@ -365,9 +369,12 @@ function DealerPanel({ order }: { order: any }) {
           )
         })()}
         {paid && <p className="mt-3 text-sm text-emerald-700">Betalning registrerad ✓</p>}
-        <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
-          Visa faktura →
-        </Link>
+        {/* Obetald: fakturaknappen sitter i betalrutan ovanför. Betald: liten länk räcker. */}
+        {!awaitingPayment && (
+          <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
+            Visa faktura →
+          </Link>
+        )}
       </div>
       <div className="card p-6">
         <h2 className="font-display text-lg text-espresso-900 mb-1">Status</h2>

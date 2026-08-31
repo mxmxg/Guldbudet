@@ -105,7 +105,7 @@ function instructionsFor(title: string): string {
     return stepsBox(
       'Så går affären vidare',
       [
-        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision + <strong style="color:#f5e6c8">${DEALER_SHIPPING_FEE} kr</strong> frakt + moms <strong style="color:#f5e6c8">omgående</strong>. Betalningsinstruktioner finns i affären.`,
+        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision + <strong style="color:#f5e6c8">${DEALER_SHIPPING_FEE} kr</strong> frakt + moms <strong style="color:#f5e6c8">omgående via banköverföring</strong>, märkt med din referens. Belopp, kontouppgifter och faktura finns i affären.`,
         'Föremålet är redan ditt, betalningen sätter igång affären.',
         'Säljaren skickar in det och vi äkthetskontrollerar det.',
         'Vi skickar sedan föremålet vidare till dig.',
@@ -295,19 +295,24 @@ export async function POST(req: NextRequest) {
     : 'Öppna på GuldBud →'
   let extra = instructionsFor(String(record.title))
 
-  // Automatiskt underlag/faktura-länk in i portalen vid de två penninghändelserna:
-  // säljaren blir utbetald ("Du har fått betalt") och handlaren har betalat
-  // ("Vi har tagit emot din betalning"). Länken går till affärens dokumentvy,
-  // där mottagaren visar och sparar sitt underlag som PDF, allt bakom inloggning.
+  // Automatiskt underlag/faktura-länk in i portalen vid penninghändelserna:
+  // handlaren vann ("Grattis, du vann budgivningen", fakturan är klar direkt
+  // sedan bytet till banköverföring 2026-09-01), säljaren blir utbetald
+  // ("Du har fått betalt") och handlaren har betalat ("Vi har tagit emot din
+  // betalning"). Länken går till affärens dokumentvy, där mottagaren visar
+  // och sparar sitt underlag som PDF, allt bakom inloggning. Ingen bilaga.
   if (isOrder && link) {
+    const dealerWon = titleLower.includes('vann')
     const paidOut = titleLower.includes('fått betalt')
     const dealerPaid = titleLower.includes('tagit emot din betalning')
-    if (paidOut || dealerPaid) {
+    if (dealerWon || paidOut || dealerPaid) {
       const invoiceHref = `${SITE}${link}/invoice`
       extra += documentBox(
         invoiceHref,
-        paidOut ? 'Se ditt utbetalningsunderlag' : 'Se din faktura och inköpsnota',
-        paidOut
+        dealerWon ? 'Öppna din faktura' : paidOut ? 'Se ditt utbetalningsunderlag' : 'Se din faktura och inköpsnota',
+        dealerWon
+          ? 'Fakturan för din vinst är klar i portalen. Öppna den, betala via banköverföring enligt villkoren och spara den som PDF.'
+          : paidOut
           ? 'Underlaget för din försäljning finns nu i portalen. Där kan du visa det och spara det som PDF.'
           : 'Din faktura och ditt inköpsunderlag finns nu i portalen. Där kan du visa dem och spara dem som PDF.'
       )
