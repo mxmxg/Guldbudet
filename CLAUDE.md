@@ -209,6 +209,12 @@ och innan du påstår något om bolagets status.
 - **Spara innan du skriver över.** Aldrig en destruktiv åtgärd utan att först
   ha läst och sparat det som finns.
 - **Verifiera i stället för att gissa.** Läs koden innan du beskriver den.
+- **SQL skrivs alltid ut som block i chatten, aldrig som en bifogad fil.**
+  Användaren kan inte öppna filerna som skickas från den här miljön. Dela upp i
+  numrerade block som körs i ordning, och skriv ut hela funktioner ordagrant
+  även när de är långa. Att hänvisa till "kör den ur schemafilen" hjälper inte.
+  Kontrollfrågor ska köras ensamma, eftersom Supabase bara visar resultatet av
+  den sista satsen i en körning.
 
 ## Språk och ton
 
