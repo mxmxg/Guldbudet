@@ -25,9 +25,11 @@ export default function LatestBid() {
     let alive = true
 
     const load = async () => {
+      // FK-namnet krävs: bids och items har två relationer (bids.item_id och
+      // items.accepted_bid_id), och utan namnet svarar PostgREST med PGRST201.
       const { data } = await supabase
         .from('bids')
-        .select('amount, created_at, item_id, items!inner(title, status)')
+        .select('amount, created_at, item_id, items!bids_item_id_fkey!inner(title, status)')
         .eq('items.status', 'active')
         .order('created_at', { ascending: false })
         .limit(1)
