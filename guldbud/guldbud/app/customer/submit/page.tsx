@@ -44,6 +44,30 @@ export default function SubmitPage() {
   const [success, setSuccess] = useState(false)
   const [dragOver, setDragOver] = useState(false)
 
+  // Förifyll vikt och karat från värderingskalkylatorn på startsidan: i första
+  // hand via query-parametrar (?vikt=&karat=), i andra hand via sessionStorage,
+  // som överlever omvägen genom registrering och inloggning. Skriver aldrig
+  // över något användaren redan hunnit fylla i.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      let w = params.get('vikt')
+      let k = params.get('karat')
+      if (!w && !k) {
+        const saved = sessionStorage.getItem('gb_calc')
+        if (saved) {
+          const p = JSON.parse(saved)
+          w = p?.weight != null ? String(p.weight) : null
+          k = typeof p?.karat === 'string' ? p.karat : null
+        }
+      }
+      sessionStorage.removeItem('gb_calc')
+      if (w && parseFloat(w) > 0) setWeight((prev) => prev || w!)
+      if (k && KARAT_OPTIONS.includes(k)) setKarat((prev) => prev || k!)
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Guard on mount so a guest/dealer isn't allowed to fill in the whole form
   // only to be bounced at submit (losing everything they typed).
   useEffect(() => {

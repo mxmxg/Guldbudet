@@ -11,6 +11,8 @@ import Footer from '@/components/Footer'
 import RecentlySold, { SoldRow } from '@/components/RecentlySold'
 import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
+import EndingSoonRail from '@/components/EndingSoonRail'
+import LatestBid from '@/components/LatestBid'
 import { TRUSTPILOT_PROFILE_URL } from '@/components/TrustpilotInvite'
 import PendingApprovalBanner from '@/components/PendingApprovalBanner'
 import FaqSection from '@/components/FaqSection'
@@ -442,15 +444,19 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             <h2 className="font-display text-3xl sm:text-4xl text-espresso-900">Pågående auktioner</h2>
           </div>
           {items.length > 0 && (
-            <p className="text-sm text-espresso-500">
-              <span className="font-semibold text-espresso-800">{totalBids}</span> bud lagda ·{' '}
-              <span className="font-semibold text-espresso-800">{items.length}</span> live
-            </p>
+            <div className="flex flex-col items-start sm:items-end gap-2">
+              <p className="text-sm text-espresso-500">
+                <span className="font-semibold text-espresso-800">{totalBids}</span> bud lagda ·{' '}
+                <span className="font-semibold text-espresso-800">{items.length}</span> live
+              </p>
+              <LatestBid />
+            </div>
           )}
         </Reveal>
 
         {items.length > 0 ? (
           <>
+            <EndingSoonRail items={items} />
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.slice(0, 9).map((item, i) => (
                 <Reveal key={item.id} delay={(i % 3) * 90}>

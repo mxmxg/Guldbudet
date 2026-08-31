@@ -126,7 +126,19 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
         </div>
 
         <Link
-          href={loggedIn ? '/customer/submit' : '/auth/login?mode=register'}
+          href={
+            loggedIn
+              ? `/customer/submit?vikt=${weight}&karat=${encodeURIComponent(karat)}`
+              : '/auth/login?mode=register'
+          }
+          onClick={() => {
+            // Wow-siffran besökaren just räknat fram ska följa med in i
+            // formuläret, även genom registrering och inloggning. Läses och
+            // rensas av submit-sidan.
+            try {
+              sessionStorage.setItem('gb_calc', JSON.stringify({ weight, karat }))
+            } catch {}
+          }}
           className="btn-gold w-full mt-5"
         >
           Lägg ut och få riktiga bud
