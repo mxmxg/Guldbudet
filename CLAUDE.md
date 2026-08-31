@@ -109,6 +109,8 @@ Användaren har bestämt det, och ändrade beslutet 2026-08-31 efter att tidigar
 ha delat upp det. Alla dokument i repot skrivs för **GuldBud AB, org.nr
 559291-4781**. Det gäller villkoren, förmedlingsuppdraget, fakturadokumenten och
 penningtvättsrutinen, alltså även handlingar som går till utomstående.
+Användaren bekräftade 2026-08-31 att det gäller **även uppgifter till
+leverantörer**, inte bara dokumenten i repot.
 
 **Rätta alltså aldrig ett dokument till Hey Consulting Nordic AB.** Det gjordes
 en gång i PR #281 och revertades i PR #282.
@@ -182,8 +184,9 @@ och innan du påstår något om bolagets status.
 **Leverantörer**
 
 - Vercel (drift), Supabase (databas, auth, lagring)
-- Stripe (kortbetalning), under granskning sedan 2026-08-28 i kategorin
-  ädelmetaller. **Testnycklar ligger i Vercel sedan 2026-08-26 och ska ersättas
+- Stripe (kortbetalning), **godkänt** efter granskningen i kategorin
+  ädelmetaller, enligt användaren 2026-08-31.
+  **Testnycklar ligger i Vercel sedan 2026-08-26 och ska ersättas
   med skarpa.** Att `STRIPE_SECRET_KEY` och `STRIPE_WEBHOOK_SECRET` finns i
   listan betyder alltså inte att live är påslaget. Värdena syns inte i Vercel,
   de är av typen Secret, så avgör aldrig frågan genom att titta på listan.
