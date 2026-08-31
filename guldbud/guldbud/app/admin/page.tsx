@@ -490,6 +490,15 @@ export default function AdminPage() {
               />
             </>
           )}
+          {/* Kvittot på förmedlingsuppdraget. Internt underlag för revisor och
+              Skatteverket. Låg tidigare hos säljaren under "Mina föremål" och
+              flyttades hit på användarens instruktion. */}
+          <Link
+            href={`/admin/items/${item.id}/uppdrag`}
+            className="w-full sm:w-auto inline-flex items-center justify-center text-sm text-espresso-600 hover:text-gold-700 border border-espresso-200 hover:border-gold-300 px-3 py-2 rounded-xl transition"
+          >
+            Uppdrag
+          </Link>
           {confirmId === item.id ? (
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
@@ -879,6 +888,14 @@ export default function AdminPage() {
                       >
                         Neka
                       </button>
+                      {/* Uppdragskvittot finns redan när föremålet är pending:
+                          mandate_accepted_at sätts när säljaren publicerar. */}
+                      <Link
+                        href={`/admin/items/${item.id}/uppdrag`}
+                        className="inline-flex items-center justify-center text-sm text-espresso-600 hover:text-gold-700 border border-espresso-200 hover:border-gold-300 px-4 py-2 rounded-xl transition"
+                      >
+                        Uppdrag
+                      </Link>
                     </div>
                   </div>
                 )
