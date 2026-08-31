@@ -427,7 +427,10 @@ export default function AuctionDetails({
                       <span className="font-medium text-espresso-700">{formatSEK(est.melt)}</span>
                     </span>
                     <span className="text-espresso-400">
-                      Uppskattad utbetalning {formatSEK(est.low)}-{formatSEK(est.high)}
+                      Uppskattad utbetalning {formatSEK(est.low)} till {formatSEK(est.high)}
+                    </span>
+                    <span className="w-full text-espresso-400">
+                      Riktvärde utifrån guldvärdet. Handlarna budar i konkurrens, så slutpriset kan bli högre.
                     </span>
                   </>
                 )}

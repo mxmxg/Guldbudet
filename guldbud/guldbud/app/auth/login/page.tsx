@@ -424,7 +424,7 @@ function LoginForm() {
 
               {mode === 'register' && (
                 <p style={{ color: '#b89a63', fontSize: '11px' }}>
-                  Dina personuppgifter hanteras säkert och delas aldrig med tredje part.{' '}
+                  Dina personuppgifter hanteras säkert enligt vår integritetspolicy och delas bara med din motpart när en affär genomförs.{' '}
                   <Link href="/privacy" style={{ color: '#B8860B' }}>Integritetspolicy</Link>
                 </p>
               )}
