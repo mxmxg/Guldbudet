@@ -185,7 +185,10 @@ och innan du påstår något om bolagets status.
 
 - Vercel (drift), Supabase (databas, auth, lagring)
 - Stripe (kortbetalning), **godkänt** efter granskningen i kategorin
-  ädelmetaller, enligt användaren 2026-08-31.
+  ädelmetaller, enligt användaren 2026-08-31. Avgiften är **1,5 procent** av
+  hela summan handlaren betalar, alltså även av säljarens pengar som bara
+  passerar. Uppgiften är användarens, 2026-08-31. Räknat mot `lib/fees.ts` äter
+  den 15 till 20 procent av GuldBuds intäkt exklusive moms, växande med budet.
   **Testnycklar ligger i Vercel sedan 2026-08-26 och ska ersättas
   med skarpa.** Att `STRIPE_SECRET_KEY` och `STRIPE_WEBHOOK_SECRET` finns i
   listan betyder alltså inte att live är påslaget. Värdena syns inte i Vercel,
