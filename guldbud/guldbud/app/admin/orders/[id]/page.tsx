@@ -157,7 +157,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     // Säkerhetsspärr: betala aldrig ut säljaren eller skicka vidare till handlaren
     // innan handlarens betalning är registrerad. Inga pengar lämnar huset på kredit.
     if ((next === 'verified_paid' || next === 'shipped_to_dealer') && !order.dealer_paid_at) {
-      setSaveError('Registrera handlarens betalning först – vi betalar ut och skickar vidare först när pengarna är inne.')
+      setSaveError('Registrera handlarens betalning först, vi betalar ut och skickar vidare först när pengarna är inne.')
       return
     }
     setSaving(true)
@@ -204,7 +204,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         status: 'cancelled',
         refunded_at: new Date().toISOString(),
         refund_reason: reason || 'Föremålet godkändes inte vid kontroll',
-        cancel_reason: 'Retur – ' + (reason || 'ej godkänt vid kontroll'),
+        cancel_reason: 'Retur, ' + (reason || 'ej godkänt vid kontroll'),
         // Pengarna går tillbaka till handlaren: nolla betalstatus så affären
         // inte längre räknas som betald (annars skulle en återöppning kunna
         // betala ut säljaren på redan återbetalda pengar).
@@ -321,7 +321,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
               </div>
             </div>
 
-            {/* Delningskit för Instagram – bild + kopierbar bildtext */}
+            {/* Delningskit för Instagram, bild + kopierbar bildtext */}
             <ShareKit
               amount={order.amount}
               title={item?.title || 'Guldföremål'}
@@ -481,7 +481,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          {/* Handlarens betalning – fristående från logistikstegen */}
+          {/* Handlarens betalning, fristående från logistikstegen */}
           <div className={`card p-6 ${!order.dealer_paid_at && !isFinalOrCancelled ? 'ring-2 ring-gold-300' : ''}`}>
             <h2 className="font-display text-lg text-espresso-900 mb-1">Handlarens betalning</h2>
             {order.dealer_paid_at ? (
@@ -552,7 +552,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                   <div className="flex justify-between gap-3">
                     <dt className="text-espresso-400">Säljarens volym (12 mån)</dt>
                     <dd className="text-espresso-800 text-right tabular-nums">
-                      {amlCumulative != null ? formatSEK(amlCumulative) : '—'}
+                      {amlCumulative != null ? formatSEK(amlCumulative) : '-'}
                     </dd>
                   </div>
                   {aml?.aml_flag_reason && (
@@ -728,8 +728,8 @@ function PartyCard({ title, p }: { title: string; p: any }) {
           <span className="text-xs font-semibold text-gold-600 uppercase tracking-wide">Utbetalning</span>
           <br />
           {p.payout_method === 'swish'
-            ? `Swish: ${p.payout_swish || '— (ej ifyllt)'}`
-            : `Bank: ${p.payout_bank_clearing || '—'} / ${p.payout_bank_account || '— (ej ifyllt)'}`}
+            ? `Swish: ${p.payout_swish || 'ej ifyllt'}`
+            : `Bank: ${p.payout_bank_clearing || '-'} / ${p.payout_bank_account || 'ej ifyllt'}`}
         </p>
       )}
     </div>

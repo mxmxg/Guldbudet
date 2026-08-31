@@ -38,7 +38,7 @@ export default function Page() {
       <H2>Vad styr guldpriset?</H2>
       <P>
         Guld handlas på en global marknad och priset sätts i realtid. Det påverkas av efterfrågan på guld, den
-        amerikanska dollarns kurs, ränteläget och hur orolig omvärlden är – guld ses som en trygg tillgång när
+        amerikanska dollarns kurs, ränteläget och hur orolig omvärlden är, guld ses som en trygg tillgång när
         ekonomin skakar. Därför kan priset röra sig både under dagen och mellan veckor.
       </P>
 

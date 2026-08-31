@@ -25,7 +25,7 @@ export default function PendingPage() {
           Tack för din registrering!
         </h1>
         <p style={{ color: '#8B6914', fontSize: '14px', lineHeight: 1.6, marginBottom: '14px' }}>
-          Ditt handlarkonto granskas av vårt team. Du får ett e-postmeddelande inom 1–2 arbetsdagar när du är
+          Ditt handlarkonto granskas av vårt team. Du får ett e-postmeddelande inom 1-2 arbetsdagar när du är
           godkänd att börja buda.
         </p>
         <p

@@ -156,7 +156,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        {/* Retur/kreditering – föremålet godkändes inte vid kontroll */}
+        {/* Retur/kreditering, föremålet godkändes inte vid kontroll */}
         {order.refunded_at && (
           <div className="card p-6 border border-amber-200 bg-amber-50">
             <h2 className="font-display text-lg text-amber-800 mb-1">Affären återgick</h2>
@@ -180,10 +180,10 @@ export default function OrderPage({ params }: { params: { id: string } }) {
           <DealerPanel order={order} />
         )}
 
-        {/* Budhistorik – vad som ledde fram till affären, anonymiserat */}
+        {/* Budhistorik, vad som ledde fram till affären, anonymiserat */}
         {order.item_id && <BidHistory itemId={order.item_id} />}
 
-        {/* Betygsätt oss – vid det bästa tillfället, precis efter avslutad affär */}
+        {/* Betygsätt oss, vid det bästa tillfället, precis efter avslutad affär */}
         {party === 'seller' &&
           ['verified_paid', 'shipped_to_dealer', 'completed'].includes(order.status) && (
             <TrustpilotInvite />

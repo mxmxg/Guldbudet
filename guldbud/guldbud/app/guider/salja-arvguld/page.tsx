@@ -33,7 +33,7 @@ export default function Page() {
     >
       <H2>Gammalt guld har ofta ett högt värde</H2>
       <P>
-        Många äldre smycken är tillverkade i hög karat – 18K eller till och med 23K – och kan därför vara värda mer än
+        Många äldre smycken är tillverkade i hög karat, 18K eller till och med 23K, och kan därför vara värda mer än
         man tror, även om de är omoderna eller trasiga. Det är <strong>guldhalten och vikten</strong> som avgör
         värdet, inte modellen. En sten som lossnat eller en trasig lås spelar liten roll för guldvärdet.
       </P>
@@ -50,7 +50,7 @@ export default function Page() {
       <P>
         Arvguld är ofta en blandning av olika smycken och karat. På <A href="/guider/salja-guld">en auktion där
         handlare tävlar</A> får varje del sitt marknadsvärde, i stället för ett samlat lågt bud från en enda
-        uppköpare. Du bestämmer själv om du accepterar – och det är{' '}
+        uppköpare. Du bestämmer själv om du accepterar, och det är{' '}
         <strong>gratis och utan förpliktelser</strong>.
       </P>
       <P>

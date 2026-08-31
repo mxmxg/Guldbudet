@@ -872,10 +872,10 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugofyra är åtgärdade:
+Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugonio är åtgärdade:
 tre i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i
-#271, två i #273, sex i #274 och en i #275.** Punkt 30 är inget fynd längre.
-Kvar är städningen, punkt 25 till 29.
+#271, två i #273, sex i #274, en i #275 och fem i #283.** Punkt 30 är inget
+fynd längre. **Listan är därmed genomgången.**
 Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
@@ -981,12 +981,26 @@ eftersom loggen skrivs före utlämnandet och stoppar det om den misslyckas.
 
 **Städning**
 
-25. 180 tankstreck på 176 rader i 54 filer.
-26. `README.md` och `ATT-GORA.md` är kraftigt föråldrade.
-27. Död kod: `components/CountUp.tsx`, `components/HeroButtons.tsx`,
-    `totalWithCommission` och `PAYMENT_WINDOW_LABEL` i `lib/fees.ts`.
-28. Bolagsuppgifterna är kopierade till tre ställen i stället för importerade.
-29. `lib/types.ts` är ur synk med databasen och kringgås med `any`.
+25. ~~180 tankstreck i 54 filer.~~ **Åtgärdad i PR #283.** Noll kvar i koden.
+    Två av dem satt i SQL-strängar, se nedan.
+26. ~~`README.md` och `ATT-GORA.md` är kraftigt föråldrade.~~ **Åtgärdad i
+    PR #283.** README beskriver koden som den ser ut, och ATT-GORA speglar det
+    verkliga läget med två punkter uttryckligen märkta som obekräftade.
+27. ~~Död kod.~~ **Åtgärdad i PR #283.** `CountUp.tsx` och `HeroButtons.tsx`
+    borttagna, `totalWithCommission` och `PAYMENT_WINDOW_LABEL` ur `lib/fees.ts`.
+28. ~~Bolagsuppgifterna kopierade till tre ställen.~~ **Åtgärdad i PR #283.**
+    Källan är `lib/company.ts`. De två villkorstexterna är orörda, de är
+    spärrade filer och har numret i löptext.
+29. ~~`lib/types.ts` ur synk med databasen.~~ **Åtgärdad i PR #283.** Fjorton
+    kolumner på `profiles` och sju på `items` saknades. Nullable skrivs nu som
+    `| null`, vilket direkt fångade tre ställen där en nullbar kolumn skickades
+    till en prop som inte tillät null.
+
+**Två tankstreck satt i SQL-strängar och är därför inte borta i databasen.**
+`process_unpaid_orders` skriver `cancel_reason` och `notify_bidders_ending_soon`
+sätter en notistitel. Filen är rättad, men de gamla strängarna ligger kvar i
+databasen tills funktionerna körs om. Det är rent kosmetiskt: mejlrutten filtrerar
+på delsträngarna "överbjuden" och "snart slut", som båda finns kvar.
 30. ~~`docs/aml-policy.md` använder GuldBud AB.~~ **Inte längre ett fynd.**
     Ändrades i PR #281 och revertades i PR #282: användaren har bestämt att
     det ska stå GuldBud AB överallt. Se affärsfakta.

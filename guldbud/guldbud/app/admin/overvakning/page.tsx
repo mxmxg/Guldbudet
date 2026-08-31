@@ -28,7 +28,7 @@ type LowComp = {
 }
 
 // Marknadsövervakning (anti-samverkan). Lyfter fram mönster som KAN tyda på
-// samordnad budgivning – låg konkurrens, hög vinstandel hos en enskild handlare,
+// samordnad budgivning, låg konkurrens, hög vinstandel hos en enskild handlare,
 // försäljningar under uppskattat värde. Detta är beslutsstöd, inte en anklagelse:
 // mönstren ska tolkas av admin innan någon åtgärd vidtas.
 export default function OvervakningPage() {
@@ -117,7 +117,7 @@ export default function OvervakningPage() {
         low.push({
           itemId: item.id,
           title: item.title,
-          winnerName: winBid ? nameOf(winBid.dealer_id) : '—',
+          winnerName: winBid ? nameOf(winBid.dealer_id) : '-',
           price,
           estLow,
           bidders: uniqueBidders,
@@ -217,7 +217,7 @@ export default function OvervakningPage() {
                             <td className="p-3 tabular-nums text-espresso-600">{d.participated}</td>
                             <td className="p-3 tabular-nums text-espresso-600">{d.wins}</td>
                             <td className="p-3 tabular-nums text-espresso-800">{winRate}%</td>
-                            <td className="p-3 tabular-nums text-espresso-600">{avgW || '—'}</td>
+                            <td className="p-3 tabular-nums text-espresso-600">{avgW || '-'}</td>
                           </tr>
                         )
                       })
@@ -255,7 +255,7 @@ export default function OvervakningPage() {
                           </td>
                           <td className="p-3 text-espresso-700">{r.winnerName}</td>
                           <td className="p-3 tabular-nums text-espresso-800">{formatSEK(r.price)}</td>
-                          <td className="p-3 tabular-nums text-espresso-500">{r.estLow ? formatSEK(r.estLow) : '—'}</td>
+                          <td className="p-3 tabular-nums text-espresso-500">{r.estLow ? formatSEK(r.estLow) : '-'}</td>
                         </tr>
                       ))
                     )}

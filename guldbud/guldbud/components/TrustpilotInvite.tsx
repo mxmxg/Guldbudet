@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 // Länk till GuldBuds Trustpilot-sida för att lämna omdöme. Domänbaserad
-// "evaluate"-länk – funkar utan widget-kod och utan betalplan. Byt domänen
+// "evaluate"-länk, funkar utan widget-kod och utan betalplan. Byt domänen
 // här om Trustpilot-profilen skulle ligga på en annan.
 export const TRUSTPILOT_REVIEW_URL = 'https://se.trustpilot.com/evaluate/guldbud.com'
 export const TRUSTPILOT_PROFILE_URL = 'https://se.trustpilot.com/review/guldbud.com'

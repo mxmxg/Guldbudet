@@ -49,14 +49,14 @@ const STEPS = [
     step: '7',
     time: 'Omgående',
     title: 'Pengarna på ditt konto',
-    desc: 'När kontrollen är godkänd betalas beloppet ut inom 24 timmar via Swish eller bankkonto. Du får hela det vinnande budet – inga avgifter dras.',
+    desc: 'När kontrollen är godkänd betalas beloppet ut inom 24 timmar via Swish eller bankkonto. Du får hela det vinnande budet, inga avgifter dras.',
   },
 ]
 
 const FAQ = [
   {
     q: 'Vad kostar det att lägga ut ett föremål?',
-    a: 'Det är helt gratis för dig som säljare – du får hela det vinnande budet, inga avgifter dras. GuldBud tar i stället en köparprovision av den vinnande handlaren.',
+    a: 'Det är helt gratis för dig som säljare, du får hela det vinnande budet, inga avgifter dras. GuldBud tar i stället en köparprovision av den vinnande handlaren.',
   },
   {
     q: 'Kan jag ångra mig efter att jag accepterat ett bud?',

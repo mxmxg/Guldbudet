@@ -16,10 +16,10 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     .single()
   if (!item) return { title: 'Auktion · GuldBud' }
   const specs = [item.weight_grams ? `${item.weight_grams} g` : '', item.karat].filter(Boolean).join(' · ')
-  const title = `${item.title}${specs ? ` – ${specs}` : ''} · GuldBud`
+  const title = `${item.title}${specs ? `, ${specs}` : ''} · GuldBud`
   const description =
     item.description?.slice(0, 160) ||
-    `Bjud på ${item.title} hos GuldBud – Sveriges guldauktion. Verifierade handlare budar mot varandra.`
+    `Bjud på ${item.title} hos GuldBud, Sveriges guldauktion. Verifierade handlare budar mot varandra.`
   const image = item.image_urls?.[0]
   return {
     title,
@@ -83,7 +83,7 @@ export default async function AuctionPage({ params }: { params: { id: string } }
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: item.title,
-    description: item.description || `${item.title} – ${specs}. Bjud hos GuldBud, Sveriges guldauktion.`,
+    description: item.description || `${item.title}, ${specs}. Bjud hos GuldBud, Sveriges guldauktion.`,
     image: item.image_urls || undefined,
     category: item.category || 'Guld',
     url,
@@ -101,7 +101,7 @@ export default async function AuctionPage({ params }: { params: { id: string } }
             // Budet blev giltigt när auktionen lades ut, och gäller tills den stänger.
             ...(item.created_at ? { validFrom: String(item.created_at).slice(0, 10) } : {}),
             ...(item.auction_ends_at ? { priceValidUntil: String(item.auction_ends_at).slice(0, 10) } : {}),
-            // Auktionsköp är slutgiltiga – en sann "inga returer"-policy.
+            // Auktionsköp är slutgiltiga, en sann "inga returer"-policy.
             hasMerchantReturnPolicy: {
               '@type': 'MerchantReturnPolicy',
               applicableCountry: 'SE',

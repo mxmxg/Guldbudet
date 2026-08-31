@@ -136,9 +136,6 @@ export const DEALER_SHIPPING_FEE = CURRENT_FEES.shippingFee
 export const SHIPPING_FEE_EX_VAT = CURRENT_FEES.shippingFeeExVat
 export const SHIPPING_FEE_VAT = CURRENT_FEES.shippingFeeVat
 
-// "Handlaren betalar vid vinst": the dealer pays immediately when they win.
-export const PAYMENT_WINDOW_LABEL = 'omgående'
-
 export function commission(bid: number): number {
   return CURRENT_FEES.commission(bid)
 }
@@ -153,12 +150,6 @@ export function totalVat(bid: number): number {
 
 export function guldbudServiceTotal(bid: number): number {
   return CURRENT_FEES.guldbudServiceTotal(bid)
-}
-
-// Bid + commission (ex moms). Kept for the "säljaren får hela budet, provisionen
-// läggs ovanpå" breakdown.
-export function totalWithCommission(bid: number): number {
-  return (bid || 0) + CURRENT_FEES.commission(bid)
 }
 
 export function dealerTotal(bid: number): number {

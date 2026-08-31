@@ -25,7 +25,7 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner, 
   const accept = async () => {
     setLoading(true)
     setError('')
-    // Only advance to the success state if the write actually succeeds –
+    // Only advance to the success state if the write actually succeeds,
     // otherwise the seller would be told to ship an item for a deal that
     // was never created (the order is created by a DB trigger on this update).
     const { data: updated, error: updateError } = await supabase

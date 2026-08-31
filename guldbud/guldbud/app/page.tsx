@@ -20,7 +20,7 @@ const orgLd = {
   name: 'GuldBud',
   url: SITE,
   logo: `${SITE}/icon`,
-  description: 'Sveriges guldauktion – auktoriserade guldhandlare budar mot varandra om ditt guld.',
+  description: 'Sveriges guldauktion, auktoriserade guldhandlare budar mot varandra om ditt guld.',
   areaServed: 'SE',
   email: 'info@guldbud.com',
   sameAs: ['https://se.trustpilot.com/review/guldbud.com'],

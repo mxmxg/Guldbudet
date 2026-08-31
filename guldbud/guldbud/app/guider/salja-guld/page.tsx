@@ -43,13 +43,13 @@ export default function Page() {
         betydligt mer än ett lika tungt 9K-smycke, eftersom det innehåller mer rent guld.
       </P>
       <P>
-        Guldpriset rör sig varje dag. Därför är ett bud som var bra förra månaden inte nödvändigtvis bra idag – kolla
+        Guldpriset rör sig varje dag. Därför är ett bud som var bra förra månaden inte nödvändigtvis bra idag, kolla
         alltid <A href="/guider/guldpris-idag">guldpriset idag</A> innan du bestämmer dig.
       </P>
 
       <H2>Så räknar du ut ungefärligt värde</H2>
       <P>
-        En enkel tumregel: multiplicera vikten med guldhalten och med dagens 24K-pris per gram. Ett exempel – 10 gram
+        En enkel tumregel: multiplicera vikten med guldhalten och med dagens 24K-pris per gram. Ett exempel, 10 gram
         18K-guld (75 % rent) vid ett 24K-pris på 1 300 kr/g:
       </P>
       <UL>
@@ -65,7 +65,7 @@ export default function Page() {
       <P>
         Guldsmeder och pantbanker ger ofta ett lågt förstabud eftersom du bara pratar med <em>en</em> köpare. Då är det
         svårt att veta om budet är rimligt. Poängen med en auktion är att flera <strong>auktoriserade handlare budar
-        mot varandra</strong> om samma föremål – då är det marknaden, inte en enskild uppköpare, som sätter priset.
+        mot varandra</strong> om samma föremål, då är det marknaden, inte en enskild uppköpare, som sätter priset.
       </P>
       <P>
         På <A href="/">GuldBud</A> lägger du ut ditt föremål gratis, handlarna tävlar, och du bestämmer själv om du

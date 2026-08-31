@@ -47,9 +47,9 @@ export default function Page() {
         <A href="/guider/karat-18k-14k-9k">vad 18K, 14K och 9K betyder</A>.
       </P>
       <UL>
-        <li><strong>Vitguld</strong> – guld + vita legeringsmetaller, ofta rodinerat. Samma guldhalt som gult vid samma karat.</li>
-        <li><strong>Rödguld / rosaguld</strong> – guld + mer koppar. Populärt i äldre svenska smycken, samma guldvärde.</li>
-        <li><strong>Gult guld</strong> – guld + silver och koppar i balans. Den klassiska tonen.</li>
+        <li><strong>Vitguld</strong>, guld + vita legeringsmetaller, ofta rodinerat. Samma guldhalt som gult vid samma karat.</li>
+        <li><strong>Rödguld / rosaguld</strong>, guld + mer koppar. Populärt i äldre svenska smycken, samma guldvärde.</li>
+        <li><strong>Gult guld</strong>, guld + silver och koppar i balans. Den klassiska tonen.</li>
       </UL>
 
       <H2>Så får du bäst betalt oavsett färg</H2>

@@ -48,7 +48,7 @@ export default async function ResultsPage() {
         <div className="relative">
           <h1 className="font-display text-4xl text-gold-100 mb-4">Sålda resultat</h1>
           <p className="text-gold-200/70 max-w-xl mx-auto text-sm leading-relaxed">
-            Se vad guld faktiskt sålts för hos GuldBud. Inga lockpriser – bara riktiga slutpriser från
+            Se vad guld faktiskt sålts för hos GuldBud. Inga lockpriser, bara riktiga slutpriser från
             verklig budgivning, så att du vet vad du kan förvänta dig.
           </p>
           {rows.length > 0 && (

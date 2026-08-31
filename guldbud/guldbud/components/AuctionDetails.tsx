@@ -109,7 +109,7 @@ export default function AuctionDetails({
     }
     load()
 
-    // Realtime — refresh bids when a new one lands on this item.
+    // Realtime, refresh bids when a new one lands on this item.
     const channel = supabase
       .channel(`bids-${item.id}`)
       .on(
@@ -247,7 +247,7 @@ export default function AuctionDetails({
         )}
         {extended && (
           <div className="animate-scale-in rounded-full bg-red-600 text-white text-sm font-semibold px-4 py-2 shadow-lift">
-            ⏱ Auktionen förlängdes – någon bjöd i sista sekund!
+            ⏱ Auktionen förlängdes, någon bjöd i sista sekund!
           </div>
         )}
       </div>
@@ -338,7 +338,7 @@ export default function AuctionDetails({
               <p className="text-espresso-600 mt-5 leading-relaxed">{item.description}</p>
             )}
 
-            {/* Sold banner (closed auctions) – social proof + SEO. Bara när ett
+            {/* Sold banner (closed auctions), social proof + SEO. Bara när ett
                 bud faktiskt accepterats; ett avböjt föremål är stängt utan bud. */}
             {isClosed && item.accepted_bid_id && topAmount ? (
               <div className="mt-5 rounded-2xl bg-espresso-900 p-5 text-center shadow-soft">
@@ -427,7 +427,7 @@ export default function AuctionDetails({
                       <span className="font-medium text-espresso-700">{formatSEK(est.melt)}</span>
                     </span>
                     <span className="text-espresso-400">
-                      Uppskattad utbetalning {formatSEK(est.low)}–{formatSEK(est.high)}
+                      Uppskattad utbetalning {formatSEK(est.low)}-{formatSEK(est.high)}
                     </span>
                   </>
                 )}
@@ -463,7 +463,7 @@ export default function AuctionDetails({
               </div>
             )}
 
-            {/* Accept bid (owner) — works while active or after end, until accepted */}
+            {/* Accept bid (owner), works while active or after end, until accepted */}
             {isOwner && !isClosed && topBid && (
               <>
                 <AcceptBid
@@ -491,7 +491,7 @@ export default function AuctionDetails({
               </div>
             )}
 
-            {/* Closed — shipping instructions */}
+            {/* Closed, shipping instructions */}
             {isOwner && isClosed && item.accepted_bid_id && (
               <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
                 <p className="font-medium text-emerald-800 mb-1">Bud accepterat ✓</p>
@@ -519,7 +519,7 @@ export default function AuctionDetails({
                   <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-center">
                     <p className="text-emerald-800 text-sm font-medium">Du hade det högsta budet</p>
                     <p className="text-emerald-700 text-xs mt-1">
-                      Auktionen är avslutad. Inväntar säljarens bekräftelse – du får en notis så snart budet accepteras.
+                      Auktionen är avslutad. Inväntar säljarens bekräftelse, du får en notis så snart budet accepteras.
                     </p>
                   </div>
                 ) : (
@@ -556,7 +556,7 @@ export default function AuctionDetails({
                 </div>
               ))}
 
-            {/* Not logged in — only invite bidding on auctions that are still open.
+            {/* Not logged in, only invite bidding on auctions that are still open.
                 Gated on `checked` so a logged-in dealer doesn't flash this CTA
                 before auth resolves, and so it stays out of the SSR markup. */}
             {checked && !user && !isClosed && !ended && (

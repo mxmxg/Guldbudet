@@ -163,7 +163,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     setMobileOpen(false)
     await supabase.auth.signOut()
-    // Hård omladdning så alla server- och klientvyer remontas utan session –
+    // Hård omladdning så alla server- och klientvyer remontas utan session,
     // router.refresh() ensam lämnar cachade klientkomponenter (t.ex. startsidan)
     // kvar i inloggat läge.
     window.location.href = '/'
@@ -361,7 +361,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile menu — overlay that floats over the page instead of
+          {/* Mobile menu, overlay that floats over the page instead of
               pushing the hero down. */}
           {mobileOpen && (
             <>

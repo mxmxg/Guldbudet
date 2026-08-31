@@ -50,7 +50,7 @@ export default function RecentlySold({ rows }: { rows: SoldRow[] }) {
                 href={`/auctions/${r.id}`}
                 className="group rounded-2xl overflow-hidden bg-white border border-espresso-100 shadow-soft hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300"
               >
-                {/* Enhetlig bildruta — object-cover fyller rutan så alla foton ser lika premium ut */}
+                {/* Enhetlig bildruta, object-cover fyller rutan så alla foton ser lika premium ut */}
                 <div className="aspect-square relative overflow-hidden bg-espresso-100">
                   {r.image_urls?.[0] ? (
                     <Image

@@ -15,7 +15,7 @@ const KARATS = [
 /**
  * Interactive "what is my gold worth?" calculator. Weight slider + karat picker
  * produce an instant indicative auction range. The single most persuasive reason
- * to list an item — so it lives up front on the landing page.
+ * to list an item, so it lives up front on the landing page.
  */
 export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
   const [weight, setWeight] = useState(12)
@@ -115,7 +115,7 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
             <span className="font-display text-3xl sm:text-4xl text-gradient-gold">
               {formatSEK(low)}
             </span>
-            <span className="text-espresso-100/60">–</span>
+            <span className="text-espresso-100/60">-</span>
             <span className="font-display text-3xl sm:text-4xl text-gradient-gold">
               {formatSEK(high)}
             </span>

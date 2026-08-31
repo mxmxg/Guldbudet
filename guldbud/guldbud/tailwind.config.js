@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Warm ivory base — softer and more premium than cold stone
+        // Warm ivory base, softer and more premium than cold stone
         cream: '#faf7f0',
         // Deep espresso-gold used for dark luxury sections
         espresso: {

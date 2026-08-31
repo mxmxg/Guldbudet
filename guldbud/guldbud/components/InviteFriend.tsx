@@ -3,10 +3,10 @@ import { useState } from 'react'
 
 // Lättviktig "tipsa en vän"-delning. Använder mobilens inbyggda delningsmeny
 // (Web Share API) när den finns, annars kopieras länken till urklipp.
-// Ingen databas, ingen inloggning – bara spridning.
+// Ingen databas, ingen inloggning, bara spridning.
 const SITE = 'https://guldbud.com'
 const SHARE_TEXT =
-  'Jag säljer mitt guld via GuldBud – auktoriserade guldköpare budar mot varandra så priset drivs upp. Kostnadsfritt att lägga ut. Kolla:'
+  'Jag säljer mitt guld via GuldBud, auktoriserade guldköpare budar mot varandra så priset drivs upp. Kostnadsfritt att lägga ut. Kolla:'
 
 export default function InviteFriend({ compact = false }: { compact?: boolean }) {
   const [copied, setCopied] = useState(false)
@@ -18,7 +18,7 @@ export default function InviteFriend({ compact = false }: { compact?: boolean })
         await nav.share({ title: 'GuldBud', text: SHARE_TEXT, url: SITE })
         return
       } catch {
-        /* användaren avbröt delningen – fall igenom till kopiering */
+        /* användaren avbröt delningen, fall igenom till kopiering */
       }
     }
     try {
@@ -26,7 +26,7 @@ export default function InviteFriend({ compact = false }: { compact?: boolean })
       setCopied(true)
       setTimeout(() => setCopied(false), 2500)
     } catch {
-      /* urklipp otillgängligt – tyst */
+      /* urklipp otillgängligt, tyst */
     }
   }
 
@@ -47,7 +47,7 @@ export default function InviteFriend({ compact = false }: { compact?: boolean })
       <div>
         <p className="font-display text-lg text-espresso-900">Känner du någon som har guld liggande?</p>
         <p className="text-sm text-espresso-500 mt-0.5">
-          Tipsa en vän – de får handlare att buda mot varandra, precis som du.
+          Tipsa en vän, de får handlare att buda mot varandra, precis som du.
         </p>
       </div>
       <button onClick={share} className="btn-gold whitespace-nowrap inline-flex items-center gap-2 self-start sm:self-auto">

@@ -42,7 +42,7 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   cancelled: 'Avbruten',
 }
 
-// Orders that still need handling – everything except finished/cancelled.
+// Orders that still need handling, everything except finished/cancelled.
 // Single source of truth so the admin dashboard count and the Affärer list
 // can never drift apart (previously the dashboard silently dropped
 // 'dealer_paid', so those deals vanished from the "pågående" stat).

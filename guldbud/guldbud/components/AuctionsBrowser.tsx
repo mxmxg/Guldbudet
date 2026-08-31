@@ -257,7 +257,7 @@ export default function AuctionsBrowser({
                 placeholder="Vikt min"
                 className="w-24 !py-1.5 text-sm"
               />
-              <span className="text-espresso-300 text-sm">–</span>
+              <span className="text-espresso-300 text-sm">-</span>
               <input
                 type="number"
                 value={wMax}

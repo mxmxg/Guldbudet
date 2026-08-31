@@ -46,11 +46,11 @@ export default function Page() {
 
       <H2>Vanliga guldmynt och deras guldinnehåll</H2>
       <UL>
-        <li><strong>Krugerrand</strong> – 1 troy ounce (31,1 g) rent guld.</li>
-        <li><strong>Brittisk sovereign</strong> – ca 7,32 g rent guld.</li>
-        <li><strong>Svensk dukat</strong> – ca 3,44 g guld (23,75 karat).</li>
-        <li><strong>20 franc (Napoleon)</strong> – ca 5,81 g rent guld.</li>
-        <li><strong>10 kr / 20 kr guldmynt (Sverige/Skandinavien)</strong> – ca 4,03 g respektive 8,06 g rent guld.</li>
+        <li><strong>Krugerrand</strong>, 1 troy ounce (31,1 g) rent guld.</li>
+        <li><strong>Brittisk sovereign</strong>, ca 7,32 g rent guld.</li>
+        <li><strong>Svensk dukat</strong>, ca 3,44 g guld (23,75 karat).</li>
+        <li><strong>20 franc (Napoleon)</strong>, ca 5,81 g rent guld.</li>
+        <li><strong>10 kr / 20 kr guldmynt (Sverige/Skandinavien)</strong>, ca 4,03 g respektive 8,06 g rent guld.</li>
       </UL>
       <P>
         Är du osäker på myntet? Fota det tydligt och beskriv vad du vet, handlarna känner igen de flesta mynt och vi

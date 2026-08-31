@@ -48,7 +48,7 @@ export default function ImageOptimizeButton() {
     let noProgress = 0
     let initial = 0
     setStatus('Krymper bilder... 0%')
-    // Endpoint:en tar en liten bunt per anrop (tidsbudget) – loopa tills done.
+    // Endpoint:en tar en liten bunt per anrop (tidsbudget), loopa tills done.
     while (guard++ < 400) {
       const r = await call(true)
       const j = r?.body
@@ -56,13 +56,13 @@ export default function ImageOptimizeButton() {
         consecTimeouts = 0
         saved += j.sparat_mb || 0
         if (initial === 0) initial = j.stora_bilder || 0
-        // Avsluta även om inget faktiskt krympts på några varv – då är allt
+        // Avsluta även om inget faktiskt krympts på några varv, då är allt
         // redan optimerat (skydd mot att loopa på bilder som ligger på gränsen).
         noProgress = (j.krympta || 0) === 0 ? noProgress + 1 : 0
         if (j.done || noProgress >= 3) {
           setStatus(
             saved > 0
-              ? `Klart! 100% – bilderna är krympta, ca ${Math.round(saved)} MB sparat. Kör om PageSpeed.`
+              ? `Klart! 100%, bilderna är krympta, ca ${Math.round(saved)} MB sparat. Kör om PageSpeed.`
               : 'Klart! Allt är redan optimerat.'
           )
           break
@@ -72,7 +72,7 @@ export default function ImageOptimizeButton() {
         setStatus(`Krymper bilder... ${pct}% (${Math.round(saved)} MB sparat)`)
         continue
       }
-      // Timeout (504) betyder bara att bunten tog slut på tid – redan klara
+      // Timeout (504) betyder bara att bunten tog slut på tid, redan klara
       // bilder är sparade, så vi fortsätter automatiskt.
       if (r?.status === 504) {
         if (++consecTimeouts > 10) {

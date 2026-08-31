@@ -26,7 +26,9 @@ export default function CategoryIcon({
   className,
   strokeWidth,
 }: {
-  category?: string
+  // Null tillåts: items.category är nullable i databasen, och raden nedan
+  // faller redan tillbaka på GemIcon för tomt värde.
+  category?: string | null
   size?: number
   className?: string
   strokeWidth?: number
