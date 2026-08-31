@@ -284,8 +284,8 @@ export default function AuctionDetails({
               {!isClosed && (
                 <span className="absolute top-4 left-4 chip bg-espresso-900/85 backdrop-blur text-gold-200 border border-gold-500/25">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75 animate-pulse-ring" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-pulse-ring" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
                   </span>
                   Live auktion
                 </span>

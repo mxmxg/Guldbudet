@@ -84,8 +84,8 @@ export default function LatestBid() {
       }`}
     >
       <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full rounded-full bg-gold-500 opacity-75 animate-ping" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-gold-500" />
+        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
       </span>
       <span className="text-espresso-600">Senaste bud</span>
       <span className="font-semibold text-espresso-900 tabular-nums">{formatSEK(latest.amount)}</span>

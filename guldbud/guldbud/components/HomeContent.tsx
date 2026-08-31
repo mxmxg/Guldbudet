@@ -278,8 +278,8 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             <Reveal>
               <span className="inline-flex items-center gap-2 rounded-full border border-gold-500/25 bg-espresso-800/60 px-3 py-1.5 text-xs text-gold-200">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-70 animate-pulse-ring" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-gold-400" />
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 animate-pulse-ring" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                 </span>
                 {items.length > 0
                   ? `${items.length} auktioner pågår just nu`
@@ -323,7 +323,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
                 <div className="w-px h-14 bg-espresso-700" />
                 <LogoStat src="/brand/swish.png" alt="Swish" label="Utbetalning inom 24h" h={48} />
                 <div className="w-px h-14 bg-espresso-700" />
-                <LogoStat src="/brand/postnord.png" alt="PostNord" label="Försäkrad rek-frakt" h={26} />
+                <LogoStat src="/brand/postnord-symbol.svg" alt="PostNord" label="Försäkrad rek-frakt" h={40} />
               </div>
             </Reveal>
           </div>
@@ -819,8 +819,8 @@ function FeaturedAuction({ items }: { items: EnrichedItem[] }) {
         <div className="flex items-center justify-between mb-5">
           <span className="eyebrow text-gold-400/80 inline-flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-70 animate-pulse-ring" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 animate-pulse-ring" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
             </span>
             Auktion · live
           </span>
