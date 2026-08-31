@@ -15,6 +15,7 @@ import { GemIcon, HourglassIcon, CheckIcon } from '@/components/Icons'
 import { estimateRange, formatSEK, isPlatinum } from '@/lib/gold'
 import { useGoldPrice } from '@/lib/useGoldPrice'
 import VerifiedBadge from '@/components/VerifiedBadge'
+import { BANKID_LIVE } from '@/lib/identity'
 
 function relTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime()
@@ -392,8 +393,15 @@ export default function AuctionDetails({
               {/* Vem man handlar med. Säljaren är och förblir anonym, men att hen
                   legitimerat sig är det som gör att en handlare vågar buda på
                   gods från någon de aldrig träffat. Visas inte för säljaren
-                  själv, som redan ser sitt märke på profilen. */}
-              {!isOwner && (
+                  själv, som redan ser sitt märke på profilen.
+                  
+                  Dolt tills BankID är skarpt. Innan dess KAN ingen vara
+                  verifierad, så märket hade stämplat varenda säljare som
+                  olegitimerad och sagt något om vår testuppsättning i stället
+                  för om personen. Ett märke utan informationsvärde är sämre än
+                  inget märke. Efter lansering kräver listningsspärren BankID,
+                  så varje aktiv auktion har en legitimerad säljare. */}
+              {!isOwner && BANKID_LIVE && (
                 <div className="mt-4 pt-4 border-t border-espresso-100 flex flex-wrap items-center gap-3 text-xs text-espresso-500">
                   <VerifiedBadge
                     verified={sellerVerified}

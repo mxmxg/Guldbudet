@@ -830,6 +830,17 @@ användare: gör en funktion som svarar på just den frågan.
 Funktionen är öppen även för utloggade, eftersom auktionssidan är publik och
 uppgiften säger att någon legitimerat sig, inte vem.
 
+**Säljarmärket visas först när BankID är skarpt.** Innan dess kan ingen vara
+verifierad, så märket hade stämplat varenda säljare som olegitimerad och sagt
+något om vår testuppsättning i stället för om personen. Ett märke utan
+informationsvärde är sämre än inget märke. Efter lansering kräver
+listningsspärren BankID, så varje aktiv auktion har en legitimerad säljare.
+
+Asymmetrin mot budhistoriken är avsiktlig: där står ett allmänt påstående om
+tjänsten, som villkoren och startsidan får skrivas i presens för lansering.
+Säljarmärket är ett faktapåstående om en namngiven enskild person och måste
+vara sant nu.
+
 **Åt andra hållet är det ett påstående, inte ett märke per rad.** Budhistoriken
 säger att alla som budar är legitimerade handlare, vilket är sant genom
 `dealer_may_bid`. Ett märke per budrad hade dessutom röjt något om enskilda
