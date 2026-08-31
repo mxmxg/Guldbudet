@@ -200,16 +200,12 @@ export default function MyItemsPage() {
                       Redigera →
                     </Link>
                   )}
-                  {/* Kvitto på förmedlingsuppdraget. Finns för allt som faktiskt
-                      lagts ut, alltså inte för avvisade föremål. */}
-                  {item.status !== 'rejected' && (
-                    <Link
-                      href={`/customer/items/${item.id}/uppdrag`}
-                      className="text-sm text-espresso-400 hover:text-gold-600 shrink-0 whitespace-nowrap"
-                    >
-                      Uppdrag →
-                    </Link>
-                  )}
+                  {/* Kvittot på förmedlingsuppdraget låg här förut. Det ligger nu
+                      i adminpanelen, på användarens instruktion: säljaren har
+                      redan godkänt villkoren vid registreringen och ser
+                      uppdragstexten i formuläret när föremålet publiceras.
+                      Handlingen är ett underlag för GuldBud, för revisor och
+                      Skatteverket, inte något kunden behöver hämta. */}
                   {item.status === 'rejected' && (
                     <button
                       onClick={() => relist(item)}
