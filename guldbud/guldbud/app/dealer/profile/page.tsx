@@ -10,6 +10,7 @@ import { CheckIcon } from '@/components/Icons'
 import NotifToggle from '@/components/NotifToggle'
 import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
+import VerifiedBadge from '@/components/VerifiedBadge'
 
 type Stats = { bids: number; items: number; leading: number; won: number }
 
@@ -176,16 +177,28 @@ export default function DealerProfilePage() {
             <h1 className="font-display text-3xl text-gold-100">
               {profile?.company_name || profile?.full_name || 'Handlare'}
             </h1>
+            {/* Tva skilda saker, tidigare hopslagna till en chip som sa
+                "Verifierad handlare" enbart baserat pa adminens godkannande.
+                Godkannandet ar vart beslut om foretaget; legitimeringen ar
+                BankID pa firmatecknaren. Bada kravs for att fa buda. */}
             {profile &&
               (profile.approved ? (
                 <span className="chip bg-emerald-500/15 text-emerald-300 border border-emerald-400/25 inline-flex items-center gap-1">
-                  <CheckIcon size={13} strokeWidth={3} /> Verifierad handlare
+                  <CheckIcon size={13} strokeWidth={3} /> Godkänd handlare
                 </span>
               ) : (
                 <span className="chip bg-amber-500/15 text-amber-300 border border-amber-400/25">
                   Väntar på godkännande
                 </span>
               ))}
+            {profile && (
+              <VerifiedBadge
+                verified={!!profile.identity_verified}
+                tone="dark"
+                unverifiedLabel="Legitimera dig med BankID"
+                href={profile.identity_verified ? undefined : '/verifiering'}
+              />
+            )}
           </div>
           <div className="mt-5 flex flex-wrap gap-6 text-sm">
             <HeaderStat value={stats.bids} label="Bud lagda" />

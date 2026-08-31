@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { ShieldIcon, CheckIcon } from '@/components/Icons'
+import { ShieldIcon } from '@/components/Icons'
+import VerifiedBadge from '@/components/VerifiedBadge'
 
 const ERROR_TEXT: Record<string, string> = {
   ej_konfigurerad: 'BankID är inte aktiverat än. Vi öppnar det inom kort.',
@@ -22,6 +23,10 @@ export default function VerifieringPage() {
   const [loading, setLoading] = useState(true)
   const [verified, setVerified] = useState(false)
   const [name, setName] = useState<string>('')
+  // Rollen styr texten och vart knappen leder. Sidan talade tidigare bara till
+  // säljaren ("du kan lägga ut föremål"), vilket blev fel så fort handlare
+  // också måste legitimera sig.
+  const [role, setRole] = useState<string | null>(null)
   const [banner, setBanner] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
   const [starting, setStarting] = useState(false)
 
@@ -76,17 +81,20 @@ export default function VerifieringPage() {
       if (user) {
         const { data: p } = await supabase
           .from('profiles')
-          .select('identity_verified, verified_name')
+          .select('identity_verified, verified_name, role')
           .eq('id', user.id)
           .single()
         setVerified(!!p?.identity_verified)
         setName(p?.verified_name || '')
+        setRole(p?.role ?? null)
       }
       setLoading(false)
     }
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const isDealer = role === 'dealer'
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -113,24 +121,31 @@ export default function VerifieringPage() {
             <div className="h-24 rounded-xl skeleton" />
           ) : verified ? (
             <>
-              <div className="inline-flex items-center gap-2 text-emerald-600 font-medium mb-2">
-                <CheckIcon size={18} /> Identitet verifierad
+              <div className="flex justify-center mb-3">
+                <VerifiedBadge verified />
               </div>
               <h1 className="font-display text-2xl text-espresso-900 mb-1">Du är verifierad</h1>
               <p className="text-sm text-espresso-500">
-                {name ? `Verifierad som ${name}.` : 'Din identitet är bekräftad med BankID.'} Du kan lägga ut
-                föremål och ta emot utbetalning.
+                {name ? `Verifierad som ${name}.` : 'Din identitet är bekräftad med BankID.'}{' '}
+                {isDealer
+                  ? 'Du kan lägga bud på auktionerna.'
+                  : 'Du kan lägga ut föremål och ta emot utbetalning.'}
               </p>
-              <Link href="/customer/submit" className="btn-gold mt-6 inline-flex">
-                Lägg ut ett föremål
+              <p className="text-xs text-espresso-400 mt-3">
+                Det här behöver bara göras en gång. Märket följer med kontot.
+              </p>
+              <Link href={isDealer ? '/dealer/dashboard' : '/customer/submit'} className="btn-gold mt-6 inline-flex">
+                {isDealer ? 'Till handlarpanelen' : 'Lägg ut ett föremål'}
               </Link>
             </>
           ) : (
             <>
               <h1 className="font-display text-2xl text-espresso-900 mb-1">Verifiera dig med BankID</h1>
               <p className="text-sm text-espresso-500 mb-6 leading-relaxed">
-                För din och köparnas trygghet verifierar vi din identitet med BankID innan du lägger ut föremål
-                och innan utbetalning. Det tar några sekunder och görs bara en gång.
+                {isDealer
+                  ? 'Säljarna hos oss är privatpersoner, och vi lovar dem att varje handlare är legitimerad. Därför legitimerar du dig med BankID innan du lägger bud.'
+                  : 'För din och köparnas trygghet verifierar vi din identitet med BankID innan du lägger ut föremål och innan utbetalning.'}{' '}
+                Det tar några sekunder och <strong>görs bara en gång</strong>.
               </p>
               <button onClick={startBankId} disabled={starting} className="btn-gold inline-flex">
                 {starting ? 'Startar...' : 'Verifiera med BankID'}

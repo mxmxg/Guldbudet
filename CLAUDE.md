@@ -796,6 +796,26 @@ Vid lansering ska **båda** or-grenarna bort samma dag, `dealer_may_bid` och
 `enforce_listing_requirements`, samtidigt som `NEXT_PUBLIC_BANKID_ENABLED` sätts
 och sajten deployas om. De hör ihop.
 
+**Verifieringen är en engångssak, och märket är en enda komponent.** Beslutat
+av användaren. `identity_verified` sätts en gång av BankID-callbacken och nollas
+aldrig av någon kod, så ingen behöver göra om det. Verifieringssidan visar
+"Du är verifierad" i stället för att erbjuda en ny körning.
+
+Märket bor i `components/VerifiedBadge.tsx` och används på verifieringssidan och
+båda profilerna. Ett märke som ritas om lite olika på varje sida slutar betyda
+något, poängen är att användaren känner igen det direkt. Ska det synas på en ny
+yta: importera komponenten, rita inte en egen chip.
+
+**Godkänd handlare och legitimerad handlare är två olika saker.** Handlarprofilen
+sa tidigare "Verifierad handlare" enbart baserat på `approved`, alltså vårt
+adminbeslut om företaget, utan att någon legitimerat sig. Nu står det "Godkänd
+handlare" för det beslutet, och legitimeringsmärket är separat. Båda krävs för
+att få buda, se `dealer_may_bid`.
+
+**Verifieringssidan är rollmedveten.** Den talade tidigare bara till säljaren,
+med texten "du kan lägga ut föremål" och en knapp till `/customer/submit`. En
+handlare som legitimerade sig skickades alltså in i säljarflödet.
+
 **Underhålls-RPC:erna anropas via en adminrutt, aldrig från webbläsaren.**
 `settle_ended_auctions`, `process_unpaid_orders` och `resolve_auto_bids` har med
 flit exekveringsrätten återkallad från `anon` och `authenticated` i schemat, som
