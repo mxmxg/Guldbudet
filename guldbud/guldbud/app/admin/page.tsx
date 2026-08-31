@@ -7,7 +7,6 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { TrashIcon } from '@/components/Icons'
 import CountdownTimer from '@/components/CountdownTimer'
-import ImageOptimizeButton from '@/components/ImageOptimizeButton'
 import { estimateRange, formatSEK } from '@/lib/gold'
 import { useGoldPrice } from '@/lib/useGoldPrice'
 import { feesAt } from '@/lib/fees'
@@ -739,10 +738,11 @@ export default function AdminPage() {
           <span className="text-gold-600 text-sm shrink-0">Öppna →</span>
         </Link>
 
-        {/* Engångs-bildoptimering */}
-        <div className="mb-10">
-          <ImageOptimizeButton />
-        </div>
+        {/* Bildkrympningen låg här. Borttagen: den skrev över originalen i
+            lagringen, och med Supabases bildtransformering är originalet det
+            som skalas ifrån. Verktyget sänkte alltså källkvaliteten permanent
+            för varje framtida storlek. Uppladdningen krymper redan i
+            webbläsaren till 2560 px, den delen finns kvar. */}
 
         {/* Dealers */}
         <section id="granska-handlare" className="mb-12 scroll-mt-24">
