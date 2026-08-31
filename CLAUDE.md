@@ -492,7 +492,8 @@ filstorlek. Ett försök att göra det revertades i PR #257.
 **Loadern var avstängd tills Supabase Pro var på.** Bildtransformeringen
 kräver Pro. Utan flaggan returnerar `lib/imageLoader.js` original-URL:en
 oförändrad, precis som den gamla `unoptimized`-vägen. Ingenting kan gå sönder
-på en plan utan transformering.
+på en plan utan transformering. Flaggan är numera satt och transformeringen
+kontrollerad, se beslutsloggen.
 
 **Vercels bildoptimering används inte alls.** Den slog tidigare i månadskvoten
 och gav 402 och svarta bilder. Därför egen loader.
@@ -907,9 +908,20 @@ Det som krävs för skalade bilder är Supabase Pro, som finns, plus att
 `NEXT_PUBLIC_SUPABASE_IMAGE_TRANSFORM` är exakt `true` i Vercel följt av en
 omdeploy. Miljövariabler kostar ingenting på någon Vercel-plan.
 
-Så avgörs läget utan att gissa: titta på en annonsbilds adress. Står det
-`/storage/v1/render/image/public/` med `width=` är transformeringen på, står
-det `/storage/v1/object/public/` är flaggan av och originalet levereras.
+**Transformeringen är på, kontrollerat 2026-08-31.** Frågan stod öppen i tre
+artifacts som "variabeln finns sedan 30 augusti men värdet är inte
+kontrollerat". Nu är den stängd: användaren skickade en annonsbilds adress och
+den går genom `/storage/v1/render/image/public/` med
+`width=1920&quality=75&resize=contain`, alltså precis det `lib/imageLoader.js`
+bygger. Omställaren i Supabase, Storage och fliken Settings, är också påslagen.
+Ingenting återstår att göra.
+
+Så avgörs läget utan att gissa, om frågan dyker upp igen: titta på en
+annonsbilds adress. Står det `/storage/v1/render/image/public/` med `width=` är
+transformeringen på, står det `/storage/v1/object/public/` är flaggan av och
+originalet levereras. Värdena går inte att läsa från den här miljön, och
+proxyn blockerar både guldbud.com och supabase.com, så adressen måste komma
+från användaren.
 
 **Ingen chattwidget på sajten. Avskrivet 2026-08-31.** Frågan gällde en
 bemannad chattruta av Weplys typ, alltså en tjänst där utomstående svarar i
