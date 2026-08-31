@@ -6,8 +6,13 @@ type GoldState = { price: number; live: boolean; changePct: number | null; up: b
 
 /**
  * Returns the current 24K gold price (SEK/gram) plus the real daily change
- * (changePct / up). Starts from the calibrated constant and updates to the live
- * value from /api/gold-price once loaded, then every 5 minutes.
+ * (changePct / up) and whether the value is live. Starts from the fallback
+ * constant, updates to the live value from /api/gold-price once loaded, then
+ * every minute.
+ *
+ * live=false betyder att konstanten visas, inte kursen. Varje yta som skriver
+ * ut priset ska säga det, i stället för att presentera reservvärdet som en
+ * marknadskurs.
  */
 export function useGoldPrice(): GoldState {
   const [state, setState] = useState<GoldState>({
@@ -33,8 +38,8 @@ export function useGoldPrice(): GoldState {
         })
         .catch(() => {})
     load()
-    // Keep an open page in sync with the market every 5 minutes.
-    const id = setInterval(load, 5 * 60 * 1000)
+    // En öppen sida ska följa marknaden, inte frysa vid första hämtningen.
+    const id = setInterval(load, 60 * 1000)
     return () => {
       active = false
       clearInterval(id)

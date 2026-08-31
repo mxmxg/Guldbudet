@@ -6,9 +6,13 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { KARAT_OPTIONS, estimateRange, formatSEK } from '@/lib/gold'
+import { useGoldPrice } from '@/lib/useGoldPrice'
 import { CATEGORIES, GEMSTONES } from '@/lib/catalog'
 
 export default function EditItemPage({ params }: { params: { id: string } }) {
+  // 24K-priset per gram, live. Faller tillbaka på riktvärdet i lib/gold
+  // tills /api/gold-price svarat.
+  const { price: spot } = useGoldPrice()
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
@@ -63,8 +67,8 @@ export default function EditItemPage({ params }: { params: { id: string } }) {
   const est = useMemo(() => {
     const w = parseFloat(form.weight)
     if (!w || !form.karat) return null
-    return estimateRange(w, form.karat)
-  }, [form.weight, form.karat])
+    return estimateRange(w, form.karat, spot)
+  }, [form.weight, form.karat, spot])
 
   const save = async () => {
     setError('')

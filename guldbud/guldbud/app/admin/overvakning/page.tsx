@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { estimateRange, formatSEK } from '@/lib/gold'
+import { useGoldPrice } from '@/lib/useGoldPrice'
 
 type DealerStat = {
   id: string
@@ -38,10 +39,16 @@ export default function OvervakningPage() {
   const [lowComp, setLowComp] = useState<LowComp[]>([])
   const [totals, setTotals] = useState({ closed: 0, avgBidders: 0, underEstimate: 0 })
 
+  // 24K-priset per gram, live. Faller tillbaka på riktvärdet i lib/gold tills
+  // /api/gold-price svarat.
+  const { price: spot } = useGoldPrice()
+
   useEffect(() => {
     init()
+    // Räknas om när kursen kommer in, annars hade sidan visat riktvärdets
+    // uppskattning kvar hela besöket.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [spot])
 
   const init = async () => {
     const {
@@ -92,7 +99,7 @@ export default function OvervakningPage() {
 
       const winBid = allBids.find((b: any) => b.id === item.accepted_bid_id)
       const price = winBid?.amount || 0
-      const est = estimateRange(item.weight_grams || 0, item.karat || '')
+      const est = estimateRange(item.weight_grams || 0, item.karat || '', spot)
       const estLow = est.low || 0
       if (estLow > 0 && price < estLow) underEstimate++
 
@@ -164,6 +171,10 @@ export default function OvervakningPage() {
               <div className="card p-4">
                 <p className="font-display text-2xl text-espresso-900 tabular-nums">{totals.underEstimate}</p>
                 <p className="text-xs text-espresso-400 mt-0.5">Sålda under uppskattat värde</p>
+                <p className="text-[11px] text-espresso-300 mt-1">
+                  Uppskattningen räknas på dagens guldkurs. Vi sparar ingen historisk kurs, så
+                  jämförelsen är trubbig för äldre affärer.
+                </p>
               </div>
             </div>
 

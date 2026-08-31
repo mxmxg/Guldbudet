@@ -13,6 +13,7 @@ import CategoryIcon from '@/components/CategoryIcon'
 import Footer from '@/components/Footer'
 import { GemIcon, HourglassIcon, CheckIcon } from '@/components/Icons'
 import { estimateRange, formatSEK, isPlatinum } from '@/lib/gold'
+import { useGoldPrice } from '@/lib/useGoldPrice'
 
 function relTime(iso: string) {
   const diff = Date.now() - new Date(iso).getTime()
@@ -25,6 +26,9 @@ function relTime(iso: string) {
 }
 
 export default function AuctionDetails({ item }: { item: any }) {
+  // 24K-priset per gram, live. Faller tillbaka på riktvärdet i lib/gold
+  // tills /api/gold-price svarat.
+  const { price: spot, live: spotLive } = useGoldPrice()
   const [bids, setBids] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
@@ -203,7 +207,9 @@ export default function AuctionDetails({ item }: { item: any }) {
   const hasReserve = !!item.has_reserve
   const reserveMet = item.reserve_met ?? true
   const images: string[] = item.image_urls?.length ? item.image_urls : []
-  const est = estimateRange(item.weight_grams || 0, item.karat || '')
+  // Dagens kurs, inte konstanten i lib/gold. Rutan under heter
+  // "Metallvärde vid dagens kurs", och då ska det vara dagens kurs.
+  const est = estimateRange(item.weight_grams || 0, item.karat || '', spot)
 
   // Anonymise bidders publicly with a stable six-digit customer number derived
   // from their id (e.g. "Kund 015648"). Because it is hashed (not sequential)
@@ -382,7 +388,7 @@ export default function AuctionDetails({ item }: { item: any }) {
                   <>
                     <span className="flex items-center gap-2">
                       <SparkIcon />
-                      Metallvärde vid dagens kurs:{' '}
+                      {spotLive ? 'Metallvärde vid dagens kurs' : 'Metallvärde, riktvärde'}:{' '}
                       <span className="font-medium text-espresso-700">{formatSEK(est.melt)}</span>
                     </span>
                     <span className="text-espresso-400">

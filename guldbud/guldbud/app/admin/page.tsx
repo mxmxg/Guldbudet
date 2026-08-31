@@ -9,6 +9,7 @@ import { TrashIcon } from '@/components/Icons'
 import CountdownTimer from '@/components/CountdownTimer'
 import ImageOptimizeButton from '@/components/ImageOptimizeButton'
 import { estimateRange, formatSEK } from '@/lib/gold'
+import { useGoldPrice } from '@/lib/useGoldPrice'
 import { feesAt } from '@/lib/fees'
 import { OPEN_ORDER_STATES } from '@/lib/orders'
 
@@ -20,6 +21,9 @@ function toLocalInput(iso?: string | null) {
 }
 
 export default function AdminPage() {
+  // 24K-priset per gram, live. Faller tillbaka på riktvärdet i lib/gold
+  // tills /api/gold-price svarat.
+  const { price: spot } = useGoldPrice()
   const [pendingDealers, setPendingDealers] = useState<any[]>([])
   const [pendingItems, setPendingItems] = useState<any[]>([])
   const [liveItems, setLiveItems] = useState<any[]>([])
@@ -800,7 +804,7 @@ export default function AdminPage() {
           ) : (
             <div className="space-y-3">
               {pendingItems.map((item) => {
-                const est = estimateRange(item.weight_grams || 0, item.karat || '')
+                const est = estimateRange(item.weight_grams || 0, item.karat || '', spot)
                 return (
                   <div key={item.id} className="card p-5 flex gap-4 flex-wrap sm:flex-nowrap">
                     {item.image_urls?.[0] && (
