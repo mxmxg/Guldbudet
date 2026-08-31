@@ -67,9 +67,6 @@ Det här vet vi inte statusen på. Kolla, och skriv in svaret här.
       auth-mejl, alltså kontobekräftelse och lösenordsåterställning, går via
       egen SMTP eller fortfarande via Supabases testmejl är inte kontrollerat.
       Går de via testmejlet stryps de vid volym och hamnar i skräpposten.
-- [ ] **"Confirm email" i Supabase.** Var avstängd under test för att komma runt
-      e-postgränsen. Om den fortfarande är det kan vem som helst registrera sig
-      på en adress de inte äger. Kontrollera och slå på den.
 
 ---
 
@@ -83,3 +80,7 @@ Skrivs upp här så det inte görs om.
 - Trustpilot-profilen hävdad, se.trustpilot.com/review/guldbud.com
 - Kedjan trigger via webhook till Resend verifierad i drift
 - Adminpanelen godkänner handlare och föremål, ingen handpåläggning i Supabase
+- **"Confirm email" är påslagen** i Supabase, kontrollerat 2026-08-31. Var
+  avstängd under test. Bekräftelsemallen är dessutom anpassad på svenska med
+  GuldBuds formgivning och rätt bolagsuppgifter i sidfoten. Anonyma
+  inloggningar är avstängda, vilket är rätt för oss.
