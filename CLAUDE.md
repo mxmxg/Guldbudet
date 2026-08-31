@@ -780,6 +780,10 @@ använder: budpolicyn, autobudspolicyn och `resolve_auto_bids`. Att skriva
 villkoret tre gånger hade gjort lanseringsdagens skärpning till tre ändringar,
 och en glömd av tre är en tyst lucka.
 
+**SQL:en är körd mot databasen 2026-08-31.** Användaren körde alla fyra blocken
+och rapporterade att kontrollfrågorna gav rätt svar. Utfallet är alltså
+användarens uppgift, inte något jag läst ur databasen själv.
+
 `resolve_auto_bids` är med av ett skäl som är lätt att missa: ett autobud som
 lades innan kravet fanns skulle annars fortsätta lösa ut bud från en handlare
 som inte får buda idag.
