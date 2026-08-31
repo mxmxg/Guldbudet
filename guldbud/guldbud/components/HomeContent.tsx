@@ -322,6 +322,8 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
                 <LogoStat src="/brand/bankid-white.png" alt="BankID" label="Verifierad affär" h={42} />
                 <div className="w-px h-14 bg-espresso-700" />
                 <LogoStat src="/brand/swish.png" alt="Swish" label="Utbetalning inom 24h" h={48} />
+                <div className="w-px h-14 bg-espresso-700" />
+                <LogoStat src="/brand/postnord-symbol.svg" alt="PostNord" label="Försäkrad rek-post" h={40} />
               </div>
             </Reveal>
           </div>
