@@ -2,7 +2,7 @@ import LegalPage from '@/components/LegalPage'
 import { TERMS_UPDATED_LABEL } from '@/lib/terms'
 
 export const metadata = {
-  title: 'Användarvillkor · GuldBud',
+  title: 'Användarvillkor',
   alternates: { canonical: '/terms' },
 }
 

@@ -66,9 +66,9 @@ export default function CountdownTimer({
   if (variant === 'chip') {
     const label =
       parts.d > 0
-        ? `${parts.d}d ${parts.h}h ${parts.m}m`
+        ? `${parts.d}d ${parts.h}t ${parts.m}m`
         : parts.h > 0
-        ? `${parts.h}h ${parts.m}m ${pad(parts.s)}s`
+        ? `${parts.h}t ${parts.m}m ${pad(parts.s)}s`
         : `${parts.m}m ${pad(parts.s)}s`
     return (
       <span

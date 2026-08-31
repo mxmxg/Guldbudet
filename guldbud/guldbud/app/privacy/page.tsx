@@ -1,7 +1,7 @@
 import LegalPage from '@/components/LegalPage'
 
 export const metadata = {
-  title: 'Integritetspolicy · GuldBud',
+  title: 'Integritetspolicy',
   alternates: { canonical: '/privacy' },
 }
 

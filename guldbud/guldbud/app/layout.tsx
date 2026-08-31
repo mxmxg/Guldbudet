@@ -58,6 +58,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="sv" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans bg-cream text-espresso-900 antialiased selection:bg-gold-200 selection:text-espresso-900">
+        {/* Utan JavaScript kör Reveal-komponenten aldrig, så dess dolda
+            grundläge skulle gömma innehållet permanent. Den här regeln visar
+            allt direkt när skript är avstängda. */}
+        <noscript>
+          <style>{`[data-reveal]{opacity:1 !important;transform:none !important}`}</style>
+        </noscript>
         {children}
         <CookieConsent />
       </body>

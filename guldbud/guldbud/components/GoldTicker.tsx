@@ -71,7 +71,10 @@ export default function GoldTicker() {
       <div className="sm:hidden relative h-9 overflow-hidden">
         <div className="absolute inset-y-0 left-0 flex items-center w-max animate-marquee">
           <Segment />
-          <Segment />
+          {/* Kopian finns bara för den sömlösa loopen, skärmläsare ska inte läsa priserna två gånger. */}
+          <span aria-hidden="true" className="flex items-center">
+            <Segment />
+          </span>
         </div>
       </div>
     </div>

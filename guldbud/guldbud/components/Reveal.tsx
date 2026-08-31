@@ -36,12 +36,19 @@ export default function Reveal({
       { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
     )
     io.observe(el)
-    return () => io.disconnect()
+    // Innehåll får aldrig förbli dolt: om observern inte hunnit slå på tre
+    // sekunder (trasig IO, konstig viewport, långsam enhet) visas det ändå.
+    const fallback = setTimeout(() => setShown(true), 3000)
+    return () => {
+      io.disconnect()
+      clearTimeout(fallback)
+    }
   }, [])
 
   return (
     <Tag
       ref={ref}
+      data-reveal
       className={`transition-all duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
         shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       } ${className}`}

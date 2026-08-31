@@ -3,7 +3,7 @@ import Footer from '@/components/Footer'
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Så fungerar budgivningen · GuldBud',
+  title: 'Så fungerar budgivningen',
   alternates: { canonical: '/dealer/guide' },
 }
 

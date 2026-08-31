@@ -7,7 +7,7 @@ import { formatSEK } from '@/lib/gold'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
-  title: 'Sålda resultat · GuldBud',
+  title: 'Sålda resultat',
   description: 'Se vad guld faktiskt sålts för på GuldBud. Transparent prisstatistik, inga lockpriser.',
   alternates: { canonical: '/resultat' },
 }

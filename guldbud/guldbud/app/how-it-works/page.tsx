@@ -3,7 +3,7 @@ import Footer from '@/components/Footer'
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Så fungerar det · GuldBud',
+  title: 'Så fungerar det',
   description: 'Så säljer du guld på GuldBud, från att lägga ut föremålet till utbetalning. Enkelt, tryggt och kostnadsfritt.',
   alternates: { canonical: '/how-it-works' },
 }

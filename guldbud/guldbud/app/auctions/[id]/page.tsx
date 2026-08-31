@@ -14,9 +14,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     .select('title, description, weight_grams, karat, image_urls')
     .eq('id', params.id)
     .single()
-  if (!item) return { title: 'Auktion · GuldBud' }
+  if (!item) return { title: 'Auktion' }
   const specs = [item.weight_grams ? `${item.weight_grams} g` : '', item.karat].filter(Boolean).join(' · ')
-  const title = `${item.title}${specs ? `, ${specs}` : ''} · GuldBud`
+  const title = `${item.title}${specs ? `, ${specs}` : ''}`
   const description =
     item.description?.slice(0, 160) ||
     `Bjud på ${item.title} hos GuldBud, Sveriges guldauktion. Verifierade handlare budar mot varandra.`
