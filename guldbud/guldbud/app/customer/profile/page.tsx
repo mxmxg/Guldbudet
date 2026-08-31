@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import Link from 'next/link'
 import NotifToggle from '@/components/NotifToggle'
 import { isValidSsn, normalizeSsn } from '@/lib/identity'
+import VerifiedBadge from '@/components/VerifiedBadge'
 
 export default function CustomerProfilePage() {
   const router = useRouter()
@@ -126,7 +127,17 @@ export default function CustomerProfilePage() {
         <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
         <div className="relative max-w-4xl mx-auto px-4 py-10">
           <p className="eyebrow text-gold-500/80 mb-1">Min profil</p>
-          <h1 className="font-display text-3xl text-gold-100">{profile?.full_name || 'Mitt konto'}</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-display text-3xl text-gold-100">{profile?.full_name || 'Mitt konto'}</h1>
+            {profile && (
+              <VerifiedBadge
+                verified={!!profile.identity_verified}
+                tone="dark"
+                unverifiedLabel="Legitimera dig med BankID"
+                href={profile.identity_verified ? undefined : '/verifiering'}
+              />
+            )}
+          </div>
           <div className="mt-5 flex flex-wrap gap-6 text-sm">
             <div>
               <div className="font-display text-2xl text-gold-100">{stats.items}</div>
