@@ -473,11 +473,23 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 <span className="tabular-nums">{formatSEK(fees.commission(order.amount))}</span>
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-4">
-              <Link href={`/orders/${order.id}/invoice`} className="text-sm text-gold-600 hover:text-gold-700">
-                Visa handlarens faktura →
-              </Link>
-              <DownloadInvoiceButton orderId={order.id} label="Ladda ner PDF" className="text-sm text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
+            {/* De tre dokumenten. Handlarens länk visar två av dem på samma
+                sida, inköpsunderlaget och GuldBuds faktura, eftersom det är så
+                handlaren ska se dem. Säljarens underlag är det tredje och nås
+                med ?doc=receipt, som bara admin får skicka med. */}
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center gap-4">
+                <Link href={`/orders/${order.id}/invoice`} className="text-sm text-gold-600 hover:text-gold-700">
+                  Handlarens underlag och faktura →
+                </Link>
+                <DownloadInvoiceButton orderId={order.id} label="Ladda ner PDF" className="text-sm text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
+              </div>
+              <div className="flex items-center gap-4">
+                <Link href={`/orders/${order.id}/invoice?doc=receipt`} className="text-sm text-gold-600 hover:text-gold-700">
+                  Säljarens underlag →
+                </Link>
+                <DownloadInvoiceButton orderId={order.id} doc="receipt" label="Ladda ner PDF" className="text-sm text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
+              </div>
             </div>
           </div>
 

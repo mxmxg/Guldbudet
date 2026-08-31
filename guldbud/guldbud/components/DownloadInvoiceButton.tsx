@@ -5,14 +5,20 @@ import { createClient } from '@/lib/supabase-browser'
 // Laddar ner affärens underlag/faktura som riktig PDF. Går via en autentiserad
 // fetch (Bearer-token) i stället för en vanlig länk, eftersom routen kräver
 // Authorization-header och svarar med en fil bakom inloggning.
+// `doc` pekar ut vilken handling som ska hämtas. Utelämnad ger den handling
+// som hör till den som frågar, alltså dagens beteende. 'receipt' hämtar
+// säljarens försäljnings- och utbetalningsunderlag, vilket bara säljaren själv
+// och admin får. Rutten avgör det, knappen bara ber om det.
 export default function DownloadInvoiceButton({
   orderId,
   label = 'Ladda ner underlag',
   className,
+  doc,
 }: {
   orderId: string
   label?: string
   className?: string
+  doc?: 'receipt'
 }) {
   const supabase = createClient()
   const [busy, setBusy] = useState(false)
@@ -30,7 +36,7 @@ export default function DownloadInvoiceButton({
         setBusy(false)
         return
       }
-      const res = await fetch(`/api/orders/${orderId}/invoice-pdf`, {
+      const res = await fetch(`/api/orders/${orderId}/invoice-pdf${doc ? `?doc=${doc}` : ''}`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
         cache: 'no-store',
       })

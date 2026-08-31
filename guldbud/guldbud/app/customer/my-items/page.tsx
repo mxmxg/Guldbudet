@@ -11,6 +11,7 @@ import InviteFriend from '@/components/InviteFriend'
 import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
 import PendingApprovalBanner from '@/components/PendingApprovalBanner'
 import { TERMS_VERSION } from '@/lib/terms'
+import { SELLER_DOC_STATES, type OrderStatus } from '@/lib/orders'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   pending: { label: 'Väntar på granskning', color: 'bg-amber-100 text-amber-700' },
@@ -24,7 +25,7 @@ export default function MyItemsPage() {
   const supabase = createClient()
   const router = useRouter()
   const [items, setItems] = useState<any[]>([])
-  const [orderByItem, setOrderByItem] = useState<Record<string, string>>({})
+  const [orderByItem, setOrderByItem] = useState<Record<string, { id: string; status: string }>>({})
   const [loading, setLoading] = useState(true)
   const [relisting, setRelisting] = useState<string | null>(null)
   const [relistError, setRelistError] = useState('')
@@ -102,9 +103,14 @@ export default function MyItemsPage() {
         .order('created_at', { ascending: false })
       setItems(data || [])
 
-      const { data: orders } = await supabase.from('orders').select('id, item_id').eq('seller_id', user.id)
-      const map: Record<string, string> = {}
-      orders?.forEach((o: any) => (map[o.item_id] = o.id))
+      // Statusen behövs för att veta om säljarens underlag finns än. Den
+      // redovisar en utbetalning, se SELLER_DOC_STATES i lib/orders.
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('id, item_id, status')
+        .eq('seller_id', user.id)
+      const map: Record<string, { id: string; status: string }> = {}
+      orders?.forEach((o: any) => (map[o.item_id] = { id: o.id, status: o.status }))
       setOrderByItem(map)
 
       setLoading(false)
@@ -154,7 +160,12 @@ export default function MyItemsPage() {
                 label: item.status,
                 color: 'bg-espresso-100 text-espresso-500',
               }
-              const orderId = orderByItem[item.id]
+              const order = orderByItem[item.id]
+              const orderId = order?.id
+              // Underlaget redovisar en utbetalning, så det finns först när
+              // utbetalningen är godkänd. Samma regel som i ordervyn, och den
+              // bor i lib/orders så de två inte kan glida isär.
+              const hasSellerDoc = !!order && SELLER_DOC_STATES.includes(order.status as OrderStatus)
               const clickable = item.status === 'active' || item.status === 'closed'
               const href = orderId ? `/orders/${orderId}` : `/auctions/${item.id}`
               const Wrapper: any = clickable ? Link : 'div'
@@ -216,8 +227,18 @@ export default function MyItemsPage() {
                     </button>
                   )}
                 </Wrapper>
-                {orderId && (
-                  <div className="pl-1">
+                {/* Säljarens försäljnings- och utbetalningsunderlag, både att
+                    visa och att ladda ner. Nedladdningen fanns här redan, men
+                    utan villkor, så den gick att hämta innan utbetalningen var
+                    godkänd. Nu följer båda samma regel som ordervyn. */}
+                {hasSellerDoc && orderId && (
+                  <div className="pl-1 flex items-center gap-4">
+                    <Link
+                      href={`/orders/${orderId}/invoice`}
+                      className="text-xs text-gold-600 hover:text-gold-700"
+                    >
+                      Visa underlag →
+                    </Link>
                     <DownloadInvoiceButton
                       orderId={orderId}
                       label="Ladda ner underlag (PDF)"

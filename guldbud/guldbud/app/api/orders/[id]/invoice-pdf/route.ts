@@ -14,6 +14,14 @@ export const dynamic = 'force-dynamic'
 //     including the private seller's identity for their VMB/bokföring.
 // Access is enforced here (service-role reads bypass RLS): only the order's
 // own seller, its own dealer, or an admin may download.
+//
+// ?doc=receipt lets an ADMIN fetch the seller's document instead of the
+// dealer's. Without it an admin got the dealer's two documents and there was no
+// way to reach the third at all, which is the one an accountant or Skatteverket
+// asks for. The dealer is deliberately NOT allowed to pass it: the seller's
+// underlag shows what the seller is paid, and the dealer has no business with
+// that. The seller always gets their own document, with or without the
+// parameter.
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const orderId = params.id
@@ -59,7 +67,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   let party: any = null
   let seller: any = null
 
-  if (isAdmin || isDealer) {
+  // Bara admin får välja handling. Handlaren och säljaren får sin egen.
+  const wantsSellerDoc = isAdmin && req.nextUrl.searchParams.get('doc') === 'receipt'
+
+  if ((isAdmin || isDealer) && !wantsSellerDoc) {
     kind = 'invoice'
     const dealerId = isDealer ? user.id : order.dealer_id
     party = await sb(

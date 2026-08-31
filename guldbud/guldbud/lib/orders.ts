@@ -55,6 +55,18 @@ export const OPEN_ORDER_STATES: OrderStatus[] = [
   'shipped_to_dealer',
 ]
 
+// När säljarens försäljnings- och utbetalningsunderlag får visas för säljaren.
+// Handlingen redovisar en utbetalning, så den finns först när utbetalningen är
+// godkänd. Regeln står på ett ställe eftersom både ordervyn och "Mina föremål"
+// länkar till samma handling, och en regel som skrivs två gånger glider isär.
+// Admin är inte bunden av den: adminvyn är arbetsverktyget vid granskning och
+// tvist och når handlingen i varje status.
+export const SELLER_DOC_STATES: OrderStatus[] = [
+  'verified_paid',
+  'shipped_to_dealer',
+  'completed',
+]
+
 // Var i stegen en affär står. 'dealer_paid' är ett utfasat statusvärde som inte
 // längre finns i ORDER_STEPS, eftersom betalningen spåras separat via
 // orders.dealer_paid_at. Utan mappningen nedan gav findIndex minus ett för
