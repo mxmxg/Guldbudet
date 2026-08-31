@@ -523,8 +523,26 @@ sedan automatiskt stängs av för utebliven betalning.
 **Förmedlingsuppdraget är inbakat i villkoren, inte ett eget avtal.** En
 säljare hade inte signerat ett separat kontrakt med BankID för att sälja ett
 smycke. Uppdraget godkänns vid registrering, publiceringen är instruktionen,
-och `/customer/items/[id]/uppdrag` renderar kvittot i efterhand ur
+och `/admin/items/[id]/uppdrag` renderar kvittot i efterhand ur
 `mandate_accepted_at` och `terms_version`.
+
+**Uppdragskvittot ligger i adminpanelen, inte hos kunden.** Beslutat av
+användaren 2026-08-31. Sidan låg under `/customer/items/[id]/uppdrag` och var
+länkad från "Mina föremål". Säljaren har redan godkänt villkoren när kontot
+skapades och ser uppdragstexten i formuläret när föremålet publiceras, så
+handlingen fyller ingen funktion för kunden. Den finns för att kunna tas fram
+när revisor eller Skatteverket frågar hur förmedlingen gick till.
+
+Texten är därför omskriven från andra person till tredje: handlingen läses av
+GuldBud om säljaren, inte av säljaren själv. Sakinnehållet är oförändrat.
+Adminvyn läser säljarens profil via `item.owner_id`, inte den inloggades, och
+policyn `admins manage all profiles` ger läsrätten. Nås från både väntande
+föremål och auktionsraderna i `/admin`.
+
+**Det är en yta, inte en spärr.** Säljaren äger sin rad i `items` och kommer åt
+sina egna uppgifter via RLS ändå. Handlingen presenteras inte längre för
+kunden, men den är inte hemlig för hen, och det går inte att göra den hemlig
+utan att gå emot att uppgifterna är säljarens egna.
 
 **Priset justeras inte efter kontroll, det omförhandlas.** Tidigare sa
 villkoren att priset "kan justeras", vilket beskriver en köpare och inte en
@@ -873,6 +891,45 @@ varje inloggad användare. Gör en rutt.
 att krympa redan uppladdade råa telefonfoton innan transformeringen fanns. Den
 skriver över originalen. Med transformeringen på är originalet det som
 Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
+
+**Ingen chattwidget på sajten. Avskrivet 2026-08-31.** Frågan gällde en
+bemannad chattruta av Weplys typ, alltså en tjänst där utomstående svarar i
+GuldBuds namn. Tre skäl, och det första är det tunga:
+
+- **Rollen.** Den som öppnar en chatt på en guldsajt frågar nästan alltid vad
+  föremålet är värt. Det är exakt den fråga GuldBud inte får besvara. En inhyrd
+  agent som säger "det brukar ligga runt 8 000" har flyttat oss från förmedlare
+  till värderare, tvärtemot både villkoren och beslutet ovan om att priset
+  omförhandlas i stället för att justeras.
+- **Personuppgifter.** `app/privacy/page.tsx` lovar att underleverantörer
+  behandlar uppgifter enligt personuppgiftsbiträdesavtal och att bara nödvändiga
+  cookies används. En chattleverantör blir ett nytt biträde och sätter i regel
+  egna cookies, så båda styckena hade behövt skrivas om. Chattrutor får
+  dessutom in personnummer och adresser okontrollerat.
+- **Bemanning.** En chattruta som ingen svarar i är sämre än ingen. Det är just
+  det en bemannad tjänst löser, vilket leder tillbaka till första punkten.
+
+Luckan är dessutom mindre än den ser ut: `info@guldbud.com` finns i sidfoten, i
+villkoren, i verifieringsflödet och på auktionssidan, och `/meddelanden` ger två
+trådar per affär. Det som saknas är bara den anonyme besökaren. Ska något ändå
+byggas: en egen "fråga oss"-ruta som mejlar `info@guldbud.com`, alltså inget
+tredjepartsskript, inga nya cookies, inget nytt biträdesavtal.
+
+**Svarslöftet i affärschatten är fast text, inte ett robotsvar i tråden.**
+Beslutat av användaren 2026-08-31, som också valde formuleringen. Under
+skrivrutan i `components/OrderChat.tsx` står "Vi ser ditt meddelande direkt och
+svarar normalt samma dag", och bara för parterna, aldrig i adminvyn.
+
+Ett automatiskt meddelande i tråden valdes bort: `order_messages` är affärens
+kommunikationsprotokoll och används vid tvist, där ett robotsvar hade varit
+omöjligt att skilja från ett riktigt svar från admin. Det hade dessutom gått
+genom `notify_order_message` och mejlat parten om ett svar som ingen skrivit.
+
+Första halvan av texten är ett påstående om systemet, inte ett löfte: triggern
+skapar en notis till varje admin vid meddelande från en part, och notisen går
+vidare till mejl. Andra halvan är ett löfte, och det är bara användaren som kan
+ändra det. Blir svarstiden en annan är det raden som ska ändras, inte
+verkligheten som ska ursäktas.
 
 ---
 
