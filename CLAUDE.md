@@ -385,6 +385,40 @@ automatisk avbrytning. Schemafilens do-block sväljer fel med
 2026-08-31 och verifierat mot `cron.job`: fyra jobb, alla aktiva. Vill du veta
 vad som faktiskt är schemalagt, fråga `cron.job`, inte filen.
 
+**Testordrarna neutraliserades innan jobbets första körning, 2026-08-31.**
+Tio obetalda ordrar låg kvar från testperioden, och den första körningen hade
+avbrutit åtta av dem, stängt av båda handlarkontona och mejlat handlarna
+"Ditt konto har stängts av". Jobbet pausades med `cron.alter_job`, ordrarna
+städades, och jobbet aktiverades igen. Slutläge, verifierat: noll ordrar med
+frist kvar att jaga, fyra aktiva jobb, noll avstängda handlare, inga notiser
+och inga mejl skapade. Order 1 står kvar som `completed` utan registrerad
+betalning, från tiden innan utbetalningsspärren fanns. Den är medvetet orörd:
+funktionen filtrerar bort `completed`, så den är ofarlig historik.
+
+Städningen gav tre läxor värda att spara:
+
+- **Fristen nollas, ordern rörs inte i övrigt.** Åtta ordrar fick
+  `payment_due_at = null`, vilket tar dem ur funktionens urval för alltid utan
+  att ändra status, skapa notiser eller skicka mejl.
+- **En rad i spärrad status utan betalning kan inte uppdateras alls, bara
+  avbrytas.** Order 4 stod i `shipped_to_dealer` utan `dealer_paid_at`, och
+  `enforce_payment_before_release` är en before update-trigger som slår på
+  varje uppdatering av en sådan rad, oavsett vilken kolumn som ändras. Enda
+  vägen ut är `status = 'cancelled'`, som passerar spärren.
+- **`cancelled` är den tysta statusen.** `notify_order_status` har grenar bara
+  för `received`, `verified_paid`, `shipped_to_dealer` och `completed`. En
+  övergång till `cancelled` skapar varken notiser eller mejl. Att backa till
+  `received` hade däremot mejlat handlaren, eftersom dubblettskyddet bara
+  täcker notiser som redan skickats en gång.
+
+**Skydd mot läckta lösenord är påslaget, 2026-08-31.** Supabase Auth
+kontrollerar nu nya lösenord mot HaveIBeenPwned vid registrering och
+lösenordsbyte. Flaggades av Supabases säkerhetsrådgivare, slogs på i
+dashboarden under e-postleverantörens inställningar, och Attack
+Protection-sidan visar Enabled. Befintliga konton påverkas först när de byter
+lösenord. Inställningen ligger i Supabase-dashboarden, inte i repot, så den
+syns inte i någon fil här.
+
 ---
 
 ## De tre resorna
