@@ -132,6 +132,23 @@ export default function OrderChat({
           {sending ? '...' : 'Skicka'}
         </button>
       </div>
+
+      {/*
+        Svarslöftet står som fast text, inte som ett robotsvar i tråden.
+        Trådens innehåll är affärens kommunikationsprotokoll och används vid
+        tvist, så ett automatiskt meddelande hade legat kvar där som om en
+        människa svarat. Det hade dessutom gått genom notify_order_message och
+        mejlat parten om ett svar som ingen skrivit.
+
+        Första halvan är ett påstående om systemet, inte ett löfte: triggern
+        notify_order_message skapar en notis till varje admin vid meddelande
+        från en part, och notisen går vidare till mejl.
+      */}
+      {!isAdmin && (
+        <p className="px-3 pb-3 -mt-1 text-xs text-espresso-400">
+          Vi ser ditt meddelande direkt och svarar normalt samma dag.
+        </p>
+      )}
     </div>
   )
 }
