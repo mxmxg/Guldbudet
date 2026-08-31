@@ -182,7 +182,7 @@ export default function CustomerProfilePage() {
                     placeholder="ÅÅÅÅMMDD-XXXX"
                   />
                   <p className="text-xs text-espresso-400 mt-1.5">
-                    Vi behöver personnummer för att kunna betala ut säkert och följa lagen mot penningtvätt. Det delas aldrig med handlarna.
+                    Vi behöver personnummer för att kunna betala ut säkert och följa lagen mot penningtvätt.
                   </p>
                 </Field>
                 <Field label="E-post (kan ej ändras här)">
