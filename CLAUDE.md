@@ -868,10 +868,10 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugofyra är åtgärdade:
+Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugofem är åtgärdade:
 tre i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i
-#271, två i #273, sex i #274 och en i #275.** Kvar är bara städningen,
-punkt 25 till 30.
+#271, två i #273, sex i #274, en i #275 och en i #281.** Kvar är städningen,
+punkt 25 till 29.
 Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
@@ -983,5 +983,6 @@ eftersom loggen skrivs före utlämnandet och stoppar det om den misslyckas.
     `totalWithCommission` och `PAYMENT_WINDOW_LABEL` i `lib/fees.ts`.
 28. Bolagsuppgifterna är kopierade till tre ställen i stället för importerade.
 29. `lib/types.ts` är ur synk med databasen och kringgås med `any`.
-30. `docs/aml-policy.md` använder GuldBud AB, men är ett dokument för
-    utomstående och ska då ha det registrerade namnet.
+30. ~~`docs/aml-policy.md` använder GuldBud AB.~~ **Åtgärdad i PR #281.**
+    Dokumentet står nu på Hey Consulting Nordic AB, med en not om att
+    namnbytet pågår. GuldBud står kvar som plattformens namn i löptexten.
