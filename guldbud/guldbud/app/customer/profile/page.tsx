@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import NotifToggle from '@/components/NotifToggle'
+import { isValidSsn, normalizeSsn } from '@/lib/identity'
 
 export default function CustomerProfilePage() {
   const router = useRouter()
@@ -75,6 +76,13 @@ export default function CustomerProfilePage() {
   }
 
   const save = async () => {
+    // Numret får sättas en gång och lagras normaliserat. Ett ogiltigt nummer
+    // ska sägas ifrån om, inte tyst bli null: fältet är låst efteråt, så en
+    // tappad uppgift går inte att rätta själv.
+    if (!profile.personal_number && form.personal_number.trim() && !isValidSsn(form.personal_number)) {
+      setMsg({ ok: false, text: 'Personnumret ser inte ut att stämma. Skriv det som ÅÅÅÅMMDD-XXXX.' })
+      return
+    }
     setSaving(true)
     setMsg(null)
     const { error } = await supabase
@@ -84,7 +92,7 @@ export default function CustomerProfilePage() {
         phone: form.phone || null,
         // Personnummer är en identitetsuppgift – låst när det väl är satt.
         // (Skickas bara med om det ännu inte finns, så det kan sättas en gång.)
-        ...(profile.personal_number ? {} : { personal_number: form.personal_number || null }),
+        ...(profile.personal_number ? {} : { personal_number: normalizeSsn(form.personal_number) }),
         address: form.address || null,
         postal_code: form.postal_code || null,
         city: form.city || null,

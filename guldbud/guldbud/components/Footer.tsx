@@ -36,7 +36,7 @@ export default function Footer() {
           </FooterCol>
 
           <FooterCol title="För handlare">
-            <FooterLink href="/auth/login?role=dealer">Bli guldhandlare</FooterLink>
+            <FooterLink href="/auth/login?role=dealer&mode=register">Bli guldhandlare</FooterLink>
             <FooterLink href="/dealer/dashboard">Handlarpanel</FooterLink>
             <FooterLink href="/dealer/guide">Budgivning</FooterLink>
             <FooterLink href="/handlarvillkor">Handlarvillkor</FooterLink>

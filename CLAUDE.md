@@ -763,6 +763,19 @@ affärer mot en uppskattning, men vi sparar ingen historisk kurs, så jämförel
 görs mot dagens. Det är trubbigt för äldre affärer och står nu utskrivet i
 gränssnittet i stället för att låtsas vara exakt.
 
+**Underhålls-RPC:erna anropas via en adminrutt, aldrig från webbläsaren.**
+`settle_ended_auctions`, `process_unpaid_orders` och `resolve_auto_bids` har med
+flit exekveringsrätten återkallad från `anon` och `authenticated` i schemat, som
+djupförsvar mot direktanrop via PostgREST. Adminpanelen anropade ändå
+`supabase.rpc('settle_ended_auctions')` från klienten, inuti ett tomt
+catch-block, så anropet misslyckades tyst vid varje klick och säljaren fick
+vänta på cron-jobbet i stället.
+
+Vägen går nu via `/api/admin/settle-auctions`, som kontrollerar adminrollen och
+kör funktionen med servicerollen. **Ge inte tillbaka rätten till
+`authenticated`** för att "fixa" ett liknande fel: det öppnar funktionen för
+varje inloggad användare. Gör en rutt.
+
 **Bildkrympningen i adminpanelen** (`/api/admin/optimize-images`) byggdes för
 att krympa redan uppladdade råa telefonfoton innan transformeringen fanns. Den
 skriver över originalen. Med transformeringen på är originalet det som
@@ -772,11 +785,10 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Sjutton är åtgärdade: tre
-i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i #271
-och två i #273.** Därmed är pengar och juridik, personuppgifter och identitet,
-samt två av tre om ärliga siffror stängda. Kvar är trasig funktion, påståendet
-om BankID-verifierade handlare, och städning.
+Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugotre är åtgärdade: tre
+i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i #271,
+två i #273 och sex i #274.** Kvar är påståendet om BankID-verifierade handlare
+(punkt 24) och städningen (punkt 25 till 30).
 Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
@@ -848,17 +860,21 @@ eftersom loggen skrivs före utlämnandet och stoppar det om den misslyckas.
 
 **Trasig funktion**
 
-16. `dealer_paid` är ett återvändsgränd-tillstånd. `stepIndex` ger minus ett,
-    så admin kan inte flytta en sådan affär framåt, bara avbryta den.
-17. `orders/[id]/page.tsx:58` hämtar inte `seal_number` eller `cancel_reason`,
-    men raderna 255, 395 och 397 läser dem. Förseglingsnumret visas aldrig.
-18. `app/admin/page.tsx:220` anropar `settle_ended_auctions`, men schemat
-    återkallar exekveringsrätten från `authenticated` på rad 1692. Anropet
-    misslyckas tyst.
-19. Sjätte bilden är osynlig. Säljaren får ladda upp sex, galleriet visar fem.
-20. Sidfotens länk "Bli guldhandlare" landar på inloggningsfliken utan väg till
-    handlarregistrering.
-21. Personnummerfältet kräver tio siffror men ber om tolv i platshållaren.
+16. ~~`dealer_paid` är ett återvändsgränd-tillstånd.~~ **Åtgärdad i PR #274.**
+    `stepIndex` mappar det utfasade värdet till `received`, steget det
+    historiskt kom efter, så nästa steg blir `verified_paid`.
+17. ~~Ordervyn hämtar inte `seal_number` eller `cancel_reason` men läser dem.~~
+    **Åtgärdad i PR #274.** Båda är med i select:en nu.
+18. ~~Adminpanelen anropar `settle_ended_auctions` men rätten är återkallad.~~
+    **Åtgärdad i PR #274.** Går via `/api/admin/settle-auctions` med
+    servicerollen. Återkallandet i schemat står kvar, det är djupförsvar.
+19. ~~Sjätte bilden är osynlig.~~ **Åtgärdad i PR #274.** Galleriet har sex
+    kolumner och kapar inte längre.
+20. ~~Sidfotens länk "Bli guldhandlare" landar på inloggningsfliken.~~
+    **Åtgärdad i PR #274.** Länken bär `mode=register`, som sidan redan läser.
+21. ~~Personnummerfältet kräver tio siffror men ber om tolv.~~ **Åtgärdad i
+    PR #274.** Båda formerna godtas, kontrollsiffran kontrolleras, och numret
+    lagras normaliserat precis som från BankID.
 
 **Rör löftet om ärliga siffror**
 
