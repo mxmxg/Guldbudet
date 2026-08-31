@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE, commission, commissionVat, dealerTotal } from '@/lib/fees'
+import { BANKID_LIVE } from '@/lib/identity'
 
 const INCREMENTS = [100, 250, 500, 1000]
 
@@ -25,6 +26,7 @@ export default function BidSection({
   const [role, setRole] = useState<string | null>(null)
   const [approved, setApproved] = useState(false)
   const [suspended, setSuspended] = useState(false)
+  const [identityVerified, setIdentityVerified] = useState(false)
   const [checked, setChecked] = useState(false)
   const [maxBid, setMaxBid] = useState('')
   const [myAutoMax, setMyAutoMax] = useState<number | null>(null)
@@ -39,12 +41,13 @@ export default function BidSection({
       if (sessionUser) {
         const { data: prof } = await supabase
           .from('profiles')
-          .select('role, approved, suspended')
+          .select('role, approved, suspended, identity_verified')
           .eq('id', sessionUser.id)
           .single()
         setRole(prof?.role ?? null)
         setApproved(prof?.approved ?? false)
         setSuspended(prof?.suspended ?? false)
+        setIdentityVerified(prof?.identity_verified ?? false)
         const { data: ab } = await supabase
           .from('auto_bids')
           .select('max_amount')
@@ -177,6 +180,28 @@ export default function BidSection({
       <div className="rounded-2xl bg-red-50 border border-red-200 p-4">
         <p className="text-red-700 text-sm font-medium">Ditt konto är pausat</p>
         <p className="text-red-600 text-xs mt-1">Du kan inte lägga bud just nu. Kontakta oss så reder vi ut det.</p>
+      </div>
+    )
+  }
+
+  // Handlaren ska vara legitimerad med BankID för att få buda. Speglar
+  // dealer_may_bid i schemat: databasen är den som faktiskt stoppar budet,
+  // det här är beskedet om varför. Flaggan är samma byggtidsflagga som
+  // säljarens listningsgrind läser, så kravet slås på för båda samtidigt.
+  if (BANKID_LIVE && !identityVerified) {
+    return (
+      <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+        <p className="text-amber-700 text-sm font-medium">Legitimera dig med BankID för att buda</p>
+        <p className="text-amber-600 text-xs mt-1">
+          Säljarna är privatpersoner, och vi lovar dem att varje handlare är legitimerad. Det tar en
+          minut och behöver bara göras en gång.
+        </p>
+        <Link
+          href="/verifiering"
+          className="inline-block mt-3 bg-gold-500 hover:bg-gold-600 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
+        >
+          Legitimera med BankID
+        </Link>
       </div>
     )
   }

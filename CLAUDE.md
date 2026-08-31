@@ -426,8 +426,10 @@ uttrycklig test- eller skarpflagga**. Två oberoende reglage styr det:
 
 1. `iduraConfigured()` är sant när alla tre Idura-variabler finns. Testläge
    kontra skarpt avgörs enbart av vilken `IDURA_DOMAIN` som är satt.
-2. `NEXT_PUBLIC_BANKID_ENABLED` avgör om BankID är **obligatoriskt** för att
-   lista ett föremål. Den läses på exakt ett ställe, `submit/page.tsx:65`.
+2. `NEXT_PUBLIC_BANKID_ENABLED` avgör om BankID är **obligatoriskt**, både för
+   säljaren som listar och för handlaren som budar. Den läses numera på ett
+   enda ställe, `BANKID_LIVE` i `lib/identity.ts`, som fyra ytor importerar.
+   Lägg aldrig en egen jämförelse mot miljövariabeln i en komponent.
 
 De två kan glida isär åt båda håll. Utan BankID faller listningsgrinden
 tillbaka på ett självdeklarerat personnummer utan checksiffrekontroll.
@@ -763,6 +765,27 @@ affärer mot en uppskattning, men vi sparar ingen historisk kurs, så jämförel
 görs mot dagens. Det är trubbigt för äldre affärer och står nu utskrivet i
 gränssnittet i stället för att låtsas vara exakt.
 
+**Handlaren måste legitimera sig med BankID, precis som säljaren.** Beslutat av
+användaren. Startsidan lovade "BankID-verifierade handlare" utan att kravet
+fanns, och valet var att göra påståendet sant i stället för att ta bort det.
+
+Spärren ligger i `dealer_may_bid` i schemat, ett predikat som tre ställen
+använder: budpolicyn, autobudspolicyn och `resolve_auto_bids`. Att skriva
+villkoret tre gånger hade gjort lanseringsdagens skärpning till tre ändringar,
+och en glömd av tre är en tyst lucka.
+
+`resolve_auto_bids` är med av ett skäl som är lätt att missa: ett autobud som
+lades innan kravet fanns skulle annars fortsätta lösa ut bud från en handlare
+som inte får buda idag.
+
+Klientgrindarna i budrutan och handlarpanelen är bara besked om varför, inte
+skyddet. Handlarpanelen förblir läsbar utan legitimering med flit: att kunna se
+auktionerna är det som gör att en ny handlare orkar ta steget.
+
+Vid lansering ska **båda** or-grenarna bort samma dag, `dealer_may_bid` och
+`enforce_listing_requirements`, samtidigt som `NEXT_PUBLIC_BANKID_ENABLED` sätts
+och sajten deployas om. De hör ihop.
+
 **Underhålls-RPC:erna anropas via en adminrutt, aldrig från webbläsaren.**
 `settle_ended_auctions`, `process_unpaid_orders` och `resolve_auto_bids` har med
 flit exekveringsrätten återkallad från `anon` och `authenticated` i schemat, som
@@ -785,10 +808,10 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugotre är åtgärdade: tre
-i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i #271,
-två i #273 och sex i #274.** Kvar är påståendet om BankID-verifierade handlare
-(punkt 24) och städningen (punkt 25 till 30).
+Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugofyra är åtgärdade:
+tre i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i
+#271, två i #273, sex i #274 och en i #275.** Kvar är bara städningen,
+punkt 25 till 30.
 Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
@@ -886,8 +909,11 @@ eftersom loggen skrivs före utlämnandet och stoppar det om den misslyckas.
     **Åtgärdad i PR #273.** Samtliga sju anropsställen skickar nu in
     live-kursen. Konstanten finns kvar enbart som reservvärde i `lib/gold.ts`
     och som startvärde i `useGoldPrice`.
-24. `components/HomeContent.tsx:344` säger "BankID-verifierade handlare".
-    Handlare går aldrig genom BankID-flödet.
+24. ~~`components/HomeContent.tsx:344` säger "BankID-verifierade handlare".~~
+    **Åtgärdad i PR #275**, genom att göra påståendet sant i stället för att ta
+    bort det. Handlaren måste nu legitimera sig, spärrat i `dealer_may_bid`.
+    Texten får stå i presens av samma skäl som villkoren: inga riktiga affärer
+    släpps igenom före lansering, och kravet skärps samma dag som BankID.
 
 **Städning**
 

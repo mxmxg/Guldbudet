@@ -766,6 +766,18 @@ export default function AdminPage() {
                     <Info label="Org.nummer" value={dealer.org_number} />
                     <Info label="Kontaktperson" value={dealer.full_name} />
                     <Info label="Personnummer" value={dealer.personal_number} />
+                    {/* Legitimationen är ett krav för att få buda, spärrat i
+                        dealer_may_bid. Visas här så du ser det innan du
+                        godkänner, i stället för att upptäcka det när handlaren
+                        hör av sig om att buden inte går igenom. */}
+                    <Info
+                      label="BankID"
+                      value={
+                        dealer.identity_verified
+                          ? `Legitimerad${dealer.verified_name ? ' som ' + dealer.verified_name : ''}`
+                          : 'Inte legitimerad än'
+                      }
+                    />
                     <Info label="E-post" value={dealer.email} />
                     <Info label="Telefon" value={dealer.phone} />
                     <Info

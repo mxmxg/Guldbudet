@@ -42,6 +42,25 @@ export default function PendingPage() {
         >
           Bekräfta först din e-post via länken vi just mejlade dig. Det behövs för att kunna logga in.
         </p>
+        <p
+          style={{
+            color: '#c9a84c',
+            fontSize: '13px',
+            lineHeight: 1.6,
+            marginBottom: '24px',
+            background: '#2d1f0a',
+            border: '1px solid #3d2d0f',
+            borderRadius: '10px',
+            padding: '12px 14px',
+          }}
+        >
+          Du behöver också legitimera dig med BankID innan du kan lägga bud. Säljarna hos oss är
+          privatpersoner, och vi lovar dem att varje handlare är legitimerad. Det gör du under{' '}
+          <Link href="/verifiering" style={{ color: '#D4AF37', fontWeight: 500 }}>
+            Verifiering
+          </Link>{' '}
+          när du loggat in.
+        </p>
         <Link href="/" style={{ color: '#B8860B', fontSize: '14px', fontWeight: 500 }}>
           Tillbaka till startsidan
         </Link>

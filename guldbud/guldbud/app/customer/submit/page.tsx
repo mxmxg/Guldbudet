@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { KARAT_OPTIONS, estimateRange, formatSEK, isPlatinum } from '@/lib/gold'
 import { useGoldPrice } from '@/lib/useGoldPrice'
+import { BANKID_LIVE } from '@/lib/identity'
 import { CATEGORIES, GEMSTONES } from '@/lib/catalog'
 import { SOURCE_OPTIONS } from '@/lib/aml'
 import { TERMS_VERSION } from '@/lib/terms'
@@ -66,7 +67,7 @@ export default function SubmitPage() {
       }
       // Hård identitetsgrind före listning: när BankID är skarpt krävs verifierad
       // identitet, annars kan konton med bara e-post lägga upp fejkannonser.
-      const bankidLive = process.env.NEXT_PUBLIC_BANKID_ENABLED === 'true'
+      const bankidLive = BANKID_LIVE
       if (bankidLive && !prof?.identity_verified) {
         router.push('/verifiering')
         return
