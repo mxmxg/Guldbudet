@@ -11,7 +11,6 @@ import Footer from '@/components/Footer'
 import RecentlySold, { SoldRow } from '@/components/RecentlySold'
 import CountdownTimer from '@/components/CountdownTimer'
 import CategoryIcon from '@/components/CategoryIcon'
-import EndingSoonRail from '@/components/EndingSoonRail'
 import LatestBid from '@/components/LatestBid'
 import { TRUSTPILOT_PROFILE_URL } from '@/components/TrustpilotInvite'
 import PendingApprovalBanner from '@/components/PendingApprovalBanner'
@@ -456,7 +455,6 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
 
         {items.length > 0 ? (
           <>
-            <EndingSoonRail items={items} />
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.slice(0, 9).map((item, i) => (
                 <Reveal key={item.id} delay={(i % 3) * 90}>
