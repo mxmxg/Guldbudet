@@ -103,19 +103,24 @@ aldrig gissa.
 Fram till att båda gått igenom heter bolaget Hey Consulting Nordic AB med
 adress i Järfälla. **Påstå aldrig att namnbytet eller adressbytet är klart.**
 
-**Beslutat: vilket namn som ska stå var**
+**Beslutat: det ska stå GuldBud AB överallt.**
 
-- **Villkor, förmedlingsuppdrag och fakturadokument skrivs för GuldBud AB.**
-  De används först vid transaktioner, och inga transaktioner tillåts innan
-  namnbytet gått igenom. Rätta alltså inte tillbaka dem till det gamla namnet.
-- **Handlingar som skickas ut före namnbytet använder det registrerade
-  namnet**, med en not om att bytet pågår. Det gäller underlaget till
-  revisorn, bankansökan och allt som en mottagare slår upp i registret. Ett
-  namn som inte matchar registret stoppar ärendet.
+Användaren har bestämt det, och ändrade beslutet 2026-08-31 efter att tidigare
+ha delat upp det. Alla dokument i repot skrivs för **GuldBud AB, org.nr
+559291-4781**. Det gäller villkoren, förmedlingsuppdraget, fakturadokumenten och
+penningtvättsrutinen, alltså även handlingar som går till utomstående.
 
-Följden av beslutet: namnbytet ligger nu på kritiska linjen. Tjänsten kan inte
-öppnas för transaktioner förrän Verksamt är klart, eftersom de juridiska
-handlingarna förutsätter det.
+**Rätta alltså aldrig ett dokument till Hey Consulting Nordic AB.** Det gjordes
+en gång i PR #281 och revertades i PR #282.
+
+Det som fortfarande gäller om registret: bolaget heter Hey Consulting Nordic AB
+där tills Verksamt är klart, och det får aldrig påstås att namnbytet är
+genomfört. Skillnaden är att den uppgiften hör hemma i ett svar till användaren,
+inte i dokumenten.
+
+Följden: namnbytet ligger på kritiska linjen. Tjänsten kan inte öppnas för
+transaktioner förrän Verksamt är klart, eftersom dokumenten redan förutsätter
+det namnet.
 
 **Inget riktigt föremål släpps igenom före lansering. Sluta ta upp det.**
 
@@ -126,8 +131,7 @@ förrän BankID är skarpt, klientmedelskontot är öppnat och namnbytet är kla
 Det betyder att villkor och dokument får beskriva tjänsten som den fungerar
 vid lansering, i presens, utan reservationer. Påpeka alltså **inte** varje
 gång att BankID ligger i testläge eller att kontot inte är öppnat. Det är
-redan hanterat av att ingenting släpps igenom. Undantaget är handlingar som
-skickas till utomstående före lansering, se ovan.
+redan hanterat av att ingenting släpps igenom.
 
 **Adresser, tre olika och lätta att blanda ihop**
 
@@ -868,10 +872,10 @@ Supabase skalar ifrån, så verktyget förstör numera sin egen förutsättning.
 
 ## Kända brister
 
-Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugofem är åtgärdade:
+Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugofyra är åtgärdade:
 tre i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i
-#271, två i #273, sex i #274, en i #275 och en i #281.** Kvar är städningen,
-punkt 25 till 29.
+#271, två i #273, sex i #274 och en i #275.** Punkt 30 är inget fynd längre.
+Kvar är städningen, punkt 25 till 29.
 Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 
 **Rör pengar eller juridik**
@@ -983,6 +987,6 @@ eftersom loggen skrivs före utlämnandet och stoppar det om den misslyckas.
     `totalWithCommission` och `PAYMENT_WINDOW_LABEL` i `lib/fees.ts`.
 28. Bolagsuppgifterna är kopierade till tre ställen i stället för importerade.
 29. `lib/types.ts` är ur synk med databasen och kringgås med `any`.
-30. ~~`docs/aml-policy.md` använder GuldBud AB.~~ **Åtgärdad i PR #281.**
-    Dokumentet står nu på Hey Consulting Nordic AB, med en not om att
-    namnbytet pågår. GuldBud står kvar som plattformens namn i löptexten.
+30. ~~`docs/aml-policy.md` använder GuldBud AB.~~ **Inte längre ett fynd.**
+    Ändrades i PR #281 och revertades i PR #282: användaren har bestämt att
+    det ska stå GuldBud AB överallt. Se affärsfakta.

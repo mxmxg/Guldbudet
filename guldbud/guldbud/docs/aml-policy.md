@@ -1,10 +1,6 @@
 # Rutin mot penningtvätt och finansiering av terrorism
 
-**Hey Consulting Nordic AB, org.nr 559291-4781**
-
-*Namnbyte till GuldBud AB är inskickat till Bolagsverket men ännu inte
-registrerat. Fram till dess gäller det registrerade namnet ovan. GuldBud är
-namnet på plattformen och används som sådant i löptexten.*
+**GuldBud AB, org.nr 559291-4781**
 
 > **UTKAST.** Detta är ett arbetsutkast framtaget för att spegla hur GuldBud
 > faktiskt fungerar. Det ska granskas och anpassas av en compliance- eller
@@ -24,10 +20,9 @@ namnet på plattformen och används som sådant i löptexten.*
 
 ## 1. Syfte och omfattning
 
-Denna rutin beskriver hur Hey Consulting Nordic AB, som driver plattformen
-GuldBud ("GuldBud"), arbetar för att förhindra att verksamheten utnyttjas för
-penningtvätt eller finansiering av terrorism, och för att stöldgods inte ska
-omsättas via plattformen.
+Denna rutin beskriver hur GuldBud AB ("GuldBud") arbetar för att förhindra att
+verksamheten utnyttjas för penningtvätt eller finansiering av terrorism, och för
+att stöldgods inte ska omsättas via plattformen.
 
 Rutinen omfattar all verksamhet på plattformen GuldBud: privatpersoner som säljer
 guld och ädelmetaller, och godkända handlare som budar. Alla medarbetare och
