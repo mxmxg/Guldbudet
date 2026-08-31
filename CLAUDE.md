@@ -377,6 +377,14 @@ läspolicy på `orders` hade annars exponerat granskningsanteckningarna.
 
 Båda de tunga funktionerna har körningslås med `pg_try_advisory_xact_lock`.
 
+**`process-unpaid-orders` saknades i skarpa driften fram till 2026-08-31.**
+`cron.job` innehöll bara tre av de fyra jobben: funktionen fanns i `pg_proc`
+men ingenting anropade den, så obetalda ordrar fick varken påminnelser eller
+automatisk avbrytning. Schemafilens do-block sväljer fel med
+`exception when others`, så bortfallet var tyst. Jobbet är schemalagt på nytt
+2026-08-31 och verifierat mot `cron.job`: fyra jobb, alla aktiva. Vill du veta
+vad som faktiskt är schemalagt, fråga `cron.job`, inte filen.
+
 ---
 
 ## De tre resorna
@@ -888,6 +896,19 @@ Vägen går nu via `/api/admin/settle-auctions`, som kontrollerar adminrollen oc
 kör funktionen med servicerollen. **Ge inte tillbaka rätten till
 `authenticated`** för att "fixa" ett liknande fel: det öppnar funktionen för
 varje inloggad användare. Gör en rutt.
+
+**Återkallandet bet inte förrän `public` togs med, rättat 2026-08-31.**
+Postgres ger varje ny funktion execute till PUBLIC, och anon ärver rätten den
+vägen även när anon själv är återkallad. De tre ursprungliga revokes hade körts
+i skarpa databasen, syntes i `proacl`, och var ändå verkningslösa:
+`has_function_privilege('anon', ...)` gav true genom `=X/postgres`. Rättat med
+`revoke ... from public, anon, authenticated` på de fem underhållsfunktionerna,
+plus `from public, anon` på `bid_kpi_summary`, som behåller `authenticated`
+eftersom adminpanelen anropar den via `supabase.rpc()` och is_admin-kontrollen
+ligger i funktionskroppen. Verifierat efteråt med `has_function_privilege` för
+anon, authenticated och service_role. Läxan: bedöm aldrig en funktions
+exponering genom att titta efter rollnamnet i `proacl`, fråga
+`has_function_privilege`, det är den som räknar med PUBLIC.
 
 **Bildkrympningen i adminpanelen är borttagen 2026-08-31.** Beslutat av
 användaren. `/api/admin/optimize-images`, `components/ImageOptimizeButton.tsx`

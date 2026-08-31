@@ -1776,10 +1776,22 @@ $$;
 -- PostgREST av vanliga användare. De körs av pg_cron (jobbägaren) och av
 -- security-definer-triggers, så att återkalla exec från anon/authenticated
 -- påverkar inte den schemalagda driften, bara direktanrop.
+--
+-- "from public" är inte valfritt: Postgres ger varje ny funktion execute till
+-- PUBLIC, och anon ärver rätten den vägen även när anon själv är återkallad.
+-- Kontrollerat i skarpa databasen 2026-08-31: de tre ursprungliga revokes hade
+-- körts men bet inte, eftersom "=X/postgres" låg kvar i proacl. Verifiera med
+-- has_function_privilege('anon', oid, 'execute'), inte med proacl:s rollista.
+--
+-- bid_kpi_summary behåller authenticated: adminpanelen anropar den via
+-- supabase.rpc() som inloggad, och is_admin-kontrollen ligger i funktionskroppen.
 -- ---------------------------------------------------------------------------
-revoke execute on function public.settle_ended_auctions() from anon, authenticated;
-revoke execute on function public.process_unpaid_orders() from anon, authenticated;
-revoke execute on function public.resolve_auto_bids(uuid) from anon, authenticated;
+revoke execute on function public.settle_ended_auctions() from public, anon, authenticated;
+revoke execute on function public.process_unpaid_orders() from public, anon, authenticated;
+revoke execute on function public.resolve_auto_bids(uuid) from public, anon, authenticated;
+revoke execute on function public.notify_ending_soon() from public, anon, authenticated;
+revoke execute on function public.notify_bidders_ending_soon() from public, anon, authenticated;
+revoke execute on function public.bid_kpi_summary() from public, anon;
 
 -- ---------------------------------------------------------------------------
 -- Listningskraven, flyttade från klienten till databasen.
