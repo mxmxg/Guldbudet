@@ -8,6 +8,7 @@ import { HomeIcon, StoreIcon } from '@/components/Icons'
 import Logo from '@/components/Logo'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import { isValidSsn, normalizeSsn } from '@/lib/identity'
 
 function validateField(name: string, value: string, role: string): string {
   switch (name) {
@@ -23,8 +24,11 @@ function validateField(name: string, value: string, role: string): string {
       return ''
     }
     case 'personalNumber': {
-      const clean = value.replace('-', '')
-      if (!/^\d{10}$/.test(clean)) return 'Format: ÅÅMMDD-XXXX.'
+      // Platshållaren bad om tolv siffror medan kontrollen krävde exakt tio,
+      // så den som skrev det som stod i fältet fick ett felmeddelande. Båda
+      // formerna godtas nu, och kontrollsiffran kontrolleras, samma regel som
+      // för ett personnummer från BankID.
+      if (!isValidSsn(value)) return 'Ange ett giltigt personnummer, ÅÅÅÅMMDD-XXXX.'
       return ''
     }
     case 'address':
@@ -195,7 +199,10 @@ function LoginForm() {
             // Tomma fält skickas som null (inte ''), så nullable-kolumner förblir
             // null och t.ex. personnummer-låset inte triggas på en tom sträng.
             phone: fields.phone || null,
-            personal_number: fields.personalNumber || null,
+            // Lagras normaliserat till tolv siffror, samma form som BankID
+            // skriver. Annars vore 900101-1234 och 199001011234 två olika
+            // personer för varje kontroll som jämför strängar.
+            personal_number: normalizeSsn(fields.personalNumber),
             address: fields.address || null,
             postal_code: fields.postalCode || null,
             city: fields.city || null,

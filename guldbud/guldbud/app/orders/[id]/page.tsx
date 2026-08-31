@@ -50,12 +50,19 @@ export default function OrderPage({ params }: { params: { id: string } }) {
       return
     }
 
-    // Explicita kolumner (inte '*') så interna admin-fält (admin_notes,
-    // cancel_reason) aldrig når säljar-/handlarvyn.
+    // Explicita kolumner (inte '*') så interna admin-fält som admin_notes
+    // aldrig når säljar- eller handlarvyn.
+    //
+    // seal_number och cancel_reason saknades tidigare i listan trots att vyn
+    // renderar dem. Följden var att förseglingsnumret aldrig syntes för
+    // parterna, och att en avbruten affär bara sa "Affären har avbrutits" utan
+    // anledningen. cancel_reason visas bara för handlaren, och bara när affären
+    // avbrutits utan kreditering, alltså den automatiska texten om utebliven
+    // betalning.
     const { data: o } = await supabase
       .from('orders')
       .select(
-        'id, item_id, seller_id, dealer_id, amount, status, dealer_paid_at, payment_due_at, tracking_dealer, order_no, created_at, refunded_at, refund_reason'
+        'id, item_id, seller_id, dealer_id, amount, status, dealer_paid_at, payment_due_at, tracking_dealer, seal_number, cancel_reason, order_no, created_at, refunded_at, refund_reason'
       )
       .eq('id', params.id)
       .single()

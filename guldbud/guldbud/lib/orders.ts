@@ -55,9 +55,17 @@ export const OPEN_ORDER_STATES: OrderStatus[] = [
   'shipped_to_dealer',
 ]
 
+// Var i stegen en affär står. 'dealer_paid' är ett utfasat statusvärde som inte
+// längre finns i ORDER_STEPS, eftersom betalningen spåras separat via
+// orders.dealer_paid_at. Utan mappningen nedan gav findIndex minus ett för
+// sådana rader, vilket gjorde nextStatus() till null: admin kunde inte flytta
+// affären framåt alls, bara avbryta den, och stegvisaren markerade inget steg.
+//
+// Värdet placeras på 'received', steget det historiskt kom efter, så nästa steg
+// blir 'verified_paid' precis som för en affär som aldrig fick den statusen.
 export function stepIndex(status: OrderStatus): number {
-  const i = ORDER_STEPS.findIndex((s) => s.key === status)
-  return i
+  const key: OrderStatus = status === 'dealer_paid' ? 'received' : status
+  return ORDER_STEPS.findIndex((s) => s.key === key)
 }
 
 // The status that comes after the given one in the ladder (null at the end).

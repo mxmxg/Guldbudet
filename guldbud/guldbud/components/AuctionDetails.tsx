@@ -280,9 +280,11 @@ export default function AuctionDetails({ item }: { item: any }) {
                 </span>
               )}
             </div>
+            {/* Sex kolumner, inte fem: uppladdningen tillåter sex bilder och
+                galleriet kapade tidigare bort den sista. */}
             {images.length > 1 && (
-              <div className="grid grid-cols-5 gap-2 mt-3">
-                {images.slice(0, 5).map((url, i) => (
+              <div className="grid grid-cols-6 gap-2 mt-3">
+                {images.map((url, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveImg(i)}
@@ -600,7 +602,7 @@ export default function AuctionDetails({ item }: { item: any }) {
           </div>
           {images.length > 1 && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2" onClick={(e) => e.stopPropagation()}>
-              {images.slice(0, 5).map((_, i) => (
+              {images.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}

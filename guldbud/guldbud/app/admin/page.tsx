@@ -229,9 +229,20 @@ export default function AdminPage() {
   const endAuctionNow = async (item: any) => {
     setEndingId(item.id)
     await applyEnd(item, new Date().toISOString(), `"${item.title}" avslutades. Säljaren får nu bekräfta högsta budet.`)
-    // Kör avräkningen direkt så säljaren notifieras nu i stället för att vänta på cron-jobbet.
+    // Kör avräkningen direkt så säljaren notifieras nu i stället för att vänta
+    // på cron-jobbet. Går via en adminrutt med servicerollen: schemat
+    // återkallar med flit exekveringsrätten på funktionen från authenticated,
+    // så det tidigare supabase.rpc()-anropet härifrån misslyckades tyst.
     try {
-      await supabase.rpc('settle_ended_auctions')
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (session) {
+        await fetch('/api/admin/settle-auctions', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+      }
     } catch {
       /* cron-jobbet kör ändå varje minut */
     }
