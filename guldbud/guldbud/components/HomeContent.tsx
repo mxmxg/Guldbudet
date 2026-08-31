@@ -323,7 +323,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
                 <div className="w-px h-14 bg-espresso-700" />
                 <LogoStat src="/brand/swish.png" alt="Swish" label="Utbetalning inom 24h" h={48} />
                 <div className="w-px h-14 bg-espresso-700" />
-                <LogoStat src="/brand/postnord-symbol.svg" alt="PostNord" label="Försäkrad rek-post" h={40} />
+                <LogoStat src="/brand/postnord.png" alt="PostNord" label="Försäkrad rek-frakt" h={26} />
               </div>
             </Reveal>
           </div>
