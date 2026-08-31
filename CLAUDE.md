@@ -794,10 +794,15 @@ Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
 15. ~~`EMAIL_WEBHOOK_SECRET` accepteras som `?secret=` i bildverktyget.~~
     **Åtgärdad i PR #271.** Bara inloggad admin med Bearer.
 
-**SQL som måste köras för att 10 och 11 ska ha effekt.** Ligger sist i
-`supabase-schema.sql`: det unika indexet på `verified_ssn` och tabellen
-`identity_disclosures`. Utan tabellen svarar utlämnandet 500 och handlaren får
-"Privatperson" i stället för säljarens namn på inköpsunderlaget.
+**SQL:en för 10 och 11 är körd mot databasen 2026-08-31, och kontrollerad.**
+Ligger sist i `supabase-schema.sql`: det unika indexet på `verified_ssn` och
+tabellen `identity_disclosures`. Båda är bekräftade genom att fråga
+`pg_indexes` och `pg_tables` efteråt: indexet `profiles_verified_ssn_unique`
+finns, och `identity_disclosures` finns med `rowsecurity = true`.
+
+Att tabellen finns är inte en formalitet. Utan den svarar utlämnandet 500 och
+handlaren får "Privatperson" i stället för säljarens namn på inköpsunderlaget,
+eftersom loggen skrivs före utlämnandet och stoppar det om den misslyckas.
 
 **Trasig funktion**
 
