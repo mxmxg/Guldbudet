@@ -2,68 +2,120 @@ import type { Metadata } from 'next'
 import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 
 export const metadata: Metadata = {
-  title: 'Sälja guld i Helsingborg, marknaden sätter priset',
+  title: 'Sälja guld i Helsingborg, så går budgivningen till',
   description:
-    'Sälja guld i Helsingborg? I stället för ett enda bud hos en guldsmed låter du auktoriserade handlare buda mot varandra om ditt guld. Hemifrån, gratis och med försäkrad frakt i hela nordvästra Skåne.',
+    'Sälja guld i Helsingborg? Så fungerar budgivningen steg för steg: 48 timmar, minsta höjning 100 kr, förlängning vid sena bud, och hela slutpriset till dig. Försäkrad frakt i hela nordvästra Skåne.',
   alternates: { canonical: '/guider/salja-guld-helsingborg' },
 }
 
 const faq = [
   {
-    q: 'Var får jag mest för mitt guld i Helsingborg?',
-    a: 'Hos en enskild guldsmed eller pantbank i Helsingborg får du ett bud från en köpare. På GuldBud budar flera auktoriserade handlare mot varandra, så konkurrensen driver priset. Du säljer hemifrån, oavsett om du bor på Söder, Tågaborg eller i Råå.',
+    q: 'Hur lång tid tar en auktion?',
+    a: 'Auktionen är öppen i 48 timmar från att vi godkänt föremålet. Kommer ett bud under de sista två minuterna förlängs tiden med två minuter, så budgivningen hinner alltid avslutas i lugn och ro.',
   },
   {
-    q: 'Fungerar det i hela nordvästra Skåne?',
-    a: 'Ja. Allt sker online och det försäkrade kuvertet vi skickar når hela regionen, från Helsingborg och Höganäs till Landskrona och Ängelholm. Du behöver aldrig ta dig in till city.',
+    q: 'Kostar det mig något?',
+    a: 'Nej. Du får hela slutbudet utan avdrag. Handlaren betalar provision och frakt ovanpå budet, och den förbetalda försändelsen kostar dig ingenting.',
   },
   {
-    q: 'Är det tryggt?',
-    a: 'Alla handlare är manuellt verifierade med organisationsnummer och legitimation. Efter accept skickas ditt föremål i ett rekommenderat, försäkrat brev, och du får betalt via Swish eller bank efter äkthetskontroll.',
+    q: 'Måste jag acceptera det högsta budet?',
+    a: 'Nej. Budgivningen är ett erbjudande till dig, inte ett avtal. Du kan tacka nej och få tillbaka föremålet, eller låta bli att lägga ut det igen.',
+  },
+  {
+    q: 'Kan jag sälja om jag bor utanför Helsingborg?',
+    a: 'Ja. Allt sker online, och den försäkrade försändelsen lämnas hos närmaste postombud. Det fungerar lika bra i Höganäs, Landskrona och Ängelholm som mitt i stan.',
   },
 ]
 
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-guld-helsingborg"
       eyebrow="Sälja guld · Helsingborg"
-      title="Sälja guld i Helsingborg utan att lämna hemmet"
-      intro="I Helsingborg och nordvästra Skåne finns gott om guldköpare, men det bästa priset får du sällan hos den första du frågar. I stället för att jämföra butik för butik längs Kullagatan kan du låta flera handlare tävla om ditt guld."
+      title="Sälja guld i Helsingborg, så går budgivningen till"
+      intro="I Helsingborg är det lätt att få ett bud på sitt guld. Det svåra är att veta om budet var bra. Den här guiden går igenom exakt hur budgivningen fungerar hos GuldBud, från att du fotar smycket till att pengarna är på kontot."
       updated="2026"
       faq={faq}
     >
-      <H2>Därför räcker inte ett bud i Helsingborg</H2>
+      <H2>Problemet med ett enda bud</H2>
       <P>
-        En guldsmed på Kullagatan eller en pantbank i centrum ger dig ett förstabud, men bara ett. Utan konkurrens är det
-        svårt att veta om budet är bra eller om du lämnar pengar på bordet. Det säkra sättet att veta vad ditt guld är
-        värt är att låta flera köpare tävla om det.
+        En guldsmed på Kullagatan, en pantbank i centrum eller en snabb tur över sundet ger dig alla samma sak: ett
+        förstabud från en köpare. Budet kan vara bra. Du har bara inget att jämföra det med, och köparen har ingen
+        anledning att bjuda över sig själv.
+      </P>
+      <P>
+        En auktion vänder på det. I stället för att du letar upp köpare kommer köparna till ditt föremål och tävlar om
+        det. Det är samma mekanism som gör att ett konstverk får sitt pris på auktion i stället för i en prislista.
       </P>
 
-      <H2>Låt köparna komma till dig</H2>
+      <H2>Så fungerar budgivningen, steg för steg</H2>
       <P>
-        På <A href="/">GuldBud</A> lägger du ut ditt guld en gång, och auktoriserade handlare budar mot varandra om det.
-        Var du bor i Helsingborg spelar ingen roll, på Söder, Tågaborg eller nere vid Råå, allt sker online:
+        Reglerna är fasta och lika för alla. Det är värt att känna till dem innan du lägger ut, så du vet vad du tittar
+        på när buden börjar ticka in:
       </P>
       <UL>
-        <li>Fota föremålet och ange vikt och karat.</li>
-        <li>Vi öppnar auktionen, oftast inom ett par timmar.</li>
-        <li>Handlarna budar i realtid och du följer varje bud.</li>
-        <li>Du accepterar det högsta budet, helt utan förpliktelser.</li>
+        <li>
+          <strong>48 timmar.</strong> Auktionen öppnar när vi godkänt föremålet och stänger två dygn senare.
+        </li>
+        <li>
+          <strong>Minst 100 kr i höjning.</strong> Varje nytt bud måste överstiga det förra med hundra kronor, oavsett
+          om föremålet ligger på 3 000 eller 60 000.
+        </li>
+        <li>
+          <strong>Sena bud förlänger.</strong> Kommer ett bud under de sista två minuterna flyttas sluttiden fram två
+          minuter. Ingen kan alltså vinna genom att lägga sitt bud i sista sekunden.
+        </li>
+        <li>
+          <strong>Handlarna kan lägga ett hemligt maxbud.</strong> Systemet budar då åt dem automatiskt, men bara så
+          högt som krävs för att leda med hundra kronor. Det gynnar dig: två handlare med höga maxbud driver upp priset
+          mot varandra utan att någon behöver sitta vid skärmen.
+        </li>
       </UL>
 
-      <H2>Försäkrad frakt i hela regionen</H2>
+      <H2>Vilka är det som budar</H2>
       <P>
-        När du godkänt ditt slutpris skickar vi ett kostnadsfritt rekommenderat brev med förbetalt porto, försäkrat upp
-        till 100 000 kr. Du lämnar det på närmaste ombud, i Helsingborg, Höganäs, Landskrona eller Ängelholm. Ingen resa
-        in till centrum, ingen jakt på parkering.
+        Bara företag vi godkänt manuellt. Vi kontrollerar organisationsnummer, och handlaren legitimerar sig med BankID
+        innan hen får lägga sitt första bud. En privatperson kan alltså inte buda på ditt guld, och en handlare som inte
+        sköter sig stängs av.
+      </P>
+      <P>
+        Du ser buden i realtid men aldrig vem som lagt dem. Handlarna ser inte heller varandras identiteter, bara
+        beloppen. Det är avsiktligt: budgivningen ska avgöras av vad föremålet är värt, inte av vem som bjuder.
       </P>
 
-      <H2>Räkna ut värdet först</H2>
+      <H2>Vad du får, och vad det kostar</H2>
       <P>
-        Vikt, karat och <A href="/guider/guldpris-idag">dagens guldpris</A> avgör värdet. Testa{' '}
-        <A href="/#estimator">värderingskalkylatorn</A>, läs om{' '}
-        <A href="/guider/bast-betalt-for-guld">hur du får bäst betalt för guld</A>, eller jämför{' '}
-        <A href="/guider/pantbank-eller-auktion">pantbank och auktion</A>.
+        Du får <strong>hela slutbudet</strong>, utan avdrag. Vinner ett bud på 18 400 kr är det 18 400 kr som betalas ut
+        till dig. GuldBuds ersättning betalas av handlaren ovanpå budet, tillsammans med frakten, och den är helt skild
+        från din köpeskilling.
+      </P>
+      <P>
+        Att lägga ut kostar ingenting, och du binder dig inte. Tackar du nej till det vinnande budet skickas föremålet
+        tillbaka till dig kostnadsfritt.
+      </P>
+
+      <H2>Frakten, praktiskt i nordvästra Skåne</H2>
+      <P>
+        När du accepterat budet skickar vi ett rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du
+        lägger i föremålet och lämnar brevet hos ditt postombud. Vi kontrollerar äktheten när det kommit fram, och sedan
+        betalas pengarna ut via Swish eller bank.
+      </P>
+      <P>
+        Eftersom allt sker per post spelar det ingen roll var i regionen du bor. Höganäs, Landskrona och Ängelholm
+        fungerar exakt som Helsingborgs centrum, och du behöver aldrig ta dig någonstans med ett smycke i fickan.
+      </P>
+
+      <H2>Innan du lägger ut</H2>
+      <P>
+        Väg föremålet och leta efter stämpeln, oftast 750 för 18 karat eller 585 för 14 karat. Vikten och karaten
+        tillsammans med <A href="/guider/guldpris-idag">dagens guldpris</A> ger dig en rimlig förväntan innan första
+        budet kommer. Är du osäker på stämpeln, läs om{' '}
+        <A href="/guider/karat-18k-14k-9k">skillnaden mellan 18k, 14k och 9k</A>, och testa{' '}
+        <A href="/#estimator">värderingskalkylatorn</A> för ett riktvärde.
+      </P>
+      <P>
+        Vill du jämföra med alternativen först, läs{' '}
+        <A href="/guider/pantbank-eller-auktion">pantbank eller auktion</A>.
       </P>
     </GuideShell>
   )

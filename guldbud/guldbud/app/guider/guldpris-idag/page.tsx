@@ -27,6 +27,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/guldpris-idag"
       eyebrow="Guldpris"
       title="Guldpris idag"
       intro="Aktuellt guldpris per gram, uppdaterat löpande. Se vad 24K, 18K, 14K och 9K är värt vid dagens kurs, och räkna ut vad just ditt guld skulle ge."

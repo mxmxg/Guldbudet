@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/karat-18k-14k-9k"
       eyebrow="Guide · Karat"
       title="Vad betyder 18K, 14K och 9K?"
       intro="Karat anger hur mycket rent guld ett föremål innehåller. Här är vad stämplarna betyder och hur de påverkar värdet när du säljer."

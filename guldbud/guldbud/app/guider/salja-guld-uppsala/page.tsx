@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-guld-uppsala"
       eyebrow="Sälja guld · Uppsala"
       title="Sälja guld i Uppsala, låt handlarna tävla om ditt guld"
       intro="Uppsala är en stad där mycket byter ägare, inte minst bland studenter och i gamla familjehem. Men det bästa priset på ditt guld får du sällan hos den första guldsmeden du besöker. Låt köparna komma till dig i stället."

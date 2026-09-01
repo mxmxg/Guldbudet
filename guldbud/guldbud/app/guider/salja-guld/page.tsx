@@ -30,6 +30,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-guld"
       eyebrow="Guide · Sälja guld"
       title="Så får du bäst betalt när du säljer guld"
       intro="Ska du sälja guld men vet inte vad det är värt, eller hur du undviker att bli lurad? Här går vi igenom hela processen, från värdering till utbetalning, och varför konkurrensen mellan handlare ger dig mest."

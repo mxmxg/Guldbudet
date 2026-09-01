@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-guld-malmo"
       eyebrow="Sälja guld · Malmö"
       title="Sälja guld i Malmö, låt köparna tävla om ditt guld"
       intro="I Malmö och övriga Skåne finns gott om guldköpare, men det bästa priset får du sällan hos den första du frågar. I stället för att jämföra butik för butik kan du låta flera handlare buda mot varandra, hemifrån."

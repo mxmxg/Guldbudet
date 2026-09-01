@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-guld-goteborg"
       eyebrow="Sälja guld · Göteborg"
       title="Sälja guld i Göteborg, marknaden sätter priset"
       intro="Från Avenyns guldsmeder till pantbanker på Hisingen, Göteborg har många guldköpare. Men i stället för att nöja dig med ett bud kan du låta flera handlare tävla om ditt guld, utan att lämna hemmet."

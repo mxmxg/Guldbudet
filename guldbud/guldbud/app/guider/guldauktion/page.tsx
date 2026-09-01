@@ -30,6 +30,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/guldauktion"
       eyebrow="Guide · Guldauktion"
       title="Guldauktion: låt guldköparna tävla om ditt guld"
       intro="En guldauktion vänder på maktförhållandet: i stället för att du jagar det bästa budet kommer buden till dig. Här förklarar vi vad en guldauktion är, hur budgivningen fungerar och varför den ofta slår både pantbank och guldsmed."

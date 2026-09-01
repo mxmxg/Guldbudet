@@ -30,6 +30,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/var-salja-guld"
       eyebrow="Guide · Var sälja guld"
       title="Var säljer man guld bäst? En ärlig jämförelse"
       intro="Pantbank, guldsmed, guldköpare på nätet eller auktion, alternativen är många och priset kan skilja tusenlappar. Här jämför vi dem så att du vet var du får mest för ditt guld."

@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/pantbank-eller-auktion"
       eyebrow="Guide · Jämförelse"
       title="Pantbank eller auktion, var får du mest för guldet?"
       intro="Pantbank, guldsmed eller auktion, valet avgör hur mycket du får. Här jämför vi vägarna ärligt, och förklarar varför konkurrens mellan flera köpare oftast slår ett enda uppköpsbud."

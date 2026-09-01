@@ -2,9 +2,15 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import JsonLd from '@/components/JsonLd'
+import { relatedGuides } from '@/lib/guides'
 
 // Shared layout for the /guider SEO content pages: dark hero + readable prose
 // body + a conversion CTA, matching the rest of the site.
+//
+// `slug` är sidans egen sökväg, till exempel '/guider/salja-guld'. Den används
+// för att välja tre andra guider att läsa vidare. Utelämnas den visas ingen
+// sådan ruta, så en ny guide går sönder synligt i stället för att tyst hamna
+// utanför korslänkningen.
 export default function GuideShell({
   eyebrow = 'Guide',
   title,
@@ -12,6 +18,7 @@ export default function GuideShell({
   updated,
   children,
   faq,
+  slug,
 }: {
   eyebrow?: string
   title: string
@@ -19,7 +26,9 @@ export default function GuideShell({
   updated?: string
   children: React.ReactNode
   faq?: { q: string; a: string }[]
+  slug?: string
 }) {
+  const related = slug ? relatedGuides(slug) : []
   const faqLd = faq
     ? {
         '@context': 'https://schema.org',
@@ -73,6 +82,29 @@ export default function GuideShell({
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Läs vidare. Ligger före CTA:n med flit: den som inte är redo att
+            sälja ska hitta nästa guide i stället för att lämna sajten. */}
+        {related.length > 0 && (
+          <div className="mt-12">
+            <h2 className="font-display text-2xl text-espresso-900 mb-4">Läs vidare</h2>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {related.map((g) => (
+                <Link key={g.href} href={g.href} className="card card-hover p-5 group">
+                  <p className="font-display text-base text-espresso-900 group-hover:text-gold-700 transition leading-snug">
+                    {g.title}
+                  </p>
+                  <p className="text-xs text-espresso-500 mt-1.5 leading-relaxed">{g.desc}</p>
+                </Link>
+              ))}
+            </div>
+            <p className="mt-4 text-sm">
+              <Link href="/guider" className="text-gold-700 underline underline-offset-2 hover:text-gold-800">
+                Alla guider om att sälja guld
+              </Link>
+            </p>
           </div>
         )}
 

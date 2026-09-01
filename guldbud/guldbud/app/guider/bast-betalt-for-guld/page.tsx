@@ -30,6 +30,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/bast-betalt-for-guld"
       eyebrow="Guide · Bäst betalt för guld"
       title="Bäst betalt för guld, så får du marknadens högsta pris"
       intro="Alla vill ha bäst betalt när de säljer guld, men hur vet du att budet du får faktiskt är bra? Här går vi igenom varför en enda uppköpare sällan ger dig mest, och hur du låter handlarna tävla i stället."
