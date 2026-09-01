@@ -172,11 +172,10 @@ och innan du påstår något om bolagets status.
 - Upplägget är **två konton**: klientmedelskonto för säljarens pengar, och
   driftkonto för GuldBuds provision. Stripe betalar dock ut hela summan till
   **en** mottagare, så uppdelningen sker efter utbetalningen.
-- **Kontot är ännu inte skapat.** Skriv därför aldrig om upplägget i presens
-  som om det redan gäller. Det är den beslutade ordningen, inte nuläget.
-- Detta ligger på kritiska linjen före lansering: skapas inte kontot hamnar
-  de första riktiga betalningarna på rörelsekontot. Då sker precis den
-  sammanblandning upplägget ska förhindra.
+- **Klientmedelskontot är öppnat hos SEB 2026-09-01**, efter mötet samma dag.
+  Kontonumret är användarens uppgift och bor i `CLIENT_FUNDS_ACCOUNT` i
+  `lib/company.ts`, kontrollsiffran verifierad med mod-11. Punkten är därmed
+  av kritiska linjen: ordersidan och fakturan visar kontouppgifterna.
 - **Beslutat 2026-09-01: lansering med faktura och banköverföring, inte
   Stripe.** Handlaren betalar via banköverföring direkt till
   klientmedelskontot med ordernumret som referens, och admin prickar av

@@ -33,12 +33,11 @@ export const GULDBUD_ADDRESS_LINE = `${GULDBUD.box}, ${GULDBUD.postal}`
 
 // Klientmedelskontot hos SEB dit handlarens betalning går, beslutat
 // 2026-09-01: lansering med faktura och banköverföring, kortbetalningen
-// vilande. Numret är tomt tills kontot är öppnat. Tills dess visar
-// ordersidan att betalningsuppgifter meddelas separat, och fakturan
-// utelämnar kontoraden. När kontot finns: fyll i numret, committa och
-// deploya. Etiketten följer kontotypen, till exempel 'Bankgiro' eller
-// 'Kontonummer (SEB)'.
+// vilande. Kontot öppnades 2026-09-01 och numret är användarens uppgift
+// samma dag, kontrollsiffran verifierad med mod-11. Clearingnumret 5232
+// ingår (SEB:s serie). Etiketten läses gemen i fakturans löptext, därför
+// 'Konto' och inte 'Kontonummer (SEB)'.
 export const CLIENT_FUNDS_ACCOUNT = {
-  label: 'Bankgiro',
-  number: '',
+  label: 'Konto',
+  number: '5232 10 078 77',
 } as const
