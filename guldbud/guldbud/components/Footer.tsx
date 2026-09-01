@@ -13,6 +13,9 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
           <div className="col-span-2 md:col-span-1">
             <Logo className="text-gold-300 text-[24px] leading-none" />
+            {/* Samma undertext som i navigeringen. Här på en rad, eftersom
+                ordmärket står ensamt och har hela spaltbredden. */}
+            <p className="mt-2 text-[9px] text-gold-500/70 tracking-[3px] uppercase">Sveriges guldauktion</p>
             <p className="text-sm mt-3 max-w-xs leading-relaxed text-espresso-100/60">
               Vi får guldköparna att konkurrera om ditt guld. Auktoriserade handlare budar mot
               varandra i realtid, och du säljer till bäst betalt, tryggt och kostnadsfritt.
