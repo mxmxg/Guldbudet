@@ -184,8 +184,13 @@ och innan du påstår något om bolagets status.
   klientmedelskontot med ordernumret som referens, och admin prickar av
   betalningen manuellt. Kortflödet ligger kvar vilande i koden. Se
   beslutsloggen.
-- Hos SEB önskas även **Swish-utbetalningar för företag** för säljarnas
-  utbetalningar.
+- Hos SEB ska avtalet **"Swish utbetalningar"** tecknas (deras exakta
+  produktnamn, verifierat mot seb.se 2026-09-01) för säljarnas utbetalningar:
+  60 kr/mån plus 2,50 kr per utbetalning, standardgräns 30 000 kr per
+  utbetalning och höjd gräns begärd eftersom affärerna nått cirka 110 000 kr.
+  I avtalet utses en certifikatansvarig (CPOC) som sedan genererar
+  certifikaten i Swish portal. **Avtalet är ännu inte tecknat.** Tekniken är
+  byggd och bevisad mot Swish testmiljö, se beslutsloggen.
 
 **Leverantörer**
 
