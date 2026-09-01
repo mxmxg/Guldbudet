@@ -173,7 +173,10 @@ export default function MyItemsPage() {
                 <div key={item.id} className="grid gap-1.5">
                 <Wrapper
                   {...(clickable ? { href } : {})}
-                  className={`card p-4 flex gap-4 items-center ${clickable ? 'card-hover' : ''}`}
+                  // min-w-0: kortet är ett grid-barn och måste kunna krympa
+                  // till spårets bredd, annars skjuts högerkolumnen ut på
+                  // mobil. Se adminvyn för mätningen.
+                  className={`card p-4 flex gap-4 items-center min-w-0 ${clickable ? 'card-hover' : ''}`}
                 >
                   <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-800 to-espresso-600 relative">
                     {item.image_urls?.[0] && (

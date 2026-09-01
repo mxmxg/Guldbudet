@@ -107,7 +107,18 @@ export default function AdminOrdersPage() {
               const idx = stepIndex(o.status as OrderStatus)
               const pct = o.status === 'cancelled' ? 0 : Math.round(((idx + 1) / ORDER_STEPS.length) * 100)
               return (
-                <Link key={o.id} href={`/admin/orders/${o.id}`} className="card card-hover p-4 flex gap-4 items-center">
+                // min-w-0 på kortet, inte inuti det. Kortet är ett grid-barn,
+                // och ett grid-barn har min-width auto, alltså sin egen minsta
+                // innehållsbredd som golv. Kortet vägrade därför krympa till
+                // spårets bredd: uppmätt 542 px i ett spår på 358 px vid 390 px
+                // skärm, vilket sköt ut beloppet och "Öppna" utanför skärmen på
+                // varje rad, även när titeln var kort. Med min-w-0 blir golvet
+                // noll och kortet följer spåret.
+                <Link
+                  key={o.id}
+                  href={`/admin/orders/${o.id}`}
+                  className="card card-hover p-4 flex gap-4 items-center min-w-0"
+                >
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
                     {o.items?.image_urls?.[0] && (
                       <Image src={o.items.image_urls[0]} alt="" fill sizes="64px" className="object-contain" />

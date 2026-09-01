@@ -225,7 +225,12 @@ export default function Navbar() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 shrink-0 group">
               <Logo className="text-gold-300 text-[26px] leading-none transition-transform group-hover:scale-105" />
-              <span className="hidden sm:block text-[9px] text-gold-500/70 tracking-[3px] uppercase border-l border-espresso-700 pl-3 leading-tight">
+              {/* Visas även på mobil. Låg tidigare bakom hidden sm:block, alltså
+                  dold under 640 px. Två skäl att visa den: en besökare på mobil
+                  såg bara ordmärket och fick ingen ledtråd om vad sajten är, och
+                  Google renderar sidan i mobil vy, där text som är display:none
+                  räknas svagare. "Guldauktion" är sajtens starkaste sökord. */}
+              <span className="block text-[9px] text-gold-500/70 tracking-[2px] sm:tracking-[3px] uppercase border-l border-espresso-700 pl-2.5 sm:pl-3 leading-tight">
                 Sveriges
                 <br />
                 Guldauktion
