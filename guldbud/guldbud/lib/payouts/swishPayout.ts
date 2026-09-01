@@ -11,7 +11,11 @@ import https from 'https'
 //     signeringscertifikatets serienummer i hexadecimal form.
 //
 // Certifikaten ligger som Base64-kodade PEM-strängar i miljövariabler och
-// lämnar aldrig servern. Testmiljön (MSS) accepterar bara Swish egna
+// lämnar aldrig servern. VIKTIGT: SWISH_TLS_CERT måste innehålla HELA
+// certifikatkedjan (lövcert plus mellanled, hopklistrade i en PEM), inte
+// bara lövcertet. Swish server avvisar annars handskakningen med alert 40.
+// Verifierat mot MSS 2026-09-01: med kedjan svarar API:t 201. Nodes
+// cert-option skickar en hopklistrad kedja korrekt. Testmiljön (MSS) accepterar bara Swish egna
 // testcertifikat, skarpa certifikat genereras av certifikatansvarig (CPOC) i
 // Swish certifikathanterare när bankavtalet är klart. Miljön styr basadressen:
 // MSS  https://mss.cpc.getswish.net  ·  produktion  https://cpc.getswish.net

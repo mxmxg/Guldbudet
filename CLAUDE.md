@@ -532,7 +532,9 @@ Base64-kodade PEM-strängar), `SWISH_PAYER_ALIAS` (bolagets Swish-nummer) och
 `SWISH_PAYOUT_API_BASE` (MSS `https://mss.cpc.getswish.net` i test, utelämnas
 i produktion där koden defaultar till `https://cpc.getswish.net`). Saknas
 någon av dem svarar utbetalningsrutten 503 och admin faller tillbaka på
-banköverföring, ingenting går sönder.
+banköverföring, ingenting går sönder. **`SWISH_TLS_CERT` måste innehålla hela
+certifikatkedjan**, inte bara lövcertet, annars avvisar Swish handskakningen
+med alert 40. Lärt den hårda vägen mot MSS 2026-09-01.
 
 Det finns ingen `.env.local.example` i repot, trots att `README.md` hänvisar
 till en.
@@ -1078,10 +1080,16 @@ Byggt mot developer.swish.nu:s tre guider samma dag. Delarna:
 - **Adminvyn** har kortet "Utbetalning till säljaren" med radhistorik och två
   knappar: Betala ut via Swish och Registrera gjord banköverföring.
 
-Obevisat: ingenting av detta har körts mot MSS än, certifikat saknas.
-Nästa steg är MSS-test med Swish testcertifikat (lösenord "swish", laddas
-ner från developer.swish.nu), sedan skarpa certifikat när avtalet är klart.
-SEB:s standardgräns är 30 000 kr per utbetalning, höjd gräns är begärd.
+**Bevisat mot MSS 2026-09-01, hela kretsloppet:** en signerad utbetalning
+skickades till testmiljön med Swish testcertifikat (samma hash- och
+signeringssteg som `swishPayout.ts`), MSS svarade 201 Created, statusen blev
+PAID, och MSS callback träffade `/api/payouts/swish-callback` i produktion
+som svarade 200 (not_configured, korrekt eftersom miljövariablerna inte är
+satta). Läxan från testet: hela TLS-certifikatkedjan krävs, se
+miljövariabelavsnittet. Det som återstår är skarpa certifikat när
+SEB-avtalet är klart, och en genomklickning av adminknappen med
+miljövariablerna satta. SEB:s standardgräns är 30 000 kr per utbetalning,
+höjd gräns är begärd.
 
 **Fakturan möter handlaren där hen redan är. Byggt 2026-09-01.** Användaren
 ville att fakturan "ploppar upp automatiskt" vid vinst. Löst i två vägar,
