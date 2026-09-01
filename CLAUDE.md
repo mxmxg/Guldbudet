@@ -1040,6 +1040,26 @@ Så här ligger det i koden:
   över ungefär femtio affärer i månaden bör avprickningen automatiseras,
   bankkoppling eller Swish Handel är kandidaterna.
 
+**Fakturan möter handlaren där hen redan är. Byggt 2026-09-01.** Användaren
+ville att fakturan "ploppar upp automatiskt" vid vinst. Löst i två vägar,
+medvetet utan popup eller modal, som fastnar i blockerare och stör på mobil:
+
+- **Vinnarmejlet bär fakturan.** Dokumentrutan i `/api/notify-email`
+  (funktionen `documentBox`) skickas nu redan på "Grattis, du vann
+  budgivningen", inte först efter betalning. Villkoret är titelmatchning på
+  "vann" plus en `/orders/`-länk, samma mönster som de två befintliga
+  penninghändelserna. Knappen "Öppna din faktura" går till affärens
+  dokumentvy bakom inloggning, ingen bilaga, av samma skäl som tidigare:
+  inköpsnotans personuppgifter ska inte ligga i ett mejl.
+- **Betalrutan på ordersidan** har knappen "Öppna fakturan" som primär
+  handling i `BankTransferBox`, i båda lägena, alltså även innan
+  kontonumret är ifyllt. Den lilla "Visa faktura"-länken under kortet visas
+  bara när affären är betald, så obetalt läge har en enda tydlig väg.
+
+Mejlvägen är obevisad tills en riktig vinst utlöst mejlet: titelmatchningen
+är läst i kod, inte sedd i en inkorg. Kontrollera fakturaknappen i
+vinnarmejlet vid nästa testaffär.
+
 **Svarslöftet i affärschatten är fast text, inte ett robotsvar i tråden.**
 Beslutat av användaren 2026-08-31, som också valde formuleringen. Under
 skrivrutan i `components/OrderChat.tsx` står "Vi ser ditt meddelande direkt och
