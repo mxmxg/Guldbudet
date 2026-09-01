@@ -35,9 +35,12 @@ export const GULDBUD_ADDRESS_LINE = `${GULDBUD.box}, ${GULDBUD.postal}`
 // 2026-09-01: lansering med faktura och banköverföring, kortbetalningen
 // vilande. Kontot öppnades 2026-09-01 och numret är användarens uppgift
 // samma dag, kontrollsiffran verifierad med mod-11. Clearingnumret 5232
-// ingår (SEB:s serie). Etiketten läses gemen i fakturans löptext, därför
-// 'Konto' och inte 'Kontonummer (SEB)'.
+// ingår (SEB:s serie). OBS: bolagets vanliga rörelsekonto är ett annat
+// SEB-nummer och får aldrig stå här, det är precis den sammanblandningen
+// klientmedelsupplägget finns för att förhindra. Rättat 2026-09-01 efter
+// att rörelsekontots nummer först lagts in av misstag. Etiketten läses
+// gemen i fakturans löptext, därför 'Konto'.
 export const CLIENT_FUNDS_ACCOUNT = {
   label: 'Konto',
-  number: '5232 10 078 77',
+  number: '5232 10 274 52',
 } as const
