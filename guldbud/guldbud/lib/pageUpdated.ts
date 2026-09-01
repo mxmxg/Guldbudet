@@ -1,0 +1,35 @@
+// GENERERAD FIL. Ändra inte för hand.
+// Skapas av scripts/sitemap-dates.mjs, som körs automatiskt före varje bygge.
+// Datumen kommer ur git: när sidans fil senast ändrades.
+
+export const PAGE_UPDATED: Record<string, string> = {
+  '': '2026-08-31',
+  '/auctions': '2026-08-31',
+  '/dealer/guide': '2026-08-31',
+  '/guider': '2026-09-01',
+  '/guider/bast-betalt-for-guld': '2026-09-01',
+  '/guider/guldauktion': '2026-09-01',
+  '/guider/guldpris-idag': '2026-09-01',
+  '/guider/karat-18k-14k-9k': '2026-09-01',
+  '/guider/pantbank-eller-auktion': '2026-09-01',
+  '/guider/salja-arvguld': '2026-09-01',
+  '/guider/salja-guld': '2026-09-01',
+  '/guider/salja-guld-goteborg': '2026-09-01',
+  '/guider/salja-guld-helsingborg': '2026-09-01',
+  '/guider/salja-guld-malmo': '2026-09-01',
+  '/guider/salja-guld-online': '2026-09-01',
+  '/guider/salja-guld-stockholm': '2026-09-01',
+  '/guider/salja-guld-uppsala': '2026-09-01',
+  '/guider/salja-guld-utan-kvitto': '2026-09-01',
+  '/guider/salja-guldmynt': '2026-09-01',
+  '/guider/salja-trasigt-guld': '2026-09-01',
+  '/guider/salja-vitguld-rodguld': '2026-09-01',
+  '/guider/skatt-pa-salt-guld': '2026-09-01',
+  '/guider/vad-ar-mitt-guld-vart': '2026-09-01',
+  '/guider/var-salja-guld': '2026-09-01',
+  '/handlarvillkor': '2026-08-31',
+  '/how-it-works': '2026-08-31',
+  '/privacy': '2026-08-31',
+  '/resultat': '2026-08-31',
+  '/terms': '2026-08-31',
+}
