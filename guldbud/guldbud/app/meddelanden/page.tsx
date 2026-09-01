@@ -138,7 +138,9 @@ export default function MessagesPage() {
               <Link
                 key={t.orderId}
                 href={t.href}
-                className="card card-hover p-4 flex items-center gap-4"
+                // Samma sak här: kortet är ett grid-barn och behöver min-w-0
+                // för att kunna krympa till spårets bredd. Se adminvyn.
+                className="card card-hover p-4 flex items-center gap-4 min-w-0"
               >
                 <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
                   {t.image && <Image src={t.image} alt="" fill sizes="48px" className="object-contain" />}
