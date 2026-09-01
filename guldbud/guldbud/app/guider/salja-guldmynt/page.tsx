@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-guldmynt"
       eyebrow="Guide · Guldmynt"
       title="Sälja guldmynt: guldvikt plus samlarvärde"
       intro="Guldmynt är en egen värld, värdet sitter inte bara i guldet utan ibland också i myntet självt. Här går vi igenom hur guldmynt värderas och hur du får betalt för både metallen och ett eventuellt samlarvärde."

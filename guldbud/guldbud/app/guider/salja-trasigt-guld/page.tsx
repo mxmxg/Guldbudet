@@ -30,6 +30,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-trasigt-guld"
       eyebrow="Guide · Trasigt guld & tandguld"
       title="Sälja trasigt guld, tandguld och guld utan stämpel"
       intro="Trasiga kedjor, ensamma örhängen, gamla tandkronor eller smycken utan stämpel, mycket som ligger i byrålådan är värt mer än man tror. Guldvärdet sitter i metallen, inte i skicket. Här är vad du behöver veta."

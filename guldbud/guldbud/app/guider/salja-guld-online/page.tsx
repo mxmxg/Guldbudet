@@ -30,6 +30,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-guld-online"
       eyebrow="Guide · Sälja guld online"
       title="Sälja guld online, tryggt, enkelt och ofta mer lönsamt"
       intro="Att sälja guld på nätet känns nytt för många, men gjort rätt är det både tryggare och mer lönsamt än att gå till en butik. Här går vi igenom hur det fungerar, hur du skickar guldet säkert och hur du får bäst betalt."

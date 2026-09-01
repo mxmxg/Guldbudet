@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-arvguld"
       eyebrow="Guide · Arvguld"
       title="Sälja arvguld och gamla smycken"
       intro="Ligger det ärvda smycken i byrålådan som ingen använder? Guldvärdet finns kvar oavsett ålder och skick. Så värderar och säljer du arvguld tryggt."

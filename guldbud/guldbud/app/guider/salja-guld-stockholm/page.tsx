@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-guld-stockholm"
       eyebrow="Sälja guld · Stockholm"
       title="Sälja guld i Stockholm utan att lämna hemmet"
       intro="I Stockholm är det aldrig långt till en guldsmed, men det betyder inte att du får bäst betalt. I stället för att gå från butik till butik på Drottninggatan kan du låta handlarna komma till dig och tävla om ditt guld."

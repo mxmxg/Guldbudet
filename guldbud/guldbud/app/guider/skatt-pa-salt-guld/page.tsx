@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/skatt-pa-salt-guld"
       eyebrow="Guide · Skatt"
       title="Skatt på sålt guld, det här gäller (i korthet)"
       intro="Måste man skatta när man säljer guld? För de flesta som säljer gamla eller ärvda smycken blir svaret ofta nej, men det finns gränser och undantag. Här är principerna, med reservationen att detta är allmän information och inte skatterådgivning."

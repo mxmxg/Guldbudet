@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-vitguld-rodguld"
       eyebrow="Guide · Färgat guld"
       title="Sälja vitguld och rödguld: färgen spelar mindre roll än du tror"
       intro="Vitguld, rödguld, rosaguld eller klassiskt gult, färgen känns viktig men avgör sällan värdet. Här förklarar vi vad som faktiskt styr priset på färgat guld och hur du får rätt betalt."

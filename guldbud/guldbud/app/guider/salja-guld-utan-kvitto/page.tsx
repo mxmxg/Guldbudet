@@ -26,6 +26,7 @@ const faq = [
 export default function Page() {
   return (
     <GuideShell
+      slug="/guider/salja-guld-utan-kvitto"
       eyebrow="Guide · Utan kvitto"
       title="Sälja guld utan kvitto, det går alldeles utmärkt"
       intro="Ärvda ringar, en present för 20 år sedan, en gammal kedja i byrålådan, nästan ingen har kvar kvittot. Här reder vi ut vad som faktiskt gäller när du vill sälja guld utan originalkvitto."
