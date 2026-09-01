@@ -229,6 +229,19 @@ och innan du påstår något om bolagets status.
 - **Spara innan du skriver över.** Aldrig en destruktiv åtgärd utan att först
   ha läst och sparat det som finns.
 - **Verifiera i stället för att gissa.** Läs koden innan du beskriver den.
+- **En orsak ska vara reproducerad innan den skrivs ut.** Att en förklaring
+  passar det du ser räcker inte, för flera förklaringar passar nästan alltid.
+  Återskapa felet, mät före och efter, och skriv först sedan vad som orsakade
+  det. Det gäller särskilt gränssnittsfel: rendera i rätt bredd och mät i
+  pixlar, gissa aldrig utifrån klassnamn. Går det inte att reproducera är
+  svaret "jag kan inte återskapa det", inte den troligaste förklaringen.
+- **Beskriv aldrig en meny du inte ser.** Klickvägar i Vercel, Supabase,
+  Stripe och Resend ändras, och en påhittad väg med brasklapp är fortfarande
+  en gissning. Har du ingen koppling som visar ytan: säg det, och ge i stället
+  ett test användaren kan köra som svarar på frågan utan menyn.
+- **Skicka aldrig användaren att åtgärda något du inte kontrollerat.** Ett
+  förslag som "fixa redirecten" kostar användaren tid även när det är fel.
+  Kontrollera först att felet finns.
 - **SQL skrivs alltid ut som block i chatten, aldrig som en bifogad fil.**
   Användaren kan inte öppna filerna som skickas från den här miljön. Dela upp i
   numrerade block som körs i ordning, och skriv ut hela funktioner ordagrant
