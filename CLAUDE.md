@@ -173,9 +173,12 @@ och innan du påstår något om bolagets status.
   driftkonto för GuldBuds provision. Stripe betalar dock ut hela summan till
   **en** mottagare, så uppdelningen sker efter utbetalningen.
 - **Klientmedelskontot är öppnat hos SEB 2026-09-01**, efter mötet samma dag.
-  Kontonumret är användarens uppgift och bor i `CLIENT_FUNDS_ACCOUNT` i
-  `lib/company.ts`, kontrollsiffran verifierad med mod-11. Punkten är därmed
-  av kritiska linjen: ordersidan och fakturan visar kontouppgifterna.
+  Kontonumret bor i `CLIENT_FUNDS_ACCOUNT` i `lib/company.ts` och är
+  **kontrollerat av användaren i drift 2026-09-01**, mot bankens uppgifter,
+  efter att rörelsekontots nummer först lagts in av misstag och rättats.
+  Läxan: båda är giltiga SEB-nummer, så en checksumma skiljer dem aldrig åt.
+  Verifiera kontonummer mot bankens papper, aldrig bara mot mod-11. Punkten
+  är av kritiska linjen: ordersidan och fakturan visar kontouppgifterna.
 - **Beslutat 2026-09-01: lansering med faktura och banköverföring, inte
   Stripe.** Handlaren betalar via banköverföring direkt till
   klientmedelskontot med ordernumret som referens, och admin prickar av
