@@ -526,6 +526,14 @@ En `NEXT_PUBLIC_`-variabel kan aldrig vara hemlig, och den läses vid bygget.
 `IDURA_CLIENT_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_API_BASE`,
 `STRIPE_WEBHOOK_SECRET`, `STRIPE_CURRENCY`.
 
+**Swish utbetalningar, sätts när certifikaten finns:** `SWISH_TLS_CERT`,
+`SWISH_TLS_KEY`, `SWISH_SIGNING_CERT`, `SWISH_SIGNING_KEY` (alla fyra är
+Base64-kodade PEM-strängar), `SWISH_PAYER_ALIAS` (bolagets Swish-nummer) och
+`SWISH_PAYOUT_API_BASE` (MSS `https://mss.cpc.getswish.net` i test, utelämnas
+i produktion där koden defaultar till `https://cpc.getswish.net`). Saknas
+någon av dem svarar utbetalningsrutten 503 och admin faller tillbaka på
+banköverföring, ingenting går sönder.
+
 Det finns ingen `.env.local.example` i repot, trots att `README.md` hänvisar
 till en.
 
@@ -1041,6 +1049,39 @@ Så här ligger det i koden:
 - Med manuell avprickning är det admin som är beloppskontrollen. Vid volym
   över ungefär femtio affärer i månaden bör avprickningen automatiseras,
   bankkoppling eller Swish Handel är kandidaterna.
+
+**Swish-utbetalningar till säljare: byggt mot API:t 2026-09-01, vilande
+tills certifikat finns.** Bankavtalet som krävs är SEB:s produkt **"Swish
+utbetalningar"** (inte Swish Handel eller företagsappen, de tar bara emot).
+Byggt mot developer.swish.nu:s tre guider samma dag. Delarna:
+
+- **`payouts`-tabellen**, körd mot databasen och i schemafilen: raden skrivs
+  INNAN pengarna skickas, samma princip som identity_disclosures.
+  `instruction_uuid` är unik så samma instruktion aldrig skickas två gånger.
+  Bara admin läser via RLS, callbacken skriver med servicerollen.
+- **`lib/payouts/swishPayout.ts`**: mTLS med TLS-certifikatet, payload
+  signerad med signeringscertifikatets nyckel (SHA-512-hash av payloadens
+  UTF-8-bytes, därefter SHA512withRSA, Base64, exakt enligt Swish
+  Java-exempel; dubbeldigesten är avsiktlig). Serienumret läses ur
+  certifikatet med X509Certificate, aldrig ur en egen variabel.
+- **`/api/admin/payouts`**: samma admin-auth som settle-auctions. Grindarna
+  speglar utbetalningsspärren: dealer_paid_at krävs, AML clear/approved,
+  ej krediterad/avbruten, och en initiated/paid-rad blockerar nya.
+  `payeeSSN` tas från `verified_ssn` i första hand. method bank_transfer
+  bokför en gjord manuell överföring, method swish anropar API:t.
+- **`/api/payouts/swish-callback`**: litar aldrig på kroppen. Verifierar
+  `callbackIdentifier`-huvudet mot radens sparade hemlighet (Swish egen
+  rekommendation) och slår sedan upp statusen med eget GET innan något
+  skrivs. Svarar 500 när verifieringen inte går att göra, med flit: Swish
+  gör om callbacken upp till tio gånger tills vi svarar 200. En förfalskad
+  callback får 200 direkt så den inte bjuds på fler försök.
+- **Adminvyn** har kortet "Utbetalning till säljaren" med radhistorik och två
+  knappar: Betala ut via Swish och Registrera gjord banköverföring.
+
+Obevisat: ingenting av detta har körts mot MSS än, certifikat saknas.
+Nästa steg är MSS-test med Swish testcertifikat (lösenord "swish", laddas
+ner från developer.swish.nu), sedan skarpa certifikat när avtalet är klart.
+SEB:s standardgräns är 30 000 kr per utbetalning, höjd gräns är begärd.
 
 **Fakturan möter handlaren där hen redan är. Byggt 2026-09-01.** Användaren
 ville att fakturan "ploppar upp automatiskt" vid vinst. Löst i två vägar,

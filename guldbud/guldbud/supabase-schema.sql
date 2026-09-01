@@ -1992,3 +1992,42 @@ as $$
 $$;
 
 grant execute on function public.item_seller_verified(uuid) to anon, authenticated;
+
+-- ===========================================================================
+-- Utbetalningar till säljare. Skapad 2026-09-01, körd mot databasen samma dag.
+--
+-- Raden skrivs INNAN pengarna skickas, samma princip som identity_disclosures:
+-- kan revisionsspåret inte skrivas sker ingen utbetalning. method 'swish' går
+-- via Swish utbetalningar (Payouts-API), 'bank_transfer' är en manuell
+-- banköverföring som admin intygar. instruction_uuid är Swish
+-- payoutInstructionUUID och unik, så samma instruktion aldrig kan skickas två
+-- gånger. Bara admin läser och skriver via klienten; callbacken uppdaterar
+-- med servicerollen.
+-- ===========================================================================
+create table if not exists public.payouts (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders on delete cascade,
+  amount numeric(12,2) not null check (amount > 0),
+  method text not null check (method in ('swish', 'bank_transfer')),
+  status text not null default 'initiated' check (status in ('initiated', 'paid', 'failed')),
+  payee_alias text,
+  reference text,
+  instruction_uuid text unique,
+  error_code text,
+  error_message text,
+  -- Hemlig per-anrop-nyckel som Swish returnerar oförändrad i callbackens
+  -- HTTP-huvud. Callbacken avvisas om huvudet inte matchar raden, Swish egen
+  -- rekommendation för att verifiera att callbacken kommer från dem.
+  callback_identifier text,
+  created_by uuid references public.profiles on delete set null,
+  created_at timestamptz not null default now(),
+  paid_at timestamptz
+);
+
+create index if not exists payouts_order_idx on public.payouts (order_id, created_at desc);
+
+alter table public.payouts enable row level security;
+
+drop policy if exists "admins manage payouts" on public.payouts;
+create policy "admins manage payouts" on public.payouts
+  for all using (public.is_admin()) with check (public.is_admin());
