@@ -82,7 +82,7 @@ const found = routes()
   .filter((r) => !EXCLUDED.some((e) => r.route === e || r.route.startsWith(e + '/')))
   .sort((a, b) => a.route.localeCompare(b.route, 'sv'))
 
-const rows = []
+const dated = []
 let missing = 0
 for (const { route, file } of found) {
   let date = null
@@ -95,22 +95,42 @@ for (const { route, file } of found) {
     missing++
     continue
   }
-  rows.push(`  '${route}': '${date}',`)
+  dated.push({ route, date })
 }
 
-// Skriv aldrig en ofullständig fil.
+// Skriv aldrig en fil vi inte kan lita på. Två sätt det kan gå fel.
 //
-// Byggmiljöer klonar ofta grunt, och då saknar en del filer historik. Att skriva
-// filen ändå hade tyst tagit bort sidor ur sitemapen vid varje deploy. Den
-// committade filen är alltid komplett, eftersom den skapas här lokalt där hela
-// historiken finns, så det säkra är att låta den vara.
-if (missing > 0 || rows.length === 0) {
+// 1. Historik saknas helt, och en del sidor får inget datum alls. Att skriva
+//    ändå hade tyst tagit bort sidor ur sitemapen.
+//
+// 2. Historiken finns men är för grund. Det här hände på riktigt: byggmiljön
+//    klonar bara de senaste commit-objekten, så varje fil ser ut att senast ha
+//    ändrats i det översta, alltså vid deployen. Sitemapen gick då ut med
+//    samma datum på alla 29 sidor, vilket är precis den lögn vid varje deploy
+//    som hela konstruktionen finns för att undvika. Spärren nedan känner igen
+//    det på att alla sidor får exakt samma datum. Det inträffar aldrig i en
+//    hel historik, där sidorna ändrats vid olika tillfällen.
+//
+// I båda fallen är den committade filen den rätta, eftersom den skapas där
+// hela historiken finns. Då är det säkra att låta den vara.
+const distinct = new Set(dated.map((d) => d.date))
+if (missing > 0 || dated.length === 0) {
   console.log(
     `sitemap-dates: hoppar över, ${missing} av ${found.length} sidor saknar git-historik. ` +
       'Den committade lib/pageUpdated.ts används oförändrad.'
   )
   process.exit(0)
 }
+if (distinct.size === 1) {
+  console.log(
+    `sitemap-dates: hoppar över, alla ${dated.length} sidor fick samma datum ` +
+      `(${[...distinct][0]}), vilket betyder för grund git-historik. ` +
+      'Den committade lib/pageUpdated.ts används oförändrad.'
+  )
+  process.exit(0)
+}
+
+const rows = dated.map((d) => `  '${d.route}': '${d.date}',`)
 
 const body = `// GENERERAD FIL. Ändra inte för hand.
 // Skapas av scripts/sitemap-dates.mjs, som körs automatiskt före varje bygge.
