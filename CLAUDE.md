@@ -1145,9 +1145,45 @@ vidare till mejl. Andra halvan är ett löfte, och det är bara användaren som 
 ändra det. Blir svarstiden en annan är det raden som ska ändras, inte
 verkligheten som ska ursäktas.
 
----
+**Sökbarheten: vad sajten faktiskt rankar på, och baslinjen 2026-09-01.**
+Search Console-exporten, tre månader, visade en annan bild än den vi antog.
 
-## Kända brister
+- **212 av 251 sökfrågor handlade om guldpris, värde eller karat.** Bara 29 om
+  att sälja. Sajten rankade alltså som en prissida, inte som en marknadsplats.
+- **`/guider/guldpris-idag` ensam stod för 1 473 av cirka 2 200 exponeringar**,
+  på position 75,6. Alltså sida åtta, där ingen klickar.
+- **"guldauktion" låg på position 6,5.** Sajtens eget ord, sida ett, utan att
+  någon försökt.
+- Totalt 30 klick och 2 170 exponeringar, snittposition 65.
+
+**Beslutet: sluta jaga guldpriset, bygg på guldauktion och valfrågorna.**
+Prisorden ägs av banker och ädelmetallhandlare sedan år tillbaka och vinns inte
+av en tio veckor gammal domän. Valfrågorna, alltså var man säljer bäst, vem som
+betalar mest och pantbank eller auktion, ligger redan på position 11 till 30.
+
+**Åtgärdat 2026-09-01 och 09-02:** daterad sitemap, 60 interna länkar mellan
+guiderna, två omskrivna sidor, och korta direktsvar högst upp på de tre
+valfrågorna.
+
+**Baslinje att jämföra mot, ur exporten 2026-09-01:**
+
+| Sida | Exponeringar | Klick | Position |
+|---|---|---|---|
+| `/guider/var-salja-guld` | 94 | 2 | 17,4 |
+| `/guider/bast-betalt-for-guld` | 34 | 1 | 30,5 |
+| `/guider/pantbank-eller-auktion` | 2 | 0 | 7,0 |
+
+Läs av tidigast tre veckor efter 09-02. **Vi kommer inte kunna säga vilken
+åtgärd som gjorde vad**, eftersom fyra saker ändrades samma dygn. Vi ser
+riktningen, inte orsaken.
+
+**AI-rapportens 56 exponeringar är inget underlag.** Generativa AI-funktioner
+visade 56 exponeringar på tre månader med stigande kurva, och de sidor som vann
+där var valfrågorna, inte prissidan. Men rapporten saknar sökfrågor, och 29 av
+56 var startsidan medan www-adresserna stod för 14. Användaren har själv sökt på
+sajtens ord under samma period. Siffran kan alltså vara användaren själv, och
+det går inte att avgöra. Bygg ingenting på den. Testet är gratis: slutar
+användaren söka på sina egna ord och kurvan planar ut var det hen.
 
 Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugonio är åtgärdade:
 tre i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i
