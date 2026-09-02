@@ -19,6 +19,7 @@ export default function GuideShell({
   children,
   faq,
   slug,
+  answer,
 }: {
   eyebrow?: string
   title: string
@@ -27,6 +28,7 @@ export default function GuideShell({
   children: React.ReactNode
   faq?: { q: string; a: string }[]
   slug?: string
+  answer?: React.ReactNode
 }) {
   const related = slug ? relatedGuides(slug) : []
   const faqLd = faq
@@ -69,6 +71,18 @@ export default function GuideShell({
       </div>
 
       <article className="flex-1 max-w-3xl w-full mx-auto px-4 py-12">
+        {/* Kort svar högst upp, före brödtexten.
+            Skälet är läsaren: den som söker "var säljer man guld bäst" vill ha
+            svaret, inte tre rubriker att scrolla förbi först. Håll det till två
+            eller tre meningar, och låt det vara ett riktigt svar, inte en
+            inledning till ett svar. */}
+        {answer && (
+          <div className="mb-10 rounded-2xl border border-gold-200 bg-gold-50/60 px-5 py-4 sm:px-6 sm:py-5">
+            <p className="eyebrow text-gold-700/80 mb-1.5">Kort svar</p>
+            <div className="text-espresso-800 leading-relaxed">{answer}</div>
+          </div>
+        )}
+
         {children}
 
         {faq && faq.length > 0 && (

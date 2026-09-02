@@ -36,6 +36,19 @@ export default function Page() {
       intro="Alla vill ha bäst betalt när de säljer guld, men hur vet du att budet du får faktiskt är bra? Här går vi igenom varför en enda uppköpare sällan ger dig mest, och hur du låter handlarna tävla i stället."
       updated="2026"
       faq={faq}
+      answer={
+        <>
+          <p className="mb-2">
+            Ta aldrig första budet. En köpare som vet att du inte har något att jämföra med har ingen
+            anledning att bjuda över sig själv. Väg föremålet, ta reda på karaten och räkna ut
+            metallvärdet, så vet du vad ett bud ska mätas mot.
+          </p>
+          <p>
+            Låt sedan flera köpare buda mot varandra. På GuldBud får du hela slutbudet utan avdrag,
+            och du kan tacka nej ända fram till att du accepterar.
+          </p>
+        </>
+      }
     >
       <H2>Varför ett enda bud nästan aldrig är det bästa</H2>
       <P>

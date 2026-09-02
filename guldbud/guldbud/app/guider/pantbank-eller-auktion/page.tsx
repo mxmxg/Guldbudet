@@ -32,6 +32,20 @@ export default function Page() {
       intro="Pantbank, guldsmed eller auktion, valet avgör hur mycket du får. Här jämför vi vägarna ärligt, och förklarar varför konkurrens mellan flera köpare oftast slår ett enda uppköpsbud."
       updated="2026"
       faq={faq}
+      answer={
+        <>
+          <p className="mb-2">
+            Först en skillnad som är lätt att missa: pantbanken erbjuder två saker, att låna ut
+            pengar med guldet som säkerhet eller att köpa det. Ska du sälja på riktigt är det priset
+            som räknas, och där ger konkurrens mer än ett enskilt uppköpsbud.
+          </p>
+          <p>
+            Pantbanken ger ett bud, snabbt och på plats. En auktion tar ett par dygn men låter flera
+            godkända handlare buda mot varandra om samma föremål. Behöver du pengarna i handen idag
+            väljer du pantbanken, vill du veta att du fått marknadens pris väljer du auktionen.
+          </p>
+        </>
+      }
     >
       <H2>Panta eller sälja, först det viktiga valet</H2>
       <P>
