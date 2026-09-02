@@ -36,6 +36,20 @@ export default function Page() {
       intro="Pantbank, guldsmed, guldköpare på nätet eller auktion, alternativen är många och priset kan skilja tusenlappar. Här jämför vi dem så att du vet var du får mest för ditt guld."
       updated="2026"
       faq={faq}
+      answer={
+        <>
+          <p className="mb-2">
+            Du får mest där flera köpare tävlar om föremålet. En pantbank eller guldsmed ger ett enda
+            bud, och du har inget att jämföra med. På en auktion budar flera godkända handlare mot
+            varandra, och konkurrensen sätter priset i stället för en prislista.
+          </p>
+          <p>
+            Räkna med att ett bud landar under metallvärdet oavsett var du säljer, eftersom köparen
+            ska smälta om guldet och ta en risk på kursen. Skillnaden mellan ett bud och flera är hur
+            långt under.
+          </p>
+        </>
+      }
     >
       <H2>Dina alternativ, kort och ärligt</H2>
       <P>
