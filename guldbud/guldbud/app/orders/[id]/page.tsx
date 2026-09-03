@@ -21,6 +21,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
   const supabase = createClient()
   const [order, setOrder] = useState<any>(null)
   const [item, setItem] = useState<any>(null)
+  const [relisted, setRelisted] = useState<{ id: string; status: string } | null>(null)
   const [me, setMe] = useState<string>('')
   const [party, setParty] = useState<'seller' | 'dealer' | null>(null)
   const [loading, setLoading] = useState(true)
@@ -91,6 +92,22 @@ export default function OrderPage({ params }: { params: { id: string } }) {
       .eq('id', o.item_id)
       .single()
     setItem(it)
+
+    // Har föremålet lagts ut igen efter att affären avbrutits? Utan den här
+    // upplysningen slutar säljarens vy i ett rött återvändsgränd: affären är
+    // avbruten, punkt, trots att föremålet ligger ute på en ny auktion.
+    // Återpublicering skapar alltid en ny rad, aldrig en återanvänd, eftersom
+    // orders.item_id är unikt.
+    if (o.status === 'cancelled') {
+      const { data: again } = await supabase
+        .from('items')
+        .select('id, status')
+        .eq('relisted_from', o.item_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      setRelisted(again || null)
+    }
     setLoading(false)
   }
 
@@ -176,7 +193,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
 
         {/* Party-specific info */}
         {party === 'seller' ? (
-          <SellerPanel order={order} />
+          <SellerPanel order={order} relisted={relisted} />
         ) : (
           <DealerPanel order={order} />
         )}
@@ -201,7 +218,13 @@ export default function OrderPage({ params }: { params: { id: string } }) {
   )
 }
 
-function SellerPanel({ order }: { order: any }) {
+function SellerPanel({
+  order,
+  relisted,
+}: {
+  order: any
+  relisted: { id: string; status: string } | null
+}) {
   const needsShipping = order.status === 'accepted'
   return (
     <div className={`card p-6 ${needsShipping ? 'ring-2 ring-gold-300' : ''}`}>
@@ -255,6 +278,22 @@ function SellerPanel({ order }: { order: any }) {
             {order.status === 'cancelled' && !order.refunded_at &&
               'Affären kunde tyvärr inte slutföras och har avbrutits. Har du frågor, skriv i meddelandena nedan.'}
           </p>
+          {/* Slutar inte i ett återvändsgränd när föremålet redan ligger ute
+              igen. Den nya annonsen är en egen rad, så utan den här raden ser
+              säljaren bara den avbrutna affären och en till synes orelaterad
+              auktion i Mina föremål. */}
+          {order.status === 'cancelled' && relisted && (
+            <p className="mt-3 text-sm text-emerald-700">
+              Föremålet är utlagt igen.{' '}
+              {relisted.status === 'pending' ? (
+                <span className="text-espresso-500">Den nya annonsen väntar på granskning.</span>
+              ) : (
+                <Link href={`/auctions/${relisted.id}`} className="text-gold-600 hover:text-gold-700">
+                  Se den nya auktionen →
+                </Link>
+              )}
+            </p>
+          )}
           {SELLER_DOC_STATES.includes(order.status) && (
             <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
               Visa avräkningsnota →

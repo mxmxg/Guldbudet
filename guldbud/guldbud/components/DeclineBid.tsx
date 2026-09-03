@@ -81,6 +81,8 @@ export default function DeclineBid({ item, isOwner }: { item: any; isOwner: bool
       ownership_attested_at: new Date().toISOString(),
       mandate_accepted_at: new Date().toISOString(),
       terms_version: TERMS_VERSION,
+      // Bandet tillbaka till annonsen den lades ut från.
+      relisted_from: item.id,
       status: 'pending',
     })
     setRelisting(false)

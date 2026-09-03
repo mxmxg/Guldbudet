@@ -96,6 +96,11 @@ export interface Item {
   mandate_accepted_at: string | null
   terms_version: string | null
 
+  // Den annons det här föremålet lades ut från, när det lagts ut igen. Alltid
+  // en ny rad, aldrig en återanvänd: orders.item_id är unikt, så ett föremål
+  // kan bara ha en affär. Null på allt som publicerats första gången.
+  relisted_from: string | null
+
   // Cron-jobbens avbockning, så samma notis inte skickas två gånger.
   ended_notified: boolean
   ending_soon_notified: boolean

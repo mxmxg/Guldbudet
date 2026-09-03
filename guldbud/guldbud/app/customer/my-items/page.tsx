@@ -74,6 +74,8 @@ export default function MyItemsPage() {
         ownership_attested_at: new Date().toISOString(),
         mandate_accepted_at: new Date().toISOString(),
         terms_version: TERMS_VERSION,
+        // Bandet tillbaka till annonsen den lades ut från.
+        relisted_from: item.id,
         status: 'pending',
       })
       .select('*')
@@ -117,6 +119,13 @@ export default function MyItemsPage() {
     }
     load()
   }, [])
+
+  // Vilka föremål har ersatts av en nyare annons. Säljaren äger båda raderna,
+  // så uppgiften finns redan i listan och behöver ingen extra fråga.
+  const replacedBy: Record<string, { id: string; status: string }> = {}
+  items.forEach((i: any) => {
+    if (i.relisted_from) replacedBy[i.relisted_from] = { id: i.id, status: i.status }
+  })
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -170,6 +179,9 @@ export default function MyItemsPage() {
               // Se kommentaren vid knappen längre ner för varför just de två.
               const relistable =
                 item.status === 'rejected' || (item.status === 'closed' && !item.accepted_bid_id)
+              // Redan utlagd igen. Ersätter knappen, så samma föremål inte
+              // läggs ut två gånger, och visar var det tog vägen.
+              const replaced = replacedBy[item.id]
               const href = orderId ? `/orders/${orderId}` : `/auctions/${item.id}`
               const Wrapper: any = clickable ? Link : 'div'
               return (
@@ -245,7 +257,7 @@ export default function MyItemsPage() {
                     Knappen ligger under kortet, inte i det. Ett stängt föremål
                     har kortet som länk, och en knapp inuti en länk hade både
                     varit ogiltig HTML och navigerat bort vid klick. */}
-                {relistable && (
+                {relistable && !replaced && (
                   <div className="pl-1">
                     <button
                       onClick={() => relist(item)}
@@ -255,6 +267,22 @@ export default function MyItemsPage() {
                       {relisting === item.id ? 'Lägger ut...' : 'Lägg ut igen →'}
                     </button>
                   </div>
+                )}
+                {/* Den gamla annonsen är inte ett återvändsgränd när föremålet
+                    redan ligger ute igen. Utan raden ser säljaren två rader med
+                    samma titel, en avslutad och en pågående, utan att något
+                    säger att det är samma föremål. */}
+                {replaced && (
+                  <p className="pl-1 text-xs text-espresso-400">
+                    Utlagd igen.{' '}
+                    {replaced.status === 'pending' ? (
+                      <span>Den nya annonsen väntar på granskning.</span>
+                    ) : (
+                      <Link href={`/auctions/${replaced.id}`} className="text-gold-600 hover:text-gold-700">
+                        Se den nya annonsen →
+                      </Link>
+                    )}
+                  </p>
                 )}
                 {/* Säljarens försäljnings- och utbetalningsunderlag, både att
                     visa och att ladda ner. Nedladdningen fanns här redan, men
