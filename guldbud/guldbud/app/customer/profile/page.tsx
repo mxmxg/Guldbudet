@@ -288,6 +288,16 @@ export default function CustomerProfilePage() {
                 <p className="font-medium text-espresso-900 group-hover:text-gold-700 transition">Lägg ut föremål</p>
                 <p className="text-xs text-espresso-400 mt-1">Starta en ny auktion.</p>
               </Link>
+              {/* Underlagen bor i Mina föremål, men den som letar efter ett
+                  kvitto går ofta till kontot först. En genväg hit, inte en
+                  andra lista: två ställen med samma handlingar glider isär. */}
+              <Link
+                href="/customer/my-items?tab=docs"
+                className="card p-5 hover:shadow-gold transition group"
+              >
+                <p className="font-medium text-espresso-900 group-hover:text-gold-700 transition">Mina underlag</p>
+                <p className="text-xs text-espresso-400 mt-1">Kvitton på dina utbetalningar.</p>
+              </Link>
             </section>
 
             <div className="text-center pt-2">

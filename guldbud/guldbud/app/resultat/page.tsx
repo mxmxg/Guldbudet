@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase-server'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import CategoryIcon from '@/components/CategoryIcon'
+import Image from 'next/image'
 import Link from 'next/link'
 import { formatSEK } from '@/lib/gold'
 import { cancelledSaleItemIds } from '@/lib/auctions'
@@ -17,7 +18,7 @@ export default async function ResultsPage() {
   const supabase = createClient()
   const { data: items } = await supabase
     .from('items')
-    .select('id, title, category, weight_grams, karat, gemstone, accepted_at, accepted_bid_id')
+    .select('id, title, category, weight_grams, karat, gemstone, accepted_at, accepted_bid_id, image_urls')
     .eq('status', 'closed')
     .not('accepted_bid_id', 'is', null)
     .order('accepted_at', { ascending: false })
@@ -83,8 +84,27 @@ export default async function ResultsPage() {
               const perGram = r.weight_grams ? Math.round(r.price / r.weight_grams) : 0
               return (
                 <div key={r.id} className="flex items-center gap-4 p-4">
-                  <div className="w-11 h-11 rounded-xl bg-gold-50 text-gold-600 flex items-center justify-center shrink-0">
-                    <CategoryIcon category={r.category} size={20} strokeWidth={1.6} />
+                  {/* Föremålets egen bild, inte en kategoriikon. En lista med
+                      identiska ikoner och siffror bredvid läser sig som
+                      påhittad statistik, medan fotot visar att det är riktiga
+                      smycken som sålts. Medvetet mindre än startsidans kort:
+                      här är slutpriset huvudsaken och bilden bekräftar det,
+                      på startsidan är bilden lockbetet. object-cover av samma
+                      skäl som där, så alla foton fyller rutan lika. */}
+                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-espresso-100 relative shrink-0">
+                    {r.image_urls?.[0] ? (
+                      <Image
+                        src={r.image_urls[0]}
+                        alt={r.title}
+                        fill
+                        sizes="56px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gold-50 text-gold-600">
+                        <CategoryIcon category={r.category} size={20} strokeWidth={1.6} />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-espresso-900 truncate">{r.title}</p>

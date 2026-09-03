@@ -13,6 +13,28 @@ import PendingApprovalBanner from '@/components/PendingApprovalBanner'
 import { TERMS_VERSION } from '@/lib/terms'
 import { SELLER_DOC_STATES, type OrderStatus } from '@/lib/orders'
 
+// Två flikar, samma indelning som adminpanelens affärslista så de två vyerna
+// läser likadant. 'pending' hör till pågående: föremålet är på väg ut, det
+// väntar bara på granskning. 'rejected' hör till avslutade, det blev aldrig
+// någon auktion av det.
+type Tab = 'open' | 'done' | 'docs'
+
+const TAB_LABEL: Record<Tab, string> = {
+  open: 'Pågående',
+  done: 'Avslutade',
+  docs: 'Mina underlag',
+}
+
+// Underlagsfliken går inte på föremålets status utan på affärens, se
+// SELLER_DOC_STATES: handlingen redovisar en utbetalning och finns först när
+// den är godkänd.
+const TAB_MATCH: Record<'open' | 'done', (status: string) => boolean> = {
+  open: (s) => s === 'pending' || s === 'active' || s === 'approved',
+  done: (s) => s === 'closed' || s === 'rejected',
+}
+
+type SellerOrder = { id: string; item_id: string; status: string; amount: number; created_at: string }
+
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   pending: { label: 'Väntar på granskning', color: 'bg-amber-100 text-amber-700' },
   approved: { label: 'Godkänd', color: 'bg-blue-100 text-blue-700' },
@@ -25,10 +47,11 @@ export default function MyItemsPage() {
   const supabase = createClient()
   const router = useRouter()
   const [items, setItems] = useState<any[]>([])
-  const [orderByItem, setOrderByItem] = useState<Record<string, { id: string; status: string }>>({})
+  const [orderByItem, setOrderByItem] = useState<Record<string, SellerOrder>>({})
   const [loading, setLoading] = useState(true)
   const [relisting, setRelisting] = useState<string | null>(null)
   const [relistError, setRelistError] = useState('')
+  const [tab, setTab] = useState<Tab>('open')
 
   const relist = async (item: any) => {
     setRelisting(item.id)
@@ -109,15 +132,23 @@ export default function MyItemsPage() {
       // redovisar en utbetalning, se SELLER_DOC_STATES i lib/orders.
       const { data: orders } = await supabase
         .from('orders')
-        .select('id, item_id, status')
+        .select('id, item_id, status, amount, created_at')
         .eq('seller_id', user.id)
-      const map: Record<string, { id: string; status: string }> = {}
-      orders?.forEach((o: any) => (map[o.item_id] = { id: o.id, status: o.status }))
+      const map: Record<string, SellerOrder> = {}
+      orders?.forEach((o: any) => (map[o.item_id] = o))
       setOrderByItem(map)
 
       setLoading(false)
     }
     load()
+  }, [])
+
+  // Öppna direkt på rätt flik när man kommer från en länk, t.ex. "Mina
+  // underlag" i profilen.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const t = new URLSearchParams(window.location.search).get('tab')
+    if (t === 'done' || t === 'docs') setTab(t)
   }, [])
 
   // Vilka föremål har ersatts av en nyare annons. Säljaren äger båda raderna,
@@ -126,6 +157,18 @@ export default function MyItemsPage() {
   items.forEach((i: any) => {
     if (i.relisted_from) replacedBy[i.relisted_from] = { id: i.id, status: i.status }
   })
+
+  // Föremål med ett färdigt underlag, alltså där utbetalningen är godkänd.
+  const docItems = items.filter((i: any) => {
+    const o = orderByItem[i.id]
+    return !!o && SELLER_DOC_STATES.includes(o.status as OrderStatus)
+  })
+
+  // Räknas ur hela listan, så antalen på flikarna stämmer oavsett vilken som
+  // är vald.
+  const listFor = (t: Tab) =>
+    t === 'docs' ? docItems : items.filter((i: any) => TAB_MATCH[t](i.status))
+  const shown = listFor(tab)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -146,6 +189,25 @@ export default function MyItemsPage() {
 
         <PendingApprovalBanner />
 
+        {!loading && items.length > 0 && (
+          <div className="flex flex-wrap gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-fit max-w-full mb-6 shadow-soft">
+            {(['open', 'done', 'docs'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  tab === t
+                    ? 'bg-gold-sheen text-espresso-900 shadow-gold'
+                    : 'text-espresso-500 hover:text-espresso-800'
+                }`}
+              >
+                {TAB_LABEL[t]}
+                <span className="ml-1.5 text-xs opacity-60 tabular-nums">{listFor(t).length}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {loading ? (
           <div className="grid gap-4">
             {[0, 1].map((i) => (
@@ -162,9 +224,68 @@ export default function MyItemsPage() {
               Lägg ut ditt första föremål
             </Link>
           </div>
+        ) : tab === 'docs' ? (
+          /* Underlagen samlade på ett ställe. De fanns redan, men bara som två
+             små länkar under det enskilda föremålets kort, alltså bara för den
+             som råkade leta på rätt rad. Det här är arkivet: en rad per affär
+             som betalats ut, med belopp och datum, att visa eller ladda ner. */
+          <div className="grid gap-3">
+            {docItems.length === 0 ? (
+              <div className="card p-12 text-center">
+                <p className="text-espresso-500 text-sm">Du har inga underlag än.</p>
+                <p className="text-espresso-400 text-xs mt-1.5">
+                  Underlaget skapas när vi betalat ut för ett sålt föremål.
+                </p>
+              </div>
+            ) : (
+              <div className="card overflow-hidden divide-y divide-espresso-100">
+                {docItems.map((item: any) => {
+                  const o = orderByItem[item.id]
+                  return (
+                    <div key={item.id} className="flex items-center gap-4 p-4">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-espresso-100 relative shrink-0">
+                        {item.image_urls?.[0] && (
+                          <Image src={item.image_urls[0]} alt={item.title} fill sizes="48px" className="object-cover" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-espresso-900 truncate">{item.title}</p>
+                        <p className="text-xs text-espresso-400">
+                          {o?.amount ? `${o.amount.toLocaleString('sv-SE')} kr` : ''}
+                          {o?.created_at
+                            ? ` · ${new Date(o.created_at).toLocaleDateString('sv-SE')}`
+                            : ''}
+                        </p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 shrink-0">
+                        <Link
+                          href={`/orders/${o.id}/invoice`}
+                          className="text-xs text-gold-600 hover:text-gold-700 whitespace-nowrap"
+                        >
+                          Visa →
+                        </Link>
+                        <DownloadInvoiceButton
+                          orderId={o.id}
+                          label="Ladda ner (PDF)"
+                          className="text-xs text-espresso-500 hover:text-espresso-800 disabled:opacity-50 whitespace-nowrap"
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         ) : (
           <div className="grid gap-4">
-            {items.map((item) => {
+            {shown.length === 0 && (
+              <div className="card p-12 text-center text-espresso-400 text-sm">
+                {tab === 'open'
+                  ? 'Inga pågående föremål just nu.'
+                  : 'Inga avslutade föremål än.'}
+              </div>
+            )}
+            {shown.map((item) => {
               const s = STATUS_LABEL[item.status] || {
                 label: item.status,
                 color: 'bg-espresso-100 text-espresso-500',
