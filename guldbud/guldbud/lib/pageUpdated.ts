@@ -3,8 +3,8 @@
 // Datumen kommer ur git: när sidans fil senast ändrades.
 
 export const PAGE_UPDATED: Record<string, string> = {
-  '': '2026-08-31',
-  '/auctions': '2026-08-31',
+  '': '2026-09-03',
+  '/auctions': '2026-09-03',
   '/dealer/guide': '2026-08-31',
   '/guider': '2026-09-01',
   '/guider/bast-betalt-for-guld': '2026-09-02',
@@ -30,6 +30,6 @@ export const PAGE_UPDATED: Record<string, string> = {
   '/handlarvillkor': '2026-08-31',
   '/how-it-works': '2026-08-31',
   '/privacy': '2026-08-31',
-  '/resultat': '2026-08-31',
+  '/resultat': '2026-09-03',
   '/terms': '2026-08-31',
 }

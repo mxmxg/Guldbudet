@@ -4,6 +4,7 @@ import Footer from '@/components/Footer'
 import CategoryIcon from '@/components/CategoryIcon'
 import Link from 'next/link'
 import { formatSEK } from '@/lib/gold'
+import { cancelledSaleItemIds } from '@/lib/auctions'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
@@ -22,7 +23,14 @@ export default async function ResultsPage() {
     .order('accepted_at', { ascending: false })
     .limit(60)
 
-  const list = items || []
+  // En avbruten affär är ingen försäljning. Frågan ovan kan inte se det:
+  // föremålet står kvar som 'closed' med sitt accepterade bud även när affären
+  // gick tillbaka. Utan filtret räknades affärer som aldrig blev av in i både
+  // antalet sålda och snittpriset per gram, på en sida som lovar riktiga
+  // slutpriser och inga lockpriser.
+  const cancelled = await cancelledSaleItemIds(supabase)
+
+  const list = (items || []).filter((i: any) => !cancelled.has(i.id))
   let priceByBid: Record<string, number> = {}
   if (list.length > 0) {
     const bidIds = list.map((i: any) => i.accepted_bid_id).filter(Boolean)
