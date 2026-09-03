@@ -167,6 +167,9 @@ export default function MyItemsPage() {
               // bor i lib/orders så de två inte kan glida isär.
               const hasSellerDoc = !!order && SELLER_DOC_STATES.includes(order.status as OrderStatus)
               const clickable = item.status === 'active' || item.status === 'closed'
+              // Se kommentaren vid knappen längre ner för varför just de två.
+              const relistable =
+                item.status === 'rejected' || (item.status === 'closed' && !item.accepted_bid_id)
               const href = orderId ? `/orders/${orderId}` : `/auctions/${item.id}`
               const Wrapper: any = clickable ? Link : 'div'
               return (
@@ -220,16 +223,39 @@ export default function MyItemsPage() {
                       uppdragstexten i formuläret när föremålet publiceras.
                       Handlingen är ett underlag för GuldBud, för revisor och
                       Skatteverket, inte något kunden behöver hämta. */}
-                  {item.status === 'rejected' && (
+                </Wrapper>
+                {/* Säljaren får lägga ut igen i två lägen, och bara i dem.
+                    'rejected' är ett föremål admin nekade, alltså en annons som
+                    aldrig kom till auktion.
+                    'closed' UTAN accepterat bud betyder att säljaren tackade nej
+                    till högsta budet. Det är det enda läget efter en avslutad
+                    auktion där föremålet får läggas ut igen.
+
+                    Stängt MED accepterat bud är sålt och ger ingen knapp, inte
+                    heller när affären senare avbryts: den avbrutna affären står
+                    kvar med sitt accepterade bud, och att lägga ut föremålet
+                    igen därifrån är ett adminbeslut, inte säljarens.
+
+                    Auktionssidan lovade redan det här ("Du kan lägga ut det igen
+                    från Mina föremål när du vill"), men knappen fanns bara för
+                    'rejected'. Efter en omladdning hade säljaren ingen väg alls:
+                    DeclineBid renderas bara så länge föremålet är öppet, så
+                    knappen där försvann i samma stund som nejet sparades.
+
+                    Knappen ligger under kortet, inte i det. Ett stängt föremål
+                    har kortet som länk, och en knapp inuti en länk hade både
+                    varit ogiltig HTML och navigerat bort vid klick. */}
+                {relistable && (
+                  <div className="pl-1">
                     <button
                       onClick={() => relist(item)}
                       disabled={relisting === item.id}
-                      className="text-sm text-gold-600 hover:text-gold-700 shrink-0 whitespace-nowrap disabled:opacity-50"
+                      className="text-xs text-gold-600 hover:text-gold-700 disabled:opacity-50"
                     >
-                      {relisting === item.id ? '...' : 'Lägg ut igen →'}
+                      {relisting === item.id ? 'Lägger ut...' : 'Lägg ut igen →'}
                     </button>
-                  )}
-                </Wrapper>
+                  </div>
+                )}
                 {/* Säljarens försäljnings- och utbetalningsunderlag, både att
                     visa och att ladda ner. Nedladdningen fanns här redan, men
                     utan villkor, så den gick att hämta innan utbetalningen var
