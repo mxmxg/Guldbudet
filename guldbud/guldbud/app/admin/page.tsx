@@ -357,7 +357,12 @@ export default function AdminPage() {
   const renderAuctionRow = (item: any) => {
     const ended = isEnded(item)
     return (
-      <div key={item.id} className="card p-4 flex gap-4 items-center flex-wrap sm:flex-nowrap">
+      // Raden får wrappa i alla bredder. Med sm:flex-nowrap kunde den inte det,
+      // och eftersom knappraden är shrink-0 medan textkolumnen är min-w-0 blev
+      // texten uppäten i stället för att knapparna flyttade ner. Uppmätt vid
+      // 1200 px skärm: textkolumnen 39 px bred, alltså ett ord per rad. Efter
+      // ändringen 782 px.
+      <div key={item.id} className="card p-4 flex gap-4 items-center flex-wrap">
         <button
           type="button"
           onClick={() => openLightbox(item.image_urls, 0)}
@@ -369,7 +374,10 @@ export default function AdminPage() {
             <img src={item.image_urls[0]} alt={item.title} className="w-full h-full object-contain transition group-hover:opacity-80" />
           )}
         </button>
-        <div className="flex-1 min-w-0">
+        {/* basis-72 ger texten ett golv att utgå från, så knappraden hamnar på
+            egen rad när den inte får plats bredvid, i stället för att texten
+            kläms ihop till ett ord per rad. */}
+        <div className="flex-1 min-w-0 basis-72">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-medium text-espresso-900">{item.title}</p>
             {item.status === 'closed' ? (
@@ -416,7 +424,7 @@ export default function AdminPage() {
             )}
           </div>
         </div>
-        <div className="w-full min-w-0 sm:w-auto sm:shrink-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap sm:justify-end">
+        <div className="w-full min-w-0 sm:w-auto flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap sm:justify-end">
           {/* Godkänn vinnande bud åt säljaren när auktionen är slut */}
           {item.status === 'active' && ended && topBidIds[item.id] && confirmId !== item.id && (
             acceptId === item.id ? (
