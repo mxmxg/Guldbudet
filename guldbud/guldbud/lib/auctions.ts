@@ -14,6 +14,27 @@ export type EnrichedItem = Item & { top_bid: number; bid_count: number }
  * (t.ex. innan schemat körts), så en deploy aldrig kan tömma listorna oavsett
  * när SQL:en körs. Tar en valfri supabase-klient (server, anon eller browser).
  */
+/**
+ * Föremålen vars affär avbröts, som en mängd id.
+ *
+ * Ett föremål står kvar som 'closed' med sitt accepterade bud även när affären
+ * går tillbaka, så de tre ytorna som visar "nyligen sålt" räknade avbrutna
+ * affärer som genomförda försäljningar. Uppgiften finns bara i orders, och en
+ * utloggad besökare har ingen läspolicy där, därför `cancelled_sale_items()`,
+ * en security definer-funktion som svarar på precis den frågan.
+ *
+ * Regeln ligger på ett ställe med flit: startsidan, auktionslistan och Sålda
+ * resultat påstår samma sak, och en regel som skrivs tre gånger glider isär.
+ *
+ * Går anropet fel returneras en tom mängd, alltså samma beteende som förut.
+ * Ett tillfälligt fel ska inte tömma "nyligen sålt" på startsidan.
+ */
+export async function cancelledSaleItemIds(supabase: any): Promise<Set<string>> {
+  const { data } = await supabase.rpc('cancelled_sale_items')
+  if (!Array.isArray(data)) return new Set()
+  return new Set(data.map((r: { item_id: string }) => r.item_id))
+}
+
 export async function loadActiveItemsWithStats(supabase: any): Promise<EnrichedItem[]> {
   const { data, error } = await supabase.rpc('active_items_with_stats')
   if (!error && Array.isArray(data)) {

@@ -11,6 +11,20 @@ import { formatSEK } from '@/lib/gold'
 
 const OPEN_STATES = OPEN_ORDER_STATES
 
+type Tab = 'open' | 'done' | 'cancelled'
+
+const TAB_LABEL: Record<Tab, string> = {
+  open: 'Pågående',
+  done: 'Slutförda',
+  cancelled: 'Avbrutna',
+}
+
+const TAB_MATCH: Record<Tab, (status: string) => boolean> = {
+  open: (s) => OPEN_STATES.includes(s as OrderStatus),
+  done: (s) => s === 'completed',
+  cancelled: (s) => s === 'cancelled',
+}
+
 export default function AdminOrdersPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -18,13 +32,17 @@ export default function AdminOrdersPage() {
   const [disputedIds, setDisputedIds] = useState<Set<string>>(new Set())
   const [amlByOrder, setAmlByOrder] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState<'open' | 'done'>('open')
+  // Avbrutna affärer har egen flik. De låg tidigare ihop med de slutförda under
+  // "Avslutade", vilket blandar två helt olika saker: en genomförd försäljning
+  // och en affär som gick tillbaka. Ingen rad raderas, den byter bara flik.
+  const [tab, setTab] = useState<Tab>('open')
 
-  // Öppna direkt på "Avslutade" när man kommer från "Slutförda affärer".
+  // Öppna direkt på rätt flik när man kommer från en länk, t.ex. "Slutförda
+  // affärer" i adminpanelen.
   useEffect(() => {
-    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tab') === 'done') {
-      setTab('done')
-    }
+    if (typeof window === 'undefined') return
+    const t = new URLSearchParams(window.location.search).get('tab')
+    if (t === 'done' || t === 'cancelled') setTab(t)
   }, [])
 
   useEffect(() => {
@@ -65,10 +83,9 @@ export default function AdminOrdersPage() {
     setLoading(false)
   }
 
-  const shown = orders.filter((o) =>
-    tab === 'open' ? OPEN_STATES.includes(o.status) : o.status === 'completed' || o.status === 'cancelled'
-  )
+  const shown = orders.filter((o) => TAB_MATCH[tab](o.status))
   const openCount = orders.filter((o) => OPEN_STATES.includes(o.status)).length
+  const countFor = (t: Tab) => orders.filter((o) => TAB_MATCH[t](o.status)).length
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -83,8 +100,8 @@ export default function AdminOrdersPage() {
       </div>
 
       <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
-        <div className="flex gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-fit mb-6 shadow-soft">
-          {(['open', 'done'] as const).map((t) => (
+        <div className="flex flex-wrap gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-fit max-w-full mb-6 shadow-soft">
+          {(['open', 'done', 'cancelled'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -92,7 +109,8 @@ export default function AdminOrdersPage() {
                 tab === t ? 'bg-gold-sheen text-espresso-900 shadow-gold' : 'text-espresso-500 hover:text-espresso-800'
               }`}
             >
-              {t === 'open' ? 'Pågående' : 'Avslutade'}
+              {TAB_LABEL[t]}
+              <span className="ml-1.5 text-xs opacity-60 tabular-nums">{countFor(t)}</span>
             </button>
           ))}
         </div>

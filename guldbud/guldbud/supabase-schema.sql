@@ -2031,3 +2031,32 @@ alter table public.payouts enable row level security;
 drop policy if exists "admins manage payouts" on public.payouts;
 create policy "admins manage payouts" on public.payouts
   for all using (public.is_admin()) with check (public.is_admin());
+
+-- ===========================================================================
+-- Sålda resultat: en avbruten affär är ingen försäljning
+-- Skapad 2026-09-03, körd mot databasen samma dag.
+--
+-- /resultat listar föremål med status 'closed' och ett accepterat bud. Den
+-- frågan kan inte se om affären fullföljdes, eftersom uppgiften bor i orders
+-- och en utloggad besökare inte har någon läspolicy där. Följden: affärer som
+-- gick tillbaka låg kvar bland de sålda och räknades in i både antalet och
+-- snittpriset per gram, på en sida som lovar riktiga slutpriser och inga
+-- lockpriser. Uppmätt före rättningen: 13 rader varav 3 avbrutna, och
+-- 118 250 kr av 448 200 kr kom från affärer som aldrig blev av.
+--
+-- Samma smala väg som item_seller_verified: en security definer-funktion som
+-- svarar på precis en fråga och aldrig lämnar ut något annat ur affären. Den
+-- säger att en försäljning inte blev av, inte vem parterna var eller varför.
+-- Öppen även för utloggade, eftersom /resultat är en publik sida.
+-- ===========================================================================
+create or replace function public.cancelled_sale_items()
+returns table (item_id uuid)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select o.item_id from public.orders o where o.status = 'cancelled';
+$$;
+
+grant execute on function public.cancelled_sale_items() to anon, authenticated;

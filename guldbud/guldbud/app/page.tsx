@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { loadActiveItemsWithStats } from '@/lib/auctions'
+import { cancelledSaleItemIds, loadActiveItemsWithStats } from '@/lib/auctions'
 import Navbar from '@/components/Navbar'
 import HomeContent from '@/components/HomeContent'
 import JsonLd from '@/components/JsonLd'
@@ -56,22 +56,30 @@ export default async function HomePage() {
   const enriched = await loadActiveItemsWithStats(supabase)
 
   // Nyligen sålt för social proof på startsidan (gäst-vyn).
+  //
+  // Affärer som avbrutits filtreras bort: ett föremål står kvar som 'closed'
+  // med sitt accepterade bud även när affären gick tillbaka, så utan filtret
+  // visades en försäljning som aldrig blev av. Hämtar med marginal och kapar
+  // efter filtret, annars kan raden bli kortare än fyra.
   let sold: SoldRow[] = []
+  const cancelled = await cancelledSaleItemIds(supabase)
   const { data: soldItems } = await supabase
     .from('items')
     .select('id, title, category, weight_grams, karat, image_urls, accepted_at, accepted_bid_id')
     .eq('status', 'closed')
     .not('accepted_bid_id', 'is', null)
     .order('accepted_at', { ascending: false })
-    .limit(4)
-  if (soldItems && soldItems.length > 0) {
-    const bidIds = soldItems.map((i: any) => i.accepted_bid_id).filter(Boolean)
+    .limit(24)
+  const soldCandidates = (soldItems || []).filter((i: any) => !cancelled.has(i.id))
+  if (soldCandidates.length > 0) {
+    const bidIds = soldCandidates.map((i: any) => i.accepted_bid_id).filter(Boolean)
     const { data: soldBids } = await supabase.from('bids').select('id, amount').in('id', bidIds)
     const priceByBid: Record<string, number> = {}
     soldBids?.forEach((b: any) => (priceByBid[b.id] = b.amount))
-    sold = soldItems
+    sold = soldCandidates
       .map((i: any) => ({ ...i, price: priceByBid[i.accepted_bid_id] || 0 }))
       .filter((r: any) => r.price > 0)
+      .slice(0, 4)
   }
 
   // Skala bort reservationsnivån (min_price) ur klient-payloaden. Köparen ska

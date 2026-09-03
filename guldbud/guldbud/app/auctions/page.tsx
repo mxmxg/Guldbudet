@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { loadActiveItemsWithStats } from '@/lib/auctions'
+import { cancelledSaleItemIds, loadActiveItemsWithStats } from '@/lib/auctions'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import AuctionsBrowser from '@/components/AuctionsBrowser'
@@ -29,22 +29,29 @@ export default async function AuctionsPage() {
   const enriched = await loadActiveItemsWithStats(supabase)
 
   // Nyligen sålt: avslutade auktioner med accepterat bud, för social proof.
+  //
+  // Affärer som avbrutits filtreras bort, samma skäl som på startsidan: ett
+  // föremål står kvar som 'closed' med sitt accepterade bud även när affären
+  // gick tillbaka. Hämtar med marginal och kapar efter filtret.
   let sold: SoldRow[] = []
+  const cancelled = await cancelledSaleItemIds(supabase)
   const { data: soldItems } = await supabase
     .from('items')
     .select('id, title, category, weight_grams, karat, image_urls, accepted_at, accepted_bid_id')
     .eq('status', 'closed')
     .not('accepted_bid_id', 'is', null)
     .order('accepted_at', { ascending: false })
-    .limit(8)
-  if (soldItems && soldItems.length > 0) {
-    const bidIds = soldItems.map((i: any) => i.accepted_bid_id).filter(Boolean)
+    .limit(32)
+  const soldCandidates = (soldItems || []).filter((i: any) => !cancelled.has(i.id))
+  if (soldCandidates.length > 0) {
+    const bidIds = soldCandidates.map((i: any) => i.accepted_bid_id).filter(Boolean)
     const { data: soldBids } = await supabase.from('bids').select('id, amount').in('id', bidIds)
     const priceByBid: Record<string, number> = {}
     soldBids?.forEach((b: any) => (priceByBid[b.id] = b.amount))
-    sold = soldItems
+    sold = soldCandidates
       .map((i: any) => ({ ...i, price: priceByBid[i.accepted_bid_id] || 0 }))
       .filter((r: any) => r.price > 0)
+      .slice(0, 8)
   }
 
   // Skala bort reservationsnivån (min_price) ur klient-payloaden, bara status ut.

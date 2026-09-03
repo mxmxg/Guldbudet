@@ -37,6 +37,9 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const [sealNumber, setSealNumber] = useState('')
   const [showRefund, setShowRefund] = useState(false)
   const [refundReason, setRefundReason] = useState('')
+  const [republishing, setRepublishing] = useState(false)
+  const [republishedId, setRepublishedId] = useState<string | null>(null)
+  const [republishError, setRepublishError] = useState('')
   const [disputes, setDisputes] = useState<any[]>([])
   const [resolutionText, setResolutionText] = useState<Record<string, string>>({})
   const [amlCumulative, setAmlCumulative] = useState<number | null>(null)
@@ -299,6 +302,68 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     setSaving(false)
   }
 
+  // Återpublicera föremålet: en NY annons av samma föremål, som väntande.
+  //
+  // Skiljer sig från "Återöppna affär", som tar upp samma affär med samma
+  // handlare igen. Här är affären död och föremålet ska ut till en ny
+  // budgivning, kanske till en annan köpare.
+  //
+  // Det måste bli en ny rad i items: orders.item_id är unikt, så det gamla
+  // föremålet kan aldrig få en andra affär. Samma skäl som säljarens egen
+  // återlistning i "Mina föremål" bygger på.
+  //
+  // Uppdrag, ägarintyg och villkorsversion FÖLJER MED från den gamla annonsen
+  // i stället för att sättas till nu. Säljarens återlistning sätter dem på
+  // nytt, och det är riktigt där: säljaren publicerar själv, och publiceringen
+  // ÄR uppdraget. Här är det admin som klickar. En färsk tidsstämpel hade
+  // påstått att säljaren godkände något i detta ögonblick, vilket vore
+  // osant. Uppdraget lämnades när föremålet först publicerades och återkallas
+  // inte av att en handlare hoppade av.
+  const republishItem = async () => {
+    if (!item) return
+    setRepublishing(true)
+    setRepublishError('')
+    // enforce_listing_requirements kräver de fyra uppgifterna vid publicering.
+    // Föremål från tiden innan kolumnerna fanns saknar dem, och då är enda
+    // vägen formuläret. Fånga det här i stället för att visa ett SQL-fel.
+    const missing = !item.source_type || !item.mandate_accepted_at || !item.terms_version || !item.ownership_attested_at
+    if (missing) {
+      setRepublishing(false)
+      setRepublishError(
+        'Det här föremålet lades ut innan vi började spara ursprung och uppdrag. Säljaren behöver lägga ut det via formuläret i stället.'
+      )
+      return
+    }
+    const { data: created, error } = await supabase
+      .from('items')
+      .insert({
+        owner_id: item.owner_id,
+        title: item.title,
+        category: item.category,
+        description: item.description,
+        karat: item.karat,
+        weight_grams: item.weight_grams,
+        diamond_carat: item.diamond_carat,
+        gemstone: item.gemstone,
+        min_price: item.min_price,
+        image_urls: item.image_urls,
+        source_type: item.source_type,
+        source_note: item.source_note,
+        ownership_attested_at: item.ownership_attested_at,
+        mandate_accepted_at: item.mandate_accepted_at,
+        terms_version: item.terms_version,
+        status: 'pending',
+      })
+      .select('id')
+      .single()
+    setRepublishing(false)
+    if (error) {
+      setRepublishError('Kunde inte återpublicera föremålet: ' + error.message)
+      return
+    }
+    setRepublishedId(created?.id ?? null)
+  }
+
   const saveTracking = async () => {
     setSaving(true)
     setSaveError('')
@@ -480,6 +545,39 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 <button onClick={() => reopenOrder()} disabled={saving} className="btn-ghost-gold !py-2">
                   Återöppna affär
                 </button>
+                <p className="mt-1.5 text-xs text-espresso-400">
+                  Tar upp samma affär igen, med samma handlare.
+                </p>
+
+                {/* Den andra vägen ut ur en avbruten affär: sälj föremålet till
+                    någon annan i stället. */}
+                <div className="mt-4 pt-4 border-t border-espresso-100">
+                  {republishError && (
+                    <p className="mb-2 text-sm text-red-600">{republishError}</p>
+                  )}
+                  {republishedId ? (
+                    <p className="text-sm text-emerald-700">
+                      Föremålet ligger nu som väntande.{' '}
+                      <Link href="/admin" className="text-gold-600 hover:underline">
+                        Godkänn och sätt sluttid i adminpanelen →
+                      </Link>
+                    </p>
+                  ) : (
+                    <>
+                      <button
+                        onClick={republishItem}
+                        disabled={republishing}
+                        className="btn-ghost-gold !py-2 disabled:opacity-50"
+                      >
+                        {republishing ? '...' : 'Återpublicera föremålet'}
+                      </button>
+                      <p className="mt-1.5 text-xs text-espresso-400">
+                        Lägger ut samma föremål som en ny annons för en ny budgivning. Den hamnar som
+                        väntande och godkänns i adminpanelen. Den här affären står kvar som avbruten.
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </div>
