@@ -97,6 +97,17 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     setItem(it)
     setSeller(s)
     setDealer(d)
+    // Är föremålet redan utlagt igen? Läses ur databasen och inte bara ur
+    // klickets minne, annars visar sidan knappen på nytt efter en omladdning
+    // och samma föremål kan läggas ut två gånger.
+    const { data: again } = await supabase
+      .from('items')
+      .select('id, status')
+      .eq('relisted_from', o.item_id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    setRepublishedId(again?.id ?? null)
     const { data: disp } = await supabase
       .from('disputes')
       .select('*')
@@ -352,6 +363,10 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         ownership_attested_at: item.ownership_attested_at,
         mandate_accepted_at: item.mandate_accepted_at,
         terms_version: item.terms_version,
+        // Bandet tillbaka till den gamla annonsen. Utan det blir de två
+        // raderna två främlingar, och säljaren ser en avbruten affär i ett
+        // återvändsgränd bredvid en till synes orelaterad ny auktion.
+        relisted_from: item.id,
         status: 'pending',
       })
       .select('id')
@@ -557,9 +572,12 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                   )}
                   {republishedId ? (
                     <p className="text-sm text-emerald-700">
-                      Föremålet ligger nu som väntande.{' '}
+                      Föremålet är utlagt igen.{' '}
+                      <Link href={`/auctions/${republishedId}`} className="text-gold-600 hover:underline">
+                        Visa den nya annonsen →
+                      </Link>{' '}
                       <Link href="/admin" className="text-gold-600 hover:underline">
-                        Godkänn och sätt sluttid i adminpanelen →
+                        Adminpanelen →
                       </Link>
                     </p>
                   ) : (

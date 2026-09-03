@@ -2060,3 +2060,25 @@ as $$
 $$;
 
 grant execute on function public.cancelled_sale_items() to anon, authenticated;
+
+-- ===========================================================================
+-- Återpublicering: koppling från den nya annonsen till den gamla
+-- Skapad 2026-09-03, körd mot databasen samma dag.
+--
+-- Att lägga ut ett föremål igen skapar alltid en NY rad i items, aldrig en
+-- återanvändning av den gamla: orders.item_id är unikt, så ett föremål kan
+-- bara ha en affär. Utan en hänvisning bakåt blev de två raderna två
+-- främlingar. Säljaren såg en avbruten affär i ett rött återvändsgränd och
+-- en till synes orelaterad ny auktion, utan att något band ihop dem.
+--
+-- Kolumnen sätts av alla tre återpubliceringsvägar: adminvyn på en avbruten
+-- affär, säljarens "Lägg ut igen" i Mina föremål, och samma knapp direkt
+-- efter ett nej i budrutan.
+--
+-- on delete set null, inte cascade: raderas den gamla annonsen ska den nya
+-- överleva. Den är ett eget föremål på auktion, inte ett bihang.
+-- ===========================================================================
+alter table public.items
+  add column if not exists relisted_from uuid references public.items(id) on delete set null;
+
+create index if not exists items_relisted_from_idx on public.items (relisted_from);
