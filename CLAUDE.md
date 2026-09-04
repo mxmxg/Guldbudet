@@ -184,13 +184,11 @@ och innan du påstår något om bolagets status.
   klientmedelskontot med ordernumret som referens, och admin prickar av
   betalningen manuellt. Kortflödet ligger kvar vilande i koden. Se
   beslutsloggen.
-- Hos SEB ska avtalet **"Swish utbetalningar"** tecknas (deras exakta
-  produktnamn, verifierat mot seb.se 2026-09-01) för säljarnas utbetalningar:
-  60 kr/mån plus 2,50 kr per utbetalning, standardgräns 30 000 kr per
-  utbetalning och höjd gräns begärd eftersom affärerna nått cirka 110 000 kr.
-  I avtalet utses en certifikatansvarig (CPOC) som sedan genererar
-  certifikaten i Swish portal. **Avtalet är ännu inte tecknat.** Tekniken är
-  byggd och bevisad mot Swish testmiljö, se beslutsloggen.
+- **Swish är struket, 2026-09-04.** Uppgiften kommer från användaren:
+  "Swish utbetalningar" gick inte att koppla till klientmedelskontot, och
+  avtalet med SEB tecknas därför inte. Säljaren får betalt till bankkonto.
+  Koden ligger kvar vilande, se beslutsloggen, och där står också vad som
+  ännu inte är rättat: löftet om Swish står kvar på 13 ställen i produkten.
 
 **Leverantörer**
 
@@ -1070,10 +1068,26 @@ Så här ligger det i koden:
   över ungefär femtio affärer i månaden bör avprickningen automatiseras,
   bankkoppling eller Swish Handel är kandidaterna.
 
-**Swish-utbetalningar till säljare: byggt mot API:t 2026-09-01, vilande
-tills certifikat finns.** Bankavtalet som krävs är SEB:s produkt **"Swish
-utbetalningar"** (inte Swish Handel eller företagsappen, de tar bara emot).
-Byggt mot developer.swish.nu:s tre guider samma dag. Delarna:
+**Swish är struket 2026-09-04. Läs det här innan resten av avsnittet.**
+Uppgiften kommer från användaren: avtalet "Swish utbetalningar" gick inte att
+koppla till klientmedelskontot, och tecknas därför inte. Säljaren får betalt
+till bankkonto. Allt nedan om hur tekniken är byggd och bevisad stämmer
+fortfarande, det är bara inte något som ska tas i drift.
+
+Koden rivs inte: `lib/payouts/swishPayout.ts`, `payouts`-tabellen, båda
+rutterna och adminknappen ligger kvar utan certifikat och gör ingen skada.
+Skulle Swish komma tillbaka en annan väg, till exempel via en betaltjänst som
+betalar ut åt oss från sina egna klientmedel, är den vägen redan byggd.
+
+**Kvar att rätta: löftet om Swish står på 13 ställen i produkten.** Sju
+guidesidor, inlämningsformuläret, kundprofilens val av utbetalningssätt,
+mejlrutten och fyra notistexter i databasfunktioner. Fyra av dem skickas till
+säljaren under en verklig affär, alltså ett löfte som inte kan hållas. Inte
+ändrat än, medvetet: ändras texterna nu och Swish sedan kommer tillbaka via
+en betalpartner får sju guidesidor skrivas om två gånger. Ändra dem senast
+den dag en riktig säljare kan nå dem.
+
+Så här byggdes det, 2026-09-01, mot developer.swish.nu:s tre guider:
 
 - **`payouts`-tabellen**, körd mot databasen och i schemafilen: raden skrivs
   INNAN pengarna skickas, samma princip som identity_disclosures.
@@ -1184,6 +1198,189 @@ där var valfrågorna, inte prissidan. Men rapporten saknar sökfrågor, och 29 
 sajtens ord under samma period. Siffran kan alltså vara användaren själv, och
 det går inte att avgöra. Bygg ingenting på den. Testet är gratis: slutar
 användaren söka på sina egna ord och kurvan planar ut var det hen.
+
+**Ping Payments avböjde 2026-09-04. Leta inte vidare bland betaltjänster
+förrän volymen finns.** Ping löser exakt det GuldBud gör manuellt:
+klientmedel, splitbetalningar, utbetalningar, KYC och AML i en tjänst, under
+Finansinspektionens tillsyn. Efter tre mejl tackade deras CMO nej, efter
+avstämning med sitt compliance-team.
+
+Skälet är värt att spara, för det gäller varje reglerad betaltjänst och inte
+bara dem: **låg och oprövad volym, stora enskilda belopp, och privatpersoner
+som betalningsmottagare.** Den sista är den tunga. Ping måste göra egen
+kundkännedom på varje mottagare av pengar, och fördjupade kontroller när
+beloppen växer. Vår BankID-legitimering tar inte bort den skyldigheten, den
+ligger på oss och deras på dem. Kostnaden är fast per person och tas ut
+oavsett hur få affärer vi gör.
+
+Deras prisbild förklarar samma sak från andra hållet: minimiavgift
+**10 000 kr i månaden**, med riktmärket "ofta kring 1 procent eller 5 kr per
+betalning". Räknat mot 8 procent provision, alltså 2 400 kr på ett bud om
+30 000 kr: minimiavgiften motsvarar provisionen från fyra affärer varje
+månad, och för att landa på tio procent av intäkten krävs cirka 39 affärer i
+månaden. Vid styckpris skulle det behövas närmare 700 affärer i månaden för
+att transaktionsavgifterna ens skulle nå golvet. Golvet var alltså hela
+kostnaden, inte procentsatsen, och det var aldrig ett pris att pruta på utan
+deras täckning för compliance.
+
+**Tröskeln att återkomma: cirka 30 affärer i månaden.** Då blir 10 000 kr en
+rimlig andel, och då finns dessutom det de saknade, alltså bevisad volym.
+
+Två saker att ta med sig. Han skrev "ni har tänkt rätt kring klientmedel,
+split och utbetalningar", och det kom från någon som just tackat nej och
+alltså inte hade något att sälja. Arkitekturen behöver inte göras om. Och den
+fråga som ställdes tre gånger utan svar står kvar: **om GuldBud själv behöver
+tillstånd eller registrering hos Finansinspektionen för att ta emot andras
+pengar på eget klientmedelskonto.** Det är inte en leverantörsfråga. Den ska
+till jurist eller till Finansinspektionen, och den bör ställas före lansering.
+
+**Google företagsprofil är avskriven 2026-09-04.** Efter flera insända
+verifieringsfilmer avslogs den varje gång. Googles egna texter förklarar
+varför, och det går inte att lösa: ett företag som bara verkar online och
+inte möter kunder personligen under angivna öppettider är inte kvalificerat,
+och en postbox eller brevlådeadress är inte godkänd om den inte är bemannad
+av egen personal under öppettiderna. Box 6007 diskvalificerar alltså i sig.
+
+Filmens avslag pekade varje gång på samma punkt: "ingen vy över omgivningen".
+De två andra kraven, företagsnamn på visitkort och företagsutrustning, fick
+grönt. De prövar att man representerar företaget. Det röda prövar att platsen
+finns. Den kan inte uppfyllas utan att ljuga.
+
+Att i stället filma den registrerade adressen avråds: grundkravet på
+kundmöte gäller ändå, profilen visar gatuadressen publikt, och kontrollen av
+just det skärptes under 2026. Påföljden är avstängning, vilket är sämre än
+ingen profil.
+
+Det som ersätter den finns redan: `Organization`-strukturdatan på startsidan
+ger Google företagets identitet utan påhittad adress, med `sameAs` till
+Trustpilot. Vänta med att lägga in organisationsnummer och registrerat
+firmanamn i strukturdatan tills Verksamt är klart, annars bjuder man in till
+en maskinell jämförelse mellan GuldBud AB och Hey Consulting Nordic AB.
+
+**Instagram-publicering via Claude: undersökt och skjutet på framtiden
+2026-09-04.** Det finns ingen Instagram-koppling i Claudes connector-katalog
+som postar, bara analys- och annonsverktyg. Ska det byggas ska det byggas i
+GuldBud, mot Instagrams eget API.
+
+Förutsättningarna är kontrollerade: kontot är ett Business-konto, och
+**Instagram Login-vägen kräver ingen Facebook-sida**. Behörigheten heter
+`instagram_business_content_publish`. App review krävs bara för den som
+postar åt konton den inte äger, alltså inte för eget konto.
+
+Den svåra delen är inte att posta, det är att knappen ska fungera om ett
+halvår: en långlivad nyckel gäller 60 dagar, kan förnyas efter ett dygn och ger
+då 60 nya, men förnyas den inte inom 60 dagar går den inte att förnya alls.
+Följden är att nyckeln inte kan bo i Vercels miljövariabler, eftersom en
+miljövariabel inte går att skriva till i drift. Den behöver ligga i databasen
+med ett schemalagt förnyelsejobb som larmar när det misslyckas. `ShareKit` i
+adminvyn skapar redan bild och bildtext, så det som saknas är själva anropet.
+
+Bygg det som en knapp någon trycker på, inte som något automatiskt: ett
+automatiskt "nyss såld" hade lagt ut påhittade försäljningar på ett riktigt
+konto så länge databasen är testdata.
+
+**Avbrutna affärer får inte raderas. Beslutat 2026-09-04.** En avbruten affär
+låg kvar och skräpade i adminlistan, och frågan var om en raderingsknapp
+skulle byggas. Svaret blev nej, och skälet är att affären bär mer än sig
+själv: penningtvättsbeslutet (`order_aml`), utbetalningsraderna (`payouts`),
+loggen över utlämnad identitet (`identity_disclosures`) och båda
+meddelandetrådarna hänger i den med `on delete cascade`. Att kunna radera
+affären är att kunna radera revisionsspåret.
+
+I stället fick `/admin/orders` en tredje flik: Pågående, Slutförda, Avbrutna,
+med antal på varje. `status = 'cancelled'` var redan flaggan, den behövde
+bara en egen plats. Ingen ny kolumn, ingen ny tabell, ingenting förlorat. Det
+gav en bonus: nyckeltalet "Slutförda affärer" räknar bara `completed` och
+länkar dit, och siffran och listan visar nu samma sak.
+
+En separat samling för borttaget valdes bort av samma skäl som allt annat i
+det här projektet: två sanningar om samma affär glider isär, och barnraderna
+kan inte följa med utan att dubbleras.
+
+**Två rena testrader raderades ur databasen samma dag**, på användarens
+instruktion: Guldlampa och Kejsar, båda nekade av admin, noll bud, noll
+affärer, noll notiser. De var de enda två i hela databasen utan beroenden.
+Resten av "går inte att återpublicera" lämnades orört, eftersom urvalet visade
+sig innehålla 16 pågående auktioner med bud och 12 sålda föremål med affärer.
+Läxan: kontrollera alltid vad ett urval faktiskt innehåller innan du raderar
+efter ett villkor.
+
+**Återpublicering: vem som får, och vad som följer med. Beslutat 2026-09-04.**
+Att lägga ut ett föremål igen skapar alltid en NY rad i `items`, aldrig en
+återanvänd, eftersom `orders.item_id` är unikt och ett föremål bara kan ha en
+affär.
+
+Två knappar på en avbruten affär, och de gör olika saker: **Återöppna affär**
+tar upp samma affär med samma handlare, **Återpublicera föremålet** lägger ut
+det för en ny budgivning. Båda behövs.
+
+**Uppdrag, ägarintyg och villkorsversion följer med** från den gamla annonsen
+när admin återpublicerar, i stället för att sättas till nu. Säljarens egen
+återlistning sätter dem på nytt, och det är riktigt där, eftersom
+publiceringen ÄR uppdraget. Här är det admin som klickar, och en färsk
+tidsstämpel hade påstått att säljaren godkände något i det ögonblicket.
+
+**Säljaren får bara återpublicera efter att ha tackat nej till högsta budet.**
+Användarens regel. I koden: knappen i Mina föremål visas vid `rejected` och
+vid `closed` utan accepterat bud, alltså definitionen av ett nej. Stängt MED
+accepterat bud ger ingen knapp, vilket automatiskt täcker en avbruten affär,
+eftersom föremålet står kvar med sitt accepterade bud när affären avbryts.
+Att lägga ut det igen därifrån är ett adminbeslut.
+
+Regeln var dessutom trasig innan: auktionssidan lovade "du kan lägga ut det
+igen från Mina föremål", men knappen fanns bara för `rejected`. Efter ett nej
+och en omladdning hade säljaren ingen väg alls, eftersom knappen i
+`DeclineBid` bara renderas medan föremålet är öppet.
+
+**Kolumnen `items.relisted_from`** binder den nya annonsen till den gamla.
+Utan den blev de två raderna två främlingar: säljaren såg en avbruten affär i
+ett återvändsgränd bredvid en till synes orelaterad ny auktion med samma
+titel. `on delete set null`, inte cascade, så den nya överlever om den gamla
+raderas. Adminvyn läser den ur databasen och inte ur klickets minne, vilket
+också var en riktig bugg: knappen kom tillbaka efter varje omladdning och
+samma föremål kunde återpubliceras hur många gånger som helst.
+
+**Avbrutna affärer visades publikt som sålda. Rättat 2026-09-04.**
+Startsidan, auktionslistan och Sålda resultat listade föremål med
+`status = 'closed'` och ett accepterat bud. Föremålet står kvar så även när
+affären går tillbaka, så affärer som aldrig blev av räknades som
+försäljningar. Uppmätt före rättningen: 13 rader på Sålda resultat varav 3
+avbrutna, och 118 250 kr av 448 200 kr kom från affärer som återgick,
+inräknade i både antalet och snittpriset per gram, på en sida som lovar
+"inga lockpriser, bara riktiga slutpriser".
+
+Uppgiften bor i `orders`, som en utloggad besökare inte har någon läspolicy
+till. Därför `cancelled_sale_items()`, en `security definer`-funktion i samma
+smala form som `item_seller_verified`. Filtret ligger i `lib/auctions.ts`
+eftersom tre ytor påstår samma sak.
+
+Sålda resultat visar dessutom föremålets egen bild sedan samma dag, i stället
+för en kategoriikon. Användarens ord: en lista med samma symbol om och om
+igen bredvid riktiga slutpriser känns påhittad. Medvetet mindre än
+startsidans kort, 56 px: där är bilden lockbetet, här bekräftar den priset.
+
+**`/favicon.ico` saknades och svarade 404. Rättat 2026-09-04.** Loggan
+försvann ur Googles sökresultat och ersattes av en jordglob. Sajtens enda
+ikondeklaration var den genererade PNG:en på `/icon?<hash>`, alltså fanns
+ingen reservväg när den adressen inte fungerar.
+
+Kontrollerat innan slutsatsen drogs: `app/icon.tsx` var oförändrad sedan
+10 augusti, robots.txt blockerar ingenting som rör ikonen, sidhuvudet är helt
+utan trasiga taggar, och ikonen var redan kvadratisk 48x48. Alla vanliga
+förklaringar var alltså uteslutna utom två: Googles egen cache, och den
+saknade filen.
+
+**Det är inte en bevisad orsak.** Google hämtar favikoner i en egen process,
+skild från sidindexeringen, och den kan tappa en ikon utan att sidan
+påverkas. Luckan är stängd, och den bevisas först av att ikonen kommer
+tillbaka, vilket kan ta veckor. Det finns ingen funktion för att begära
+hämtning av just en favikon, bara indexering av startsidan.
+
+En detalj värd att känna till om den dyker upp igen: ikonlänken ligger som
+tagg 48 av 50 i sidhuvudet, alltså längst ner. Råd på nätet säger att den ska
+ligga högt upp. Det kravet går inte att belägga i Googles dokumentation, och
+med `/favicon.ico` på plats letar Google där oavsett taggordningen. Peta inte
+i Next.js metadataordning för att jaga ett obekräftat krav.
 
 Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugonio är åtgärdade:
 tre i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i
