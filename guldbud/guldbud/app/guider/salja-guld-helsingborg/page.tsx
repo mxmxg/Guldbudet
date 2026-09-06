@@ -98,7 +98,7 @@ export default function Page() {
       <P>
         När du accepterat budet skickar vi ett rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du
         lägger i föremålet och lämnar brevet hos ditt postombud. Vi kontrollerar äktheten när det kommit fram, och sedan
-        betalas pengarna ut via Swish eller bank.
+        betalas pengarna ut till ditt bankkonto.
       </P>
       <P>
         Eftersom allt sker per post spelar det ingen roll var i regionen du bor. Höganäs, Landskrona och Ängelholm
