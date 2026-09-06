@@ -554,6 +554,12 @@ banköverföring, ingenting går sönder. **`SWISH_TLS_CERT` måste innehålla h
 certifikatkedjan**, inte bara lövcertet, annars avvisar Swish handskakningen
 med alert 40. Lärt den hårda vägen mot MSS 2026-09-01.
 
+**Läget 2026-09-04:** alla sex ligger i Vercel Production med Swish
+offentliga testcertifikat och MSS-basen, inlagda för att prova adminknappen
+mot testmiljön. Knappen är borttagen sedan Swish ströks, så variablerna gör
+ingenting, men de ska raderas av användaren. Läs aldrig deras närvaro som att
+Swish-utbetalningar är i drift.
+
 Det finns ingen `.env.local.example` i repot, trots att `README.md` hänvisar
 till en.
 
