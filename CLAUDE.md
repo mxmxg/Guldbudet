@@ -187,8 +187,10 @@ och innan du påstår något om bolagets status.
 - **Swish är struket, 2026-09-04.** Uppgiften kommer från användaren:
   "Swish utbetalningar" gick inte att koppla till klientmedelskontot, och
   avtalet med SEB tecknas därför inte. Säljaren får betalt till bankkonto.
-  Koden ligger kvar vilande, se beslutsloggen, och där står också vad som
-  ännu inte är rättat: löftet om Swish står kvar på 13 ställen i produkten.
+  Koden ligger kvar vilande, se beslutsloggen. Löftet om Swish är borta ur
+  produkten sedan 2026-09-04: alla texter, loggorna, profilen, mejlrutten och
+  databasens notistexter säger bankkonto. Clearing- och kontonummer är den
+  enda utbetalningsuppgiften och krävs för att lägga ut föremål.
 
 **Leverantörer**
 
@@ -1079,13 +1081,33 @@ rutterna och adminknappen ligger kvar utan certifikat och gör ingen skada.
 Skulle Swish komma tillbaka en annan väg, till exempel via en betaltjänst som
 betalar ut åt oss från sina egna klientmedel, är den vägen redan byggd.
 
-**Kvar att rätta: löftet om Swish står på 13 ställen i produkten.** Sju
-guidesidor, inlämningsformuläret, kundprofilens val av utbetalningssätt,
-mejlrutten och fyra notistexter i databasfunktioner. Fyra av dem skickas till
-säljaren under en verklig affär, alltså ett löfte som inte kan hållas. Inte
-ändrat än, medvetet: ändras texterna nu och Swish sedan kommer tillbaka via
-en betalpartner får sju guidesidor skrivas om två gånger. Ändra dem senast
-den dag en riktig säljare kan nå dem.
+**Löftet om Swish är rättat överallt, 2026-09-04, på användarens
+instruktion.** Startsidans hero (Swish-loggan ersatt av ikonankaret
+"Bankutbetalning inom 24h"), sidfoten (loggan borta, filen raderad), FAQ, så
+fungerar det, auktionssidan, acceptvyn, tio guider, inlämningsformuläret,
+mejlrutten och villkoren (spärrad fil, ändrad på uttrycklig instruktion:
+"inom 24 timmar via banköverföring ... till det bankkonto som säljaren
+anger"). Databasens fyra notistexter i `notify_bid_accepted`,
+`notify_order_status` och `settle_ended_auctions` uppdaterades direkt i
+databasen via `pg_get_functiondef` plus `replace`, verifierat: noll
+funktioner med Swish kvar. Schemafilen speglar texterna.
+
+Kundprofilen har bara clearing- och kontonummer kvar, validerade (4 till 5
+respektive 6 till 12 siffror) och lagrade som rena siffror. `payout_method`
+sparas alltid som `bank` och `payout_swish` nollas vid sparning; kolumnen
+finns kvar som kvarleva. Listningsgrinden i `/customer/submit` kräver båda
+bankfälten. Profiltexten säger att utbetalning bara görs till konto i
+säljarens eget namn.
+
+**Öppen fråga, användarens: hur vet vi att kontot tillhör säljaren?** Swish
+matchade personnumret åt oss, bankkonto gör det inte. Rekommenderad väg är
+kontoverifiering via öppen bank-API (Tink, Finshark eller Enable Banking):
+säljaren loggar in på sin bank med BankID, leverantören lämnar kontonummer
+plus kontohavare, vi matchar mot BankID-identiteten och låser kontot som
+verifierat. Kräver leverantörsavtal, inte byggt. Interimsalternativ:
+öresöverföring med kod (bevisar tillgång, inte ägarskap). Tills något av det
+finns är kontrollen manuell: admin ser kontouppgifterna bredvid
+BankID-namnet i affärsvyn innan överföringen görs.
 
 Så här byggdes det, 2026-09-01, mot developer.swish.nu:s tre guider:
 
@@ -1109,8 +1131,10 @@ Så här byggdes det, 2026-09-01, mot developer.swish.nu:s tre guider:
   skrivs. Svarar 500 när verifieringen inte går att göra, med flit: Swish
   gör om callbacken upp till tio gånger tills vi svarar 200. En förfalskad
   callback får 200 direkt så den inte bjuds på fler försök.
-- **Adminvyn** har kortet "Utbetalning till säljaren" med radhistorik och två
-  knappar: Betala ut via Swish och Registrera gjord banköverföring.
+- **Adminvyn** har kortet "Utbetalning till säljaren" med radhistorik och
+  knappen Registrera gjord banköverföring. Swish-knappen togs bort
+  2026-09-04 tillsammans med resten av Swish-löftet; rutten svarar
+  fortfarande på method swish om den anropas, men ingen yta gör det.
 
 **Bevisat mot MSS 2026-09-01, hela kretsloppet:** en signerad utbetalning
 skickades till testmiljön med Swish testcertifikat (samma hash- och
