@@ -19,7 +19,7 @@ const faq = [
   },
   {
     q: 'Är det tryggt?',
-    a: 'Alla handlare är manuellt verifierade med organisationsnummer och legitimation. Efter accept skickas ditt föremål i ett rekommenderat, försäkrat brev, och du får betalt via Swish eller bank efter äkthetskontroll.',
+    a: 'Alla handlare är manuellt verifierade med organisationsnummer och legitimation. Efter accept skickas ditt föremål i ett rekommenderat, försäkrat brev, och du får betalt till ditt bankkonto efter äkthetskontroll.',
   },
 ]
 

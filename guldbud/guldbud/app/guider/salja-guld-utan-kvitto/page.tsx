@@ -54,8 +54,8 @@ export default function Page() {
 
       <H2>Därför är det ändå säkert</H2>
       <P>
-        GuldBud är helt <strong>kontantfritt</strong>, både betalning in och utbetalning ut sker spårbart via bank eller
-        Swish. Det gör affärerna trygga och rena utan att du behöver gräva fram gamla papper. Handlarna är dessutom
+        GuldBud är helt <strong>kontantfritt</strong>, både betalning in och utbetalning ut sker spårbart via bank.
+        Det gör affärerna trygga och rena utan att du behöver gräva fram gamla papper. Handlarna är dessutom
         manuellt verifierade, så du vet att seriösa köpare står bakom varje bud.
       </P>
 

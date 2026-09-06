@@ -82,7 +82,7 @@ export default function SubmitPage() {
       }
       const { data: prof } = await supabase
         .from('profiles')
-        .select('role, identity_verified, personal_number, address, postal_code, city, payout_swish, payout_bank_clearing, payout_bank_account')
+        .select('role, identity_verified, personal_number, address, postal_code, city, payout_bank_clearing, payout_bank_account')
         .eq('id', user.id)
         .single()
       if (prof?.role !== 'customer') {
@@ -101,7 +101,7 @@ export default function SubmitPage() {
       // skickar det förbetalda kuvertet) och utbetalningsuppgifter. Uppgifterna
       // samlas här i stället för vid registreringen, där de sänkte konverteringen.
       const addressOk = !!(prof?.address && prof?.postal_code && prof?.city)
-      const payoutOk = !!(prof?.payout_swish || (prof?.payout_bank_clearing && prof?.payout_bank_account))
+      const payoutOk = !!(prof?.payout_bank_clearing && prof?.payout_bank_account)
       const identityOk = bankidLive ? !!prof?.identity_verified : !!prof?.personal_number
       if (!addressOk || !payoutOk || !identityOk) {
         router.push('/customer/profile?from=submit')
@@ -681,7 +681,7 @@ export default function SubmitPage() {
                   'Handlare budar i konkurrens',
                   'Gratis att lägga ut',
                   'Du väljer om du säljer',
-                  'Utbetalning via Swish eller bankkonto',
+                  'Utbetalning till ditt bankkonto',
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2">
                     <span className="w-4 h-4 rounded-full bg-gold-100 text-gold-700 flex items-center justify-center shrink-0">

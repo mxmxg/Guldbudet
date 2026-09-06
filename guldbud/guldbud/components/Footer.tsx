@@ -24,8 +24,6 @@ export default function Footer() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/bankid-white.png" alt="BankID" className="h-11 w-auto" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/swish.png" alt="Swish" className="h-11 w-auto" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/postnord-symbol.svg" alt="PostNord" className="h-11 w-auto" />
             </div>
           </div>

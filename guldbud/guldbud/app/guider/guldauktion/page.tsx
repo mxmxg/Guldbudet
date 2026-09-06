@@ -23,7 +23,7 @@ const faq = [
   },
   {
     q: 'Är det tryggt att sälja guld på auktion online?',
-    a: 'Ja. Alla handlare är manuellt verifierade med organisationsnummer och legitimation. När du accepterat ditt slutpris skickar vi ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Vi äkthetskontrollerar föremålet och betalar ut spårbart via Swish eller bank, aldrig kontant i handen.',
+    a: 'Ja. Alla handlare är manuellt verifierade med organisationsnummer och legitimation. När du accepterat ditt slutpris skickar vi ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Vi äkthetskontrollerar föremålet och betalar ut spårbart till ditt bankkonto, aldrig kontant i handen.',
   },
 ]
 

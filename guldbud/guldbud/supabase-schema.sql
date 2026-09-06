@@ -41,7 +41,7 @@ alter table public.profiles add column if not exists identity_verified boolean n
 alter table public.profiles add column if not exists verified_name text;
 alter table public.profiles add column if not exists verified_ssn text;
 alter table public.profiles add column if not exists identity_verified_at timestamptz;
--- Utbetalningsuppgifter för säljare: Swish eller bankkonto.
+-- Utbetalningsuppgifter för säljare: bankkonto. payout_swish är en kvarleva från tiden med Swish som alternativ, används inte längre.
 alter table public.profiles add column if not exists payout_method text;
 alter table public.profiles add column if not exists payout_swish text;
 alter table public.profiles add column if not exists payout_bank_clearing text;
@@ -814,7 +814,7 @@ begin
       insert into public.notifications (user_id, title, message, item_id, link)
       values (r.owner_id, 'Grattis! Ditt föremål fick ' || v_top.amount || ' kr',
               'Budgivningen på "' || r.title || '" landade på ' || v_top.amount ||
-              ' kr. Godkänn budet så drar vi igång affären. Vi betalar ut omgående via Swish eller ' ||
+              ' kr. Godkänn budet så drar vi igång affären. Vi betalar ut omgående till ditt ' ||
               'bankkonto så snart vi tagit emot och verifierat föremålet. Att sälja är helt kostnadsfritt för dig.',
               r.id, '/auctions/' || r.id);
       insert into public.notifications (user_id, title, message, item_id, link)
@@ -978,7 +978,7 @@ begin
 
     insert into public.notifications (user_id, title, message, item_id, link)
     values (new.owner_id, 'Affär skapad, skicka in föremålet',
-            'Budet är accepterat och affären är din. Så fort du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat, porto och adress är redan klara. Så snart vi tagit emot och verifierat det betalar vi ut omgående via Swish eller bankkonto.',
+            'Budet är accepterat och affären är din. Så fort du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat, porto och adress är redan klara. Så snart vi tagit emot och verifierat det betalar vi ut omgående till ditt bankkonto.',
             new.id, '/orders/' || v_order);
 
     if v_dealer is not null then
@@ -1094,7 +1094,7 @@ begin
       insert into public.notifications (user_id, title, message, item_id, link)
       select new.seller_id, 'Vi har tagit emot ditt föremål',
               'Vi har tagit emot "' || v_title || '" och äkthetskontrollerar det nu. Så snart kontrollen är godkänd betalar vi ut ' ||
-              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr omgående via Swish eller bankkonto. Fyll gärna i dina utbetalningsuppgifter i din profil så går det snabbt.',
+              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr omgående till ditt bankkonto. Fyll gärna i dina utbetalningsuppgifter i din profil så går det snabbt.',
               new.item_id, '/orders/' || new.id
       where not exists (select 1 from public.notifications n
         where n.user_id = new.seller_id and n.link = '/orders/' || new.id and n.title = 'Vi har tagit emot ditt föremål');
@@ -1107,7 +1107,7 @@ begin
     elsif new.status = 'verified_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
       select new.seller_id, 'Du har fått betalt',
-              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr betalas ut omgående via Swish eller bankkonto. Tack för att du sålde via GuldBud!',
+              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr betalas ut omgående till ditt bankkonto. Tack för att du sålde via GuldBud!',
               new.item_id, '/orders/' || new.id
       where not exists (select 1 from public.notifications n
         where n.user_id = new.seller_id and n.link = '/orders/' || new.id and n.title = 'Du har fått betalt');

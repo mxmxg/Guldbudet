@@ -72,8 +72,8 @@ export default function Page() {
 
       <H2>Sälja tryggt och spårbart</H2>
       <P>
-        Oavsett skattefrågan är det en fördel att sälja spårbart. GuldBud är kontantfritt, du får betalt via Swish eller
-        bank, vilket gör det enkelt att hålla ordning. Läs mer om <A href="/how-it-works">hur det fungerar</A> eller om{' '}
+        Oavsett skattefrågan är det en fördel att sälja spårbart. GuldBud är kontantfritt, du får betalt till ditt
+        bankkonto, vilket gör det enkelt att hålla ordning. Läs mer om <A href="/how-it-works">hur det fungerar</A> eller om{' '}
         <A href="/guider/salja-arvguld">att sälja arvguld</A>.
       </P>
     </GuideShell>

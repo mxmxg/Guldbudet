@@ -321,7 +321,9 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
                 <LogoStat src="/brand/bankid-white.png" alt="BankID" label="Verifierad affär" h={42} />
                 <div className="w-px h-14 bg-espresso-700" />
-                <LogoStat src="/brand/swish.png" alt="Swish" label="Utbetalning inom 24h" h={48} />
+                <IconStat label="Bankutbetalning inom 24h">
+                  <WalletIcon size={22} className="text-gold-300" />
+                </IconStat>
                 <div className="w-px h-14 bg-espresso-700" />
                 <LogoStat src="/brand/postnord-symbol.svg" alt="PostNord" label="Försäkrad rek-frakt" h={40} />
               </div>
@@ -346,7 +348,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
           <div className="max-w-6xl mx-auto px-4 py-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-espresso-100/70">
             <Trust><LockIcon size={16} className="text-gold-400" /> BankID-verifierade handlare</Trust>
             <Trust><TruckIcon size={16} className="text-gold-400" /> Försäkrad frakt</Trust>
-            <Trust><WalletIcon size={16} className="text-gold-400" /> Utbetalning via Swish eller bank</Trust>
+            <Trust><WalletIcon size={16} className="text-gold-400" /> Bankutbetalning inom 24h</Trust>
             <Trust><CheckIcon size={16} className="text-gold-400" /> Kostnadsfritt att lägga ut</Trust>
           </div>
         </div>
@@ -412,7 +414,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {
                 Icon: CoinsIcon,
                 title: 'Acceptera och få betalt',
-                desc: 'Välj det bud du är nöjd med, posta föremålet i det kostnadsfria, försäkrade rekommenderade brev vi skickar dig och få pengarna inom 24 timmar via Swish eller bankkonto när vi verifierat det.',
+                desc: 'Välj det bud du är nöjd med, posta föremålet i det kostnadsfria, försäkrade rekommenderade brev vi skickar dig och få pengarna till ditt bankkonto inom 24 timmar när vi verifierat det.',
               },
             ].map((s, i) => (
               <Reveal key={s.title} delay={i * 120}>
@@ -577,7 +579,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {
                 icon: <BoltIcon />,
                 title: 'Utbetalning inom 24h',
-                desc: 'När du accepterat det vinnande budet betalar handlaren omgående till oss. Så snart vi tagit emot och verifierat ditt föremål betalas pengarna ut inom 24 timmar via Swish eller bankkonto.',
+                desc: 'När du accepterat det vinnande budet betalar handlaren omgående till oss. Så snart vi tagit emot och verifierat ditt föremål betalas pengarna ut till ditt bankkonto inom 24 timmar.',
               },
               {
                 icon: <HeartIcon />,
@@ -644,7 +646,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             },
             {
               title: 'Betalt efter äkthetskontroll',
-              desc: 'När vi mottagit och verifierat föremålet betalas pengarna ut inom 24 timmar via Swish eller bankkonto.',
+              desc: 'När vi mottagit och verifierat föremålet betalas pengarna ut till ditt bankkonto inom 24 timmar.',
             },
             {
               title: 'Du bestämmer',
@@ -752,7 +754,7 @@ function AuctionsSection({ items, title }: { items: EnrichedItem[]; title: strin
   )
 }
 
-// Trygghets-ankare med en officiell logotyp (BankID/Swish). Logotyphöjden
+// Trygghets-ankare med en officiell logotyp (BankID/PostNord). Logotyphöjden
 // justeras per logga så raden blir optiskt jämn.
 function LogoStat({ src, alt, label, h }: { src: string; alt: string; label: string; h: number }) {
   return (
@@ -760,6 +762,22 @@ function LogoStat({ src, alt, label, h }: { src: string; alt: string; label: str
       <div className="flex items-center" style={{ height: 48 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src} alt={alt} style={{ height: h }} className="w-auto object-contain" />
+      </div>
+      <div className="text-xs text-espresso-100/55 mt-1.5">{label}</div>
+    </div>
+  )
+}
+
+// Trygghets-ankare utan logotyp: en ikon i samma optiska storlek som
+// logotyperna bredvid. Bankutbetalningen har ingen leverantörslogga att visa
+// sedan Swish togs bort 2026-09-01.
+function IconStat({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="flex items-center" style={{ height: 48 }}>
+        <span className="w-11 h-11 rounded-xl bg-espresso-800 border border-gold-500/25 flex items-center justify-center">
+          {children}
+        </span>
       </div>
       <div className="text-xs text-espresso-100/55 mt-1.5">{label}</div>
     </div>

@@ -23,6 +23,9 @@ export type ItemStatus = 'pending' | 'approved' | 'active' | 'closed' | 'rejecte
 // enforce_listing_requirements, som avvisar allt utanför listan.
 export type SourceType = 'eget_smycke' | 'arv' | 'eget_kop' | 'annat'
 
+// 'swish' är en kvarleva: Swish som utbetalningsväg togs bort 2026-09-01
+// (SEB kan inte koppla Swish utbetalningar till klientmedelskontot). Profilen
+// sparar alltid 'bank', men gamla rader kan fortfarande bära 'swish'.
 export type PayoutMethod = 'swish' | 'bank'
 
 export interface Profile {

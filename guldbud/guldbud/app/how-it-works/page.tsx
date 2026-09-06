@@ -49,7 +49,7 @@ const STEPS = [
     step: '7',
     time: 'Omgående',
     title: 'Pengarna på ditt konto',
-    desc: 'När kontrollen är godkänd betalas beloppet ut inom 24 timmar via Swish eller bankkonto. Du får hela det vinnande budet, inga avgifter dras.',
+    desc: 'När kontrollen är godkänd betalas beloppet ut till ditt bankkonto inom 24 timmar. Du får hela det vinnande budet, inga avgifter dras.',
   },
 ]
 

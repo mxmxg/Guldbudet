@@ -719,7 +719,6 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 <h2 className="font-display text-lg text-espresso-900 mb-1">Utbetalning till säljaren</h2>
                 <p className="text-sm text-espresso-500 mb-3">
                   {formatSEK(order.amount)}
-                  {seller?.payout_swish ? ` · Swish ${seller.payout_swish}` : ''}
                   {seller?.payout_bank_clearing || seller?.payout_bank_account
                     ? ` · Bank ${seller?.payout_bank_clearing || '-'} / ${seller?.payout_bank_account || '-'}`
                     : ''}
@@ -759,15 +758,11 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 {!active &&
                   (unlocked ? (
                     <div className="flex flex-wrap items-center gap-2">
-                      <button onClick={() => doPayout('swish')} disabled={payoutBusy} className="btn-gold !py-2">
-                        {payoutBusy ? '...' : 'Betala ut via Swish'}
-                      </button>
-                      <button
-                        onClick={() => doPayout('bank_transfer')}
-                        disabled={payoutBusy}
-                        className="text-sm text-espresso-600 hover:text-espresso-900 px-3 py-2 transition"
-                      >
-                        Registrera gjord banköverföring
+                      {/* Swish-knappen togs bort 2026-09-01: SEB kan inte koppla Swish
+                          utbetalningar till klientmedelskontot. Rälsen ligger kvar
+                          vilande i /api/admin/payouts om beslutet ändras. */}
+                      <button onClick={() => doPayout('bank_transfer')} disabled={payoutBusy} className="btn-gold !py-2">
+                        {payoutBusy ? '...' : 'Registrera gjord banköverföring'}
                       </button>
                     </div>
                   ) : (
@@ -777,7 +772,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                   ))}
                 {payoutError && <p className="mt-2 text-xs text-red-600">{payoutError}</p>}
                 <p className="text-[11px] text-espresso-400 mt-3">
-                  Utbetalningen bokförs innan pengarna skickas. Banköverföringen gör du i internetbanken
+                  Utbetalningen bokförs med revisionsspår. Banköverföringen gör du från klientmedelskontot i internetbanken
                   och registrerar här efteråt.
                 </p>
               </div>
@@ -988,9 +983,7 @@ function PartyCard({ title, p }: { title: string; p: any }) {
         <p className="mt-2 pt-2 border-t border-espresso-100 text-espresso-700">
           <span className="text-xs font-semibold text-gold-600 uppercase tracking-wide">Utbetalning</span>
           <br />
-          {p.payout_method === 'swish'
-            ? `Swish: ${p.payout_swish || 'ej ifyllt'}`
-            : `Bank: ${p.payout_bank_clearing || '-'} / ${p.payout_bank_account || 'ej ifyllt'}`}
+          {`Bank: ${p.payout_bank_clearing || '-'} / ${p.payout_bank_account || 'ej ifyllt'}`}
         </p>
       )}
     </div>
