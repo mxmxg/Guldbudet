@@ -1329,6 +1329,21 @@ Men **ingen lansering, ingen riktig affär och inga pengar in på
 klientmedelskontot förrän juristen sagt sitt.** Statusartifactens punkt om
 Finansinspektionen är därmed en spärr, inte en att-göra-punkt.
 
+**Investerardecken finns, 2026-09-08.** Artifact "GuldBud investerardeck"
+(https://claude.ai/code/artifact/df5ea3a9-733b-468e-b8ce-d9162b04c1b7), femton
+bilder i sajtens mörka espresso-och-guld, Playfair och Inter, plus PDF
+renderad med headless Edge. Varje siffra har källa: livekursen från
+guldbud.com/api/gold-price (1 357 kr/g 24k den 8 september), Dagens Handel
+24 februari 2026 för "mer än fördubblat på fem år", "tiotals miljarder i
+hushållen" (branschbedömning, märkt som uppskattning) och 18 k kring 1 000
+kr/g, räkneexemplet ur lib/fees.ts, 419 commits sedan 16 juni 2026, 30 fynd
+stängda, 21 guider. Inga traktionssiffror: noll riktiga affärer, och de två
+godkända handlarna och testkontona redovisas inte som traktion. Bild 12
+säger öppet att betaltjänstbedömningen pågår. Två platshållare som bara
+användaren kan fylla: beloppet som söks (bild 15) och teamraden (bild 14).
+Regeln för decken är samma som för sajten: inga påhittade siffror, inga
+namngivna konkurrentpriser, uppskattningar märkta som uppskattningar.
+
 **Google företagsprofil är avskriven 2026-09-04.** Efter flera insända
 verifieringsfilmer avslogs den varje gång. Googles egna texter förklarar
 varför, och det går inte att lösa: ett företag som bara verkar online och
