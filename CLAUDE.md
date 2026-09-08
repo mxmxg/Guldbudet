@@ -1412,6 +1412,14 @@ ligga högt upp. Det kravet går inte att belägga i Googles dokumentation, och
 med `/favicon.ico` på plats letar Google där oavsett taggordningen. Peta inte
 i Next.js metadataordning för att jaga ett obekräftat krav.
 
+**Uppföljning 2026-09-08:** sökresultatet visade fortfarande jordgloben, men
+Googles egen favikontjänst (`google.com/s2/favicons?domain=guldbud.com`)
+levererar nu det mörka G:et i 48x48, alltså har Google hämtat ikonen på nytt
+efter rättningen. Kontrollerat samma dag: `/favicon.ico` 200 med sex lager
+(16 till 256 px), `/icon` 200 som 48x48 PNG, robots blockerar inget. Det som
+återstår är sökresultatens egen uppdatering, som släpar efter favikontjänsten.
+Rör inte ikonfilerna under tiden, varje ändring startar om väntan.
+
 Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugonio är åtgärdade:
 tre i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i
 #271, två i #273, sex i #274, en i #275 och fem i #283.** Punkt 30 är inget
