@@ -1334,6 +1334,29 @@ nu säger. Verifierat 2026-09-08 genom att generera bilden i produktion med
 en riktig alliansring och titta på resultatet. Ändras layouten: kontrollera
 att mittzonen fortfarande bär hela budskapet, det är regeln, inte måtten.
 
+Två följdläxor samma dag:
+
+- **Cachen.** `ImageResponse` sätter `Cache-Control: public, immutable,
+  max-age=31536000` per adress, så redan genererade bilder behöll den gamla
+  layouten efter rättningen. `headers`-optionen räcker inte, den läggs
+  TILL standardvärdet och gav båda i samma huvud. Rätt sätt är
+  `res.headers.set('Cache-Control', 'public, max-age=60, s-maxage=3600')`
+  på svaret. Dessutom bär `ShareKit` en `SHARE_IMAGE_VERSION` i adressen
+  (`&v=N`): räkna upp den vid varje layoutändring så allt som cachats byts
+  ut direkt. Vercel visar bara `max-age=60` utåt, `s-maxage` används i
+  CDN:et och tas bort ur svaret, det är väntat.
+- **EXIF-rotationen.** Ett kors upplagt 2026-08-06 låg på sidan i
+  delningsbilden men rätt på sajten. Originalfilen är 4000×3000 med EXIF
+  `orientation=6`: webbläsaren lyder flaggan, bildmotorn i `ImageResponse`
+  (satori/resvg) ignorerar den. Uppladdningen bakar in rotationen sedan
+  2026-08-22 (`createImageBitmap` med `imageOrientation: 'from-image'`), men
+  äldre foton ligger kvar orörda i lagringen. Därför hämtar delningsbilden
+  fotot via Supabases bildtransform (`/storage/v1/render/image/...?width=960
+  &height=760&resize=contain&quality=85`), som levererar bilden
+  färdigroterad och nedskalad (verifierat: 960×1280, orientation=1, 255 kB
+  i stället för 4,2 MB). Rita aldrig ett lagrat original direkt i en
+  serverritad bild utan att gå via transformen.
+
 **Avbrutna affärer får inte raderas. Beslutat 2026-09-04.** En avbruten affär
 låg kvar och skräpade i adminlistan, och frågan var om en raderingsknapp
 skulle byggas. Svaret blev nej, och skälet är att affären bär mer än sig
