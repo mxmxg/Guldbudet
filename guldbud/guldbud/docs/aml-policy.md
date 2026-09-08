@@ -38,7 +38,7 @@ vinnande handlaren.
 Två förhållanden sänker risken påtagligt och är centrala i vår bedömning:
 
 - **Verksamheten är helt kontantfri.** Handlaren betalar in spårbart, och
-  utbetalning till säljaren sker spårbart till bankkonto eller Swish. Inga
+  utbetalning till säljaren sker spårbart till bankkonto. Inga
   kontanter förekommer.
 - **Alla parter är identifierade.** Säljare identifieras med BankID och handlare
   godkänns manuellt utifrån organisationsnummer och företagsuppgifter.
