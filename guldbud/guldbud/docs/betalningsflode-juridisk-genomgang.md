@@ -134,13 +134,23 @@ säljaren fått betalt.
    handlarens betalning på eget klientmedelskonto, behåller vår provision
    och betalar ut resten till säljaren.
 
-2. **Är undantaget för handelsagent tillämpligt?** Säljaren lämnar ett
+2. **Är undantaget för handelsagent tillämpligt?** 1 kap. 7 § 6 lagen
+   (2010:751) om betaltjänster undantar betalningstransaktioner som "sker
+   från betalaren till betalningsmottagaren genom en handelskommissionär,
+   handelsagent eller liknande uppdragstagare, som för endast betalarens
+   eller betalningsmottagarens räkning förhandlar eller ingår avtal om köp
+   eller försäljning av varor eller tjänster". Säljaren lämnar ett
    uttryckligt förmedlingsuppdrag att sälja i säljarens namn och för
    säljarens räkning, dokumenterat per föremål. GuldBud är inte part i
-   köpeavtalet och fastställer inte priset.
+   köpeavtalet och fastställer inte priset. Samtidigt betalas provisionen
+   av handlaren, och GuldBud granskar och godkänner handlarna. Uppfyller vi
+   kravet på att agera för **endast** en parts räkning?
 
 3. **Om undantaget inte är tillämpligt, vilka vägar står öppna?**
-   a) Registrering eller tillstånd hos Finansinspektionen.
+   a) Tillstånd hos Finansinspektionen. Vi noterar att undantaget från
+      tillståndsplikt (registrerad betaltjänstleverantör) sedan 1 juli 2025
+      bara finns kvar för kontoinformationstjänster, så detta torde
+      innebära tillstånd som betalningsinstitut.
    b) Ombyggnad enligt avsnitt 8 nedan, så att vi aldrig håller säljarens
       pengar.
    c) Att verka som anmält betaltjänstombud under en licensierad

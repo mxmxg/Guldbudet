@@ -1264,6 +1264,59 @@ tillstånd eller registrering hos Finansinspektionen för att ta emot andras
 pengar på eget klientmedelskonto.** Det är inte en leverantörsfråga. Den ska
 till jurist eller till Finansinspektionen, och den bör ställas före lansering.
 
+**Ping Payments CMO återkom 2026-09-06 med en regulatorisk varning. Juridisk
+bedömning krävs före lansering, det är en spärr.** Hans bedömning, oombedd
+och från någon som just tackat nej: upplägget är "ytterst tveksamt
+regulatoriskt". Att pengarna ligger avskilt på klientmedelskontot innebär inte
+i sig att GuldBud får ta emot säljarens pengar, dra provision och betala ut
+resten utan att omfattas av betaltjänstregleringen. Räkna inte heller med
+ombudsundantaget: FI:s beskrivning av betaltjänstombud utgår från att ombudet
+agerar för en reglerad leverantör som anmält det. Sedan 1 mars 2026 finns
+straffansvar för olovlig finansiell verksamhet. Hans råd: låt en jurist med
+kompetens inom betaltjänstlagen bedöma upplägget innan ni går live.
+
+Underlaget till juristen är skrivet: `guldbud/guldbud/docs/betalningsflode-juridisk-genomgang.md`
+(PR #308, 2026-09-07). Det beskriver flödet steg för steg med räkneexempel,
+vems pengar varje post är, var guldet finns i varje steg, spärrarna som
+redan finns, fem frågor, och ett alternativ där GuldBud aldrig håller
+säljarens pengar.
+
+Tre saker kontrollerade 2026-09-08 mot primärkällor, som ändrar tyngden i
+frågorna:
+
+- **Undantaget som GuldBud lutar sig mot finns i lagen**, 1 kap. 7 § 6 lagen
+  (2010:751) om betaltjänster, ordagrant hos Riksdagen: lagen gäller inte
+  betalningstransaktioner som "sker från betalaren till betalningsmottagaren
+  genom en handelskommissionär, handelsagent eller liknande uppdragstagare,
+  som för endast betalarens eller betalningsmottagarens räkning förhandlar
+  eller ingår avtal om köp eller försäljning av varor eller tjänster".
+  Nyckelordet är **endast**: GuldBud måste agera för en part. Villkoren säger
+  säljarens namn och räkning, men handlaren betalar provisionen och GuldBud
+  granskar och godkänner handlarna, och det är precis den dubbelheten en
+  jurist ska pröva. Det är fråga 2 i underlaget, och den bör vara huvudfrågan.
+- **Den lätta vägen via FI är borta.** Sedan 1 juli 2025 finns undantaget
+  från tillståndsplikt (registrerad betaltjänstleverantör) bara kvar för
+  kontoinformationstjänster, enligt FI:s egen nyhet "Tillstånd krävs för
+  valutaväxling och betaltjänster" (2025). Fråga 3a i underlaget, registrering
+  eller tillstånd, betyder alltså i praktiken tillstånd som betalningsinstitut.
+  Det är inte en väg för ett bolag utan volym. Håller inte undantaget
+  återstår ombyggnaden i underlagets avsnitt 8: handlaren betalar säljaren
+  direkt, GuldBud fakturerar bara sin provision, och tryggheten ligger i att
+  GuldBud håller guldet i stället för pengarna.
+- **FI:s innovationscenter** (innovationscentret@fi.se) är första
+  kontaktpunkt för företag som är osäkra på regler, men ger uttryckligen inte
+  förhandsbesked om tillståndsplikt för ett enskilt upplägg och är ingen
+  konsulttjänst. Det duger för en generell fråga om hur FI ser på
+  handelsagentundantaget för marknadsplatser, inte som ersättning för
+  juristen.
+
+Konsekvens för bygget: koden behöver inte göras om nu. Ping skrev tidigare
+att arkitekturen är rätt tänkt, och avsnitt 8-flödet är en ändring i vem
+fakturan ställs till och vem som bekräftar betalningen, inte en ny plattform.
+Men **ingen lansering, ingen riktig affär och inga pengar in på
+klientmedelskontot förrän juristen sagt sitt.** Statusartifactens punkt om
+Finansinspektionen är därmed en spärr, inte en att-göra-punkt.
+
 **Google företagsprofil är avskriven 2026-09-04.** Efter flera insända
 verifieringsfilmer avslogs den varje gång. Googles egna texter förklarar
 varför, och det går inte att lösa: ett företag som bara verkar online och
