@@ -154,7 +154,7 @@ export default function ShareKit({
         {caption}
       </pre>
       <p className="text-[11px] text-espresso-400 mt-2">
-        Tryck Dela för att skicka bilden direkt, eller Ladda ner och posta i Instagram. Säljarens namn visas aldrig.
+        Tryck Dela för att skicka bilden direkt, eller Ladda ner och posta i Instagram. Välj Original i Instagrams beskärning så behålls hela bilden; blir det kvadrat ändå ligger foto, pris och titel i den säkra mitten. Säljarens namn visas aldrig.
       </p>
     </div>
   )
