@@ -37,7 +37,7 @@ export function GET(req: Request) {
   const meta = (searchParams.get('meta') || '').slice(0, 80)
   const img = searchParams.get('img') || ''
 
-  return new ImageResponse(
+  const res = new ImageResponse(
     (
       <div
         style={{
@@ -140,14 +140,14 @@ export function GET(req: Request) {
         </div>
       </div>
     ),
-    {
-      width: 1080,
-      height: 1350,
-      // ImageResponse sätter annars en ettårig immutable-cache per adress,
-      // vilket gjorde att redan genererade bilder behöll den gamla layouten
-      // efter rättningen 2026-09-08. En timme i CDN räcker: bilden är billig
-      // att rita om, och en layoutändring ska nå alla affärer samma dag.
-      headers: { 'Cache-Control': 'public, max-age=60, s-maxage=3600' },
-    }
+    { width: 1080, height: 1350 }
   )
+  // ImageResponse sätter en ettårig immutable-cache per adress, vilket gjorde
+  // att redan genererade bilder behöll den gamla layouten efter rättningen
+  // 2026-09-08. headers-optionen räcker inte: den läggs TILL standardvärdet
+  // och gav "max-age=31536000, public, max-age=60" i samma huvud. Därför
+  // set() på svaret, som ersätter. En timme i CDN räcker: bilden är billig
+  // att rita om, och en layoutändring ska nå alla affärer samma dag.
+  res.headers.set('Cache-Control', 'public, max-age=60, s-maxage=3600')
+  return res
 }
