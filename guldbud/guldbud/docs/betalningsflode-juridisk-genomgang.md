@@ -18,7 +18,8 @@ guldföremål till en av oss granskad guldhandlare genom budgivning.
 
 - Säljaren är alltid privatperson.
 - Köparen är alltid ett företag som vi godkänt manuellt mot
-  organisationsnummer innan det får lägga bud.
+  organisationsnummer innan det får lägga bud, och vars företrädare har
+  legitimerat sig med BankID.
 - Föremålet är begagnat guld, typiskt smycken.
 
 ## 2. Vår roll enligt villkoren
@@ -115,7 +116,17 @@ säljaren fått betalt.
 - Handlaren måste vara godkänd av GuldBud och legitimerad med BankID innan
   hen får buda. Kontrollen ligger som ett villkor i databasen, inte bara i
   gränssnittet.
-- Säljaren måste vara legitimerad innan ett föremål får publiceras.
+- Säljaren måste vara legitimerad med BankID innan ett föremål får
+  publiceras. BankID-legitimeringen är byggd (Idura och Criipto) och ligger
+  i testläge tills lanseringsdagen, eftersom tjänsten kostar från
+  aktivering. Fram till dess accepterar systemet även ett manuellt angivet
+  personnummer; den grenen tas bort när BankID aktiveras.
+- Säljarens bankkonto verifieras via öppen bank-API (kontoverifiering där
+  säljaren loggar in hos sin bank med BankID), så att kontohavaren stämmer
+  med den BankID-legitimerade säljaren innan någon utbetalning kan ske.
+  Pengarna kan därmed bara hamna hos den registrerade användaren. Detta
+  införs före lansering; leverantör (Finshark, Tink eller motsvarande) är
+  ännu inte vald.
 - Penningtvättsgranskning sker automatiskt när affären skapas, med trösklar
   om 25 000 kr per affär och 50 000 kr sammanlagt per person under rullande
   tolv månader. Ärenden över tröskeln måste granskas manuellt.
@@ -173,7 +184,9 @@ Vi tar aldrig emot säljarens pengar. Flödet blir:
    3 199 kr i exemplet, till bolagets driftkonto. Det är GuldBuds egen
    intäkt för GuldBuds egen tjänst.
 3. Säljaren skickar in föremålet. GuldBud tar emot och äkthetskontrollerar.
-4. **Handlaren betalar 30 000 kr direkt till säljarens bankkonto.**
+4. **Handlaren betalar 30 000 kr direkt till säljarens bankkonto**, det
+   konto som verifierats enligt avsnitt 6 och som vi förmedlar till
+   handlaren.
 5. Säljaren bekräftar i tjänsten att betalningen kommit.
 6. Först då skickar GuldBud föremålet vidare till handlaren.
 

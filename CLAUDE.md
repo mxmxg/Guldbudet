@@ -1310,6 +1310,18 @@ frågorna:
   handelsagentundantaget för marknadsplatser, inte som ersättning för
   juristen.
 
+Underlaget kompletterades 2026-09-08 på användarens rättelse med två saker:
+handlarnas företrädare legitimeras också med BankID (avsnitt 1), och
+**säljarens bankkonto ska verifieras via öppen bank-API före lansering**, så
+utbetalning bara kan gå till den registrerade användaren (avsnitt 6, samt
+avsnitt 8 där handlaren betalar till det verifierade kontot). Det är därmed
+ett beslut, inte längre en öppen fråga; leverantör (Finshark, Tink eller
+motsvarande) är inte vald. Underlaget säger också ärligt att BankID ligger i
+testläge tills lanseringsdagen och att databasen tills dess även godtar ett
+angivet personnummer. Penningtvättsrutinen fick samma två tillägg. Båda
+dokumenten skickades som PDF (renderade med headless Edge ur HTML i
+scratchpad, eftersom varken Node eller Python finns lokalt).
+
 Konsekvens för bygget: koden behöver inte göras om nu. Ping skrev tidigare
 att arkitekturen är rätt tänkt, och avsnitt 8-flödet är en ändring i vem
 fakturan ställs till och vem som bekräftar betalningen, inte en ny plattform.

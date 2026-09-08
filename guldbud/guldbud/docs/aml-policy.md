@@ -40,8 +40,13 @@ Två förhållanden sänker risken påtagligt och är centrala i vår bedömning
 - **Verksamheten är helt kontantfri.** Handlaren betalar in spårbart, och
   utbetalning till säljaren sker spårbart till bankkonto. Inga
   kontanter förekommer.
-- **Alla parter är identifierade.** Säljare identifieras med BankID och handlare
-  godkänns manuellt utifrån organisationsnummer och företagsuppgifter.
+- **Alla parter är identifierade.** Säljare identifieras med BankID. Handlare
+  godkänns manuellt utifrån organisationsnummer och företagsuppgifter, och
+  handlarens företrädare legitimeras med BankID.
+- **Utbetalning sker bara till ett verifierat konto.** Säljarens bankkonto
+  verifieras via öppen bank-API med BankID-inloggning hos säljarens bank, så
+  att kontohavaren stämmer med den legitimerade säljaren. Införs före
+  lansering.
 
 ## 3. Roller och ansvar
 
@@ -73,8 +78,13 @@ och ses över minst en gång per år.
   inlämning bekräftar säljaren hur föremålet förvärvats (arv/gåva, eget köp,
   eget/familjens smycke, annat) och intygar att föremålet är egen egendom och
   lagligt införskaffat.
-- **Handlare** godkänns manuellt utifrån organisationsnummer och företagsuppgifter
-  och godkänner handlarvillkoren, som bland annat kräver att handlaren följer
+- **Säljarens bankkonto** verifieras via öppen bank-API (kontoverifiering med
+  BankID-inloggning hos säljarens bank) innan utbetalning, så att kontohavaren
+  är samma person som legitimerats. Införs före lansering; leverantör är ännu
+  inte vald.
+- **Handlare** godkänns manuellt utifrån organisationsnummer och företagsuppgifter,
+  handlarens företrädare legitimeras med BankID, och handlaren godkänner
+  handlarvillkoren, som bland annat kräver att handlaren följer
   liggtid och regelverk för handel med begagnade varor och ädelmetaller.
 - Uppgifterna hålls aktuella och kontrolleras vid behov.
 
