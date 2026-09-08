@@ -9,7 +9,33 @@ function groupSek(n: number): string {
   return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' kr'
 }
 
-const HASHTAGS = '#guld #säljaguld #guldpris #arvsilver #guldsmycken #guldbud #sverige'
+// Hashtaggarna riktar sig till den som har guld i en låda och funderar på
+// att sälja: det är den personen inlägget ska nå, inte guldintresserade i
+// allmänhet. Därför en liten kärna med säljintention och sammanhang, plus
+// taggar per kategori och karat så varje inlägg hamnar i sin egen nisch.
+// Breda taggar som #guld och #sverige är bortvalda: de konkurrerar med
+// miljontals inlägg och når ingen som letar efter just det här. #arvsilver
+// var fel metall. Håll listan kort, kring tio, hellre träffsäker än lång.
+const CORE_TAGS = ['#guldbud', '#guldauktion', '#säljaguld', '#guldpris', '#arvsmycken', '#dödsbo']
+
+const CATEGORY_TAGS: Record<string, string[]> = {
+  Ringar: ['#guldring', '#ringar'],
+  Halsband: ['#guldkedja', '#halsband'],
+  Örhängen: ['#guldörhängen', '#örhängen'],
+  Hängen: ['#guldhänge', '#hängsmycke'],
+  Armband: ['#guldarmband', '#armband'],
+  Broscher: ['#brosch', '#antikasmycken'],
+  Mynt: ['#guldmynt', '#numismatik'],
+}
+
+function buildHashtags(category?: string | null, karat?: string | null): string {
+  const tags = [...CORE_TAGS]
+  const cat = category ? CATEGORY_TAGS[category] : undefined
+  tags.push(...(cat ?? ['#guldsmycken']))
+  const k = karat?.match(/(\d{1,2})\s*k/i)?.[1]
+  if (k) tags.push(`#${k}kguld`)
+  return tags.join(' ')
+}
 
 // Version 2: kvadratsäker layout med contain-foto, 2026-09-08.
 // Version 3: fotot via Supabases bildtransform så EXIF-rotationen följer med.
@@ -20,11 +46,15 @@ export default function ShareKit({
   title,
   meta,
   image,
+  category,
+  karat,
 }: {
   amount: number
   title: string
   meta: string
   image?: string | null
+  category?: string | null
+  karat?: string | null
 }) {
   const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState<'' | 'share' | 'download'>('')
@@ -44,7 +74,7 @@ export default function ShareKit({
     `✨ Nyss såld på GuldBud: ${title}${meta ? ` (${meta})` : ''}. Slutpris ${groupSek(amount)}.\n\n` +
     `Auktoriserade guldköpare budar mot varandra, så priset drivs upp. ` +
     `Lägg ut ditt guld helt gratis på guldbud.com 🔗\n\n` +
-    HASHTAGS
+    buildHashtags(category, karat)
 
   const fetchBlob = async () => {
     const res = await fetch(imageUrl)

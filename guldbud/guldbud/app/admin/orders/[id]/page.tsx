@@ -466,6 +466,8 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 .filter(Boolean)
                 .join(' · ')}
               image={item?.image_urls?.[0]}
+              category={item?.category}
+              karat={item?.karat}
             />
             <OrderStepper status={status} />
 
