@@ -29,13 +29,30 @@ function groupSek(n: number): string {
 const SAFE_TOP = 135
 const SAFE_BOTTOM = 135
 const PHOTO_HEIGHT = 760
+const PHOTO_WIDTH = 960
+
+// Fotot hämtas via Supabases bildtransform, inte som originalfil. Skälet är
+// EXIF: mobilfoton lagras ofta liggande med en rotationsflagga som webbläsare
+// lyder men bildmotorn här (satori/resvg) ignorerar, så ett stående foto
+// hamnade på sidan i delningsbilden (korset 2026-09-08, orientation=6).
+// Uppladdningen bakar in rotationen sedan 2026-08-22, men äldre foton ligger
+// kvar orörda i lagringen. Transformen levererar bilden färdigroterad och
+// nedskalad (255 kB i stället för 4,2 MB för samma foto), vilket även gör
+// genereringen snabbare. Andra adresser lämnas orörda.
+function photoUrl(src: string): string {
+  const marker = '/storage/v1/object/public/'
+  if (!src.includes('.supabase.co') || !src.includes(marker)) return src
+  const rendered = src.replace(marker, '/storage/v1/render/image/public/')
+  const sep = rendered.includes('?') ? '&' : '?'
+  return `${rendered}${sep}width=${PHOTO_WIDTH}&height=${PHOTO_HEIGHT}&resize=contain&quality=85`
+}
 
 export function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const amount = Number(searchParams.get('amount') || 0)
   const title = (searchParams.get('title') || 'Guldföremål').slice(0, 60)
   const meta = (searchParams.get('meta') || '').slice(0, 80)
-  const img = searchParams.get('img') || ''
+  const img = photoUrl(searchParams.get('img') || '')
 
   const res = new ImageResponse(
     (
@@ -79,7 +96,7 @@ export function GET(req: Request) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={img}
-              width={960}
+              width={PHOTO_WIDTH}
               height={PHOTO_HEIGHT}
               style={{ objectFit: 'contain', borderRadius: 28 }}
               alt=""

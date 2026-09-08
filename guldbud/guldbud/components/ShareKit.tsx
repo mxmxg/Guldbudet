@@ -12,7 +12,8 @@ function groupSek(n: number): string {
 const HASHTAGS = '#guld #säljaguld #guldpris #arvsilver #guldsmycken #guldbud #sverige'
 
 // Version 2: kvadratsäker layout med contain-foto, 2026-09-08.
-const SHARE_IMAGE_VERSION = 2
+// Version 3: fotot via Supabases bildtransform så EXIF-rotationen följer med.
+const SHARE_IMAGE_VERSION = 3
 
 export default function ShareKit({
   amount,
