@@ -49,19 +49,19 @@ export function GET(req: Request) {
           backgroundImage: 'radial-gradient(circle at 50% 35%, #241a0a 0%, #0f0a04 65%)',
         }}
       >
-        {/* Toppremsa, utanför den kvadratsäkra zonen: bara varumärke. */}
+        {/* Toppremsa, utanför den kvadratsäkra zonen: får klippas bort. */}
         <div
           style={{
             height: SAFE_TOP,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 24,
+            fontSize: 22,
             letterSpacing: 9,
-            color: '#8B6914',
+            color: '#6b5a33',
           }}
         >
-          SÅLD PÅ GULDBUD
+          SVERIGES GULDAUKTION
         </div>
 
         {/* Fotot, helt synligt med contain, inom den säkra zonen. */}
@@ -98,7 +98,11 @@ export function GET(req: Request) {
             padding: '0 80px',
           }}
         >
-          <div style={{ fontSize: 28, color: '#c9a84c', display: 'flex' }}>slutpris</div>
+          {/* Varumärket ligger här, inom den kvadratsäkra zonen, så en
+              beskuren bild aldrig saknar avsändare. */}
+          <div style={{ fontSize: 26, letterSpacing: 7, color: '#c9a84c', display: 'flex' }}>
+            SÅLD PÅ GULDBUD · SLUTPRIS
+          </div>
           <div
             style={{
               fontSize: 128,
@@ -132,9 +136,6 @@ export function GET(req: Request) {
         >
           <div style={{ fontSize: 36, fontWeight: 600, letterSpacing: -0.5, color: '#D4AF37', display: 'flex' }}>
             guldbud.com
-          </div>
-          <div style={{ fontSize: 20, letterSpacing: 5, color: '#6b5a33', marginTop: 6, display: 'flex' }}>
-            SVERIGES GULDAUKTION
           </div>
         </div>
       </div>
