@@ -1309,6 +1309,31 @@ Bygg det som en knapp någon trycker på, inte som något automatiskt: ett
 automatiskt "nyss såld" hade lagt ut påhittade försäljningar på ett riktigt
 konto så länge databasen är testdata.
 
+**Delningsbilden är byggd för två beskärningar. Rättat 2026-09-08.**
+`/api/share-image` (1080×1350, 4:5) klipptes fel när användaren postade på
+Instagram, och orsaken var två beskärningar i lager:
+
+1. **Vår egen.** Fotot låg med `objectFit: cover` i ett brett band på
+   1080×660, så ringar och kedjor klipptes i topp och botten redan innan
+   Instagram fått bilden. Nu visas fotot med `contain` i en 760 px hög yta.
+   Hela föremålet syns, och den mörka bakgrunden gör eventuella kanter till
+   en del av designen. Använd aldrig cover på produktfoton här.
+2. **Instagrams.** Webbuppladdningen beskär till kvadrat (1:1) som standard
+   och tar då bort 135 px upptill och nedtill ur en 4:5-bild. Layouten har
+   därför en **kvadratsäker mittzon, 135 till 1215 px**, där allt som bär
+   budskapet ligger: fotot, raden "SÅLD PÅ GULDBUD · SLUTPRIS", priset,
+   titeln och specifikationen. Toppremsan ("SVERIGES GULDAUKTION") och
+   bottenremsan ("guldbud.com") får klippas bort utan att bilden tappar
+   avsändare. Varumärket flyttades in i mittzonen av precis det skälet: i
+   första versionen låg det bara i remsorna, och en kvadratbeskuren bild
+   stod helt utan GuldBud.
+
+Formatet är kvar på 4:5 eftersom Instagram-flödet visar det obeskuret om
+man väljer **Original** i beskärningssteget, vilket hjälptexten i `ShareKit`
+nu säger. Verifierat 2026-09-08 genom att generera bilden i produktion med
+en riktig alliansring och titta på resultatet. Ändras layouten: kontrollera
+att mittzonen fortfarande bär hela budskapet, det är regeln, inte måtten.
+
 **Avbrutna affärer får inte raderas. Beslutat 2026-09-04.** En avbruten affär
 låg kvar och skräpade i adminlistan, och frågan var om en raderingsknapp
 skulle byggas. Svaret blev nej, och skälet är att affären bär mer än sig
