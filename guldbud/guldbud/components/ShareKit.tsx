@@ -11,6 +11,9 @@ function groupSek(n: number): string {
 
 const HASHTAGS = '#guld #säljaguld #guldpris #arvsilver #guldsmycken #guldbud #sverige'
 
+// Version 2: kvadratsäker layout med contain-foto, 2026-09-08.
+const SHARE_IMAGE_VERSION = 2
+
 export default function ShareKit({
   amount,
   title,
@@ -26,10 +29,13 @@ export default function ShareKit({
   const [busy, setBusy] = useState<'' | 'share' | 'download'>('')
   const [err, setErr] = useState('')
 
+  // Layoutversionen ligger i adressen så att bilder som redan cachats med en
+  // äldre layout byts ut direkt. Räkna upp den vid varje layoutändring.
   const imageUrl =
     `/api/share-image?amount=${amount}&title=${encodeURIComponent(title || 'Guldföremål')}` +
     `&meta=${encodeURIComponent(meta)}` +
-    (image ? `&img=${encodeURIComponent(image)}` : '')
+    (image ? `&img=${encodeURIComponent(image)}` : '') +
+    `&v=${SHARE_IMAGE_VERSION}`
 
   const fileName = `guldbud-${groupSek(amount).replace(/\D/g, '')}.png`
 

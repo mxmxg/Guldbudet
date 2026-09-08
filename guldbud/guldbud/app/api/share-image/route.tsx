@@ -140,6 +140,14 @@ export function GET(req: Request) {
         </div>
       </div>
     ),
-    { width: 1080, height: 1350 }
+    {
+      width: 1080,
+      height: 1350,
+      // ImageResponse sätter annars en ettårig immutable-cache per adress,
+      // vilket gjorde att redan genererade bilder behöll den gamla layouten
+      // efter rättningen 2026-09-08. En timme i CDN räcker: bilden är billig
+      // att rita om, och en layoutändring ska nå alla affärer samma dag.
+      headers: { 'Cache-Control': 'public, max-age=60, s-maxage=3600' },
+    }
   )
 }
