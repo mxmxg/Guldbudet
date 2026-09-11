@@ -19,10 +19,11 @@ De här hänger ihop. Ingen riktig affär får släppas igenom förrän alla är
       "GuldBud AB" avslogs som för generiskt och har aldrig funnits. Villkoren,
       förmedlingsuppdraget, fakturadokumenten och penningtvättsrutinen är
       omskrivna för det registrerade namnet.
-- [ ] **Adressändring till postboxen.** Inskickad, inte genomförd. Registret
-      visar fortfarande c/o DIX Revision AB, Kvarnvingevägen 2, 177 41 Järfälla.
-      Dokumenten i repot använder redan boxadressen, Box 6007, 102 31 Stockholm,
-      eftersom det är dit guldet skickas. Ingen kodändring väntar på det här.
+- [x] **Adressändringen är genomförd.** Registrerad adress är **Box 6007,
+      102 31 Stockholm** sedan 2026-09-11, ärende 479572/2026, samma adress som
+      dokumenten redan använde. Den gamla, c/o DIX Revision AB,
+      Kvarnvingevägen 2 i Järfälla, gäller inte längre. Ingen kodändring
+      behövdes.
 - [ ] **Klientmedelskonto hos SEB.** Inte skapat. Handlarens betalning ska tas
       emot avskilt från bolagets egna medel, och Stripes utbetalningar ska gå
       dit, inte till rörelsekontot. Görs det inte hamnar de första riktiga

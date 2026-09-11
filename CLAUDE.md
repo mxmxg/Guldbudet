@@ -89,7 +89,8 @@ aldrig gissa.
 
 - Namn: **Guldbud Sverige AB**, registrerat 2026-09-11
 - Org.nr: **559291-4781**
-- Registrerad adress: **c/o DIX Revision AB, Kvarnvingevägen 2, 177 41 Järfälla**
+- Registrerad adress: **Box 6007, 102 31 Stockholm**, registrerad 2026-09-11
+- Registrerad e-postadress: info@guldbud.com
 - Säte: Stockholms län, Stockholms kommun
 - Momsregistrerat, SE559291478101, bekräftat mot Skatteverket
 - SNI-koden är ändrad till **47.910, Förmedling**. Klart.
@@ -111,16 +112,16 @@ för generiskt. Dokumenten skrevs en period för det namnet och är omskrivna
 Skriv aldrig tillbaka det. Rätta inte heller ett dokument till Hey Consulting
 Nordic AB, det gjordes en gång i PR #281 och revertades i PR #282.
 
-**Vad som fortfarande ligger i handläggning**
+**Adressbytet är genomfört 2026-09-11**, samma dag som namnbytet men i ett eget
+ärende, 479572/2026. Bolagsverket registrerade postadress och e-postadress.
+Registret visar nu **Box 6007, 102 31 Stockholm**, alltså samma adress som
+dokumenten redan använde. Källa: registreringsbeviset användaren skickade samma
+dag, läst i den här miljön.
 
-- Byte av adress till postboxen. Inskickat, väntar. Registret visar fortfarande
-  Järfälla. **Påstå aldrig att adressbytet är klart.**
-- Adressen och nycklarna är mottagna från PostNord, men registerändringen är
-  inte genomförd.
+Den gamla registrerade adressen var c/o DIX Revision AB, Kvarnvingevägen 2,
+177 41 Järfälla. Den ska inte tillbaka någonstans.
 
-Adressbytet blockerar ingenting i koden. Dokumenten använder redan boxadressen,
-eftersom det är dit guldet skickas, och den uppgiften ändras inte av vad
-registret säger.
+**Ingenting ligger kvar i handläggning hos Bolagsverket.**
 
 **Inget riktigt föremål släpps igenom före lansering. Sluta ta upp det.**
 
@@ -134,14 +135,19 @@ vid lansering, i presens, utan reservationer. Påpeka alltså **inte** varje
 gång att BankID ligger i testläge eller att kontot inte är öppnat. Det är
 redan hanterat av att ingenting släpps igenom.
 
-**Adresser, tre olika och lätta att blanda ihop**
+**Adressen, numera bara en**
 
-- **Registrerad adress:** c/o DIX Revision AB, Kvarnvingevägen 2, 177 41
-  Järfälla. Den som gäller mot Bolagsverket, Skatteverket och vid verifieringar
-  hos leverantörer, tills adressbytet till boxen gått igenom.
-- **Postbox:** Box 6007, 102 31 Stockholm. Dit guldet skickas. Ligger i
-  sidfoten och i fraktinstruktionerna.
+- **Box 6007, 102 31 Stockholm.** Registrerad adress hos Bolagsverket sedan
+  2026-09-11, och samtidigt dit guldet skickas. Den gäller alltså både mot
+  myndigheter och leverantörer och i sidfoten, fakturorna och
+  fraktinstruktionerna.
 - E-post: info@guldbud.com
+
+Fram till 2026-09-11 var det två olika adresser, och den fällan finns kvar i
+äldre handlingar: gatuadressen i Järfälla mot boxens postnummer i Stockholm.
+Kombinationen "Kvarnvingevägen 2, 102 31 Stockholm" har aldrig existerat och
+stoppar registerkontroller. Numera finns bara boxen, så frågan uppstår inte
+längre för nya handlingar.
 
 **Domäner**
 
@@ -151,10 +157,6 @@ redan hanterat av att ingenting släpps igenom.
   inte. De är inte uppsatta någonstans. Använd dem aldrig som avsändare eller
   varumärke, och nämn dem inte i handlingar till revisor, bank eller
   leverantörer. Det skulle bara göra identiteten otydlig i en granskning.
-
-Blanda aldrig gatuadressen med boxens postnummer. Kombinationen
-"Kvarnvingevägen 2, 102 31 Stockholm" existerar inte och stoppar
-registerkontroller.
 
 **Läs de egna dokumenten, inte bara koden**
 
@@ -1363,10 +1365,12 @@ ingen profil.
 
 Det som ersätter den finns redan: `Organization`-strukturdatan på startsidan
 ger Google företagets identitet utan påhittad adress, med `sameAs` till
-Trustpilot. Hindret att lägga in organisationsnummer och registrerat firmanamn
-i strukturdatan är borta sedan 2026-09-11: registret säger Guldbud Sverige AB,
-samma namn som dokumenten, så en maskinell jämförelse stämmer numera. Adressen
-ska däremot fortfarande utelämnas tills adressbytet gått igenom.
+Trustpilot. Hindret mot att lägga in organisationsnummer, registrerat firmanamn
+och adress i strukturdatan är borta sedan 2026-09-11: registret säger Guldbud
+Sverige AB med Box 6007, 102 31 Stockholm, alltså exakt det dokumenten säger,
+så en maskinell jämförelse stämmer. Det är fortfarande inte gjort i koden.
+Observera att detta gäller strukturdata, inte Google företagsprofil: en box
+diskvalificerar fortfarande där, av skälen ovan.
 
 **Instagram-publicering via Claude: undersökt och skjutet på framtiden
 2026-09-04.** Det finns ingen Instagram-koppling i Claudes connector-katalog
