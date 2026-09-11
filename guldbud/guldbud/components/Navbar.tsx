@@ -230,7 +230,14 @@ export default function Navbar() {
                   såg bara ordmärket och fick ingen ledtråd om vad sajten är, och
                   Google renderar sidan i mobil vy, där text som är display:none
                   räknas svagare. "Guldauktion" är sajtens starkaste sökord. */}
-              <span className="block text-[9px] text-gold-500/70 tracking-[2px] sm:tracking-[3px] uppercase border-l border-espresso-700 pl-2.5 sm:pl-3 leading-tight">
+              {/* 11 px och full gold-500, inte 9 px vid 70 procent. Uppmätt på
+                  renderade pixlar i skärmdump: den gamla varianten gav 2,85:1
+                  mot espresso-900, alltså under kravet 4,5:1, och nominellt
+                  bara 3,86:1. Vid 9 px med 3 px teckenmellanrum blir glyferna
+                  dessutom så tunna att nästan ingen pixel når fram till den
+                  angivna färgen, så opaciteten sänkte kontrasten en andra gång.
+                  Sänk inte tillbaka något av de två värdena. */}
+              <span className="block text-[11px] text-gold-500 tracking-[2px] sm:tracking-[3px] uppercase border-l border-espresso-700 pl-2.5 sm:pl-3 leading-tight">
                 Sveriges
                 <br />
                 Guldauktion
