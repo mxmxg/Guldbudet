@@ -42,13 +42,20 @@ export default function LegalPage({
                 {i + 1}. {s.heading}
               </h2>
               <div className="flex flex-col gap-3">
+                {/* max-w-[60ch] begränsar radlängden, inte spalten. Utan den
+                    blev raderna cirka 105 tecken, eftersom max-w-3xl minus
+                    padding ger 736 px och brödtexten är 14 px. Riktmärket är
+                    65 till 75 tecken: längre rader gör att ögat tappar platsen
+                    på vägen tillbaka till nästa radbörjan. Det märks mest här,
+                    eftersom villkoren är den längsta löptexten på sajten.
+                    Rubrikerna lämnas i full spaltbredd, de är korta ändå. */}
                 {s.body.map((p, j) => (
-                  <p key={j} className="text-sm text-espresso-600 leading-relaxed">
+                  <p key={j} className="text-sm text-espresso-600 leading-relaxed max-w-[60ch]">
                     {p}
                   </p>
                 ))}
                 {s.bullets && (
-                  <ul className="list-disc pl-5 flex flex-col gap-1.5">
+                  <ul className="list-disc pl-5 flex flex-col gap-1.5 max-w-[60ch]">
                     {s.bullets.map((b, j) => (
                       <li key={j} className="text-sm text-espresso-600 leading-relaxed">
                         {b}
