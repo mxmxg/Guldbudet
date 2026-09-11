@@ -63,7 +63,7 @@ export default function Footer() {
         <div className="divider-gold my-10" />
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-espresso-100/45">
-          <p>© {new Date().getFullYear()} GuldBud AB. Alla rättigheter förbehållna.</p>
+          <p>© {new Date().getFullYear()} {GULDBUD.name}. Alla rättigheter förbehållna.</p>
           <div className="flex gap-4">
             <Link href="/terms" className="hover:text-gold-300 transition inline-block py-2 px-1">
               Villkor

@@ -87,48 +87,47 @@ aldrig gissa.
 
 **Bolaget, så som det ser ut i registret idag**
 
-- Namn: **Hey Consulting Nordic AB**
+- Namn: **Guldbud Sverige AB**, registrerat 2026-09-11
 - Org.nr: **559291-4781**
-- Registrerad adress: **Kvarnvingevägen 2, 177 41 Järfälla**
+- Registrerad adress: **c/o DIX Revision AB, Kvarnvingevägen 2, 177 41 Järfälla**
+- Säte: Stockholms län, Stockholms kommun
 - Momsregistrerat, SE559291478101, bekräftat mot Skatteverket
 - SNI-koden är ändrad till **47.910, Förmedling**. Klart.
+- Bolagsordningens verksamhetsföremål är **auktionsverksamhet**, senast ändrad
+  2026-08-22. Räkenskapsår 1 oktober till 30 september, ingen revisor.
 
-**Vad som ligger i handläggning**
+**Namnbytet är genomfört 2026-09-11.** Bolagsverket registrerade
+**Guldbud Sverige AB** i ärende 477319/2026. Källa: registreringsbeviset
+användaren skickade samma dag, läst i den här miljön. Bolaget hette
+dessförinnan Hey Consulting Nordic AB.
 
-- Namnbyte till **GuldBud AB**. Inskickat, väntar på Verksamt.
-- Byte av adress till postboxen. Inskickat, väntar på Verksamt.
+**Stavningen är "Guldbud Sverige AB", med litet u och d**, eftersom det är så
+registret skriver det. GuldBud med stort B är varumärket och används i löptext
+och i gränssnittet, aldrig som bolagsnamn i en handling.
+
+**"GuldBud AB" finns inte och har aldrig funnits.** Bolagsverket avslog det som
+för generiskt. Dokumenten skrevs en period för det namnet och är omskrivna
+2026-09-11 på användarens uttryckliga instruktion, spärrade filer inkluderade.
+Skriv aldrig tillbaka det. Rätta inte heller ett dokument till Hey Consulting
+Nordic AB, det gjordes en gång i PR #281 och revertades i PR #282.
+
+**Vad som fortfarande ligger i handläggning**
+
+- Byte av adress till postboxen. Inskickat, väntar. Registret visar fortfarande
+  Järfälla. **Påstå aldrig att adressbytet är klart.**
 - Adressen och nycklarna är mottagna från PostNord, men registerändringen är
   inte genomförd.
 
-Fram till att båda gått igenom heter bolaget Hey Consulting Nordic AB med
-adress i Järfälla. **Påstå aldrig att namnbytet eller adressbytet är klart.**
-
-**Beslutat: det ska stå GuldBud AB överallt.**
-
-Användaren har bestämt det, och ändrade beslutet 2026-08-31 efter att tidigare
-ha delat upp det. Alla dokument i repot skrivs för **GuldBud AB, org.nr
-559291-4781**. Det gäller villkoren, förmedlingsuppdraget, fakturadokumenten och
-penningtvättsrutinen, alltså även handlingar som går till utomstående.
-Användaren bekräftade 2026-08-31 att det gäller **även uppgifter till
-leverantörer**, inte bara dokumenten i repot.
-
-**Rätta alltså aldrig ett dokument till Hey Consulting Nordic AB.** Det gjordes
-en gång i PR #281 och revertades i PR #282.
-
-Det som fortfarande gäller om registret: bolaget heter Hey Consulting Nordic AB
-där tills Verksamt är klart, och det får aldrig påstås att namnbytet är
-genomfört. Skillnaden är att den uppgiften hör hemma i ett svar till användaren,
-inte i dokumenten.
-
-Följden: namnbytet ligger på kritiska linjen. Tjänsten kan inte öppnas för
-transaktioner förrän Verksamt är klart, eftersom dokumenten redan förutsätter
-det namnet.
+Adressbytet blockerar ingenting i koden. Dokumenten använder redan boxadressen,
+eftersom det är dit guldet skickas, och den uppgiften ändras inte av vad
+registret säger.
 
 **Inget riktigt föremål släpps igenom före lansering. Sluta ta upp det.**
 
 Varje föremål skapas som `pending` och måste godkännas manuellt av admin
 innan det blir aktivt. Användaren är admin och släpper igenom ingenting
-förrän BankID är skarpt, klientmedelskontot är öppnat och namnbytet är klart.
+förrän BankID är skarpt. Klientmedelskontot är öppnat 2026-09-01 och namnbytet
+är genomfört 2026-09-11, så BankID är det enda av de tre som återstår.
 
 Det betyder att villkor och dokument får beskriva tjänsten som den fungerar
 vid lansering, i presens, utan reservationer. Påpeka alltså **inte** varje
@@ -137,8 +136,9 @@ redan hanterat av att ingenting släpps igenom.
 
 **Adresser, tre olika och lätta att blanda ihop**
 
-- **Registrerad adress:** Kvarnvingevägen 2, 177 41 Järfälla. Den som gäller
-  mot Bolagsverket, Skatteverket och vid verifieringar hos leverantörer.
+- **Registrerad adress:** c/o DIX Revision AB, Kvarnvingevägen 2, 177 41
+  Järfälla. Den som gäller mot Bolagsverket, Skatteverket och vid verifieringar
+  hos leverantörer, tills adressbytet till boxen gått igenom.
 - **Postbox:** Box 6007, 102 31 Stockholm. Dit guldet skickas. Ligger i
   sidfoten och i fraktinstruktionerna.
 - E-post: info@guldbud.com
@@ -1363,9 +1363,10 @@ ingen profil.
 
 Det som ersätter den finns redan: `Organization`-strukturdatan på startsidan
 ger Google företagets identitet utan påhittad adress, med `sameAs` till
-Trustpilot. Vänta med att lägga in organisationsnummer och registrerat
-firmanamn i strukturdatan tills Verksamt är klart, annars bjuder man in till
-en maskinell jämförelse mellan GuldBud AB och Hey Consulting Nordic AB.
+Trustpilot. Hindret att lägga in organisationsnummer och registrerat firmanamn
+i strukturdatan är borta sedan 2026-09-11: registret säger Guldbud Sverige AB,
+samma namn som dokumenten, så en maskinell jämförelse stämmer numera. Adressen
+ska däremot fortfarande utelämnas tills adressbytet gått igenom.
 
 **Instagram-publicering via Claude: undersökt och skjutet på framtiden
 2026-09-04.** Det finns ingen Instagram-koppling i Claudes connector-katalog
@@ -1678,5 +1679,6 @@ sätter en notistitel. Filen är rättad, men de gamla strängarna ligger kvar i
 databasen tills funktionerna körs om. Det är rent kosmetiskt: mejlrutten filtrerar
 på delsträngarna "överbjuden" och "snart slut", som båda finns kvar.
 30. ~~`docs/aml-policy.md` använder GuldBud AB.~~ **Inte längre ett fynd.**
-    Ändrades i PR #281 och revertades i PR #282: användaren har bestämt att
-    det ska stå GuldBud AB överallt. Se affärsfakta.
+    Ändrades i PR #281 och revertades i PR #282. Sedan 2026-09-11 är frågan
+    slutgiltigt ur världen: bolaget heter Guldbud Sverige AB i registret, och
+    varje dokument är omskrivet för det namnet. Se affärsfakta.

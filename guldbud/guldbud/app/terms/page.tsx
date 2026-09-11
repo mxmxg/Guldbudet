@@ -17,7 +17,7 @@ export default function TermsPage() {
         {
           heading: 'Om GuldBud och tjänsten',
           body: [
-            'Tjänsten tillhandahålls av GuldBud AB, org.nr 559291-4781, nedan kallat GuldBud. GuldBud driver en digital marknadsplats där privatpersoner kan lägga ut guld, ädelmetaller och smycken för budgivning och där verifierade handlare kan lämna bud.',
+            'Tjänsten tillhandahålls av Guldbud Sverige AB, org.nr 559291-4781, nedan kallat GuldBud. GuldBud driver en digital marknadsplats där privatpersoner kan lägga ut guld, ädelmetaller och smycken för budgivning och där verifierade handlare kan lämna bud.',
             'När du som privatperson använder GuldBud för att sälja ett föremål ger du GuldBud i uppdrag att förmedla försäljningen i ditt namn och för din räkning till en godkänd handlare. GuldBud är därmed förmedlare och plattform och är inte köpare eller säljare av föremålet.',
             'Det köp som uppstår genom tjänsten ingås mellan dig som säljare och den vinnande handlaren. GuldBud är inte part i köpeavtalet mellan säljaren och handlaren.',
             'GuldBud tillhandahåller egna tjänster i form av förmedling, kontroll av föremål, administrering av betalningsavveckling och transport enligt dessa villkor.',

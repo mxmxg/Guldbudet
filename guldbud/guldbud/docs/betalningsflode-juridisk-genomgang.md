@@ -1,13 +1,13 @@
 # GuldBud, pengaflöde och förmedlingsuppdrag
 
 Underlag för juridisk bedömning enligt lagen om betaltjänster.
-Upprättat 2026-09-07. Tjänsten är byggd men inte i drift. Noll riktiga
-affärer har genomförts.
+Upprättat 2026-09-07, uppdaterat 2026-09-11. Tjänsten är byggd men inte i
+drift. Noll riktiga affärer har genomförts.
 
-**Bolag:** org.nr 559291-4781. Verksamheten drivs under namnet GuldBud,
-guldbud.com. Namnbyte till GuldBud AB är inskickat till Verksamt men ännu
-inte genomfört, så bolaget heter fortfarande Hey Consulting Nordic AB i
-registret.
+**Bolag:** Guldbud Sverige AB, org.nr 559291-4781. Namnet registrerades hos
+Bolagsverket 2026-09-11. Bolaget hette dessförinnan Hey Consulting Nordic AB.
+Verksamheten drivs under varumärket GuldBud, guldbud.com. Bolagsordningens
+verksamhetsföremål är auktionsverksamhet.
 
 ---
 

@@ -14,10 +14,15 @@ det stå kvar tills någon faktiskt tittat.
 
 De här hänger ihop. Ingen riktig affär får släppas igenom förrän alla är klara.
 
-- [ ] **Namnbyte till GuldBud AB.** Inskickat till Verksamt, inte genomfört.
-      Villkoren, förmedlingsuppdraget och fakturadokumenten är redan skrivna för
-      det namnet, så tjänsten kan inte öppnas för transaktioner innan bytet gått
-      igenom.
+- [x] **Namnbytet är genomfört.** Bolaget heter **Guldbud Sverige AB** sedan
+      2026-09-11, registrerat av Bolagsverket i ärende 477319/2026. Namnet
+      "GuldBud AB" avslogs som för generiskt och har aldrig funnits. Villkoren,
+      förmedlingsuppdraget, fakturadokumenten och penningtvättsrutinen är
+      omskrivna för det registrerade namnet.
+- [ ] **Adressändring till postboxen.** Inskickad, inte genomförd. Registret
+      visar fortfarande c/o DIX Revision AB, Kvarnvingevägen 2, 177 41 Järfälla.
+      Dokumenten i repot använder redan boxadressen, Box 6007, 102 31 Stockholm,
+      eftersom det är dit guldet skickas. Ingen kodändring väntar på det här.
 - [ ] **Klientmedelskonto hos SEB.** Inte skapat. Handlarens betalning ska tas
       emot avskilt från bolagets egna medel, och Stripes utbetalningar ska gå
       dit, inte till rörelsekontot. Görs det inte hamnar de första riktiga

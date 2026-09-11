@@ -6,17 +6,21 @@
 // syns i handlingar som går till handlare, revisor och Skatteverket. Ett
 // felaktigt org.nummer i ett underlag är inte ett skönhetsfel.
 //
-// Namnet är GuldBud AB, beslutat av användaren: alla dokument skrivs för det
-// namnet, även de som går till utomstående. Att bolaget står som Hey Consulting
-// Nordic AB i registret tills namnbytet gått igenom hör hemma i ett svar till
-// användaren, inte i en handling. Se CLAUDE.md under affärsfakta.
+// Namnet är Guldbud Sverige AB, registrerat hos Bolagsverket 2026-09-11,
+// ärende 477319/2026. Stavningen följer registret, alltså litet u och d.
+// GuldBud med stort B är varumärket och används i löptext, aldrig som
+// bolagsnamn i en handling.
+//
+// Tidigare hette bolaget Hey Consulting Nordic AB. Dokumenten skrevs en period
+// för "GuldBud AB", ett namn Bolagsverket avslog som för generiskt. Det namnet
+// har alltså aldrig funnits och ska inte tillbaka någonstans.
 //
 // Adressen är postboxen, inte den registrerade gatuadressen. Det är dit guldet
 // skickas och den som ska stå i handlingar. Blanda dem aldrig: kombinationen
 // gatuadress plus boxens postnummer existerar inte.
 
 export const GULDBUD = {
-  name: 'GuldBud AB',
+  name: 'Guldbud Sverige AB',
   org: '559291-4781',
   // Momsnumret visas BARA på GuldBuds egen faktura, aldrig på handlarens
   // inköpsunderlag. Varuledet mellan privatperson och handlare är momsfritt,

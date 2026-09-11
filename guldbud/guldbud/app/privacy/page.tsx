@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         {
           heading: 'Personuppgiftsansvarig',
           body: [
-            'GuldBud AB är personuppgiftsansvarig för behandlingen av dina personuppgifter på denna webbplats. Du når oss på info@guldbud.com.',
+            'Guldbud Sverige AB är personuppgiftsansvarig för behandlingen av dina personuppgifter på denna webbplats. Du når oss på info@guldbud.com.',
           ],
         },
         {
