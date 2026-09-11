@@ -13,9 +13,12 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
           <div className="col-span-2 md:col-span-1">
             <Logo className="text-gold-300 text-[24px] leading-none" />
-            {/* Samma undertext som i navigeringen. Här på en rad, eftersom
-                ordmärket står ensamt och har hela spaltbredden. */}
-            <p className="mt-2 text-[9px] text-gold-500/70 tracking-[3px] uppercase">Sveriges guldauktion</p>
+            {/* Samma undertext som i navigeringen, och samma storlek och färg
+                som där. Låg tidigare på text-[9px] med gold-500/70, vilket gav
+                2,72:1 mot espresso-900 uppmätt på renderade pixlar. Kravet är
+                4,5:1. Håll de två raderna i synk: står det olika värden här och
+                i Navbar.tsx är det den ena som är fel, inte ett designval. */}
+            <p className="mt-2 text-[11px] text-gold-500 tracking-[3px] uppercase">Sveriges guldauktion</p>
             <p className="text-sm mt-3 max-w-xs leading-relaxed text-espresso-100/60">
               Vi får guldköparna att konkurrera om ditt guld. Auktoriserade handlare budar mot
               varandra i realtid, och du säljer till bäst betalt, tryggt och kostnadsfritt.
