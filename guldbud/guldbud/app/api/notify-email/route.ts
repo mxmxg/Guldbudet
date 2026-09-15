@@ -370,11 +370,12 @@ export async function POST(req: NextRequest) {
     if (!to) {
       sms = 'skipped: no mobile'
     } else {
-      const text =
-        `GuldBud: "${item?.title || 'föremålet'}" är kontrollerat. ` +
-        `Betala köpeskillingen till säljaren inom 24 timmar. Betaluppgifterna finns i affären: ${SITE}${link}`
+      // Exakt 160 tecken med en 63 tecken lång affärslänk, alltså en sms-del.
+      // Utan titel med flit: varje titel gjorde sms:et till två delar, och
+      // länken öppnar ändå rätt affär. Räkna om längden vid varje ändring.
+      const text = `GuldBud: föremålet är kontrollerat. Betala säljaren inom 24 timmar, uppgifterna finns i affären: ${SITE}${link}`
       const r = await sendSms(to, text)
-      sms = r.ok ? 'sent' : `failed: ${r.detail}`
+      sms = r.ok ? `sent (${r.parts ?? '?'} del, kostnad ${r.cost ?? '?'})` : `failed: ${r.detail}`
       if (!r.ok) console.error('sms failed', { notification: record.id, detail: r.detail })
     }
   }
