@@ -43,7 +43,7 @@ const STEPS = [
     step: '6',
     time: 'Efter mottagning',
     title: 'Vi verifierar äktheten',
-    desc: 'När vi mottagit föremålet granskar våra experter äktheten, vikten och karathalten. Stämmer allt betalar vi ut inom 24 timmar.',
+    desc: 'När vi mottagit föremålet granskar våra experter äktheten, vikten och karathalten. Stämmer allt får du betalt inom 24 timmar.',
   },
   {
     step: '7',

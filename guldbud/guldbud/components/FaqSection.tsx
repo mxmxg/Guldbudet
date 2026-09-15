@@ -12,7 +12,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Hur och när får jag betalt?',
-    a: 'När du godkänt ett bud skickar vi dig ett kostnadsfritt, försäkrat brev. Så snart vi tagit emot och äkthetskontrollerat föremålet betalar vi ut hela budet till ditt bankkonto inom 24 timmar.',
+    a: 'När du godkänt ett bud skickar vi dig ett kostnadsfritt, försäkrat brev. Så snart vi tagit emot och äkthetskontrollerat föremålet får du hela budet till ditt bankkonto inom 24 timmar.',
   },
   {
     q: 'Är det säkert att skicka in mitt guld?',

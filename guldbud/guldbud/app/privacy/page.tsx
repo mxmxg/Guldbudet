@@ -29,7 +29,7 @@ export default function PrivacyPage() {
         {
           heading: 'Varför vi behandlar uppgifterna',
           body: [
-            'Vi behandlar uppgifterna för att kunna tillhandahålla tjänsten: verifiera användare, genomföra auktioner, förmedla kontakt mellan säljare och handlare samt hantera utbetalningar.',
+            'Vi behandlar uppgifterna för att kunna tillhandahålla tjänsten: verifiera användare, genomföra auktioner, förmedla kontakt mellan säljare och handlare samt förmedla betalningen mellan handlare och säljare.',
             'Den lagliga grunden är fullgörande av avtal, samt i vissa fall vårt berättigade intresse av att driva en säker marknadsplats och att uppfylla rättsliga förpliktelser.',
           ],
         },

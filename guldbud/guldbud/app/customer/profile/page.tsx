@@ -173,7 +173,7 @@ export default function CustomerProfilePage() {
               <div className="rounded-2xl border border-gold-300 bg-gold-50 p-5 ring-1 ring-gold-200">
                 <p className="font-medium text-espresso-900 mb-1">Ett steg kvar innan du lägger ut</p>
                 <p className="text-sm text-espresso-600">
-                  Fyll i din adress och hur du vill få betalt, så kan du lägga ut ditt föremål. Vi skickar ett förbetalt, försäkrat kuvert till adressen, och betalar ut till kontot när affären är klar. Uppgifterna delas aldrig publikt.
+                  Fyll i din adress och hur du vill få betalt, så kan du lägga ut ditt föremål. Vi skickar ett förbetalt, försäkrat kuvert till adressen, och handlaren betalar till kontot när föremålet är verifierat. Uppgifterna delas aldrig publikt.
                 </p>
               </div>
             )}
@@ -218,7 +218,7 @@ export default function CustomerProfilePage() {
               <div className="mt-6 pt-6 border-t border-espresso-100">
                 <h3 className="font-display text-lg text-espresso-900 mb-1">Bankkonto för betalning</h3>
                 <p className="text-xs text-espresso-400 mb-4">
-                  Hit betalar vi ut när ditt föremål sålts och betalningen kommit in. Krävs för att lägga ut föremål.
+                  Hit betalar handlaren när ditt föremål sålts och verifierats, inom 24 timmar. Krävs för att lägga ut föremål.
                   Uppgifterna visas aldrig publikt.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-4">

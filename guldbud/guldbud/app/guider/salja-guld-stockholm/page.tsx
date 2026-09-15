@@ -19,7 +19,7 @@ const faq = [
   },
   {
     q: 'Hur snabbt får jag betalt?',
-    a: 'När vi tagit emot och äkthetskontrollerat föremålet betalar vi ut till ditt bankkonto inom 24 timmar. Att sälja är kostnadsfritt för dig.',
+    a: 'När vi tagit emot och äkthetskontrollerat föremålet får du betalt till ditt bankkonto inom 24 timmar. Att sälja är kostnadsfritt för dig.',
   },
 ]
 

@@ -39,11 +39,11 @@ export default function DealerTermsPage() {
         {
           heading: 'Betalning efter vunnet bud',
           body: [
-            'När säljaren har accepterat det vinnande budet ska du betala det totala belopp som anges i affärsvyn senast inom ett (1) dygn.',
-            'Betalningen består av den köpeskilling som enligt köpeavtalet tillkommer säljaren, GuldBuds köparprovision, samt eventuell fraktavgift och moms på GuldBuds egna tjänster enligt aktuell prisuppgift.',
-            'Säljarens köpeskilling och GuldBuds ersättning är ekonomiskt separata delar av betalningen. GuldBud administrerar betalningen och verkställer utbetalningen av säljarens köpeskilling för säljarens räkning.',
-            'Föremålet skickas vidare till handlaren först när full betalning har registrerats. GuldBud säljer inte föremålet på kredit.',
-            'Vid utebliven betalning skickas en påminnelse. Om betalning därefter inte sker har GuldBud rätt att häva den förmedlade affären enligt dessa villkor och vidta de åtgärder som anges i punkt 9.',
+            'Betalningen sker i två delar. GuldBuds faktura för köparprovision, frakt och moms betalar du till GuldBuds bankkonto senast inom ett (1) dygn från att säljaren accepterat det vinnande budet. Köpeskillingen betalar du direkt till säljarens bankkonto enligt nedan.',
+            'Det totala beloppet består av den köpeskilling som enligt köpeavtalet tillkommer säljaren, GuldBuds köparprovision, samt fraktavgift och moms på GuldBuds egna tjänster enligt aktuell prisuppgift.',
+            'Köpeskillingen och GuldBuds ersättning är två separata betalningar till två olika mottagare. GuldBud tar inte emot köpeskillingen. När GuldBud meddelat att föremålet är mottaget och godkänt vid kontroll ska du betala köpeskillingen direkt till det bankkonto som visas i affärsvyn, senast inom 24 timmar från beskedet, märkt med affärens referens. Säljaren bekräftar mottagandet i tjänsten.',
+            'Föremålet skickas vidare till handlaren först när säljaren bekräftat att köpeskillingen mottagits och GuldBuds faktura är betald. GuldBud lämnar inte ut föremålet på kredit.',
+            'Vid utebliven betalning av någon av delarna skickas en påminnelse. Om betalning därefter inte sker har GuldBud rätt att häva den förmedlade affären enligt dessa villkor och vidta de åtgärder som anges i punkt 9.',
           ],
         },
         {
@@ -57,8 +57,8 @@ export default function DealerTermsPage() {
         {
           heading: 'Processen efter vunnet bud',
           body: [
-            'När budgivningen är avslutad och säljaren accepterat det vinnande budet betalar handlaren den totala summan som anges i affärsvyn. Säljaren skickar därefter föremålet till GuldBud enligt de fraktinstruktioner som anges i tjänsten.',
-            'GuldBud tar emot föremålet och genomför kontroll enligt punkt 6. Om kontrollen godkänns administrerar GuldBud utbetalningen av säljarens köpeskilling och skickar därefter föremålet vidare till handlaren, som bekräftar mottagandet i tjänsten.',
+            'När budgivningen är avslutad och säljaren accepterat det vinnande budet betalar handlaren GuldBuds faktura enligt avsnittet om betalning efter vunnet bud. Säljaren skickar föremålet till GuldBud enligt de fraktinstruktioner som anges i tjänsten.',
+            'GuldBud tar emot föremålet och genomför kontroll enligt punkt 6. Om kontrollen godkänns får handlaren säljarens kontouppgifter i affärsvyn och betalar köpeskillingen direkt till säljaren inom 24 timmar. När säljaren bekräftat betalningen skickar GuldBud föremålet vidare till handlaren, som bekräftar mottagandet i tjänsten.',
             'GuldBud agerar som förmedlare och administrerar processen mellan säljaren och handlaren. Handlare är anonyma gentemot andra handlare och gentemot säljaren under budgivningen.',
           ],
         },
@@ -68,7 +68,7 @@ export default function DealerTermsPage() {
             'GuldBud kontrollerar föremålets äkthet och sammansättning innan det skickas vidare till handlaren. Kontrollen kan innefatta kemiska och tekniska tester, inklusive probering, samt kontroll av vikt, karathalt och andra egenskaper som har betydelse för affären. Vid behov kan ett föremål monteras isär för att separat väga ädelmetall eller undersöka ingående stenar.',
             'Om kontrollen visar att föremålet inte motsvarar de uppgifter som låg till grund för det accepterade budet, eller om föremålet bedöms vara oäkta, kan den förmedlade affären inte fullföljas enligt de accepterade villkoren. GuldBud underrättar då både handlaren och säljaren om vad kontrollen visat.',
             'Handlaren kan därefter lämna ett nytt bud utifrån föremålets faktiska egenskaper, och säljaren kan acceptera eller avböja det. GuldBud fastställer inte priset, utan förmedlar parternas nya överenskommelse på samma sätt som den ursprungliga. Ingen av parterna är skyldig att träffa en ny överenskommelse.',
-            'Kommer ingen ny överenskommelse till stånd återbetalas eller krediteras handlarens betalning enligt GuldBuds rutiner, och någon utbetalning av köpeskillingen till säljaren genomförs inte.',
+            'Kommer ingen ny överenskommelse till stånd ska handlaren inte betala köpeskillingen, och GuldBuds faktura krediteras enligt GuldBuds rutiner.',
             'GuldBud blir genom kontrollen inte ägare till föremålet och blir inte part i köpeavtalet mellan säljaren och handlaren.',
           ],
         },

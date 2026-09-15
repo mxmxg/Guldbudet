@@ -579,7 +579,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {
                 icon: <BoltIcon />,
                 title: 'Utbetalning inom 24h',
-                desc: 'När du accepterat det vinnande budet betalar handlaren omgående till oss. Så snart vi tagit emot och verifierat ditt föremål betalas pengarna ut till ditt bankkonto inom 24 timmar.',
+                desc: 'Så snart vi tagit emot och verifierat ditt föremål betalas hela beloppet till ditt bankkonto inom 24 timmar, direkt från handlaren. Du bekräftar i affären när pengarna kommit.',
               },
               {
                 icon: <HeartIcon />,

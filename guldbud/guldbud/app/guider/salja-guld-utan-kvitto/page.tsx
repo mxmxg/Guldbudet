@@ -15,11 +15,11 @@ const faq = [
   },
   {
     q: 'Vad behöver jag i stället för kvitto?',
-    a: 'Inget särskilt dokument. Vid inlämning gör du en kort ägarbekräftelse (till exempel arv, present eller eget köp) och intygar att föremålet är ditt. Vid utbetalning verifierar vi din identitet, det är spårbart och tryggt, men du behöver inget gammalt kvitto.',
+    a: 'Inget särskilt dokument. Vid inlämning gör du en kort ägarbekräftelse (till exempel arv, present eller eget köp) och intygar att föremålet är ditt. Din identitet är verifierad med BankID, det är spårbart och tryggt, men du behöver inget gammalt kvitto.',
   },
   {
     q: 'Varför frågar ni om ursprunget om det inte krävs kvitto?',
-    a: 'För allas trygghet handlar vi bara med guld med känt ursprung, och som kontantfri plattform (spårbar in- och utbetalning) håller vi affärerna rena. Det är en enkel bekräftelse, inte ett förhör, och den behövs inte styrkas med kvitto.',
+    a: 'För allas trygghet handlar vi bara med guld med känt ursprung, och som kontantfri plattform (spårbar betalning via bank) håller vi affärerna rena. Det är en enkel bekräftelse, inte ett förhör, och den behövs inte styrkas med kvitto.',
   },
 ]
 
@@ -49,12 +49,12 @@ export default function Page() {
       <UL>
         <li>Ingen originalkvittens krävs.</li>
         <li>En kort ägarbekräftelse vid inlämning räcker.</li>
-        <li>Identiteten verifieras vid utbetalning, spårbart och tryggt.</li>
+        <li>Identiteten verifieras med BankID, spårbart och tryggt.</li>
       </UL>
 
       <H2>Därför är det ändå säkert</H2>
       <P>
-        GuldBud är helt <strong>kontantfritt</strong>, både betalning in och utbetalning ut sker spårbart via bank.
+        GuldBud är helt <strong>kontantfritt</strong>, all betalning sker spårbart via bank.
         Det gör affärerna trygga och rena utan att du behöver gräva fram gamla papper. Handlarna är dessutom
         manuellt verifierade, så du vet att seriösa köpare står bakom varje bud.
       </P>
