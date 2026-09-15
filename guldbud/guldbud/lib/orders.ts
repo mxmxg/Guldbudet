@@ -1,5 +1,11 @@
 // Shared definitions for the post-auction settlement flow ("affär").
-// GuldBud acts as the hub: seller -> GuldBud (check + pay) -> dealer.
+//
+// Väg C sedan 2026-09-15: GuldBud håller föremålet, aldrig pengarna.
+// Säljaren skickar in, GuldBud kontrollerar, handlaren betalar
+// köpeskillingen direkt till säljarens bankkonto och GuldBuds faktura
+// (provision plus frakt) till rörelsekontot. Säljaren bekräftar att
+// pengarna kommit (orders.dealer_paid_at), och först då skickas föremålet
+// vidare. GuldBuds egen faktura spåras i orders.fee_paid_at.
 
 export type OrderStatus =
   | 'accepted'
@@ -23,10 +29,11 @@ export const ORDER_STEPS: OrderStep[] = [
   { key: 'accepted', label: 'Accepterad', desc: 'Budet är accepterat och affären skapad.' },
   { key: 'shipped_by_seller', label: 'Inskickad', desc: 'Säljaren har skickat föremålet till GuldBud.' },
   { key: 'received', label: 'Mottagen & kontrollerad', desc: 'GuldBud har tagit emot och äkthetskontrollerat föremålet.' },
-  // Betalningen spåras separat via orders.dealer_paid_at (handlaren betalar vid
-  // vinst), inte som ett linjärt steg. 'dealer_paid' finns kvar som status-värde
-  // för ev. gamla rader men ingår inte längre i stegen admin går igenom.
-  { key: 'verified_paid', label: 'Utbetald till säljare', desc: 'Säljaren har fått betalt.' },
+  // Betalningen spåras separat via orders.dealer_paid_at (säljarens
+  // bekräftelse på att köpeskillingen kommit), inte som ett linjärt steg.
+  // 'dealer_paid' finns kvar som status-värde för ev. gamla rader men ingår
+  // inte längre i stegen admin går igenom.
+  { key: 'verified_paid', label: 'Säljaren har fått betalt', desc: 'Handlaren har betalat säljaren direkt, och säljaren har bekräftat.' },
   { key: 'shipped_to_dealer', label: 'Vidareskickad', desc: 'Föremålet har skickats till den vinnande handlaren.' },
   { key: 'completed', label: 'Slutförd', desc: 'Handlaren har mottagit föremålet. Affären är avslutad.' },
 ]
@@ -36,7 +43,7 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
   shipped_by_seller: 'Inskickad',
   received: 'Mottagen & kontrollerad',
   dealer_paid: 'Betald av handlare',
-  verified_paid: 'Utbetald till säljare',
+  verified_paid: 'Säljaren har fått betalt',
   shipped_to_dealer: 'Vidareskickad',
   completed: 'Slutförd',
   cancelled: 'Avbruten',

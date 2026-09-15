@@ -15,7 +15,7 @@ import Link from 'next/link'
 import { ORDER_STATUS_LABEL, OrderStatus, SELLER_DOC_STATES } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
 import { feesAt } from '@/lib/fees'
-import { GULDBUD, CLIENT_FUNDS_ACCOUNT } from '@/lib/company'
+import { GULDBUD, OPERATING_ACCOUNT } from '@/lib/company'
 
 export default function OrderPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -65,7 +65,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
     const { data: o } = await supabase
       .from('orders')
       .select(
-        'id, item_id, seller_id, dealer_id, amount, status, dealer_paid_at, payment_due_at, tracking_dealer, seal_number, cancel_reason, order_no, created_at, refunded_at, refund_reason'
+        'id, item_id, seller_id, dealer_id, amount, status, dealer_paid_at, fee_paid_at, payment_due_at, tracking_dealer, seal_number, cancel_reason, order_no, created_at, refunded_at, refund_reason'
       )
       .eq('id', params.id)
       .single()
@@ -194,7 +194,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
 
         {/* Party-specific info */}
         {party === 'seller' ? (
-          <SellerPanel order={order} relisted={relisted} />
+          <SellerPanel order={order} relisted={relisted} meId={me} onChanged={init} />
         ) : (
           <DealerPanel order={order} />
         )}
@@ -219,16 +219,79 @@ export default function OrderPage({ params }: { params: { id: string } }) {
   )
 }
 
+// Statusar där GuldBud tagit emot och kontrollerat föremålet, alltså där
+// handlaren ska betala köpeskillingen till säljaren och säljaren kan bekräfta.
+const PAYABLE_STATES = ['received', 'dealer_paid', 'verified_paid', 'shipped_to_dealer', 'completed']
+
+// Referensformatet GB-XXXXXX är samma som fakturans ref(), medvetet
+// kopierat: att importera lib/pdf/invoiceDoc hit hade dragit in react-pdf i
+// klientbundlen.
+function payRef(orderNo?: number | null) {
+  return 'GB-' + String(orderNo ?? 0).padStart(6, '0')
+}
+
 function SellerPanel({
   order,
   relisted,
+  meId,
+  onChanged,
 }: {
   order: any
   relisted: { id: string; status: string } | null
+  meId: string
+  onChanged: () => Promise<void>
 }) {
+  const supabase = createClient()
+  const [bank, setBank] = useState<{ clearing: string | null; account: string | null } | null>(null)
+  const [confirming, setConfirming] = useState(false)
+  const [confirmError, setConfirmError] = useState('')
+
   const needsShipping = order.status === 'accepted'
+  // Väg C: handlaren betalar köpeskillingen direkt till säljarens konto när
+  // föremålet är kontrollerat, och säljaren bekräftar här. Bekräftelsen
+  // (dealer_paid_at) är det som låser upp vidareskicket i databasen.
+  const awaitingConfirm =
+    !order.dealer_paid_at &&
+    !order.refunded_at &&
+    order.status !== 'cancelled' &&
+    PAYABLE_STATES.includes(order.status)
+
+  useEffect(() => {
+    if (!awaitingConfirm) return
+    // Egen rad, RLS tillåter det. Visas så säljaren ser vilket konto
+    // handlaren fått, och reagerar om det är fel.
+    supabase
+      .from('profiles')
+      .select('payout_bank_clearing, payout_bank_account')
+      .eq('id', meId)
+      .single()
+      .then(({ data }) =>
+        setBank(data ? { clearing: data.payout_bank_clearing, account: data.payout_bank_account } : null)
+      )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [awaitingConfirm, meId])
+
+  const confirm = async () => {
+    setConfirming(true)
+    setConfirmError('')
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    const res = await fetch(`/api/orders/${order.id}/confirm-payment`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session?.access_token || ''}` },
+    })
+    if (!res.ok) {
+      setConfirmError('Bekräftelsen kunde inte sparas. Försök igen, eller skriv i meddelandena nedan.')
+      setConfirming(false)
+      return
+    }
+    await onChanged()
+    setConfirming(false)
+  }
+
   return (
-    <div className={`card p-6 ${needsShipping ? 'ring-2 ring-gold-300' : ''}`}>
+    <div className={`card p-6 ${needsShipping || awaitingConfirm ? 'ring-2 ring-gold-300' : ''}`}>
       {needsShipping ? (
         <>
           <div className="flex items-center gap-2 mb-1">
@@ -236,9 +299,10 @@ function SellerPanel({
           </div>
           <h2 className="font-display text-xl text-espresso-900 mb-1">Grattis, ditt föremål är sålt!</h2>
           <p className="text-sm text-espresso-500 mb-5 leading-relaxed">
-            Du sålde för {formatSEK(order.amount)}, och pengarna är dina så snart vi tagit emot och kontrollerat föremålet.
-            Nu skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr.
-            Lägg föremålet i det och posta det rekommenderat. Ju snabbare det är på väg, desto snabbare får du betalt.
+            Du sålde för {formatSEK(order.amount)}. Handlaren betalar hela beloppet direkt till ditt bankkonto
+            när vi tagit emot och kontrollerat föremålet. Nu skickar vi dig ett kostnadsfritt, rekommenderat
+            brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det
+            rekommenderat. Ju snabbare det är på väg, desto snabbare får du betalt.
           </p>
 
           <ol className="grid gap-3 mb-5">
@@ -262,8 +326,37 @@ function SellerPanel({
             <p className="text-gold-200/80 text-sm">Förbetalt porto och adress, försäkrat upp till 100 000 kr. Vi skickar det till dig nu, posta så snart du kan.</p>
           </div>
           <p className="text-xs text-espresso-400 mt-3 leading-relaxed">
-            Så fort vi tar emot och äkthetskontrollerat föremålet betalar vi ut hela budet till dig. Har
-            du frågor innan du postar, skriv i meddelandena nedan.
+            Så fort vi tagit emot och äkthetskontrollerat föremålet får handlaren dina kontouppgifter och
+            betalar {formatSEK(order.amount)} direkt till ditt konto. Du bekräftar här när pengarna kommit,
+            och först då skickar vi föremålet vidare. Har du frågor innan du postar, skriv i meddelandena nedan.
+          </p>
+        </>
+      ) : awaitingConfirm ? (
+        <>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="chip bg-gold-100 text-gold-800 border border-gold-200">Din tur</span>
+          </div>
+          <h2 className="font-display text-xl text-espresso-900 mb-1">Väntar på din bekräftelse</h2>
+          <p className="text-sm text-espresso-500 leading-relaxed">
+            Föremålet är mottaget och kontrollerat. Handlaren betalar {formatSEK(order.amount)} direkt
+            till ditt bankkonto
+            {bank?.clearing || bank?.account ? (
+              <>
+                {' '}
+                <span className="font-medium text-espresso-700 tabular-nums">
+                  {bank.clearing || '-'} / {bank.account || '-'}
+                </span>
+              </>
+            ) : null}
+            . När pengarna syns på kontot, bekräfta här. Först då skickar vi föremålet vidare till handlaren.
+          </p>
+          <button onClick={confirm} disabled={confirming} className="btn-gold mt-4">
+            {confirming ? '...' : 'Pengarna har kommit in på mitt konto'}
+          </button>
+          {confirmError && <p className="mt-2 text-xs text-red-600">{confirmError}</p>}
+          <p className="text-xs text-espresso-400 mt-3 leading-relaxed">
+            Bekräfta bara när beloppet faktiskt syns på kontot. Har inget kommit inom ett par bankdagar,
+            skriv i meddelandena så tar vi kontakt med handlaren.
           </p>
         </>
       ) : (
@@ -271,9 +364,8 @@ function SellerPanel({
           <h2 className="font-display text-lg text-espresso-900 mb-1">Status</h2>
           <p className="text-sm text-espresso-500">
             {order.status === 'shipped_by_seller' && 'Vi väntar på att ditt föremål ska komma fram.'}
-            {order.status === 'received' && 'Vi har tagit emot föremålet och kontrollerar äktheten.'}
-            {order.status === 'dealer_paid' && 'Vi förbereder din utbetalning nu.'}
-            {order.status === 'verified_paid' && 'Godkänt! Din utbetalning är på väg till ditt konto.'}
+            {(order.status === 'received' || order.status === 'dealer_paid' || order.status === 'verified_paid') &&
+              'Du har bekräftat betalningen. Vi skickar föremålet vidare till handlaren.'}
             {(order.status === 'shipped_to_dealer' || order.status === 'completed') &&
               'Affären är klar. Tack för att du sålde via GuldBud!'}
             {order.status === 'cancelled' && !order.refunded_at &&
@@ -297,7 +389,7 @@ function SellerPanel({
           )}
           {SELLER_DOC_STATES.includes(order.status) && (
             <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
-              Visa avräkningsnota →
+              Visa försäljningsunderlag →
             </Link>
           )}
           {order.seal_number && (
@@ -311,70 +403,93 @@ function SellerPanel({
   )
 }
 
-// Handlarens betalningsinstruktion: banköverföring till klientmedelskontot
-// med ordernumret som referens, beslutat 2026-09-01 i stället för
-// kortbetalning via Stripe. Betalningen prickas av manuellt av admin
-// (dealer_paid_at), och kortflödets API-rutter ligger kvar vilande.
-// Referensformatet GB-XXXXXX är samma som fakturans ref(), medvetet
-// kopierat: att importera lib/pdf/invoiceDoc hit hade dragit in
-// react-pdf i klientbundlen.
-function payRef(orderNo?: number | null) {
-  return 'GB-' + String(orderNo ?? 0).padStart(6, '0')
-}
-
-function BankTransferBox({ order, total }: { order: any; total: number }) {
+// En av handlarens två betalningar, som en numrerad ruta.
+function PayBox({
+  step,
+  title,
+  done,
+  children,
+}: {
+  step: string
+  title: string
+  done: boolean
+  children: React.ReactNode
+}) {
   return (
-    <div className="mt-4 rounded-xl bg-white border border-espresso-100 p-4 text-sm">
-      <p className="font-medium text-espresso-900 mb-2">Betala via banköverföring</p>
-      {CLIENT_FUNDS_ACCOUNT.number ? (
-        <>
-          <dl className="grid grid-cols-[120px_1fr] gap-y-1.5 gap-x-3">
-            <dt className="text-espresso-400">Belopp</dt>
-            <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{formatSEK(total)}</dd>
-            <dt className="text-espresso-400">Mottagare</dt>
-            <dd className="m-0 text-espresso-700">{GULDBUD.name}</dd>
-            <dt className="text-espresso-400">{CLIENT_FUNDS_ACCOUNT.label}</dt>
-            <dd className="m-0 text-espresso-700 tabular-nums">{CLIENT_FUNDS_ACCOUNT.number}</dd>
-            <dt className="text-espresso-400">Referens</dt>
-            <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{payRef(order.order_no)}</dd>
-          </dl>
-          <p className="mt-3 text-xs text-espresso-500">
-            Märk betalningen med referensen, den kopplar pengarna till din affär. Vi prickar av
-            inkomna betalningar löpande och bekräftar här i affären, i regel samma bankdag.
-          </p>
-        </>
-      ) : (
-        <p className="text-espresso-600">
-          Kontouppgifterna meddelas i affärens meddelanden. Beloppet och referensen står på fakturan.
-        </p>
-      )}
-      <Link href={`/orders/${order.id}/invoice`} className="btn-gold w-full sm:w-auto mt-4 inline-flex justify-center">
-        Öppna fakturan
-      </Link>
+    <div className={`mt-4 rounded-xl border p-4 text-sm ${done ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-espresso-100'}`}>
+      <div className="flex items-center gap-2 mb-2">
+        <span
+          className={`shrink-0 w-6 h-6 rounded-full grid place-items-center text-xs font-semibold ${
+            done ? 'bg-emerald-500 text-white' : 'bg-gold-500 text-white'
+          }`}
+        >
+          {done ? '✓' : step}
+        </span>
+        <p className="font-medium text-espresso-900">{title}</p>
+      </div>
+      {children}
     </div>
   )
 }
 
+// Handlarens betalning under väg C, beslutad 2026-09-15: två överföringar,
+// två mottagare. GuldBuds faktura (provision plus frakt inklusive moms) går
+// till rörelsekontot och betalas omgående. Köpeskillingen går direkt till
+// säljarens bankkonto och betalas först när GuldBud tagit emot och
+// kontrollerat föremålet, eftersom pengarna då inte går att få tillbaka via
+// oss om föremålet underkänns. Säljaren bekräftar i affären, och först då
+// skickas föremålet vidare. GuldBud tar aldrig emot köpeskillingen.
 function DealerPanel({ order }: { order: any }) {
-  const paid = !!order.dealer_paid_at
-  const awaitingPayment = !paid && order.status !== 'cancelled'
+  const supabase = createClient()
   // Avgifterna som gällde när affären slöts, samma som på fakturan.
   const fees = feesAt(order.created_at)
+  const live = !order.refunded_at && order.status !== 'cancelled'
+  const feePaid = !!order.fee_paid_at
+  const sellerPaid = !!order.dealer_paid_at
+  const payable = live && PAYABLE_STATES.includes(order.status)
+  const [account, setAccount] = useState<{ name: string | null; clearing: string | null; account: string | null } | null>(null)
+  const [accountError, setAccountError] = useState('')
+
+  useEffect(() => {
+    if (!payable || sellerPaid) return
+    // Kontouppgifterna lämnas ut av en rutt med servicerollen, loggad i
+    // identity_disclosures, först när föremålet är kontrollerat.
+    ;(async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const res = await fetch(`/api/orders/${order.id}/payout-account`, {
+        headers: { Authorization: `Bearer ${session?.access_token || ''}` },
+        cache: 'no-store',
+      })
+      if (!res.ok) {
+        setAccountError('Kontouppgifterna kunde inte hämtas. Skriv i meddelandena så hjälper vi dig.')
+        return
+      }
+      const j = await res.json().catch(() => null)
+      setAccount(j?.account || null)
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payable, sellerPaid, order.id])
+
+  const due = order.payment_due_at ? new Date(order.payment_due_at) : null
+  const overdue = due ? due.getTime() < Date.now() : false
+
   return (
     <>
-      <div className={`card p-6 ${awaitingPayment ? 'ring-2 ring-gold-300' : ''}`}>
+      <div className={`card p-6 ${live && (!feePaid || !sellerPaid) ? 'ring-2 ring-gold-300' : ''}`}>
         <h2 className="font-display text-lg text-espresso-900 mb-3">Att betala</h2>
         <div className="flex flex-col gap-1 text-sm">
           <div className="flex justify-between text-espresso-600">
-            <span>Vinnande bud</span>
+            <span>Vinnande bud, till säljaren</span>
             <span className="tabular-nums">{formatSEK(order.amount)}</span>
           </div>
           <div className="flex justify-between text-espresso-600">
-            <span>Provision {fees.commissionLabel}</span>
+            <span>Provision {fees.commissionLabel}, till GuldBud</span>
             <span className="tabular-nums">+{formatSEK(fees.commission(order.amount))}</span>
           </div>
           <div className="flex justify-between text-espresso-600">
-            <span>Frakt (inkl moms)</span>
+            <span>Frakt (inkl moms), till GuldBud</span>
             <span className="tabular-nums">+{formatSEK(fees.shippingFee)}</span>
           </div>
           <div className="flex justify-between text-espresso-600">
@@ -386,31 +501,88 @@ function DealerPanel({ order }: { order: any }) {
             <span className="tabular-nums">{formatSEK(fees.dealerTotal(order.amount))}</span>
           </div>
         </div>
-        {awaitingPayment && (() => {
-          const due = order.payment_due_at ? new Date(order.payment_due_at) : null
-          const overdue = due ? due.getTime() < Date.now() : false
-          return (
-            <div className={`mt-4 rounded-xl p-4 text-sm border ${overdue ? 'bg-red-50 border-red-200' : 'bg-gold-50 border-gold-200'}`}>
-              <p className={`font-medium ${overdue ? 'text-red-700' : 'text-gold-800'}`}>
-                {overdue ? 'Din betalning är försenad' : 'Du vann budgivningen, dags att betala'}
-              </p>
-              <p className="text-espresso-600 mt-1 leading-relaxed">
-                {overdue
-                  ? 'Betala snart så håller vi affären öppen. Uteblir betalningen avbryts affären automatiskt.'
-                  : <>Föremålet är ditt. Betala bud + provision + frakt <span className="font-medium">omgående</span>, så tar säljaren emot din instruktion att skicka in det. Vi kontrollerar äktheten och skickar det sedan vidare till dig.</>}
-              </p>
-              {due && (
-                <p className={`mt-2 font-medium ${overdue ? 'text-red-700' : 'text-espresso-700'}`}>
-                  Betala senast {due.toLocaleDateString('sv-SE')}
+        <p className="text-xs text-espresso-500 mt-2 leading-relaxed">
+          Betalas i två delar: GuldBuds faktura till oss nu, och köpeskillingen direkt till säljaren när
+          föremålet är kontrollerat. GuldBud tar inte emot köpeskillingen.
+        </p>
+
+        {live && (
+          <>
+            <PayBox step="1" title="GuldBuds faktura, betala omgående" done={feePaid}>
+              {feePaid ? (
+                <p className="text-emerald-700">
+                  Registrerad {new Date(order.fee_paid_at).toLocaleDateString('sv-SE')}. Tack!
                 </p>
+              ) : (
+                <>
+                  <dl className="grid grid-cols-[120px_1fr] gap-y-1.5 gap-x-3">
+                    <dt className="text-espresso-400">Belopp</dt>
+                    <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{formatSEK(fees.guldbudServiceTotal(order.amount))}</dd>
+                    <dt className="text-espresso-400">Mottagare</dt>
+                    <dd className="m-0 text-espresso-700">{GULDBUD.name}</dd>
+                    <dt className="text-espresso-400">{OPERATING_ACCOUNT.label}</dt>
+                    <dd className="m-0 text-espresso-700 tabular-nums">{OPERATING_ACCOUNT.number}</dd>
+                    <dt className="text-espresso-400">Referens</dt>
+                    <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{payRef(order.order_no)}</dd>
+                  </dl>
+                  {due && (
+                    <p className={`mt-2 font-medium ${overdue ? 'text-red-700' : 'text-espresso-700'}`}>
+                      {overdue ? 'Förfallen sedan ' : 'Betala senast '}
+                      {due.toLocaleDateString('sv-SE')}
+                    </p>
+                  )}
+                  <p className="mt-2 text-xs text-espresso-500">
+                    Märk betalningen med referensen. Vi prickar av inkomna betalningar löpande och
+                    bekräftar här i affären.
+                    {overdue ? ' Uteblir betalningen avbryts affären automatiskt.' : ''}
+                  </p>
+                  <Link href={`/orders/${order.id}/invoice`} className="btn-gold w-full sm:w-auto mt-3 inline-flex justify-center">
+                    Öppna fakturan
+                  </Link>
+                </>
               )}
-              <BankTransferBox order={order} total={fees.dealerTotal(order.amount)} />
-            </div>
-          )
-        })()}
-        {paid && <p className="mt-3 text-sm text-emerald-700">Betalning registrerad ✓</p>}
-        {/* Obetald: fakturaknappen sitter i betalrutan ovanför. Betald: liten länk räcker. */}
-        {!awaitingPayment && (
+            </PayBox>
+
+            <PayBox step="2" title="Köpeskillingen, direkt till säljaren" done={sellerPaid}>
+              {sellerPaid ? (
+                <p className="text-emerald-700">
+                  Säljaren har bekräftat {new Date(order.dealer_paid_at).toLocaleDateString('sv-SE')}. Vi skickar
+                  föremålet till dig.
+                </p>
+              ) : !payable ? (
+                <p className="text-espresso-600">
+                  {formatSEK(order.amount)}. Betalas när vi tagit emot och kontrollerat föremålet, inte innan.
+                  Säljarens kontouppgifter visas här då.
+                </p>
+              ) : account ? (
+                <>
+                  <dl className="grid grid-cols-[120px_1fr] gap-y-1.5 gap-x-3">
+                    <dt className="text-espresso-400">Belopp</dt>
+                    <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{formatSEK(order.amount)}</dd>
+                    <dt className="text-espresso-400">Kontohavare</dt>
+                    <dd className="m-0 text-espresso-700">{account.name || '-'}</dd>
+                    <dt className="text-espresso-400">Clearing</dt>
+                    <dd className="m-0 text-espresso-700 tabular-nums">{account.clearing || '-'}</dd>
+                    <dt className="text-espresso-400">Kontonummer</dt>
+                    <dd className="m-0 text-espresso-700 tabular-nums">{account.account || '-'}</dd>
+                    <dt className="text-espresso-400">Referens</dt>
+                    <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{payRef(order.order_no)}</dd>
+                  </dl>
+                  <p className="mt-2 text-xs text-espresso-500">
+                    Föremålet är mottaget och kontrollerat. Betala direkt till säljaren och märk med referensen.
+                    När säljaren bekräftat att pengarna kommit skickar vi föremålet till dig.
+                  </p>
+                </>
+              ) : accountError ? (
+                <p className="text-red-600">{accountError}</p>
+              ) : (
+                <p className="text-espresso-400">Hämtar säljarens kontouppgifter...</p>
+              )}
+            </PayBox>
+          </>
+        )}
+
+        {(!live || feePaid) && (
           <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
             Visa faktura →
           </Link>
@@ -420,11 +592,11 @@ function DealerPanel({ order }: { order: any }) {
         <h2 className="font-display text-lg text-espresso-900 mb-1">Status</h2>
         <p className="text-sm text-espresso-500">
           {(order.status === 'accepted' || order.status === 'shipped_by_seller') &&
-            'Vi väntar på att säljaren skickar in föremålet. Så fort det är mottaget och kontrollerat hör vi av oss.'}
+            'Vi väntar på att säljaren skickar in föremålet. Betala GuldBuds faktura under tiden. Så fort föremålet är mottaget och kontrollerat hör vi av oss.'}
           {order.status === 'received' &&
-            (paid
-              ? 'Föremålet är mottaget och kontrollerat. Vi packar det och skickar det till dig inom kort.'
-              : 'Föremålet är mottaget och kontrollerat. Vi skickar det vidare så snart din betalning är registrerad.')}
+            (sellerPaid
+              ? 'Säljaren har bekräftat din betalning. Vi packar och skickar föremålet till dig inom kort.'
+              : 'Föremålet är mottaget och kontrollerat. Betala köpeskillingen till säljaren, så skickar vi det vidare när säljaren bekräftat.')}
           {order.status === 'dealer_paid' && 'Vi förbereder leverans till dig.'}
           {order.status === 'verified_paid' && 'Föremålet packas för leverans till dig.'}
           {order.status === 'shipped_to_dealer' &&

@@ -95,7 +95,7 @@ function instructionsFor(title: string): string {
         'Så fort du godkänt ditt slutpris skickar vi dig ett <strong style="color:#f5e6c8">kostnadsfritt, rekommenderat brev</strong> med förbetalt porto, försäkrat upp till <strong style="color:#f5e6c8">100 000 kr</strong>.',
         'Lägg föremålet i det och posta det <strong style="color:#f5e6c8">rekommenderat</strong>. Porto och adress är redan klara.',
         'Vi verifierar äktheten så snart vi tagit emot föremålet.',
-        `Du får betalt <strong style="color:#f5e6c8">inom 24 timmar</strong> till ditt bankkonto när vi verifierat föremålet.`,
+        `Handlaren betalar sedan hela beloppet <strong style="color:#f5e6c8">direkt till ditt bankkonto</strong>. Du bekräftar i affären när pengarna kommit, och först då skickar vi föremålet vidare.`,
       ],
       'Att sälja är helt kostnadsfritt för dig. Har du frågor når du oss direkt i affären.'
     )
@@ -105,10 +105,10 @@ function instructionsFor(title: string): string {
     return stepsBox(
       'Så går affären vidare',
       [
-        `Betala budet + <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision + <strong style="color:#f5e6c8">${DEALER_SHIPPING_FEE} kr</strong> frakt + moms <strong style="color:#f5e6c8">omgående via banköverföring</strong>, märkt med din referens. Belopp, kontouppgifter och faktura finns i affären.`,
-        'Föremålet är redan ditt, betalningen sätter igång affären.',
-        'Säljaren skickar in det och vi äkthetskontrollerar det.',
-        'Vi skickar sedan föremålet vidare till dig.',
+        `Betala GuldBuds faktura, <strong style="color:#f5e6c8">${DEALER_COMMISSION_LABEL}</strong> provision + <strong style="color:#f5e6c8">${DEALER_SHIPPING_FEE} kr</strong> frakt + moms, <strong style="color:#f5e6c8">omgående via banköverföring</strong>, märkt med din referens. Belopp, kontouppgifter och faktura finns i affären.`,
+        'Säljaren skickar in föremålet och vi äkthetskontrollerar det.',
+        'Sedan betalar du köpeskillingen <strong style="color:#f5e6c8">direkt till säljarens bankkonto</strong>. Kontouppgifterna visas i affären när föremålet är kontrollerat.',
+        'När säljaren bekräftat att pengarna kommit skickar vi föremålet vidare till dig.',
       ],
       'Följ varje steg och skriv till oss under Affärer.'
     )
@@ -304,16 +304,30 @@ export async function POST(req: NextRequest) {
   if (isOrder && link) {
     const dealerWon = titleLower.includes('vann')
     const paidOut = titleLower.includes('fått betalt')
-    const dealerPaid = titleLower.includes('tagit emot din betalning')
-    if (dealerWon || paidOut || dealerPaid) {
+    // Två handlarhändelser under väg C: GuldBuds faktura betald ("Vi har
+    // tagit emot din betalning") och säljaren har bekräftat köpeskillingen
+    // ("Säljaren har bekräftat din betalning"). Inköpsunderlaget med
+    // säljarens identitet finns först efter det senare, så bara den länken
+    // lovar en inköpsnota.
+    const feePaid = titleLower.includes('tagit emot din betalning')
+    const sellerConfirmed = titleLower.includes('bekräftat din betalning')
+    if (dealerWon || paidOut || feePaid || sellerConfirmed) {
       const invoiceHref = `${SITE}${link}/invoice`
       extra += documentBox(
         invoiceHref,
-        dealerWon ? 'Öppna din faktura' : paidOut ? 'Se ditt utbetalningsunderlag' : 'Se din faktura och inköpsnota',
         dealerWon
-          ? 'Fakturan för din vinst är klar i portalen. Öppna den, betala via banköverföring enligt villkoren och spara den som PDF.'
+          ? 'Öppna din faktura'
+          : paidOut
+          ? 'Se ditt försäljningsunderlag'
+          : feePaid
+          ? 'Se din faktura'
+          : 'Se din faktura och inköpsnota',
+        dealerWon
+          ? 'Fakturan för GuldBuds provision och frakt är klar i portalen. Öppna den, betala via banköverföring enligt villkoren och spara den som PDF. Köpeskillingen betalar du direkt till säljaren när föremålet är kontrollerat.'
           : paidOut
           ? 'Underlaget för din försäljning finns nu i portalen. Där kan du visa det och spara det som PDF.'
+          : feePaid
+          ? 'Din betalda faktura finns i portalen. Inköpsunderlaget med säljarens uppgifter blir klart när säljaren bekräftat köpeskillingen.'
           : 'Din faktura och ditt inköpsunderlag finns nu i portalen. Där kan du visa dem och spara dem som PDF.'
       )
     }

@@ -180,7 +180,7 @@ export default function CustomerProfilePage() {
             <section className="card p-6">
               <h2 className="font-display text-xl text-espresso-900 mb-1">Mina uppgifter</h2>
               <p className="text-xs text-espresso-400 mb-5">
-                Vi använder uppgifterna för utbetalning och för att kunna kontakta dig om en affär. De delas aldrig publikt.
+                Vi använder uppgifterna för att handlaren ska kunna betala dig och för att kunna kontakta dig om en affär. De delas aldrig publikt.
               </p>
               <div className="grid sm:grid-cols-2 gap-4">
                 <Field label="Namn">
@@ -216,7 +216,7 @@ export default function CustomerProfilePage() {
               </div>
 
               <div className="mt-6 pt-6 border-t border-espresso-100">
-                <h3 className="font-display text-lg text-espresso-900 mb-1">Utbetalning till bankkonto</h3>
+                <h3 className="font-display text-lg text-espresso-900 mb-1">Bankkonto för betalning</h3>
                 <p className="text-xs text-espresso-400 mb-4">
                   Hit betalar vi ut när ditt föremål sålts och betalningen kommit in. Krävs för att lägga ut föremål.
                   Uppgifterna visas aldrig publikt.
@@ -239,7 +239,7 @@ export default function CustomerProfilePage() {
                   </Field>
                 </div>
                 <p className="text-xs text-espresso-400 mt-3">
-                  Utbetalningen görs inom 24 timmar efter godkänd kontroll, till ett bankkonto i ditt eget namn.
+                  Handlaren betalar hela beloppet direkt till det här kontot när vi kontrollerat föremålet. Kontot måste stå i ditt eget namn.
                   Vi betalar aldrig ut till någon annans konto.
                 </p>
               </div>
@@ -256,7 +256,7 @@ export default function CustomerProfilePage() {
               <div>
                 <h2 className="font-display text-lg text-espresso-900">Notiser</h2>
                 <p className="text-xs text-espresso-400 mt-0.5">
-                  Vi mejlar det viktiga: godkännande, mottaget föremål och utbetalning. Löpande bud
+                  Vi mejlar det viktiga: godkännande, mottaget föremål och betalning. Löpande bud
                   syns i notisklockan i appen.
                 </p>
               </div>
@@ -290,7 +290,7 @@ export default function CustomerProfilePage() {
                 className="card p-5 hover:shadow-gold transition group"
               >
                 <p className="font-medium text-espresso-900 group-hover:text-gold-700 transition">Mina underlag</p>
-                <p className="text-xs text-espresso-400 mt-1">Kvitton på dina utbetalningar.</p>
+                <p className="text-xs text-espresso-400 mt-1">Underlag för dina försäljningar.</p>
               </Link>
             </section>
 

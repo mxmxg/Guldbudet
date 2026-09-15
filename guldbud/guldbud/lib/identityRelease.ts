@@ -12,17 +12,48 @@
 // Ligger i en egen fil eftersom två rutter lämnar ut samma uppgifter, och en
 // grind som finns på två ställen glider isär.
 
-export type DisclosureChannel = 'seller_api' | 'invoice_pdf'
+export type DisclosureChannel = 'seller_api' | 'invoice_pdf' | 'payout_account'
 
 export type ReleaseDecision =
   | { allowed: true; role: 'admin' | 'dealer' }
-  | { allowed: false; reason: 'not_a_party' | 'not_paid' | 'deal_reverted' }
+  | { allowed: false; reason: 'not_a_party' | 'not_paid' | 'not_received' | 'deal_reverted' }
 
 type OrderForRelease = {
   dealer_id?: string | null
   status?: string | null
   dealer_paid_at?: string | null
   refunded_at?: string | null
+}
+
+// Under väg C betalar handlaren köpeskillingen direkt till säljarens
+// bankkonto, så handlaren behöver kontonumret och kontohavarens namn INNAN
+// betalningen, inte efter. Det är en andra, smalare utlämning: bara det som
+// krävs för att göra överföringen, aldrig personnummer eller adress. De
+// följer fortfarande mayReleaseSellerIdentity ovan, alltså efter betalning.
+//
+// Tidpunkten är när GuldBud tagit emot och kontrollerat föremålet
+// (status received eller senare). Före det finns ingen anledning att betala,
+// och en handlare som betalat för tidigt mot ett föremål som sedan
+// underkänns hade stått utan återbetalningsväg, eftersom pengarna gått
+// direkt till säljaren.
+const PAYABLE_STATES = ['received', 'dealer_paid', 'verified_paid', 'shipped_to_dealer', 'completed']
+
+export function mayReleaseSellerPayoutAccount(
+  order: OrderForRelease,
+  viewerId: string,
+  isAdmin: boolean
+): ReleaseDecision {
+  if (isAdmin) return { allowed: true, role: 'admin' }
+  if (!order.dealer_id || order.dealer_id !== viewerId) {
+    return { allowed: false, reason: 'not_a_party' }
+  }
+  if (order.refunded_at || order.status === 'cancelled') {
+    return { allowed: false, reason: 'deal_reverted' }
+  }
+  if (!PAYABLE_STATES.includes(order.status || '')) {
+    return { allowed: false, reason: 'not_received' }
+  }
+  return { allowed: true, role: 'dealer' }
 }
 
 // Admin ser alltid: adminvyn är arbetsverktyget för penningtvättsgranskning och

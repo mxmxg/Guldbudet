@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase-browser'
 import { loginUrl } from '@/lib/loginUrl'
 import Link from 'next/link'
 import { feesAt } from '@/lib/fees'
-import { GULDBUD, CLIENT_FUNDS_ACCOUNT } from '@/lib/company'
+import { GULDBUD, OPERATING_ACCOUNT } from '@/lib/company'
 
 function ref(orderNo?: number) {
   return 'GB-' + String(orderNo ?? 0).padStart(6, '0')
@@ -122,19 +122,19 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
         {kind === 'receipt' ? (
           /* ============ SÄLJARE: försäljnings-/utbetalningsunderlag ============ */
           <Doc>
-            <DocHead title="Försäljnings- och utbetalningsunderlag" sub="Underlag för din försäljning" order={order} date={date} />
-            <Recipient label="Utbetalas till" party={party} />
+            <DocHead title="Försäljningsunderlag" sub="Underlag för din försäljning" order={order} date={date} />
+            <Recipient label="Säljare" party={party} />
             <table className="w-full text-sm mb-5">
               <tbody>
                 <Row label={`Vara: ${item?.title || 'Föremål'}`} value={`${item?.weight_grams} g · ${item?.karat}`} plain />
                 <Row label="Försäljningspris" value={kr2(bid)} />
-                <Total label="Utbetalt till dig" value={kr2(bid)} />
+                <Total label="Betalt till dig av köparen" value={kr2(bid)} />
               </tbody>
             </table>
             <Fine>
               {order.refunded_at
                 ? `Affären återgick: föremålet godkändes inte vid äkthetskontroll${order.refund_reason ? ` (${order.refund_reason})` : ''}, och försäljningen genomfördes inte.`
-                : `Du får hela försäljningspriset. GuldBud har inte gjort något avdrag från ditt belopp. Som privatperson lägger du ingen moms på försäljning av dina egna begagnade föremål. Förmedlat av ${GULDBUD.name} (org.nr ${GULDBUD.org}). Referens: ${ref(order.order_no)}.`}
+                : `Du får hela försäljningspriset, betalt av köparen direkt till ditt bankkonto. GuldBud har inte tagit emot pengarna och har inte gjort något avdrag från ditt belopp. Som privatperson lägger du ingen moms på försäljning av dina egna begagnade föremål. Förmedlat av ${GULDBUD.name} (org.nr ${GULDBUD.org}). Referens: ${ref(order.order_no)}.`}
             </Fine>
           </Doc>
         ) : (
@@ -161,7 +161,7 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
               <Fine>
                 {credit
                   ? `Inköpet har återgått. Föremålet godkändes inte vid äkthetskontroll${order.refund_reason ? ` (${order.refund_reason})` : ''} och affären krediteras i sin helhet.`
-                  : `Säljaren är privatperson och försäljningen är inte momsbelagd, ingen moms tas ut på föremålet. Affären är förmedlad av ${GULDBUD.name} (org.nr ${GULDBUD.org}), som inte är part i själva köpet. Referens: ${ref(order.order_no)}. Detta underlag styrker ditt inköp av föremålet från säljaren ovan.`}
+                  : `Säljaren är privatperson och försäljningen är inte momsbelagd, ingen moms tas ut på föremålet. Köpeskillingen betalas av köparen direkt till säljarens bankkonto; GuldBud tar inte emot den. Affären är förmedlad av ${GULDBUD.name} (org.nr ${GULDBUD.org}), som inte är part i själva köpet. Referens: ${ref(order.order_no)}. Detta underlag styrker ditt inköp av föremålet från säljaren ovan.`}
               </Fine>
             </Doc>
 
@@ -191,15 +191,10 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
                 </tbody>
               </table>
               <Fine>
-                Avser GuldBuds förmedlingstjänst (provision + frakt). Föremålets pris ({kr2(bid)}) faktureras separat enligt inköpsunderlaget och tillfaller säljaren.{' '}
-                {credit ? '' : `Handlaren betalar hela affären som en summa: ${kr2(fees.dealerTotal(bid))} (föremål ${kr2(bid)} + denna faktura ${kr2(fees.guldbudServiceTotal(bid))}). `}
+                Avser GuldBuds förmedlingstjänst (provision + frakt). Köpeskillingen ({kr2(bid)}) betalar du direkt till säljaren enligt inköpsunderlaget och ingår inte i denna faktura. GuldBud tar inte emot köpeskillingen.{' '}
                 {credit
                   ? ''
-                  : `Betalningsvillkor: omgående, via banköverföring${
-                      CLIENT_FUNDS_ACCOUNT.number
-                        ? ` till ${CLIENT_FUNDS_ACCOUNT.label.toLowerCase()} ${CLIENT_FUNDS_ACCOUNT.number}`
-                        : ''
-                    }, märkt med referensen. `}
+                  : `Betalningsvillkor: omgående, via banköverföring till ${OPERATING_ACCOUNT.label.toLowerCase()} ${OPERATING_ACCOUNT.number}, märkt med referensen. `}
                 Referens: {ref(order.order_no)}.
               </Fine>
             </Doc>

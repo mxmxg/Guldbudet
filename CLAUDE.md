@@ -166,26 +166,27 @@ och innan du påstår något om bolagets status.
 
 **Pengar**
 
-- Handlarens betalning ska tas emot på **klientmedelskonto**, avskilt från
-  bolagets egna medel, så kundernas pengar tydligt skiljs från företagets.
-- Stripes utbetalningar ska gå till klientmedelskontot, inte till
-  rörelsekontot.
-- Kontot ligger hos **SEB**, samma bank som bolagets ordinarie konto.
-- Upplägget är **två konton**: klientmedelskonto för säljarens pengar, och
-  driftkonto för GuldBuds provision. Stripe betalar dock ut hela summan till
-  **en** mottagare, så uppdelningen sker efter utbetalningen.
-- **Klientmedelskontot är öppnat hos SEB 2026-09-01**, efter mötet samma dag.
-  Kontonumret bor i `CLIENT_FUNDS_ACCOUNT` i `lib/company.ts` och är
-  **kontrollerat av användaren i drift 2026-09-01**, mot bankens uppgifter,
-  efter att rörelsekontots nummer först lagts in av misstag och rättats.
-  Läxan: båda är giltiga SEB-nummer, så en checksumma skiljer dem aldrig åt.
-  Verifiera kontonummer mot bankens papper, aldrig bara mot mod-11. Punkten
-  är av kritiska linjen: ordersidan och fakturan visar kontouppgifterna.
-- **Beslutat 2026-09-01: lansering med faktura och banköverföring, inte
-  Stripe.** Handlaren betalar via banköverföring direkt till
-  klientmedelskontot med ordernumret som referens, och admin prickar av
-  betalningen manuellt. Kortflödet ligger kvar vilande i koden. Se
-  beslutsloggen.
+- **Väg C sedan 2026-09-15: GuldBud tar aldrig emot säljarens pengar.**
+  Handlaren betalar köpeskillingen direkt till säljarens bankkonto, och
+  GuldBuds egen faktura (provision plus frakt inklusive moms) till bolagets
+  rörelsekonto. Två överföringar, två mottagare. Se beslutsloggen.
+- **Rörelsekontot hos SEB är 5232 10 078 77.** Användarens uppgift
+  2026-09-15. Slutsiffrorna 7877 stämmer med utbetalningskontot som var
+  registrerat hos Stripe, läst i kontodatan samma session. Numret bor i
+  `OPERATING_ACCOUNT` i `lib/company.ts` och visas på ordersidan och på
+  GuldBuds faktura.
+- **Klientmedelskontot (5232 10 274 52) är öppnat hos SEB 2026-09-01 men
+  används inte längre i flödet.** Det är borttaget ur koden. Vad som ska
+  hända med kontot hos SEB är användarens fråga, inte avgjord. Skriv aldrig
+  in det numret i koden igen: köpeskillingen ska inte passera bolaget alls.
+- Läxan från 2026-09-01 gäller fortfarande: rörelsekontot och
+  klientmedelskontot är båda giltiga SEB-nummer, så en checksumma skiljer
+  dem aldrig åt. Verifiera kontonummer mot bankens papper, aldrig bara mot
+  mod-11.
+- Faktura och banköverföring, inte Stripe, beslutat 2026-09-01. Admin
+  prickar av GuldBuds faktura manuellt (`fee_paid_at`). Kortflödet ligger
+  kvar vilande i koden men räknar fortfarande på hela summan (`dealerTotal`),
+  så det får inte slås på utan att byggas om för väg C.
 - **Swish är struket, 2026-09-04, och koden riven 2026-09-15.** Uppgiften
   kommer från användaren: "Swish utbetalningar" gick inte att koppla till
   klientmedelskontot, och avtalet med SEB tecknas därför inte. Säljaren får
@@ -456,13 +457,16 @@ skickar annars till `/customer/profile?from=submit`. Lägger ut föremål med
 minst 2 och högst 6 bilder, ursprungsval och ägarintyg. Föremålet skapas som
 `pending` med `mandate_accepted_at` och `terms_version`. Admin godkänner och
 sätter sluttid 48 timmar fram. Säljaren följer buden i realtid, accepterar via
-`AcceptBid`, skickar guldet, och får betalt när admin sätter `verified_paid`.
+`AcceptBid`, skickar guldet, får betalt direkt av handlaren när GuldBud
+kontrollerat föremålet, och bekräftar i affären att pengarna kommit.
 
 **Handlaren.** Registrerar sig med fullt företagsformulär, får `approved=false`
 och skickas till `/auth/pending`. Admin godkänner manuellt i `/admin`. Att neka
 raderar profilraden. Handlaren budar från två ytor, auktionssidan
 (`BidSection`) och `/dealer/dashboard`, med autobud i `auto_bids`. Vid vinst
-skapar en databastrigger ordern. Betalar via `/orders/[id]`, tar emot varan.
+skapar en databastrigger ordern. Betalar GuldBuds faktura direkt och
+köpeskillingen till säljaren via `/orders/[id]` när föremålet är
+kontrollerat, tar emot varan.
 
 **Adminen.** `/admin` är kontrollrummet: godkänna handlare och föremål, styra
 auktioner, godkänna vinnande bud åt säljaren, nyckeltal. `/admin/orders/[id]`
@@ -474,26 +478,43 @@ flaggar handlare som vinner för lätt.
 
 ## Betalning och pengaflöde
 
-**Obs 2026-09-01: steg 3 och 4 beskriver det vilande kortflödet.** I drift
-betalar handlaren via banköverföring enligt instruktionen på ordersidan, och
-admin sätter `dealer_paid_at` manuellt. Se beslutsloggen om faktura och
-banköverföring.
+**Väg C sedan 2026-09-15. GuldBud håller föremålet, aldrig pengarna.**
 
 1. Säljaren accepterar. `enforce_accepted_bid_valid` kontrollerar att budet är
    det högsta och tillhör föremålet. `notify_bid_accepted` skapar ordern med
-   `payment_due_at = now() + interval '1 day'`.
+   `payment_due_at = now() + interval '1 day'`. Fristen gäller GuldBuds egen
+   faktura, inte köpeskillingen.
 2. `set_order_aml_status` sätter `clear` eller `review` direkt vid orderns
    skapande. Trösklar: 25 000 kr per affär, 50 000 kr rullande 12 månader.
-3. Handlaren startar betalningen via `/api/payments/create`, som öppnar en
-   Stripe-session och skriver `payment_status = 'pending'`.
-4. Leverantörens webhook träffar `/api/payments/callback`. Signaturen
-   verifieras, beloppet kontrolleras, och vid träff sätts `dealer_paid_at`.
-5. Admin flyttar affären framåt. `enforce_payment_before_release` blockerar
-   `verified_paid` och `shipped_to_dealer` om betalning saknas eller om
-   penningtvättsgranskningen inte är `clear` eller `approved`.
+3. Handlaren betalar GuldBuds faktura, `guldbudServiceTotal`, till
+   rörelsekontot omgående. Admin prickar av mot kontot och sätter
+   `fee_paid_at`. `process_unpaid_orders` jagar den här betalningen:
+   påminnelse efter fristen, avbrytning och avstängning efter fyra dygn till.
+4. Säljaren skickar in. Admin flyttar affären till `received` efter
+   äkthetskontroll. Först då lämnas säljarens kontonummer och kontohavarnamn
+   ut till handlaren, via `/api/orders/[id]/payout-account`, loggat i
+   `identity_disclosures` med kanalen `payout_account`. Att vänta till
+   `received` är avsiktligt: betalar handlaren säljaren direkt och föremålet
+   sedan underkänns finns ingen återbetalningsväg via oss.
+5. Handlaren betalar köpeskillingen, `order.amount`, direkt till säljarens
+   konto. Säljaren bekräftar i affären via `/api/orders/[id]/confirm-payment`,
+   som sätter `dealer_paid_at`. Admin kan sätta den manuellt när säljaren
+   bekräftat på annat sätt.
+6. `enforce_payment_before_release` (spärrad, oförändrad) blockerar
+   `verified_paid` och `shipped_to_dealer` utan `dealer_paid_at`, eller om
+   penningtvättsgranskningen inte är `clear` eller `approved`. Kolumnen
+   betyder numera "säljaren har bekräftat", och spärren fungerar därför utan
+   ändring.
 
-**Det finns ingen utbetalningsintegration.** `verified_paid` är en manuell
-adminflagga. Själva utbetalningen till säljaren sker utanför systemet.
+**Kolumnnamnet `dealer_paid_at` är kvar av avsikt.** Att döpa om den hade
+rört den spärrade triggern, RLS-fria rutter, nyckeltalen i `/admin` och
+mejlrutten på en gång. Innebörden står i `lib/orders.ts` och här.
+
+**Det finns ingen utbetalning från GuldBud.** `payouts`-tabellen,
+`/api/admin/payouts` och adminkortet "Utbetalning till säljaren" är
+borttagna 2026-09-15. Säljarens identitet (namn, personnummer, adress) till
+inköpsunderlaget lämnas fortfarande ut först efter `dealer_paid_at`, via
+`lib/identityRelease.ts`.
 
 **De tre dokumenten**, `lib/pdf/invoiceDoc.tsx` speglad av
 `app/orders/[id]/invoice/page.tsx`:
@@ -1386,6 +1407,65 @@ enligt penningtvättslagen i egen rätt, och om handel med begagnade varor
 kräver registrering av oss som förmedlare), om han ställde några villkor för
 väg C, och vad som ska hända med klientmedelskontot hos SEB, som väg C inte
 behöver för föremålsledet. Fråga användaren innan något av det påstås.
+
+**Väg C är byggd 2026-09-15, på användarens "Kör".** Transaktionsflödet är
+ombyggt i kod, databas och mejl. Så här är det gjort och varför:
+
+- **Två tidsstämplar på affären.** `fee_paid_at` är ny: GuldBuds faktura,
+  admin prickar av mot rörelsekontot. `dealer_paid_at` behåller namnet men
+  betyder säljarens bekräftelse på att köpeskillingen kommit. Den spärrade
+  triggern `enforce_payment_before_release` läser fortfarande
+  `dealer_paid_at` och fungerar därför oförändrad: inget vidareskick förrän
+  säljaren fått betalt. Backfyllning vid migreringen: rader med
+  `dealer_paid_at` satt fick `fee_paid_at = dealer_paid_at`, eftersom
+  fakturan ingick i samma summa under väg A.
+- **Fristen jagar fakturan, inte köpeskillingen.** `process_unpaid_orders`
+  filtrerar på `fee_paid_at is null`. Köpeskillingen har ingen frist i
+  databasen: den betalas först vid `received`, och tidpunkten beror på
+  posten. Säljaren notifieras nu när en handlare backar, eftersom GuldBud
+  inte längre står för betalningen mot säljaren.
+- **Kontouppgifterna lämnas ut vid `received`, inte vid vinst.** Juristens
+  underlag, avsnitt 8, sätter betalningen efter kontrollen. Skälet är
+  återbetalningsvägen: pengar som gått direkt till säljaren kan GuldBud inte
+  kreditera. Grinden `mayReleaseSellerPayoutAccount` i
+  `lib/identityRelease.ts` lämnar bara clearing, kontonummer och
+  kontohavarnamn (`verified_name` före `full_name`), aldrig personnummer
+  eller adress. Kanalen `payout_account` i `identity_disclosures`.
+- **Säljaren bekräftar själv**, via `/api/orders/[id]/confirm-payment` med
+  servicerollen, eftersom parterna bara har läsrätt på `orders`. Rutten
+  kräver `received` eller senare, så en bekräftelse innan handlaren ens fått
+  kontouppgifterna avvisas.
+- **Notistexterna är uppdaterade i databasen med `replace()` mot
+  `pg_get_functiondef`**, samma teknik som 2026-09-04, och migreringen
+  avbryter om den gamla texten saknas. Två funktioner är helt omskrivna:
+  `process_unpaid_orders` och `notify_payment_registered` (två grenar, en
+  per tidsstämpel, plus adminlarm när säljaren bekräftat). Schemafilen och
+  migreringen genererades av samma skript, så texterna är identiska.
+  Mejlrutten matchar titlarna "tagit emot din betalning" (fakturan) och
+  "bekräftat din betalning" (köpeskillingen), ändra inte den ena utan den
+  andra.
+- **Dokumenten:** GuldBuds faktura säger att köpeskillingen betalas direkt
+  till säljaren och inte ingår, med betalningsvillkor till rörelsekontot.
+  Inköpsunderlaget säger att köparen betalat säljaren direkt. Säljarens
+  handling heter "Försäljningsunderlag" och "Betalt till dig av köparen".
+  Båda fakturafilerna är spärrade och ändrade på användarens "Kör" efter att
+  de namngivits uttryckligen.
+- **Deployordningen är inte valfri.** Ordersidan läser `fee_paid_at`, och
+  PostgREST svarar med fel på en kolumn som inte finns, så parterna hade fått
+  "Affären hittades inte". Migreringen ska vara körd före mergen. Vid
+  bygget låg Supabase nere för underhåll, se nästa post för utfallet.
+- **Utanför den här ändringen, och kvar att göra:** de publika texterna
+  (startsidan, så fungerar det, guiderna, inlämningsformuläret, FAQ) säger
+  fortfarande att GuldBud betalar ut inom 24 timmar. Villkoren (spärrade)
+  beskriver väg A: "för din räkning", "medel åtskilda fram till
+  utbetalning". Uppdragskvittot återger villkoren säljaren faktiskt godkände
+  och ska inte ändras retroaktivt; det följer med när villkoren får en ny
+  version. Kortflödet i `lib/payments/` räknar på `dealerTotal` och måste
+  byggas om innan det någonsin slås på.
+- **Kontoverifieringen är fortfarande en lanseringsspärr.** Tills den finns
+  visar ordersidan säljarens egen uppgift ur profilen, och admin ser den
+  bredvid BankID-namnet i affärsvyn med en uppmaning att kontrollera innan
+  handlaren betalar.
 
 **Investerardecken finns, 2026-09-08.** Artifact "GuldBud investerardeck"
 (https://claude.ai/code/artifact/df5ea3a9-733b-468e-b8ce-d9162b04c1b7), femton
