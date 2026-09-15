@@ -1331,6 +1331,43 @@ Men **ingen lansering, ingen riktig affär och inga pengar in på
 klientmedelskontot förrän juristen sagt sitt.** Statusartifactens punkt om
 Finansinspektionen är därmed en spärr, inte en att-göra-punkt.
 
+**Juristen har svarat 2026-09-15: väg C gäller. Handlaren betalar säljaren
+direkt.** Uppgiften kommer från användaren efter ett möte samma morgon.
+Juristens besked, så som användaren återgav det: han ser inga problem med
+väg C, den är renast, och även om väg A hade kunnat fungera föredrar han C
+för att slippa pengaströmmen genom bolaget.
+
+Underlaget han läste är artefakten "Betaltjänstfrågan för GuldBud"
+(https://claude.ai/artifact/LeHPVptjiJnEieVnc7tMX8), med flödet, lagrummet,
+de tre vägarna och elva numrerade frågor.
+
+**Så ser väg C ut:** GuldBud fakturerar enbart sin egen provision plus frakt
+till bolagets eget rörelsekonto. Handlaren betalar hela köpeskillingen direkt
+till säljarens bankkonto. Säljaren bekräftar i tjänsten att betalningen kommit.
+Först då skickas guldet vidare till handlaren. **GuldBud håller föremålet i
+stället för pengarna** och tar aldrig emot säljarens medel.
+
+**Följden som väger tyngst: kontoverifieringen är inte längre en punkt på
+listan, den är en förutsättning.** Under väg A märktes ett felaktigt
+kontonummer av att vår egen utbetalning studsade, och pengarna låg kvar hos
+oss. Under väg C betalar handlaren till ett konto vi aldrig kontrollerat. Är
+numret fel går pengarna till en främling, och vi står med guldet mitt i en
+tvist där pengarna är borta och felet inte är i vår hand. Öppna bank-API:et
+måste alltså finnas på plats innan väg C öppnas, inte efter.
+
+**Verksamhetsbeskrivningen fick klartecken samma dag.** Juristen hade inget
+att invända, och sa att en bredare formulering går lika bra och är att
+föredra. SNI-koden byts till 47.920, förmedling avseende specialiserad
+detaljhandel. Den gamla uppgiften i den här filen, 47.910, var fel: SCB:s
+definition av 47.910 undantar uttryckligen specialiserad detaljhandel.
+
+**Detta är inte besvarat och ska inte antas:** om beskedet finns skriftligt,
+om juristen svarade på fråga 9 och 10 (om GuldBud är verksamhetsutövare
+enligt penningtvättslagen i egen rätt, och om handel med begagnade varor
+kräver registrering av oss som förmedlare), om han ställde några villkor för
+väg C, och vad som ska hända med klientmedelskontot hos SEB, som väg C inte
+behöver för föremålsledet. Fråga användaren innan något av det påstås.
+
 **Investerardecken finns, 2026-09-08.** Artifact "GuldBud investerardeck"
 (https://claude.ai/code/artifact/df5ea3a9-733b-468e-b8ce-d9162b04c1b7), femton
 bilder i sajtens mörka espresso-och-guld, Playfair och Inter, plus PDF
