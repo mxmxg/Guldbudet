@@ -13,11 +13,21 @@
 // sms, tyst. Sms:et får aldrig stoppa mejlet: anroparen ignorerar utfallet
 // utöver loggning.
 //
-// API-kontraktet nedan (adress, basic auth, formulärfält from, to, message)
-// är skrivet ur minnet av 46elks dokumentation, som proxyn blockerade vid
-// bygget. Det första riktiga sms:et är testet av att det stämmer.
+// API-kontraktet är kontrollerat mot 46elks dokumentation "Send an SMS",
+// som användaren klistrade in 2026-09-15: POST till adressen nedan, basic
+// auth, formulärfälten from, to (E.164) och message som URL-kodad UTF-8.
+// Svaret är JSON med status, id, parts och cost, där cost anges i
+// tiotusendelar av kontots valuta (3500 = 0,35 kr).
+//
+// Längd: högst 160 tecken i en del om texten håller sig inom GSM 03.38, som
+// innehåller å, ä och ö. Därutöver 153 tecken per del. Texten i mejlrutten
+// är uppmätt till exakt 160 tecken med en 63 tecken lång affärslänk, så
+// varje ändring av den ska räknas om. Emoji ger UTF-16 och 70 tecken per
+// del, använd aldrig sådana.
 
 const ELKS_SMS_URL = 'https://api.46elks.com/a1/sms'
+
+export type SmsResult = { ok: true; id?: string; parts?: number; cost?: number } | { ok: false; detail: string }
 
 export function smsConfigured(): boolean {
   return !!(process.env.ELKS_API_USERNAME && process.env.ELKS_API_PASSWORD)
@@ -36,7 +46,7 @@ export function normalizeSwedishMobile(raw: string | null | undefined): string |
   return d
 }
 
-export async function sendSms(to: string, message: string): Promise<{ ok: boolean; detail?: string }> {
+export async function sendSms(to: string, message: string): Promise<SmsResult> {
   const user = process.env.ELKS_API_USERNAME
   const pass = process.env.ELKS_API_PASSWORD
   if (!user || !pass) return { ok: false, detail: 'not_configured' }
@@ -53,7 +63,8 @@ export async function sendSms(to: string, message: string): Promise<{ ok: boolea
       cache: 'no-store',
     })
     if (!res.ok) return { ok: false, detail: `${res.status} ${await res.text().catch(() => '')}` }
-    return { ok: true }
+    const j: any = await res.json().catch(() => null)
+    return { ok: true, id: j?.id, parts: j?.parts, cost: j?.cost }
   } catch (e: any) {
     return { ok: false, detail: String(e?.message || e) }
   }
