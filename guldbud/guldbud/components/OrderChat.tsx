@@ -30,7 +30,7 @@ export default function OrderChat({
   const [sending, setSending] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [sendError, setSendError] = useState('')
-  const endRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   const load = async () => {
     const { data } = await supabase
@@ -61,8 +61,15 @@ export default function OrderChat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, party])
 
+  // Skrolla bara chattrutan, aldrig sidan. Tidigare låg en tom div sist i
+  // listan och effekten anropade scrollIntoView på den. scrollIntoView
+  // skrollar varje skrollbar förälder, alltså även fönstret, så varje
+  // affärssida öppnades hoppad ner till chatten längst ner. Uppmätt i
+  // headless Chromium vid 390 px: window.scrollY 2211 före, 0 efter, med
+  // rutan i botten i båda fallen. scrollTop på behållaren rör bara den.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = listRef.current
+    if (el) el.scrollTop = el.scrollHeight
   }, [msgs.length])
 
   const send = async () => {
@@ -89,7 +96,7 @@ export default function OrderChat({
         </p>
       </div>
 
-      <div className="flex-1 max-h-80 overflow-y-auto p-4 flex flex-col gap-3">
+      <div ref={listRef} className="flex-1 max-h-80 overflow-y-auto p-4 flex flex-col gap-3">
         {!loaded ? (
           <div className="h-16 rounded-xl skeleton" />
         ) : msgs.length === 0 ? (
@@ -111,7 +118,6 @@ export default function OrderChat({
             )
           })
         )}
-        <div ref={endRef} />
       </div>
 
       {sendError && <p className="px-3 pt-2 text-xs text-red-600">{sendError}</p>}
