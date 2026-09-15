@@ -45,6 +45,9 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const [amlCumulative, setAmlCumulative] = useState<number | null>(null)
   const [amlNotes, setAmlNotes] = useState('')
   const [aml, setAml] = useState<any>(null)
+  // Sant när admin valt "Ändra beslut" på en redan granskad affär. Formuläret
+  // visas annars bara medan beslutet saknas.
+  const [amlEditing, setAmlEditing] = useState(false)
   const [payouts, setPayouts] = useState<any[]>([])
   const [payoutBusy, setPayoutBusy] = useState(false)
   const [payoutError, setPayoutError] = useState('')
@@ -154,7 +157,10 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         { onConflict: 'order_id' }
       )
     if (error) setSaveError('Kunde inte spara granskningen: ' + error.message)
-    else await loadOrder()
+    else {
+      await loadOrder()
+      setAmlEditing(false)
+    }
     setSaving(false)
   }
 
@@ -826,25 +832,67 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                   </p>
                 )}
 
-                <textarea
-                  value={amlNotes}
-                  onChange={(e) => setAmlNotes(e.target.value)}
-                  rows={2}
-                  placeholder="Anteckning om granskningen (sparas för dokumentation)"
-                  className="w-full text-sm mb-2"
-                />
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={() => updateAml('approved')} disabled={saving} className="btn-gold !py-1.5 text-sm">
-                    Godkänn
-                  </button>
-                  <button
-                    onClick={() => updateAml('flagged')}
-                    disabled={saving}
-                    className="text-sm text-red-500 hover:text-red-600 px-3 py-1.5 transition"
-                  >
-                    Flagga som misstänkt
-                  </button>
-                </div>
+                {/* Efter ett beslut visas beslutet, inte formuläret. Knapparna
+                    stod tidigare kvar även när chippen sa "Granskad och
+                    godkänd", så kortet såg ogjort ut. Beslutet går att ändra,
+                    men bakom ett eget steg, så ett felklick inte skriver över
+                    en granskning av misstag. */}
+                {(amlStatus === 'approved' || amlStatus === 'flagged') && !amlEditing ? (
+                  <div className="rounded-lg bg-espresso-50 px-3 py-2.5">
+                    <p className="text-sm text-espresso-800">
+                      {amlStatus === 'approved' ? 'Godkänd' : 'Flaggad som misstänkt'}
+                      {aml?.aml_reviewed_at
+                        ? ` ${new Date(aml.aml_reviewed_at).toLocaleString('sv-SE', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          })}`
+                        : ''}
+                    </p>
+                    {aml?.aml_notes && (
+                      <p className="text-sm text-espresso-600 mt-1 whitespace-pre-wrap break-words">{aml.aml_notes}</p>
+                    )}
+                    <button
+                      onClick={() => setAmlEditing(true)}
+                      className="text-xs text-espresso-500 hover:text-espresso-800 underline mt-2 transition"
+                    >
+                      Ändra beslut
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <textarea
+                      value={amlNotes}
+                      onChange={(e) => setAmlNotes(e.target.value)}
+                      rows={2}
+                      placeholder="Anteckning om granskningen (sparas för dokumentation)"
+                      className="w-full text-sm mb-2"
+                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button onClick={() => updateAml('approved')} disabled={saving} className="btn-gold !py-1.5 text-sm">
+                        Godkänn
+                      </button>
+                      <button
+                        onClick={() => updateAml('flagged')}
+                        disabled={saving}
+                        className="text-sm text-red-500 hover:text-red-600 px-3 py-1.5 transition"
+                      >
+                        Flagga som misstänkt
+                      </button>
+                      {amlEditing && (
+                        <button
+                          onClick={() => {
+                            setAmlEditing(false)
+                            setAmlNotes(aml?.aml_notes || '')
+                          }}
+                          disabled={saving}
+                          className="text-sm text-espresso-500 hover:text-espresso-800 px-3 py-1.5 transition"
+                        >
+                          Avbryt
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             )
           })()}
