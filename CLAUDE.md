@@ -183,10 +183,9 @@ och innan du påstår något om bolagets status.
   klientmedelskontot är båda giltiga SEB-nummer, så en checksumma skiljer
   dem aldrig åt. Verifiera kontonummer mot bankens papper, aldrig bara mot
   mod-11.
-- Faktura och banköverföring, inte Stripe, beslutat 2026-09-01. Admin
-  prickar av GuldBuds faktura manuellt (`fee_paid_at`). Kortflödet ligger
-  kvar vilande i koden men räknar fortfarande på hela summan (`dealerTotal`),
-  så det får inte slås på utan att byggas om för väg C.
+- Faktura och banköverföring, beslutat 2026-09-01. Admin prickar av
+  GuldBuds faktura manuellt (`fee_paid_at`). Kortflödet (Stripe) är rivet
+  2026-09-15, det finns inga kortbetalningar.
 - **Swish är struket, 2026-09-04, och koden riven 2026-09-15.** Uppgiften
   kommer från användaren: "Swish utbetalningar" gick inte att koppla till
   klientmedelskontot, och avtalet med SEB tecknas därför inte. Säljaren får
@@ -200,16 +199,17 @@ och innan du påstår något om bolagets status.
 **Leverantörer**
 
 - Vercel (drift), Supabase (databas, auth, lagring)
-- Stripe (kortbetalning), **vilande sedan beslutet 2026-09-01** att lansera
-  med faktura och banköverföring. Kontot är godkänt i kategorin ädelmetaller
-  och testnycklar ligger kvar i Vercel, men inga skarpa nycklar ska läggas in
-  och ingen live-webhook sättas upp utan nytt beslut. Skälet till bytet:
-  avgiften 1,5 procent tas på hela summan handlaren betalar, vilket räknat
-  mot `lib/fees.ts` äter 15 till 20 procent av GuldBuds intäkt exklusive
-  moms, och banköverföring saknar chargebacks. Koden och API-rutterna ligger
-  kvar orörda som option.
-- Direkt banköverföring är planen på sikt, men **ingen sådan leverantör är
-  inkopplad**. Brite-adaptern togs bort 2026-08-30, se beslutsloggen.
+- **Stripe är borta ur bygget 2026-09-15**, på användarens instruktion.
+  Kortflödet lades vilande 2026-09-01 (avgiften 1,5 procent på hela summan
+  åt 15 till 20 procent av intäkten, och banköverföring saknar
+  chargebacks) och är nu rivet: `lib/payments/`, båda betalrutterna och de
+  tre kolumnerna `payment_provider`, `payment_reference`, `payment_status`.
+  Stripe-kontot finns kvar hos Stripe och de fyra `STRIPE_`-variablerna
+  ligger kvar i Vercel utan läsare; båda är användarens att avveckla.
+  Det finns inga kortbetalningar i GuldBud.
+- Ingen betalleverantör är inkopplad, och under väg C behövs ingen:
+  handlaren betalar med banköverföring, till säljaren och till GuldBud.
+  Brite-adaptern togs bort 2026-08-30, se beslutsloggen.
 - Resend (transaktionsmejl), Zoho (mänsklig inkorg)
 - Anthropic (AI-värdering), Trustpilot (omdömen), PostNord (rekommenderat
   brev med kundavtal)
@@ -332,10 +332,10 @@ Läs det här innan du börjar leta i koden. Allt nedan är läst i repot.
 | Katalog | Vad som finns där |
 |---|---|
 | `app/` | 50 sidor plus 12 API-rutter. App Router |
-| `app/api/` | payments, bankid, notify-email, gold-price, suggest-listing, orders, admin |
+| `app/api/` | bankid, notify-email, gold-price, suggest-listing, orders, admin, share-image |
 | `app/guider/` | 20 SEO-artiklar, alla byggda på `components/GuideShell.tsx` |
 | `components/` | 40 komponenter |
-| `lib/` | 21 filer. `fees`, `orders`, `aml`, `terms`, `payments/`, `pdf/`, `idura` |
+| `lib/` | `fees`, `orders`, `aml`, `terms`, `identityRelease`, `loginUrl`, `pdf/`, `idura` |
 | `supabase-schema.sql` | 1694 rader. Tabeller, RLS, triggers, spärrar, cron |
 
 **Var behörigheten faktiskt sitter**
@@ -566,8 +566,12 @@ En `NEXT_PUBLIC_`-variabel kan aldrig vara hemlig, och den läses vid bygget.
 **Hemliga**: `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`,
 `EMAIL_WEBHOOK_SECRET`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `TRUSTPILOT_AFS_BCC`,
 `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `IDURA_DOMAIN`, `IDURA_CLIENT_ID`,
-`IDURA_CLIENT_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_API_BASE`,
-`STRIPE_WEBHOOK_SECRET`, `STRIPE_CURRENCY`.
+`IDURA_CLIENT_SECRET`.
+
+**Fyra `STRIPE_`-variabler ligger kvar i Vercel utan att någon kod läser
+dem:** `STRIPE_SECRET_KEY`, `STRIPE_API_BASE`, `STRIPE_WEBHOOK_SECRET` och
+`STRIPE_CURRENCY`. Kortflödet är borttaget 2026-09-15. De ska raderas av
+användaren, tillsammans med de sex `SWISH_`-variablerna nedan.
 
 **Sex `SWISH_`-variabler ligger kvar i Vercel Production utan att någon kod
 läser dem:** `SWISH_TLS_CERT`, `SWISH_TLS_KEY`, `SWISH_SIGNING_CERT`,
@@ -1085,10 +1089,10 @@ Så här ligger det i koden:
 - Fakturans finstilta har betalningsvillkoret: omgående, via banköverföring,
   märkt med referensen. Speglad i båda fakturafilerna, ändrade på
   användarens uttryckliga instruktion (spärrade filer).
-- **Kortflödet är vilande, inte borttaget:** `lib/payments/`, båda
-  betalrutterna och beloppskontrollen ligger kvar orörda. Utan skarpa nycklar
-  öppnas ingen kortbetalning. Riv inget av det utan beslut, och lägg inte in
-  skarpa Stripe-nycklar utan nytt beslut.
+- **Kortflödet var vilande fram till 2026-09-15 och är nu borttaget** på
+  användarens instruktion: `lib/payments/`, båda betalrutterna,
+  beloppskontrollen och de tre kolumnerna. Beslutsposterna nedan om
+  callbacken, dubbla sessioner och `amount_mismatch` är historik.
 - Med manuell avprickning är det admin som är beloppskontrollen. Vid volym
   över ungefär femtio affärer i månaden bör avprickningen automatiseras
   via bankkoppling.
@@ -1454,6 +1458,8 @@ ombyggt i kod, databas och mejl. Så här är det gjort och varför:
   PostgREST svarar med fel på en kolumn som inte finns, så parterna hade fått
   "Affären hittades inte". Migreringen ska vara körd före mergen. Vid
   bygget låg Supabase nere för underhåll, se nästa post för utfallet.
+- **Stripe revs i samma ändring**, på användarens "Rensa bort stripe från
+  hela bygget också". Se leverantörsavsnittet.
 - **Utanför den här ändringen, och kvar att göra:** de publika texterna
   (startsidan, så fungerar det, guiderna, inlämningsformuläret, FAQ) säger
   fortfarande att GuldBud betalar ut inom 24 timmar. Villkoren (spärrade)

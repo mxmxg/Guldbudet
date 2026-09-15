@@ -880,9 +880,9 @@ alter table public.orders add column if not exists cancel_reason text;
 -- Handlarens inbetalning: leverantörsagnostisk referens + status för
 -- handlarens inbetalning. dealer_paid_at sätts automatiskt när callbacken
 -- bekräftar en lyckad betalning; admin kan fortfarande sätta den manuellt.
-alter table public.orders add column if not exists payment_provider text;
-alter table public.orders add column if not exists payment_reference text;
-alter table public.orders add column if not exists payment_status text; -- 'pending' | 'paid' | 'failed'
+-- payment_provider, payment_reference och payment_status hörde till kortflödet
+-- (Stripe) och är borttagna 2026-09-15 tillsammans med koden. Väg C har inga
+-- kortbetalningar.
 -- Retur/kreditering: när ett föremål inte godkänns vid kontroll (fake/stämmer ej).
 alter table public.orders add column if not exists refunded_at timestamptz;
 alter table public.orders add column if not exists refund_reason text;

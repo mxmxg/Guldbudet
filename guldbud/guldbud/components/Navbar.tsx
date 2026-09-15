@@ -34,7 +34,7 @@ export default function Navbar() {
     let channel: any = null
     let cancelled = false
     // getSession() förnyar en utgången token och överlever en kall sidladdning
-    // (t.ex. återkomst från Stripe), till skillnad från getUser() som då kan
+    // (t.ex. återkomst från en extern sida), till skillnad från getUser() som då kan
     // returnera null och få navbaren att felaktigt visa utloggat.
     supabase.auth.getSession().then(async ({ data }) => {
       const sessionUser = data.session?.user

@@ -4,7 +4,7 @@
 
 Sajten renderar ordmärket som text (`components/Logo.tsx`), så det finns ingen
 bildfil i själva gränssnittet. Filerna här är för externa tjänster som kräver en
-uppladdad logotyp, t.ex. Stripe Checkout.
+uppladdad logotyp.
 
 - `guldbud-logo-gold.png`, ordmärket i guld, genomskinlig botten, beskuret till
   bokstäverna. För mörkt underlag. Detta är standardvalet.

@@ -24,15 +24,21 @@ De här hänger ihop. Ingen riktig affär får släppas igenom förrän alla är
       dokumenten redan använde. Den gamla, c/o DIX Revision AB,
       Kvarnvingevägen 2 i Järfälla, gäller inte längre. Ingen kodändring
       behövdes.
-- [ ] **Klientmedelskonto hos SEB.** Inte skapat. Handlarens betalning ska tas
-      emot avskilt från bolagets egna medel, och Stripes utbetalningar ska gå
-      dit, inte till rörelsekontot. Görs det inte hamnar de första riktiga
-      utbetalningarna fel, vilket är precis den sammanblandning upplägget ska
-      förhindra.
-- [ ] **Skarpa Stripe-nycklar.** Testnycklar ligger i Vercel sedan 2026-08-26.
-      Byt `STRIPE_SECRET_KEY` och sätt upp webhooken skarpt, så att
-      `STRIPE_WEBHOOK_SECRET` matchar. Betalningen öppnas inte alls utan båda,
-      med avsikt: en betalning som inte kan kvitteras är värre än ingen.
+- [x] **Betalflödet är väg C sedan 2026-09-15.** Handlaren betalar
+      köpeskillingen direkt till säljarens bankkonto och GuldBuds faktura till
+      rörelsekontot 5232 10 078 77. GuldBud tar aldrig emot säljarens pengar.
+      Klientmedelskontot (öppnat 2026-09-01) används inte i flödet; vad som
+      ska hända med det hos SEB är inte avgjort. Stripe är borttaget ur
+      bygget.
+- [ ] **Kontoverifiering via öppen bank-API.** Lanseringsspärr under väg C:
+      handlaren betalar till ett konto vi annars aldrig kontrollerat.
+      Leverantör (Tink Account Check eller Finshark) inte vald, inget avtal.
+      Tills dess är kontot säljarens egen uppgift och admin kontrollerar det
+      mot BankID-namnet i affärsvyn innan handlaren betalar.
+- [ ] **Publika texter och villkoren för väg C.** Startsidan, så fungerar det,
+      guiderna, FAQ och inlämningsformuläret säger fortfarande att GuldBud
+      betalar ut inom 24 timmar, och villkoren beskriver väg A. Nästa PR,
+      beslutad 2026-09-15.
 - [ ] **BankID skarpt.** Tre saker samma dag, annars säger klienten och
       databasen olika saker:
       1. Skarp `IDURA_DOMAIN` och `NEXT_PUBLIC_BANKID_ENABLED=true` i Vercel,
@@ -46,8 +52,9 @@ De här hänger ihop. Ingen riktig affär får släppas igenom förrän alla är
 
 ## Städning i Vercel
 
-- [ ] **Ta bort `PAYMENT_PROVIDER` och de sex `BRITE_`-variablerna.** Brite är
-      borttagen ur koden, så de läses inte längre av någonting.
+- [ ] **Ta bort variabler som ingen kod läser:** `PAYMENT_PROVIDER` och de sex
+      `BRITE_` (Brite borttagen 2026-08-30), de sex `SWISH_` (Swish borttaget
+      2026-09-15) och de fyra `STRIPE_` (Stripe borttaget 2026-09-15).
 
 ---
 

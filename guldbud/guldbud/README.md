@@ -41,8 +41,8 @@ SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 Utan de övriga stängs funktioner av på ett kontrollerat sätt i stället för att
-gå sönder: betalningen svarar 503 utan Stripe-nycklar, AI-förslaget döljs utan
-`ANTHROPIC_API_KEY`, och BankID svarar `ej_konfigurerad` utan Idura-variablerna.
+gå sönder: AI-förslaget döljs utan `ANTHROPIC_API_KEY`, och BankID svarar
+`ej_konfigurerad` utan Idura-variablerna.
 
 ### 4. Kör lokalt
 
@@ -128,8 +128,8 @@ lib/
   orders.ts        statusstegen i en affär
   identity.ts      personnummer och BankID-flaggan
   gold.ts          guldvärde och kursberäkning
-  company.ts       bolagsuppgifterna
-  payments/        betalleverantören, Stripe
+  company.ts       bolagsuppgifterna och rörelsekontot
+  identityRelease.ts när säljarens uppgifter får lämnas ut till handlaren
   pdf/             dokumenten som PDF
 
 supabase-schema.sql   tabeller, RLS, triggers, spärrar, cron
@@ -152,6 +152,5 @@ policy ändrar du säkerheten. Ändrar du en klientgrind ändrar du bekvämlighe
 - Tailwind CSS
 - Supabase: databas, auth, lagring
 - Vercel: drift
-- Stripe: kortbetalning
 - Resend: transaktionsmejl
 - BankID via Idura, OIDC med PKCE

@@ -250,7 +250,6 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         // betala ut säljaren på redan återbetalda pengar).
         dealer_paid_at: null,
         fee_paid_at: null,
-        payment_status: null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', order.id)
@@ -275,7 +274,6 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         // aldrig ärva ett gammalt (återbetalt) dealer_paid_at.
         dealer_paid_at: null,
         fee_paid_at: null,
-        payment_status: null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', order.id)
