@@ -19,7 +19,7 @@ export default function DealerTermsPage() {
         {
           heading: 'Vem som får vara handlare',
           body: [
-            'Tjänsten tillhandahålls av GuldBud AB, org.nr 559291-4781, nedan kallat GuldBud.',
+            'Tjänsten tillhandahålls av Guldbud Sverige AB, org.nr 559291-4781, nedan kallat GuldBud.',
             'För att bli handlare på GuldBud ska du vara en registrerad näringsidkare med giltigt organisationsnummer och ha rätt att bedriva den handel som din verksamhet omfattar.',
             'Du ansvarar själv för att inneha och vidmakthålla de registreringar, tillstånd och övriga krav som gäller för din verksamhet, inklusive registrering för handel med begagnade varor hos Polismyndigheten där sådan registrering krävs, samt eventuella skyldigheter enligt penningtvättsregelverket.',
             'Handlarkonton granskas och godkänns manuellt utifrån organisationsnummer och företagsuppgifter. GuldBud kan avslå en ansökan eller återkalla ett godkännande när detta är motiverat av tjänstens säkerhet, regelefterlevnad eller riskhantering.',

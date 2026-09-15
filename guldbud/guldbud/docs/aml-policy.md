@@ -1,6 +1,6 @@
 # Rutin mot penningtvätt och finansiering av terrorism
 
-**GuldBud AB, org.nr 559291-4781**
+**Guldbud Sverige AB, org.nr 559291-4781**
 
 > **UTKAST.** Detta är ett arbetsutkast framtaget för att spegla hur GuldBud
 > faktiskt fungerar. Det ska granskas och anpassas av en compliance- eller
@@ -20,7 +20,7 @@
 
 ## 1. Syfte och omfattning
 
-Denna rutin beskriver hur GuldBud AB ("GuldBud") arbetar för att förhindra att
+Denna rutin beskriver hur Guldbud Sverige AB ("GuldBud") arbetar för att förhindra att
 verksamheten utnyttjas för penningtvätt eller finansiering av terrorism, och för
 att stöldgods inte ska omsättas via plattformen.
 
