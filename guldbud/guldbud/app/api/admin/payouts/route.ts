@@ -1,18 +1,10 @@
-import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteClient } from '@/lib/supabase-route'
-import {
-  swishPayoutsConfigured,
-  createSwishPayout,
-  newInstructionUuid,
-  normalizeSwishAlias,
-} from '@/lib/payouts/swishPayout'
-import { normalizeSsn } from '@/lib/identity'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// POST /api/admin/payouts  { orderId, method: 'swish' | 'bank_transfer' }
+// POST /api/admin/payouts  { orderId, method: 'bank_transfer' }
 //
 // Registrerar en utbetalning till säljaren. Samma grindar som databasens
 // utbetalningsspärr, kontrollerade här också eftersom utbetalningen lämnar
@@ -22,10 +14,9 @@ export const dynamic = 'force-dynamic'
 // Revisionsraden i payouts skrivs INNAN pengarna skickas. Kan den inte
 // skrivas sker ingen utbetalning, samma princip som identity_disclosures.
 //
-// method 'bank_transfer': admin intygar att banköverföringen är gjord i
-// internetbanken, raden bokförs direkt som betald.
-// method 'swish': anropet går till Swish Payouts-API. Raden står som
-// initiated tills callbacken verifierats, se /api/payouts/swish-callback.
+// Banköverföring är enda metoden: admin intygar att överföringen är gjord i
+// internetbanken, och raden bokförs direkt som betald. Swish är struket och
+// koden borttagen 2026-09-15, se beslutsloggen.
 
 function ref(orderNo?: number | null) {
   return 'GB-' + String(orderNo ?? 0).padStart(6, '0')
@@ -62,7 +53,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}))
   const orderId: string = body?.orderId
   const method: string = body?.method
-  if (!orderId || (method !== 'swish' && method !== 'bank_transfer')) {
+  if (!orderId || method !== 'bank_transfer') {
     return NextResponse.json({ error: 'bad_request' }, { status: 400 })
   }
 
@@ -101,8 +92,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'payout_exists', status: existing[0].status }, { status: 409 })
   }
 
+  // Kontrollerar bara att säljaren finns. Kontouppgifterna läser admin i
+  // affärsvyn innan överföringen görs, de skickas inte härifrån.
   const sellerRes = await fetch(
-    `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(order.seller_id)}&select=payout_swish,verified_ssn,personal_number`,
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${encodeURIComponent(order.seller_id)}&select=id`,
     { headers, cache: 'no-store' }
   )
   const sellers = await sellerRes.json().catch(() => [])
@@ -111,64 +104,17 @@ export async function POST(req: NextRequest) {
 
   const reference = ref(order.order_no)
 
-  if (method === 'bank_transfer') {
-    const insertRes = await fetch(`${supabaseUrl}/rest/v1/payouts`, {
-      method: 'POST',
-      headers: { ...headers, Prefer: 'return=representation' },
-      body: JSON.stringify({
-        order_id: order.id,
-        amount: order.amount,
-        method: 'bank_transfer',
-        status: 'paid',
-        reference,
-        created_by: user.id,
-        paid_at: new Date().toISOString(),
-      }),
-      cache: 'no-store',
-    })
-    if (!insertRes.ok) {
-      const detail = await insertRes.text().catch(() => '')
-      return NextResponse.json({ error: 'payout_log_failed', detail }, { status: 502 })
-    }
-    return NextResponse.json({ ok: true, status: 'paid' })
-  }
-
-  // method === 'swish'
-  if (!swishPayoutsConfigured()) {
-    return NextResponse.json({ error: 'swish_not_configured' }, { status: 503 })
-  }
-  const payeeAlias = normalizeSwishAlias(seller.payout_swish)
-  if (!payeeAlias) {
-    return NextResponse.json({ error: 'missing_swish_number' }, { status: 409 })
-  }
-  // Swish matchar utbetalningen mot mottagarens personnummer. BankID-numret
-  // (verified_ssn) är förstahandskällan; det självdeklarerade är reserven
-  // tills BankID är skarpt.
-  const payeeSSN = normalizeSsn(seller.verified_ssn) || normalizeSsn(seller.personal_number)
-  if (!payeeSSN) {
-    return NextResponse.json({ error: 'missing_ssn' }, { status: 409 })
-  }
-
-  const instructionUuid = newInstructionUuid()
-  // Hemlig nyckel som Swish returnerar i callbackens huvud, callbacken
-  // avvisas om den inte matchar. Ett vanligt uuid uppfyller formatkravet
-  // (32-36 alfanumeriska tecken eller bindestreck).
-  const callbackIdentifier = crypto.randomUUID()
-
-  // Revisionsraden först. Går den inte att skriva skickas inga pengar.
   const insertRes = await fetch(`${supabaseUrl}/rest/v1/payouts`, {
     method: 'POST',
     headers: { ...headers, Prefer: 'return=representation' },
     body: JSON.stringify({
       order_id: order.id,
       amount: order.amount,
-      method: 'swish',
-      status: 'initiated',
-      payee_alias: payeeAlias,
+      method: 'bank_transfer',
+      status: 'paid',
       reference,
-      instruction_uuid: instructionUuid,
-      callback_identifier: callbackIdentifier,
       created_by: user.id,
+      paid_at: new Date().toISOString(),
     }),
     cache: 'no-store',
   })
@@ -176,35 +122,5 @@ export async function POST(req: NextRequest) {
     const detail = await insertRes.text().catch(() => '')
     return NextResponse.json({ error: 'payout_log_failed', detail }, { status: 502 })
   }
-
-  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://guldbud.com'
-  const result = await createSwishPayout({
-    instructionUuid,
-    payerPaymentReference: reference,
-    payeeAlias,
-    payeeSSN,
-    amount: Number(order.amount),
-    message: `GuldBud utbetalning ${reference}`,
-    callbackUrl: `${site}/api/payouts/swish-callback`,
-    callbackIdentifier,
-  })
-
-  if (!result.ok) {
-    await fetch(`${supabaseUrl}/rest/v1/payouts?instruction_uuid=eq.${instructionUuid}`, {
-      method: 'PATCH',
-      headers,
-      body: JSON.stringify({
-        status: 'failed',
-        error_code: result.errorCode || String(result.status),
-        error_message: result.errorMessage || null,
-      }),
-      cache: 'no-store',
-    })
-    return NextResponse.json(
-      { error: 'swish_rejected', errorCode: result.errorCode, errorMessage: result.errorMessage },
-      { status: 502 }
-    )
-  }
-
-  return NextResponse.json({ ok: true, status: 'initiated' })
+  return NextResponse.json({ ok: true, status: 'paid' })
 }

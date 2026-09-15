@@ -41,9 +41,8 @@ alter table public.profiles add column if not exists identity_verified boolean n
 alter table public.profiles add column if not exists verified_name text;
 alter table public.profiles add column if not exists verified_ssn text;
 alter table public.profiles add column if not exists identity_verified_at timestamptz;
--- Utbetalningsuppgifter för säljare: bankkonto. payout_swish är en kvarleva från tiden med Swish som alternativ, används inte längre.
+-- Utbetalningsuppgifter för säljare: bankkonto är enda vägen. payout_method finns kvar som kvarleva och sätts alltid till 'bank'.
 alter table public.profiles add column if not exists payout_method text;
-alter table public.profiles add column if not exists payout_swish text;
 alter table public.profiles add column if not exists payout_bank_clearing text;
 alter table public.profiles add column if not exists payout_bank_account text;
 -- Avstängning: en handlare som backar från ett vunnet bud stängs av och kan inte buda.
@@ -1997,28 +1996,23 @@ grant execute on function public.item_seller_verified(uuid) to anon, authenticat
 -- Utbetalningar till säljare. Skapad 2026-09-01, körd mot databasen samma dag.
 --
 -- Raden skrivs INNAN pengarna skickas, samma princip som identity_disclosures:
--- kan revisionsspåret inte skrivas sker ingen utbetalning. method 'swish' går
--- via Swish utbetalningar (Payouts-API), 'bank_transfer' är en manuell
--- banköverföring som admin intygar. instruction_uuid är Swish
--- payoutInstructionUUID och unik, så samma instruktion aldrig kan skickas två
--- gånger. Bara admin läser och skriver via klienten; callbacken uppdaterar
--- med servicerollen.
+-- kan revisionsspåret inte skrivas sker ingen utbetalning. 'bank_transfer' är
+-- enda metoden: en manuell banköverföring som admin intygar. Bara admin läser
+-- och skriver via klienten.
+--
+-- Swish är struket och koden borttagen 2026-09-15. Kolumnerna payee_alias,
+-- instruction_uuid och callback_identifier hörde till Swish och är
+-- borttagna, se beslutsloggen.
 -- ===========================================================================
 create table if not exists public.payouts (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references public.orders on delete cascade,
   amount numeric(12,2) not null check (amount > 0),
-  method text not null check (method in ('swish', 'bank_transfer')),
+  method text not null check (method in ('bank_transfer')),
   status text not null default 'initiated' check (status in ('initiated', 'paid', 'failed')),
-  payee_alias text,
   reference text,
-  instruction_uuid text unique,
   error_code text,
   error_message text,
-  -- Hemlig per-anrop-nyckel som Swish returnerar oförändrad i callbackens
-  -- HTTP-huvud. Callbacken avvisas om huvudet inte matchar raden, Swish egen
-  -- rekommendation för att verifiera att callbacken kommer från dem.
-  callback_identifier text,
   created_by uuid references public.profiles on delete set null,
   created_at timestamptz not null default now(),
   paid_at timestamptz

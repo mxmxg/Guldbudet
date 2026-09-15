@@ -24,7 +24,6 @@ Officiella logotyper för trygghetsmärkning på startsidan.
 Lägg filerna här med exakt dessa namn (så refererar koden dem rätt):
 
 - `bankid-white.png`, BankID, vit version (för mörk bakgrund)
-- `swish.png`, Swish-symbolen (färg)
 
-Källor: bankid.com respektive swish.nu (officiella varumärkesportaler).
-Visas eftersom GuldBud använder tjänsterna (BankID-verifiering + Swish-utbetalning).
+Källa: bankid.com (officiell varumärkesportal).
+Visas eftersom GuldBud använder tjänsten för legitimering.

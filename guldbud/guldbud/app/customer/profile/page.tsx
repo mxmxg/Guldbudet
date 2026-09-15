@@ -27,7 +27,6 @@ export default function CustomerProfilePage() {
     postal_code: '',
     city: '',
     payout_method: 'bank',
-    payout_swish: '',
     payout_bank_clearing: '',
     payout_bank_account: '',
   })
@@ -63,7 +62,6 @@ export default function CustomerProfilePage() {
       postal_code: prof.postal_code || '',
       city: prof.city || '',
       payout_method: 'bank',
-      payout_swish: prof.payout_swish || '',
       payout_bank_clearing: prof.payout_bank_clearing || '',
       payout_bank_account: prof.payout_bank_account || '',
     })
@@ -110,17 +108,16 @@ export default function CustomerProfilePage() {
         address: form.address || null,
         postal_code: form.postal_code || null,
         city: form.city || null,
-        // Bankkonto är enda utbetalningsvägen sedan 2026-09-01. payout_swish
-        // nollas så en gammal Swish-uppgift inte ligger kvar som om den gällde.
+        // Bankkonto är enda utbetalningsvägen. Kolumnen finns kvar som
+        // kvarleva och sparas alltid som 'bank'.
         payout_method: 'bank',
-        payout_swish: null,
         payout_bank_clearing: clearing || null,
         payout_bank_account: account || null,
       })
       .eq('id', profile.id)
     if (error) setMsg({ ok: false, text: error.message })
     else {
-      setProfile((p: any) => ({ ...p, ...form, payout_method: 'bank', payout_swish: '' }))
+      setProfile((p: any) => ({ ...p, ...form, payout_method: 'bank' }))
       // Kom man hit från listningen och profilen nu är komplett, skicka tillbaka
       // dit så flödet inte bryts.
       const addressOk = !!(form.address && form.postal_code && form.city)
