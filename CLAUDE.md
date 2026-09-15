@@ -211,6 +211,15 @@ och innan du påstår något om bolagets status.
   handlaren betalar med banköverföring, till säljaren och till GuldBud.
   Brite-adaptern togs bort 2026-08-30, se beslutsloggen.
 - Resend (transaktionsmejl), Zoho (mänsklig inkorg)
+- **46elks (sms), valt av användaren 2026-09-15.** Ett enda sms: till
+  handlaren när föremålet markeras som mottaget och kontrollerat, utan
+  kontonummer. Pris 52 öre per sms-del och 0 kr för API-tjänsten, läst på
+  46elks prissida i användarens skärmdump. SMSAPI (LINK Mobility) låg på
+  0,044 euro enligt deras prislista, Twilio på 0,0609 dollar; priset avgjorde
+  inte, det gjorde att 46elks är svenskt och saknar månadsgolv. Konto och
+  nycklar är användarens. Kvar att fråga 46elks: hur avsändarnamnet
+  registreras mot operatörerna när PTS öppnar för det, planerat till början
+  av 2027 enligt sökträffar från PTS och Riksdagen.
 - Anthropic (AI-värdering), Trustpilot (omdömen), PostNord (rekommenderat
   brev med kundavtal)
 - BankID via Idura och Criipto. Ligger i testläge och slås på först på
@@ -566,7 +575,11 @@ En `NEXT_PUBLIC_`-variabel kan aldrig vara hemlig, och den läses vid bygget.
 **Hemliga**: `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`,
 `EMAIL_WEBHOOK_SECRET`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `TRUSTPILOT_AFS_BCC`,
 `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `IDURA_DOMAIN`, `IDURA_CLIENT_ID`,
-`IDURA_CLIENT_SECRET`.
+`IDURA_CLIENT_SECRET`, `ELKS_API_USERNAME`, `ELKS_API_PASSWORD`.
+
+**`SMS_SENDER`** är valfri, avsändarnamnet i sms, standard `GuldBud`. Saknas
+`ELKS_API_USERNAME` eller `ELKS_API_PASSWORD` skickas inget sms, tyst, och
+mejlet går som vanligt. Sms:et kan aldrig stoppa mejlet.
 
 **Fyra `STRIPE_`-variabler ligger kvar i Vercel utan att någon kod läser
 dem:** `STRIPE_SECRET_KEY`, `STRIPE_API_BASE`, `STRIPE_WEBHOOK_SECRET` och
