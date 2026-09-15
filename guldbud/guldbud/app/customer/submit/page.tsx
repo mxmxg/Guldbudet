@@ -2,6 +2,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { loginUrl } from '@/lib/loginUrl'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
@@ -77,7 +78,7 @@ export default function SubmitPage() {
       } = await supabase.auth.getSession()
       const user = session?.user
       if (!user) {
-        router.push('/auth/login')
+        router.push(loginUrl())
         return
       }
       const { data: prof } = await supabase
@@ -254,7 +255,7 @@ export default function SubmitPage() {
     const user = session?.user
     if (!user) {
       setLoading(false)
-      router.push('/auth/login')
+      router.push(loginUrl())
       return
     }
 

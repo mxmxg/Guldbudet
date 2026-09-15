@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { loginUrl } from '@/lib/loginUrl'
 import { Item } from '@/lib/types'
 import { loadActiveItemsWithStats } from '@/lib/auctions'
 import Navbar from '@/components/Navbar'
@@ -52,7 +53,7 @@ export default function DealerDashboard() {
     } = await supabase.auth.getSession()
     const user = session?.user
     if (!user) {
-      router.push('/auth/login?role=dealer')
+      router.push(loginUrl('dealer'))
       return
     }
 

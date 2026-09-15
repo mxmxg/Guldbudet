@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { loginUrl } from '@/lib/loginUrl'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
@@ -55,7 +56,7 @@ export default function AdminPage() {
       } = await supabase.auth.getSession()
       const user = session?.user
       if (!user) {
-        router.push('/auth/login')
+        router.push(loginUrl())
         return
       }
 
