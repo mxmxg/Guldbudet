@@ -186,13 +186,15 @@ och innan du påstår något om bolagets status.
   klientmedelskontot med ordernumret som referens, och admin prickar av
   betalningen manuellt. Kortflödet ligger kvar vilande i koden. Se
   beslutsloggen.
-- **Swish är struket, 2026-09-04.** Uppgiften kommer från användaren:
-  "Swish utbetalningar" gick inte att koppla till klientmedelskontot, och
-  avtalet med SEB tecknas därför inte. Säljaren får betalt till bankkonto.
-  Koden ligger kvar vilande, se beslutsloggen. Löftet om Swish är borta ur
-  produkten sedan 2026-09-04: alla texter, loggorna, profilen, mejlrutten och
-  databasens notistexter säger bankkonto. Clearing- och kontonummer är den
-  enda utbetalningsuppgiften och krävs för att lägga ut föremål.
+- **Swish är struket, 2026-09-04, och koden riven 2026-09-15.** Uppgiften
+  kommer från användaren: "Swish utbetalningar" gick inte att koppla till
+  klientmedelskontot, och avtalet med SEB tecknas därför inte. Säljaren får
+  betalt till bankkonto. Löftet om Swish är borta ur produkten sedan
+  2026-09-04: alla texter, loggorna, profilen, mejlrutten och databasens
+  notistexter säger bankkonto. Sedan 2026-09-15 finns ingen Swish-kod,
+  inga Swish-kolumner och inget Swish-värde i databasen, se beslutsloggen.
+  Clearing- och kontonummer är den enda utbetalningsuppgiften och krävs för
+  att lägga ut föremål.
 
 **Leverantörer**
 
@@ -546,21 +548,13 @@ En `NEXT_PUBLIC_`-variabel kan aldrig vara hemlig, och den läses vid bygget.
 `IDURA_CLIENT_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_API_BASE`,
 `STRIPE_WEBHOOK_SECRET`, `STRIPE_CURRENCY`.
 
-**Swish utbetalningar, sätts när certifikaten finns:** `SWISH_TLS_CERT`,
-`SWISH_TLS_KEY`, `SWISH_SIGNING_CERT`, `SWISH_SIGNING_KEY` (alla fyra är
-Base64-kodade PEM-strängar), `SWISH_PAYER_ALIAS` (bolagets Swish-nummer) och
-`SWISH_PAYOUT_API_BASE` (MSS `https://mss.cpc.getswish.net` i test, utelämnas
-i produktion där koden defaultar till `https://cpc.getswish.net`). Saknas
-någon av dem svarar utbetalningsrutten 503 och admin faller tillbaka på
-banköverföring, ingenting går sönder. **`SWISH_TLS_CERT` måste innehålla hela
-certifikatkedjan**, inte bara lövcertet, annars avvisar Swish handskakningen
-med alert 40. Lärt den hårda vägen mot MSS 2026-09-01.
-
-**Läget 2026-09-04:** alla sex ligger i Vercel Production med Swish
-offentliga testcertifikat och MSS-basen, inlagda för att prova adminknappen
-mot testmiljön. Knappen är borttagen sedan Swish ströks, så variablerna gör
-ingenting, men de ska raderas av användaren. Läs aldrig deras närvaro som att
-Swish-utbetalningar är i drift.
+**Sex `SWISH_`-variabler ligger kvar i Vercel Production utan att någon kod
+läser dem:** `SWISH_TLS_CERT`, `SWISH_TLS_KEY`, `SWISH_SIGNING_CERT`,
+`SWISH_SIGNING_KEY`, `SWISH_PAYER_ALIAS` och `SWISH_PAYOUT_API_BASE`. De
+lades in 2026-09-04 med Swish offentliga testcertifikat för att prova
+adminknappen mot testmiljön. Koden som läste dem är borttagen 2026-09-15, så
+de är rena kvarlevor och ska raderas av användaren. Läs aldrig deras närvaro
+som att Swish-utbetalningar finns.
 
 Det finns ingen `.env.local.example` i repot, trots att `README.md` hänvisar
 till en.
@@ -1075,19 +1069,34 @@ Så här ligger det i koden:
   öppnas ingen kortbetalning. Riv inget av det utan beslut, och lägg inte in
   skarpa Stripe-nycklar utan nytt beslut.
 - Med manuell avprickning är det admin som är beloppskontrollen. Vid volym
-  över ungefär femtio affärer i månaden bör avprickningen automatiseras,
-  bankkoppling eller Swish Handel är kandidaterna.
+  över ungefär femtio affärer i månaden bör avprickningen automatiseras
+  via bankkoppling.
 
-**Swish är struket 2026-09-04. Läs det här innan resten av avsnittet.**
-Uppgiften kommer från användaren: avtalet "Swish utbetalningar" gick inte att
-koppla till klientmedelskontot, och tecknas därför inte. Säljaren får betalt
-till bankkonto. Allt nedan om hur tekniken är byggd och bevisad stämmer
-fortfarande, det är bara inte något som ska tas i drift.
+**Swish är struket 2026-09-04 och koden riven 2026-09-15. Läs det här
+innan resten av avsnittet.** Uppgiften kommer från användaren: avtalet
+"Swish utbetalningar" gick inte att koppla till klientmedelskontot, och
+tecknas därför inte. Säljaren får betalt till bankkonto.
 
-Koden rivs inte: `lib/payouts/swishPayout.ts`, `payouts`-tabellen, båda
-rutterna och adminknappen ligger kvar utan certifikat och gör ingen skada.
-Skulle Swish komma tillbaka en annan väg, till exempel via en betaltjänst som
-betalar ut åt oss från sina egna klientmedel, är den vägen redan byggd.
+Beslutet från 4 september att låta koden ligga kvar vilande är upphävt av
+användaren 2026-09-15: "Swish bort helt, överallt." Borttaget i commit
+`dfcdf95`: `lib/payouts/swishPayout.ts`, `/api/payouts/swish-callback`,
+Swish-grenen i `/api/admin/payouts`, felmeddelandena i adminvyn,
+`payout_swish` ur typer och kundprofil, och Swish-kolumnerna ur `payouts` i
+schemafilen. Databasen kördes samma dag via migreringen
+`remove_swish_payouts`: `payouts_method_check` är nu `method =
+'bank_transfer'`, kolumnerna `payee_alias`, `instruction_uuid` och
+`callback_identifier` är borta ur `payouts`, `payout_swish` är borta ur
+`profiles`, och den enda profilen med `payout_method = 'swish'` (en kund
+utan bankkonto) nollades. Kontrollerat efteråt: noll Swish-kolumner, noll
+villkor, noll funktioner, noll profiler. `payouts` var tom vid körningen.
+
+Kvar av apparaten är `payouts`-tabellen, `/api/admin/payouts` med enbart
+`bank_transfer`, och kortet "Utbetalning till säljaren" i adminvyn. Under
+väg C betalar GuldBud aldrig ut till säljaren, så även de är rester av väg A.
+Om de ska rivas är en öppen fråga till användaren, se nedan.
+
+Beskrivningen nedan av hur Swish-tekniken byggdes och bevisades är
+historik. Ingenting av det finns i koden längre.
 
 **Löftet om Swish är rättat överallt, 2026-09-04, på användarens
 instruktion.** Startsidans hero (Swish-loggan ersatt av ikonankaret
@@ -1102,20 +1111,30 @@ funktioner med Swish kvar. Schemafilen speglar texterna.
 
 Kundprofilen har bara clearing- och kontonummer kvar, validerade (4 till 5
 respektive 6 till 12 siffror) och lagrade som rena siffror. `payout_method`
-sparas alltid som `bank` och `payout_swish` nollas vid sparning; kolumnen
-finns kvar som kvarleva. Listningsgrinden i `/customer/submit` kräver båda
-bankfälten. Profiltexten säger att utbetalning bara görs till konto i
-säljarens eget namn.
+sparas alltid som `bank`; kolumnen finns kvar som kvarleva. Listningsgrinden
+i `/customer/submit` kräver båda bankfälten. Profiltexten säger att
+utbetalning bara görs till konto i säljarens eget namn.
 
-**Öppen fråga, användarens: hur vet vi att kontot tillhör säljaren?** Swish
-matchade personnumret åt oss, bankkonto gör det inte. Rekommenderad väg är
-kontoverifiering via öppen bank-API (Tink, Finshark eller Enable Banking):
-säljaren loggar in på sin bank med BankID, leverantören lämnar kontonummer
-plus kontohavare, vi matchar mot BankID-identiteten och låser kontot som
-verifierat. Kräver leverantörsavtal, inte byggt. Interimsalternativ:
-öresöverföring med kod (bevisar tillgång, inte ägarskap). Tills något av det
-finns är kontrollen manuell: admin ser kontouppgifterna bredvid
-BankID-namnet i affärsvyn innan överföringen görs.
+**Hur vi vet att kontot tillhör säljaren: kontoverifiering via öppen
+bank-API, och ingenting annat.** Beslutat av användaren, senast bekräftat
+2026-09-15. Säljaren trycker på en knapp, väljer sin bank i en lista,
+legitimerar sig mot banken med BankID, och leverantören lämnar kontonummer
+plus kontohavarens namn som vi matchar mot BankID-identiteten. Produkten
+finns färdig: Tink kallar den Account Check och Tradera använder den för
+exakt samma sak, säljarnas utbetalningskonton. Finshark har motsvarande
+under namnet Account checks och står under Finansinspektionens tillsyn.
+Leverantör är inte vald och inget avtal finns. Inget av det ovan är läst på
+leverantörernas egna sidor, proxyn blockerar dem; det kommer ur sökträffar.
+
+**Föreslå aldrig en improviserad väg runt detta.** Användaren har sagt ifrån
+två gånger, sist 2026-09-15 med orden "aldrig mer sånt trams". Det gäller
+öresöverföringar, att säljaren skickar en krona till oss, att säljaren
+signerar ett självifyllt kontonummer som ersättning för verifiering, och
+allt liknande. En BankID-signatur på ett eget ifyllt nummer bevisar vem som
+skrev, inte att numret är rätt eller att kontot är säljarens, och under
+väg C går pengarna till en främling om numret är fel. Rätt svar på frågan
+är alltid leverantören. Tills den finns är kontrollen manuell: admin ser
+kontouppgifterna bredvid BankID-namnet i affärsvyn.
 
 Så här byggdes det, 2026-09-01, mot developer.swish.nu:s tre guider:
 
