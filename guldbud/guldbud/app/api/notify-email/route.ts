@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic'
 
 import { DEALER_COMMISSION_LABEL, DEALER_SHIPPING_FEE } from '@/lib/fees'
 import { GULDBUD, GULDBUD_ADDRESS_LINE } from '@/lib/company'
+import { smsConfigured, normalizeSwedishMobile, sendSms } from '@/lib/sms'
 
 const FROM = process.env.EMAIL_FROM || 'GuldBud <no-reply@guldbud.com>'
 // Svar på notismejl ska landa i den riktiga brevlådan, inte i no-reply-tomrummet.
@@ -231,7 +232,7 @@ export async function POST(req: NextRequest) {
 
   // Recipient e-mail + notification preference.
   const profiles = await (
-    await sb(`profiles?id=eq.${encodeURIComponent(userId)}&select=email,email_notifications`)
+    await sb(`profiles?id=eq.${encodeURIComponent(userId)}&select=email,email_notifications,phone`)
   ).json()
   const prof = Array.isArray(profiles) ? profiles[0] : null
   const email = prof?.email
@@ -357,5 +358,25 @@ export async function POST(req: NextRequest) {
     const detail = await sendRes.text()
     return NextResponse.json({ error: 'resend failed', detail }, { status: 502 })
   }
-  return NextResponse.json({ ok: true })
+
+  // Sms till handlaren, för exakt en händelse: föremålet är mottaget och
+  // kontrollerat, alltså ögonblicket handlaren ska betala säljaren. Beslutat
+  // av användaren 2026-09-15. Utan kontonummer, se lib/sms. Utfallet påverkar
+  // aldrig svaret: mejlet är redan skickat, och databasen gör om anropet vid
+  // fel, vilket hade gett dubbla mejl.
+  let sms: string | undefined
+  if (isOrder && link && titleLower.includes('mottaget och kontrollerat') && smsConfigured()) {
+    const to = normalizeSwedishMobile(prof?.phone)
+    if (!to) {
+      sms = 'skipped: no mobile'
+    } else {
+      const text =
+        `GuldBud: "${item?.title || 'föremålet'}" är kontrollerat. ` +
+        `Betala köpeskillingen till säljaren inom 24 timmar. Betaluppgifterna finns i affären: ${SITE}${link}`
+      const r = await sendSms(to, text)
+      sms = r.ok ? 'sent' : `failed: ${r.detail}`
+      if (!r.ok) console.error('sms failed', { notification: record.id, detail: r.detail })
+    }
+  }
+  return NextResponse.json({ ok: true, ...(sms ? { sms } : {}) })
 }
