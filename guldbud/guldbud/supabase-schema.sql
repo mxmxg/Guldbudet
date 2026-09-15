@@ -960,6 +960,8 @@ create policy "dealer writes own thread" on public.order_messages
   );
 
 -- Skapa affär + notiser när ett bud accepteras (ersätter tidigare notify_bid_accepted).
+-- Texterna nedan speglar databasen 2026-09-15. Databasen hade tidigare en
+-- annan titel och ett formaterat belopp som aldrig nått filen; nu är de lika.
 create or replace function public.notify_bid_accepted()
 returns trigger language plpgsql security definer
   set search_path = public as $$
@@ -979,14 +981,14 @@ begin
     select id into v_order from public.orders where item_id = new.id;
 
     insert into public.notifications (user_id, title, message, item_id, link)
-    values (new.owner_id, 'Affär skapad, skicka in föremålet',
-            'Budet är accepterat och affären är din. Så fort du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat, porto och adress är redan klara. Så snart vi tagit emot och verifierat det betalar handlaren direkt till ditt bankkonto, och du bekräftar i affären när pengarna kommit.',
+    values (new.owner_id, 'Grattis, ditt föremål är sålt!',
+            'Du sålde "' || new.title || '" för ' || replace(to_char(v_amount, 'FM999,999,999'), ',', ' ') || ' kr. Nu skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat, porto och adress är redan klara. Så snart vi tagit emot och verifierat det betalar handlaren hela budet direkt till ditt bankkonto, och du bekräftar i affären när pengarna kommit.',
             new.id, '/orders/' || v_order);
 
     if v_dealer is not null then
       insert into public.notifications (user_id, title, message, item_id, link)
       values (v_dealer, 'Grattis, du vann budgivningen',
-              'Föremålet "' || new.title || '" är ditt. Betala GuldBuds faktura (provision och frakt) omgående. Köpeskillingen betalar du direkt till säljaren när vi tagit emot och kontrollerat föremålet, kontouppgifterna visas i affären då.',
+              'Föremålet "' || new.title || '" är ditt. Betala GuldBuds faktura (provision och frakt inklusive moms) omgående. Köpeskillingen betalar du direkt till säljaren när vi tagit emot och kontrollerat föremålet, kontouppgifterna visas i affären då.',
               new.id, '/orders/' || v_order);
     end if;
   end if;
@@ -1109,7 +1111,7 @@ begin
     elsif new.status = 'verified_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
       select new.seller_id, 'Du har fått betalt',
-              'Du har bekräftat att ' || replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr kommit in på ditt bankkonto. Vi skickar föremålet vidare till handlaren. Tack för att du sålde via GuldBud!',
+              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr har kommit in på ditt bankkonto, enligt din bekräftelse. Vi skickar föremålet vidare till handlaren. Tack för att du sålde via GuldBud!',
               new.item_id, '/orders/' || new.id
       where not exists (select 1 from public.notifications n
         where n.user_id = new.seller_id and n.link = '/orders/' || new.id and n.title = 'Du har fått betalt');

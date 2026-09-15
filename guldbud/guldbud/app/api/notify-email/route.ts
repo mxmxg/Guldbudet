@@ -88,7 +88,9 @@ function instructionsFor(title: string): string {
     )
   }
   // Säljaren, affären är skapad, skicka in direkt (brevet är på väg men behöver inte inväntas).
-  if (t.includes('affär skapad') || t.includes('skicka in')) {
+  // Databasens titel är "Grattis, ditt föremål är sålt!" (notify_bid_accepted),
+  // de två äldre matchningarna står kvar för gamla notiser.
+  if (t.includes('affär skapad') || t.includes('skicka in') || t.includes('föremål är sålt')) {
     return stepsBox(
       'Så här slutför du affären',
       [
