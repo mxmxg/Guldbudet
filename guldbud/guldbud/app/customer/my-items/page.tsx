@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { loginUrl } from '@/lib/loginUrl'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
@@ -61,7 +62,7 @@ export default function MyItemsPage() {
     } = await supabase.auth.getSession()
     const user = session?.user
     if (!user) {
-      router.push('/auth/login')
+      router.push(loginUrl())
       return
     }
     // Föremål som lades ut innan ursprungsvalet fanns saknar source_type.
@@ -118,7 +119,7 @@ export default function MyItemsPage() {
       } = await supabase.auth.getSession()
       const user = session?.user
       if (!user) {
-        router.push('/auth/login')
+        router.push(loginUrl())
         return
       }
       const { data } = await supabase

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { loginUrl } from '@/lib/loginUrl'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import OrderStepper from '@/components/OrderStepper'
@@ -63,7 +64,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     } = await supabase.auth.getSession()
     const user = session?.user
     if (!user) {
-      router.push('/auth/login')
+      router.push(loginUrl())
       return
     }
     setMe(user.id)

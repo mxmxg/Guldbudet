@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { loginUrl } from '@/lib/loginUrl'
 import Link from 'next/link'
 import { feesAt } from '@/lib/fees'
 import { GULDBUD, CLIENT_FUNDS_ACCOUNT } from '@/lib/company'
@@ -35,7 +36,7 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
     } = await supabase.auth.getSession()
     const user = session?.user
     if (!user) {
-      router.push('/auth/login')
+      router.push(loginUrl())
       return
     }
     const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).single()

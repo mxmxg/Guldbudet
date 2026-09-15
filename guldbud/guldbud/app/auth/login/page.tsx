@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { safeNext } from '@/lib/loginUrl'
 import Link from 'next/link'
 import { HomeIcon, StoreIcon } from '@/components/Icons'
 import Logo from '@/components/Logo'
@@ -183,6 +184,13 @@ function LoginForm() {
         }
         setSubmitError('Fel e-post eller lösenord.')
         setLoading(false)
+        return
+      }
+      // Tillbaka dit man var på väg, om grinden skickade med adressen.
+      // Annars rollens startsida som förut.
+      const next = safeNext(params.get('next'))
+      if (next) {
+        window.location.href = next
         return
       }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
