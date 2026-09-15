@@ -19,7 +19,7 @@ const faq = [
   },
   {
     q: 'Hur skickar jag in mitt guld tryggt?',
-    a: 'När du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du lägger föremålet i det och postar det rekommenderat, porto och adress är redan klara. Vi äkthetskontrollerar det och betalar ut till dig till ditt bankkonto inom 24 timmar.',
+    a: 'När du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du lägger föremålet i det och postar det rekommenderat, porto och adress är redan klara. Vi äkthetskontrollerar det, och du får betalt till ditt bankkonto inom 24 timmar.',
   },
   {
     q: 'Behöver jag veta karaten på förhand?',
@@ -89,7 +89,7 @@ export default function Page() {
         <li>Vi granskar och öppnar auktionen, oftast inom ett par timmar.</li>
         <li>Auktoriserade handlare budar mot varandra i realtid.</li>
         <li>Du accepterar det högsta budet. Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto (försäkrat upp till 100 000 kr) och du postar det rekommenderat.</li>
-        <li>Vi kontrollerar äktheten och betalar ut till dig.</li>
+        <li>Vi kontrollerar äktheten, och du får betalt inom 24 timmar.</li>
       </UL>
       <P>
         Det är <strong>gratis och utan förpliktelser</strong>. Läs mer om <A href="/how-it-works">hur det fungerar</A>{' '}
