@@ -27,9 +27,9 @@ export const PAGE_UPDATED: Record<string, string> = {
   '/guider/skatt-pa-salt-guld': '2026-09-06',
   '/guider/vad-ar-mitt-guld-vart': '2026-09-01',
   '/guider/var-salja-guld': '2026-09-02',
-  '/handlarvillkor': '2026-09-11',
+  '/handlarvillkor': '2026-09-15',
   '/how-it-works': '2026-09-06',
-  '/privacy': '2026-09-11',
+  '/privacy': '2026-09-15',
   '/resultat': '2026-09-03',
-  '/terms': '2026-09-11',
+  '/terms': '2026-09-15',
 }

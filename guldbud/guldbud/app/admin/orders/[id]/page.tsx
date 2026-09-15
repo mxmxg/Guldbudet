@@ -160,9 +160,8 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
 
   // Utbetalning till säljaren. Servern skriver revisionsraden i payouts innan
   // några pengar rör sig. bank_transfer intygar en manuell banköverföring som
-  // redan är gjord i internetbanken; swish skickar utbetalningen via Swish
-  // Payouts-API (kräver certifikat i driftmiljön, annars svarar rutten 503).
-  const doPayout = async (method: 'swish' | 'bank_transfer') => {
+  // redan är gjord i internetbanken, och är enda metoden.
+  const doPayout = async (method: 'bank_transfer') => {
     setPayoutBusy(true)
     setPayoutError('')
     try {
@@ -181,13 +180,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
         const msg =
-          data?.error === 'swish_not_configured'
-            ? 'Swish-utbetalningar är inte aktiverade än, certifikaten saknas i driftmiljön. Registrera en banköverföring i stället.'
-            : data?.error === 'missing_swish_number'
-            ? 'Säljaren har inget Swish-nummer i profilen.'
-            : data?.error === 'missing_ssn'
-            ? 'Säljaren saknar personnummer, Swish kräver det för att matcha mottagaren.'
-            : data?.error === 'payout_exists'
+          data?.error === 'payout_exists'
             ? 'Det finns redan en registrerad utbetalning på affären.'
             : data?.error === 'dealer_not_paid'
             ? 'Handlarens betalning är inte registrerad.'
@@ -731,8 +724,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                       <div key={p.id} className="rounded-lg bg-espresso-50 px-3 py-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-espresso-600">
-                            {p.method === 'swish' ? 'Swish' : 'Banköverföring'} ·{' '}
-                            {new Date(p.created_at).toLocaleString('sv-SE')}
+                            Banköverföring · {new Date(p.created_at).toLocaleString('sv-SE')}
                           </span>
                           <span
                             className={`chip text-xs ${
@@ -746,7 +738,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                             {p.status === 'paid'
                               ? 'Utbetald'
                               : p.status === 'initiated'
-                              ? 'Väntar på Swish'
+                              ? 'Påbörjad'
                               : 'Misslyckades'}
                           </span>
                         </div>
@@ -760,9 +752,9 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 {!active &&
                   (unlocked ? (
                     <div className="flex flex-wrap items-center gap-2">
-                      {/* Swish-knappen togs bort 2026-09-01: SEB kan inte koppla Swish
-                          utbetalningar till klientmedelskontot. Rälsen ligger kvar
-                          vilande i /api/admin/payouts om beslutet ändras. */}
+                      {/* Banköverföring är enda utbetalningsvägen. Admin gör
+                          överföringen i internetbanken och intygar den här, så
+                          raden i payouts blir revisionsspåret. */}
                       <button onClick={() => doPayout('bank_transfer')} disabled={payoutBusy} className="btn-gold !py-2">
                         {payoutBusy ? '...' : 'Registrera gjord banköverföring'}
                       </button>

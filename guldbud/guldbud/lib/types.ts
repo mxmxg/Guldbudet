@@ -23,10 +23,9 @@ export type ItemStatus = 'pending' | 'approved' | 'active' | 'closed' | 'rejecte
 // enforce_listing_requirements, som avvisar allt utanför listan.
 export type SourceType = 'eget_smycke' | 'arv' | 'eget_kop' | 'annat'
 
-// 'swish' är en kvarleva: Swish som utbetalningsväg togs bort 2026-09-01
-// (SEB kan inte koppla Swish utbetalningar till klientmedelskontot). Profilen
-// sparar alltid 'bank', men gamla rader kan fortfarande bära 'swish'.
-export type PayoutMethod = 'swish' | 'bank'
+// Bankkonto är enda utbetalningsvägen. Kolumnen finns kvar som kvarleva och
+// sparas alltid som 'bank'.
+export type PayoutMethod = 'bank'
 
 export interface Profile {
   id: string
@@ -59,7 +58,6 @@ export interface Profile {
 
   // Utbetalning till säljaren. Kontrolleras vid listning, inte i databasen.
   payout_method: PayoutMethod | null
-  payout_swish: string | null
   payout_bank_clearing: string | null
   payout_bank_account: string | null
 

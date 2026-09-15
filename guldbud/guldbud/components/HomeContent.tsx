@@ -769,8 +769,7 @@ function LogoStat({ src, alt, label, h }: { src: string; alt: string; label: str
 }
 
 // Trygghets-ankare utan logotyp: en ikon i samma optiska storlek som
-// logotyperna bredvid. Bankutbetalningen har ingen leverantörslogga att visa
-// sedan Swish togs bort 2026-09-01.
+// logotyperna bredvid. Bankutbetalningen har ingen leverantörslogga att visa.
 function IconStat({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
