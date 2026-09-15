@@ -35,16 +35,22 @@ export const GULDBUD = {
 // Adressen på en rad, för sidfot och mejlmallar.
 export const GULDBUD_ADDRESS_LINE = `${GULDBUD.box}, ${GULDBUD.postal}`
 
-// Klientmedelskontot hos SEB dit handlarens betalning går, beslutat
-// 2026-09-01: lansering med faktura och banköverföring, kortbetalningen
-// vilande. Kontot öppnades 2026-09-01 och numret är användarens uppgift
-// samma dag, kontrollsiffran verifierad med mod-11. Clearingnumret 5232
-// ingår (SEB:s serie). OBS: bolagets vanliga rörelsekonto är ett annat
-// SEB-nummer och får aldrig stå här, det är precis den sammanblandningen
-// klientmedelsupplägget finns för att förhindra. Rättat 2026-09-01 efter
-// att rörelsekontots nummer först lagts in av misstag. Etiketten läses
+// Bolagets rörelsekonto hos SEB, dit handlaren betalar GuldBuds egen
+// faktura: provision plus frakt inklusive moms, och ingenting annat.
+//
+// Väg C, beslutad efter juristens besked 2026-09-15: handlaren betalar
+// köpeskillingen direkt till säljarens bankkonto, och GuldBud tar aldrig
+// emot säljarens pengar. Klientmedelskontot (5232 10 274 52, öppnat
+// 2026-09-01) används därför inte längre i flödet och ska inte tillbaka hit.
+// Att blanda in köpeskillingen på det här kontot är exakt det upplägget
+// finns för att undvika.
+//
+// Numret är användarens uppgift 2026-09-15. Slutsiffrorna 7877 stämmer med
+// det utbetalningskonto som var registrerat hos Stripe, läst i kontodatan
+// samma session. Kontrollsiffran skiljer aldrig två giltiga SEB-nummer åt,
+// så verifiera alltid mot bankens papper, aldrig mot mod-11. Etiketten läses
 // gemen i fakturans löptext, därför 'Konto'.
-export const CLIENT_FUNDS_ACCOUNT = {
+export const OPERATING_ACCOUNT = {
   label: 'Konto',
-  number: '5232 10 274 52',
+  number: '5232 10 078 77',
 } as const

@@ -49,9 +49,6 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   // Sant när admin valt "Ändra beslut" på en redan granskad affär. Formuläret
   // visas annars bara medan beslutet saknas.
   const [amlEditing, setAmlEditing] = useState(false)
-  const [payouts, setPayouts] = useState<any[]>([])
-  const [payoutBusy, setPayoutBusy] = useState(false)
-  const [payoutError, setPayoutError] = useState('')
 
   useEffect(() => {
     init()
@@ -122,13 +119,6 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     const { data: amlRow } = await supabase.from('order_aml').select('*').eq('order_id', params.id).single()
     setAml(amlRow || null)
     setAmlNotes(amlRow?.aml_notes || '')
-    // Utbetalningsraderna, admin-only via RLS.
-    const { data: payoutRows } = await supabase
-      .from('payouts')
-      .select('*')
-      .eq('order_id', params.id)
-      .order('created_at', { ascending: false })
-    setPayouts(payoutRows || [])
     // Säljarens sammanlagda volym (rullande 12 mån, exkl. avbrutna) för AML-vyn.
     const yearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
     const { data: sellerOrders } = await supabase
@@ -165,46 +155,6 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     setSaving(false)
   }
 
-  // Utbetalning till säljaren. Servern skriver revisionsraden i payouts innan
-  // några pengar rör sig. bank_transfer intygar en manuell banköverföring som
-  // redan är gjord i internetbanken, och är enda metoden.
-  const doPayout = async (method: 'bank_transfer') => {
-    setPayoutBusy(true)
-    setPayoutError('')
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      const token = session?.access_token
-      const res = await fetch('/api/admin/payouts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ orderId: order.id, method }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        const msg =
-          data?.error === 'payout_exists'
-            ? 'Det finns redan en registrerad utbetalning på affären.'
-            : data?.error === 'dealer_not_paid'
-            ? 'Handlarens betalning är inte registrerad.'
-            : data?.error === 'aml_not_cleared'
-            ? 'Penningtvättsgranskningen är inte godkänd.'
-            : data?.errorMessage || 'Utbetalningen kunde inte registreras. Försök igen.'
-        setPayoutError(msg)
-        return
-      }
-      await loadOrder()
-    } catch {
-      setPayoutError('Utbetalningen kunde inte registreras. Försök igen.')
-    } finally {
-      setPayoutBusy(false)
-    }
-  }
-
   // Admin avgör ett ärende. under_review kräver ingen text; resolved/rejected
   // sparar admins svar som skickas till parten via notis-triggern.
   const updateDispute = async (id: string, status: DisputeStatus) => {
@@ -225,10 +175,11 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
   const advance = async () => {
     const next = nextStatus(order.status as OrderStatus)
     if (!next) return
-    // Säkerhetsspärr: betala aldrig ut säljaren eller skicka vidare till handlaren
-    // innan handlarens betalning är registrerad. Inga pengar lämnar huset på kredit.
+    // Säkerhetsspärr: skicka aldrig vidare till handlaren innan säljaren
+    // bekräftat att köpeskillingen kommit. Databasen har samma spärr
+    // (enforce_payment_before_release), det här är bara beskedet varför.
     if ((next === 'verified_paid' || next === 'shipped_to_dealer') && !order.dealer_paid_at) {
-      setSaveError('Registrera handlarens betalning först, vi betalar ut och skickar vidare först när pengarna är inne.')
+      setSaveError('Säljaren har inte bekräftat betalningen än. Föremålet skickas vidare först när säljaren fått pengarna.')
       return
     }
     setSaving(true)
@@ -242,6 +193,12 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
     setSaving(false)
   }
 
+  // Två betalningar under väg C, två tidsstämplar. dealer_paid_at är
+  // säljarens bekräftelse på att köpeskillingen kommit, normalt satt av
+  // säljaren själv via /api/orders/[id]/confirm-payment; admin kan sätta
+  // den manuellt när säljaren bekräftat på annat sätt. Det är den kolumnen
+  // utbetalningsspärren i databasen läser. fee_paid_at är GuldBuds egen
+  // faktura, provision plus frakt, prickad av mot rörelsekontot av admin.
   const setDealerPaid = async (paid: boolean) => {
     setSaving(true)
     setSaveError('')
@@ -249,7 +206,19 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
       .from('orders')
       .update({ dealer_paid_at: paid ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
       .eq('id', order.id)
-    if (error) setSaveError('Kunde inte spara betalningen: ' + error.message)
+    if (error) setSaveError('Kunde inte spara bekräftelsen: ' + error.message)
+    else await loadOrder()
+    setSaving(false)
+  }
+
+  const setFeePaid = async (paid: boolean) => {
+    setSaving(true)
+    setSaveError('')
+    const { error } = await supabase
+      .from('orders')
+      .update({ fee_paid_at: paid ? new Date().toISOString() : null, updated_at: new Date().toISOString() })
+      .eq('id', order.id)
+    if (error) setSaveError('Kunde inte spara fakturabetalningen: ' + error.message)
     else await loadOrder()
     setSaving(false)
   }
@@ -280,7 +249,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         // inte längre räknas som betald (annars skulle en återöppning kunna
         // betala ut säljaren på redan återbetalda pengar).
         dealer_paid_at: null,
-        payment_status: null,
+        fee_paid_at: null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', order.id)
@@ -304,7 +273,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
         // Starta betalningen från noll: en återöppnad affär ska betalas igen,
         // aldrig ärva ett gammalt (återbetalt) dealer_paid_at.
         dealer_paid_at: null,
-        payment_status: null,
+        fee_paid_at: null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', order.id)
@@ -628,12 +597,12 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             <h2 className="font-display text-lg text-espresso-900 mb-4">Ekonomi</h2>
             <div className="flex flex-col gap-1.5 text-sm">
               <div className="flex justify-between text-espresso-600">
-                <span>Handlaren betalar (bud + provision + frakt + moms)</span>
-                <span className="tabular-nums font-medium">{formatSEK(fees.dealerTotal(order.amount))}</span>
+                <span>Handlaren betalar till säljaren (köpeskillingen, direkt)</span>
+                <span className="tabular-nums font-medium">{formatSEK(order.amount)}</span>
               </div>
               <div className="flex justify-between text-espresso-600">
-                <span>Säljaren får (hela budet)</span>
-                <span className="tabular-nums">{formatSEK(order.amount)}</span>
+                <span>Handlaren betalar till GuldBud (provision + frakt + moms)</span>
+                <span className="tabular-nums font-medium">{formatSEK(fees.guldbudServiceTotal(order.amount))}</span>
               </div>
               <div className="flex justify-between text-espresso-400">
                 <span>Frakt exkl moms (genomströmning)</span>
@@ -668,19 +637,18 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             </div>
           </div>
 
-          {/* Handlarens betalning, fristående från logistikstegen */}
-          <div className={`card p-6 ${!order.dealer_paid_at && !isFinalOrCancelled ? 'ring-2 ring-gold-300' : ''}`}>
-            <h2 className="font-display text-lg text-espresso-900 mb-1">Handlarens betalning</h2>
-            {order.dealer_paid_at ? (
+          {/* GuldBuds egen faktura: provision plus frakt till rörelsekontot.
+              Fristen (payment_due_at) och cron-jobbets påminnelser och
+              avstängning gäller den här betalningen. */}
+          <div className={`card p-6 ${!order.fee_paid_at && !isFinalOrCancelled ? 'ring-2 ring-gold-300' : ''}`}>
+            <h2 className="font-display text-lg text-espresso-900 mb-1">GuldBuds faktura</h2>
+            {order.fee_paid_at ? (
               <>
                 <p className="text-sm text-emerald-700">
-                  Betald ✓ · {new Date(order.dealer_paid_at).toLocaleString('sv-SE')}
-                </p>
-                <p className="text-xs text-espresso-400 mt-1">
-                  Utbetalning till säljare och vidareskick är nu upplåsta.
+                  Betald ✓ · {new Date(order.fee_paid_at).toLocaleString('sv-SE')}
                 </p>
                 <button
-                  onClick={() => setDealerPaid(false)}
+                  onClick={() => setFeePaid(false)}
                   disabled={saving}
                   className="mt-3 text-xs text-espresso-400 hover:text-red-500 transition"
                 >
@@ -690,8 +658,8 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             ) : (
               <>
                 <p className="text-sm text-espresso-500 mb-2 leading-relaxed">
-                  Väntar på {formatSEK(fees.dealerTotal(order.amount))}. Registrera betalningen när pengarna
-                  kommit in. Utbetalning till säljaren och vidareskick är låsta tills dess.
+                  Väntar på {formatSEK(fees.guldbudServiceTotal(order.amount))} till rörelsekontot, referens {'GB-' + String(order.order_no ?? 0).padStart(6, '0')}.
+                  Registrera när pengarna syns på kontot.
                 </p>
                 {order.payment_due_at && (() => {
                   const due = new Date(order.payment_due_at)
@@ -703,82 +671,54 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                     </p>
                   )
                 })()}
-                <button onClick={() => setDealerPaid(true)} disabled={saving} className="btn-gold !py-2">
-                  {saving ? '...' : 'Registrera handlarens betalning'}
+                <button onClick={() => setFeePaid(true)} disabled={saving} className="btn-gold !py-2">
+                  {saving ? '...' : 'Registrera fakturan som betald'}
                 </button>
               </>
             )}
           </div>
 
-          {/* Utbetalning till säljaren, med revisionsspår i payouts-tabellen */}
-          {(() => {
-            const amlOk = !aml?.aml_status || aml.aml_status === 'clear' || aml.aml_status === 'approved'
-            const unlocked =
-              !!order.dealer_paid_at && amlOk && !order.refunded_at && order.status !== 'cancelled'
-            const active = payouts.find((p) => p.status === 'paid' || p.status === 'initiated')
-            return (
-              <div className="card p-6">
-                <h2 className="font-display text-lg text-espresso-900 mb-1">Utbetalning till säljaren</h2>
-                <p className="text-sm text-espresso-500 mb-3">
-                  {formatSEK(order.amount)}
+          {/* Köpeskillingen: handlaren betalar direkt till säljarens konto,
+              säljaren bekräftar i affären. Det är dealer_paid_at, och det är
+              den kolumnen som låser upp vidareskicket i databasen. */}
+          <div className={`card p-6 ${!order.dealer_paid_at && !isFinalOrCancelled ? 'ring-2 ring-gold-300' : ''}`}>
+            <h2 className="font-display text-lg text-espresso-900 mb-1">Köpeskillingen till säljaren</h2>
+            {order.dealer_paid_at ? (
+              <>
+                <p className="text-sm text-emerald-700">
+                  Säljaren har bekräftat ✓ · {new Date(order.dealer_paid_at).toLocaleString('sv-SE')}
+                </p>
+                <p className="text-xs text-espresso-400 mt-1">
+                  Vidareskick till handlaren är upplåst.
+                </p>
+                <button
+                  onClick={() => setDealerPaid(false)}
+                  disabled={saving}
+                  className="mt-3 text-xs text-espresso-400 hover:text-red-500 transition"
+                >
+                  Ångra (markera som obekräftad)
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-espresso-500 mb-2 leading-relaxed">
+                  Handlaren betalar {formatSEK(order.amount)} direkt till säljarens konto
                   {seller?.payout_bank_clearing || seller?.payout_bank_account
-                    ? ` · Bank ${seller?.payout_bank_clearing || '-'} / ${seller?.payout_bank_account || '-'}`
+                    ? ` (${seller?.payout_bank_clearing || '-'} / ${seller?.payout_bank_account || '-'})`
                     : ''}
+                  {' '}när föremålet är mottaget och kontrollerat. Säljaren bekräftar själv i affären.
+                  Vidareskick är låst tills dess.
                 </p>
-                {payouts.length > 0 && (
-                  <div className="mb-3 grid gap-1.5">
-                    {payouts.map((p) => (
-                      <div key={p.id} className="rounded-lg bg-espresso-50 px-3 py-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-espresso-600">
-                            Banköverföring · {new Date(p.created_at).toLocaleString('sv-SE')}
-                          </span>
-                          <span
-                            className={`chip text-xs ${
-                              p.status === 'paid'
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : p.status === 'initiated'
-                                ? 'bg-gold-50 text-gold-700'
-                                : 'bg-red-50 text-red-600'
-                            }`}
-                          >
-                            {p.status === 'paid'
-                              ? 'Utbetald'
-                              : p.status === 'initiated'
-                              ? 'Påbörjad'
-                              : 'Misslyckades'}
-                          </span>
-                        </div>
-                        {p.status === 'failed' && p.error_message && (
-                          <p className="text-xs text-red-600 mt-1">{p.error_message}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {!active &&
-                  (unlocked ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                      {/* Banköverföring är enda utbetalningsvägen. Admin gör
-                          överföringen i internetbanken och intygar den här, så
-                          raden i payouts blir revisionsspåret. */}
-                      <button onClick={() => doPayout('bank_transfer')} disabled={payoutBusy} className="btn-gold !py-2">
-                        {payoutBusy ? '...' : 'Registrera gjord banköverföring'}
-                      </button>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-espresso-400">
-                      Låst tills handlarens betalning är registrerad och penningtvättsgranskningen godkänd.
-                    </p>
-                  ))}
-                {payoutError && <p className="mt-2 text-xs text-red-600">{payoutError}</p>}
-                <p className="text-[11px] text-espresso-400 mt-3">
-                  Utbetalningen bokförs med revisionsspår. Banköverföringen gör du från klientmedelskontot i internetbanken
-                  och registrerar här efteråt.
+                <p className="text-xs text-espresso-400 mb-3">
+                  Kontrollera att kontot står i säljarens namn innan handlaren betalar. Kontot är säljarens
+                  egen uppgift tills kontoverifieringen finns.
                 </p>
-              </div>
-            )
-          })()}
+                <button onClick={() => setDealerPaid(true)} disabled={saving} className="btn-gold !py-2">
+                  {saving ? '...' : 'Registrera att säljaren fått betalt'}
+                </button>
+              </>
+            )}
+          </div>
 
           {/* AML / ursprungskontroll */}
           {(() => {
@@ -829,7 +769,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 {needsReview && (
                   <p className="text-xs text-amber-700 mb-3 flex items-start gap-1.5">
                     <span aria-hidden>⚠</span>
-                    <span>Utbetalning är spärrad tills du godkänt granskningen.</span>
+                    <span>Vidareskick till handlaren är spärrat tills du godkänt granskningen.</span>
                   </p>
                 )}
 
@@ -1024,9 +964,9 @@ function PartyCard({ title, p }: { title: string; p: any }) {
       )}
       {p.payout_method && (
         <p className="mt-2 pt-2 border-t border-espresso-100 text-espresso-700">
-          <span className="text-xs font-semibold text-gold-600 uppercase tracking-wide">Utbetalning</span>
+          <span className="text-xs font-semibold text-gold-600 uppercase tracking-wide">Bankkonto, säljarens egen uppgift</span>
           <br />
-          {`Bank: ${p.payout_bank_clearing || '-'} / ${p.payout_bank_account || 'ej ifyllt'}`}
+          {`${p.payout_bank_clearing || '-'} / ${p.payout_bank_account || 'ej ifyllt'}`}
         </p>
       )}
     </div>

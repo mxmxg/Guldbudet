@@ -813,7 +813,7 @@ begin
       insert into public.notifications (user_id, title, message, item_id, link)
       values (r.owner_id, 'Grattis! Ditt föremål fick ' || v_top.amount || ' kr',
               'Budgivningen på "' || r.title || '" landade på ' || v_top.amount ||
-              ' kr. Godkänn budet så drar vi igång affären. Vi betalar ut omgående till ditt ' ||
+              ' kr. Godkänn budet så drar vi igång affären. Handlaren betalar direkt till ditt ' ||
               'bankkonto så snart vi tagit emot och verifierat föremålet. Att sälja är helt kostnadsfritt för dig.',
               r.id, '/auctions/' || r.id);
       insert into public.notifications (user_id, title, message, item_id, link)
@@ -871,15 +871,18 @@ alter table public.orders add column if not exists dealer_paid_at timestamptz;
 
 -- Fas 2: betalnings-deadline, påminnelse-strypning och avboknings-orsak.
 alter table public.orders add column if not exists payment_due_at timestamptz;
+-- Väg C, 2026-09-15: GuldBuds egen faktura (provision plus frakt) prickas av här.
+-- dealer_paid_at betyder numera att säljaren bekräftat att köpeskillingen kommit.
+alter table public.orders add column if not exists fee_paid_at timestamptz;
 alter table public.orders add column if not exists payment_reminded_at timestamptz;
 alter table public.orders add column if not exists cancel_reason text;
 
 -- Handlarens inbetalning: leverantörsagnostisk referens + status för
 -- handlarens inbetalning. dealer_paid_at sätts automatiskt när callbacken
 -- bekräftar en lyckad betalning; admin kan fortfarande sätta den manuellt.
-alter table public.orders add column if not exists payment_provider text;
-alter table public.orders add column if not exists payment_reference text;
-alter table public.orders add column if not exists payment_status text; -- 'pending' | 'paid' | 'failed'
+-- payment_provider, payment_reference och payment_status hörde till kortflödet
+-- (Stripe) och är borttagna 2026-09-15 tillsammans med koden. Väg C har inga
+-- kortbetalningar.
 -- Retur/kreditering: när ett föremål inte godkänns vid kontroll (fake/stämmer ej).
 alter table public.orders add column if not exists refunded_at timestamptz;
 alter table public.orders add column if not exists refund_reason text;
@@ -957,6 +960,8 @@ create policy "dealer writes own thread" on public.order_messages
   );
 
 -- Skapa affär + notiser när ett bud accepteras (ersätter tidigare notify_bid_accepted).
+-- Texterna nedan speglar databasen 2026-09-15. Databasen hade tidigare en
+-- annan titel och ett formaterat belopp som aldrig nått filen; nu är de lika.
 create or replace function public.notify_bid_accepted()
 returns trigger language plpgsql security definer
   set search_path = public as $$
@@ -976,14 +981,14 @@ begin
     select id into v_order from public.orders where item_id = new.id;
 
     insert into public.notifications (user_id, title, message, item_id, link)
-    values (new.owner_id, 'Affär skapad, skicka in föremålet',
-            'Budet är accepterat och affären är din. Så fort du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat, porto och adress är redan klara. Så snart vi tagit emot och verifierat det betalar vi ut omgående till ditt bankkonto.',
+    values (new.owner_id, 'Grattis, ditt föremål är sålt!',
+            'Du sålde "' || new.title || '" för ' || replace(to_char(v_amount, 'FM999,999,999'), ',', ' ') || ' kr. Nu skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det rekommenderat, porto och adress är redan klara. Så snart vi tagit emot och verifierat det betalar handlaren hela budet direkt till ditt bankkonto, och du bekräftar i affären när pengarna kommit.',
             new.id, '/orders/' || v_order);
 
     if v_dealer is not null then
       insert into public.notifications (user_id, title, message, item_id, link)
       values (v_dealer, 'Grattis, du vann budgivningen',
-              'Föremålet "' || new.title || '" är ditt. Betala bud + provision omgående, så tar vi emot det från säljaren, kontrollerar äktheten och skickar det vidare till dig. Betalningsinstruktioner finns i affären.',
+              'Föremålet "' || new.title || '" är ditt. Betala GuldBuds faktura (provision och frakt inklusive moms) omgående. Köpeskillingen betalar du direkt till säljaren när vi tagit emot och kontrollerat föremålet, kontouppgifterna visas i affären då.',
               new.id, '/orders/' || v_order);
     end if;
   end if;
@@ -1092,21 +1097,21 @@ begin
     if new.status = 'received' then
       insert into public.notifications (user_id, title, message, item_id, link)
       select new.seller_id, 'Vi har tagit emot ditt föremål',
-              'Vi har tagit emot "' || v_title || '" och äkthetskontrollerar det nu. Så snart kontrollen är godkänd betalar vi ut ' ||
-              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr omgående till ditt bankkonto. Fyll gärna i dina utbetalningsuppgifter i din profil så går det snabbt.',
+              'Vi har tagit emot "' || v_title || '" och äkthetskontrollerar det nu. Så snart kontrollen är godkänd får handlaren dina kontouppgifter och betalar ' ||
+              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr direkt till ditt bankkonto. Bekräfta i affären när pengarna kommit.',
               new.item_id, '/orders/' || new.id
       where not exists (select 1 from public.notifications n
         where n.user_id = new.seller_id and n.link = '/orders/' || new.id and n.title = 'Vi har tagit emot ditt föremål');
       insert into public.notifications (user_id, title, message, item_id, link)
       select new.dealer_id, 'Ditt föremål är mottaget och kontrollerat',
-              '"' || v_title || '" är mottaget hos oss och äkthetskontrollerat. Vi packar och skickar det vidare till dig.',
+              '"' || v_title || '" är mottaget hos oss och äkthetskontrollerat. Betala nu köpeskillingen direkt till säljaren, kontouppgifterna finns i affären. När säljaren bekräftat skickar vi föremålet till dig.',
               new.item_id, '/orders/' || new.id
       where not exists (select 1 from public.notifications n
         where n.user_id = new.dealer_id and n.link = '/orders/' || new.id and n.title = 'Ditt föremål är mottaget och kontrollerat');
     elsif new.status = 'verified_paid' then
       insert into public.notifications (user_id, title, message, item_id, link)
       select new.seller_id, 'Du har fått betalt',
-              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr betalas ut omgående till ditt bankkonto. Tack för att du sålde via GuldBud!',
+              replace(to_char(new.amount, 'FM999,999,999'), ',', ' ') || ' kr har kommit in på ditt bankkonto, enligt din bekräftelse. Vi skickar föremålet vidare till handlaren. Tack för att du sålde via GuldBud!',
               new.item_id, '/orders/' || new.id
       where not exists (select 1 from public.notifications n
         where n.user_id = new.seller_id and n.link = '/orders/' || new.id and n.title = 'Du har fått betalt');
@@ -1134,20 +1139,35 @@ create trigger on_order_status
   after update on public.orders
   for each row execute procedure public.notify_order_status();
 
--- Bekräftelse när admin registrerar handlarens betalning (dealer_paid_at sätts).
--- Ersätter det gamla dealer_paid-stegets notis och kvitterar mot rätt händelse.
+-- Två betalningar under väg C, två kvittenser till handlaren. fee_paid_at:
+-- GuldBuds faktura registrerad av admin. dealer_paid_at: säljaren har
+-- bekräftat köpeskillingen, och admin larmas så vidareskicket kan göras.
+-- Titlarna matchas av mejlrutten (/api/notify-email), ändra dem inte utan
+-- att ändra där.
 create or replace function public.notify_payment_registered()
 returns trigger language plpgsql security definer
 set search_path = public as $$
 declare
   v_title text;
 begin
-  if new.dealer_paid_at is not null and old.dealer_paid_at is null then
+  if new.fee_paid_at is not null and old.fee_paid_at is null then
     select title into v_title from public.items where id = new.item_id;
     insert into public.notifications (user_id, title, message, item_id, link)
     values (new.dealer_id, 'Vi har tagit emot din betalning',
-            'Tack! Din betalning för "' || coalesce(v_title, 'föremålet') || '" är registrerad. Vi hör av oss så snart föremålet är mottaget och kontrollerat, och skickar det sedan vidare till dig.',
+            'Tack! Din betalning av GuldBuds faktura för "' || coalesce(v_title, 'föremålet') || '" är registrerad. Köpeskillingen betalar du direkt till säljaren när föremålet är mottaget och kontrollerat, kontouppgifterna visas i affären då.',
             new.item_id, '/orders/' || new.id);
+  end if;
+  if new.dealer_paid_at is not null and old.dealer_paid_at is null then
+    select title into v_title from public.items where id = new.item_id;
+    insert into public.notifications (user_id, title, message, item_id, link)
+    values (new.dealer_id, 'Säljaren har bekräftat din betalning',
+            'Säljaren har bekräftat att köpeskillingen för "' || coalesce(v_title, 'föremålet') || '" kommit in. Vi packar och skickar föremålet till dig.',
+            new.item_id, '/orders/' || new.id);
+    insert into public.notifications (user_id, title, message, item_id, link)
+    select p.id, 'Säljaren har bekräftat betalning, skicka vidare',
+           'Säljaren har bekräftat att köpeskillingen för "' || coalesce(v_title, 'föremålet') || '" kommit in. Vidareskicket till handlaren är upplåst.',
+           new.item_id, '/admin/orders/' || new.id
+    from public.profiles p where p.role = 'admin';
   end if;
   return new;
 end;
@@ -1221,8 +1241,11 @@ drop function if exists public.notify_on_outbid();
 
 -- ============================================================
 -- Obetalda affärer, påminnelser och avstängning av handlare som backar.
--- Handlaren betalar vid vinst. Betalar hen inte i tid skickar vi först en
--- påminnelse (max en per dygn) och avbryter sedan affären efter en frist.
+-- Väg C, 2026-09-15: fristen (payment_due_at) gäller GuldBuds egen faktura,
+-- alltså fee_paid_at. Köpeskillingen till säljaren har ingen frist här: den
+-- betalas först när föremålet är kontrollerat, och säljaren bekräftar den.
+-- Betalar handlaren inte fakturan i tid skickar vi först en påminnelse (max
+-- en per dygn) och avbryter sedan affären efter en frist.
 -- ============================================================
 create or replace function public.process_unpaid_orders()
 returns void language plpgsql security definer
@@ -1238,7 +1261,7 @@ begin
   end if;
   for o in
     select * from public.orders
-    where dealer_paid_at is null
+    where fee_paid_at is null
       and status not in ('cancelled', 'completed')
       and payment_due_at is not null
   loop
@@ -1246,7 +1269,6 @@ begin
 
     if now() > o.payment_due_at + interval '4 days' then
       -- Handlaren backade från ett vunnet bud: stäng av handlaren och larma admin.
-      -- GuldBud står för föremålet mot säljaren, så säljaren notifieras inte.
       update public.profiles set suspended = true where id = o.dealer_id;
       -- Sätt status='cancelled' så affären lämnar det öppna flödet och grenen
       -- inte kan fyra igen varje timme (loopen exkluderar 'cancelled').
@@ -1256,13 +1278,19 @@ begin
 
       insert into public.notifications (user_id, title, message, item_id, link)
       values (o.dealer_id, 'Ditt konto har stängts av',
-              'Betalningen för "' || coalesce(v_title, 'föremålet') || '" uteblev. Att backa från ett vunnet bud strider mot villkoren, så ditt konto är avstängt. Kontakta oss för att reda ut det.',
+              'Betalningen av GuldBuds faktura för "' || coalesce(v_title, 'föremålet') || '" uteblev. Att backa från ett vunnet bud strider mot villkoren, så ditt konto är avstängt. Kontakta oss för att reda ut det.',
               o.item_id, '/orders/' || o.id);
-      -- Larma alla administratörer så vi kan säkra säljarens utbetalning och hantera föremålet.
+      -- Under väg C betalar handlaren säljaren direkt, så säljaren måste få
+      -- veta att affären inte blev av och att föremålet kan läggas ut igen.
+      insert into public.notifications (user_id, title, message, item_id, link)
+      values (o.seller_id, 'Affären avbröts, handlaren betalade inte',
+              'Handlaren fullföljde inte köpet av "' || coalesce(v_title, 'föremålet') || '", så affären är avbruten. Har du skickat in föremålet får du det tillbaka. Du kan lägga ut det igen från Mina föremål.',
+              o.item_id, '/orders/' || o.id);
+      -- Larma alla administratörer så föremålet hanteras och säljaren får besked.
       insert into public.notifications (user_id, title, message, item_id, link)
       select p.id, 'Handlare backade, kräver hantering',
              'Handlaren fullföljde inte köpet av "' || coalesce(v_title, 'föremålet') ||
-             '" och har stängts av. Säkerställ att säljaren får betalt och hantera föremålet.',
+             '" och har stängts av. Hantera föremålet: skicka tillbaka det till säljaren om det kommit in, eller lägg ut det igen.',
              o.item_id, '/admin/orders/' || o.id
       from public.profiles p where p.role = 'admin';
 
@@ -1273,7 +1301,7 @@ begin
 
       insert into public.notifications (user_id, title, message, item_id, link)
       values (o.dealer_id, 'Påminnelse: din betalning väntar',
-              'Vi har inte registrerat din betalning för "' || coalesce(v_title, 'föremålet') || '" än. Betala snart så håller vi affären öppen, annars avbryts den automatiskt.',
+              'Vi har inte registrerat din betalning av GuldBuds faktura för "' || coalesce(v_title, 'föremålet') || '" än. Betala snart så håller vi affären öppen, annars avbryts den automatiskt.',
               o.item_id, '/orders/' || o.id);
     end if;
   end loop;
@@ -1935,7 +1963,7 @@ create table if not exists public.identity_disclosures (
   seller_id uuid references public.profiles on delete set null,
   requested_by uuid references public.profiles on delete set null,
   requester_role text not null check (requester_role in ('admin', 'dealer')),
-  channel text not null check (channel in ('seller_api', 'invoice_pdf')),
+  channel text not null check (channel in ('seller_api', 'invoice_pdf', 'payout_account')),
   created_at timestamptz not null default now()
 );
 
@@ -1992,39 +2020,8 @@ $$;
 
 grant execute on function public.item_seller_verified(uuid) to anon, authenticated;
 
--- ===========================================================================
--- Utbetalningar till säljare. Skapad 2026-09-01, körd mot databasen samma dag.
---
--- Raden skrivs INNAN pengarna skickas, samma princip som identity_disclosures:
--- kan revisionsspåret inte skrivas sker ingen utbetalning. 'bank_transfer' är
--- enda metoden: en manuell banköverföring som admin intygar. Bara admin läser
--- och skriver via klienten.
---
--- Swish är struket och koden borttagen 2026-09-15. Kolumnerna payee_alias,
--- instruction_uuid och callback_identifier hörde till Swish och är
--- borttagna, se beslutsloggen.
--- ===========================================================================
-create table if not exists public.payouts (
-  id uuid primary key default gen_random_uuid(),
-  order_id uuid not null references public.orders on delete cascade,
-  amount numeric(12,2) not null check (amount > 0),
-  method text not null check (method in ('bank_transfer')),
-  status text not null default 'initiated' check (status in ('initiated', 'paid', 'failed')),
-  reference text,
-  error_code text,
-  error_message text,
-  created_by uuid references public.profiles on delete set null,
-  created_at timestamptz not null default now(),
-  paid_at timestamptz
-);
-
-create index if not exists payouts_order_idx on public.payouts (order_id, created_at desc);
-
-alter table public.payouts enable row level security;
-
-drop policy if exists "admins manage payouts" on public.payouts;
-create policy "admins manage payouts" on public.payouts
-  for all using (public.is_admin()) with check (public.is_admin());
+-- payouts-tabellen togs bort 2026-09-15 (väg C: GuldBud betalar aldrig ut
+-- till säljaren, handlaren betalar direkt). Migreringen vagc_direct_payment.
 
 -- ===========================================================================
 -- Sålda resultat: en avbruten affär är ingen försäljning
