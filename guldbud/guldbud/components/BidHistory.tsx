@@ -83,7 +83,7 @@ export default function BidHistory({ itemId }: { itemId: string }) {
                   Kund {dealerCode(bid.dealer_id)}
                   {i === 0 && <span className="ml-2 chip bg-emerald-100 text-emerald-700">Vinnande bud</span>}
                 </p>
-                <p className="text-[11px] text-espresso-300">{relTime(bid.created_at)}</p>
+                <p className="text-[11px] text-espresso-400">{relTime(bid.created_at)}</p>
               </div>
             </div>
             <span className={`tabular-nums whitespace-nowrap shrink-0 ml-3 ${i === 0 ? 'font-semibold text-gold-700' : 'text-espresso-600'}`}>

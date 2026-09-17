@@ -609,7 +609,7 @@ export default function AuctionDetails({
                             {dealerLabel(bid)}
                             {i === 0 && <span className="ml-2 chip bg-emerald-100 text-emerald-700">Ledande</span>}
                           </p>
-                          <p className="text-[11px] text-espresso-300">{relTime(bid.created_at)}</p>
+                          <p className="text-[11px] text-espresso-400">{relTime(bid.created_at)}</p>
                         </div>
                       </div>
                       <span className={`tabular-nums whitespace-nowrap shrink-0 ml-3 ${i === 0 ? 'font-semibold text-gold-700' : 'text-espresso-600'}`}>
@@ -661,15 +661,17 @@ export default function AuctionDetails({
 
 function ShippingCard() {
   return (
-    <div className="bg-espresso-900 rounded-xl p-5 text-center relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
-      <div className="relative">
-        <p className="eyebrow text-gold-500/70 mb-1">Frakt</p>
-        <p className="text-gold-200 font-medium">Kostnadsfritt rekommenderat brev</p>
-        <p className="text-gold-500/80 text-sm">Porto och adress klara, rekommenderat och försäkrat.</p>
-        <p className="text-gold-500/80 text-sm">Skickas när du godkänt ditt slutpris.</p>
-        <p className="text-gold-500/60 text-xs mt-2">Vid frågor: info@guldbud.com</p>
-      </div>
+    // Ljus ruta i stallet for svart. Uppmatt 2026-09-17 pa den svarta
+    // bakgrunden: FRAKT-etiketten hade kontrast 3,86 och e-postraden 3,10,
+    // bada under kravet 4,5. Brodtexten lag pa 4,71, alltsa pa gransen. Pa
+    // ljus botten far alla fyra nivaer minst 5,5. Rutan lag dessutom som ett
+    // morkt block inuti en gron ruta i en ljus sida, vilket gjorde vyn orolig.
+    <div className="rounded-xl bg-gold-50 border border-gold-200 p-5 text-center">
+      <p className="eyebrow text-gold-700 mb-1">Frakt</p>
+      <p className="text-espresso-900 font-medium">Kostnadsfritt förberett kuvert</p>
+      <p className="text-espresso-600 text-sm">Porto och adress klara, rekommenderat och försäkrat.</p>
+      <p className="text-espresso-600 text-sm">Skickas när du godkänt ditt slutpris.</p>
+      <p className="text-espresso-400 text-xs mt-2">Vid frågor: info@guldbud.com</p>
     </div>
   )
 }
