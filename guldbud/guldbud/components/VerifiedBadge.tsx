@@ -57,7 +57,9 @@ export default function VerifiedBadge({
     </span>
   )
   return href ? (
-    <Link href={href} className="inline-flex hover:opacity-90 transition">
+    // Uppmätt 26 px hög i profilens sidhuvud. Vaddering ger 34 px klickyta,
+    // negativ marginal håller märket på samma plats.
+    <Link href={href} className="inline-flex py-1 -my-1 hover:opacity-90 transition">
       {content}
     </Link>
   ) : (

@@ -64,7 +64,9 @@ export function TrustpilotFooterLink() {
       href={TRUSTPILOT_REVIEW_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 text-sm text-espresso-100/70 hover:text-gold-300 transition"
+      // Uppmätt 20 px hög i sidfoten. Vaddering ger 28 px, negativ marginal
+      // håller sidfotens radavstånd oförändrat.
+      className="inline-flex items-center gap-1.5 py-1 -my-1 text-sm text-espresso-100/70 hover:text-gold-300 transition"
     >
       <TrustpilotStar size={14} />
       Betygsätt oss på Trustpilot

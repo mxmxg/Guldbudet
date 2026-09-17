@@ -70,10 +70,14 @@ export default function PendingApprovalBanner() {
               <Link
                 key={p.id}
                 href={`/auctions/${p.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl bg-white border border-gold-200 px-4 py-3 hover:border-gold-400 transition"
+                // Uppmätt på startsidan i 390 px: titeln fick 109 px bredvid
+                // "Granska budet" och klipptes (491 > 109). Under sm staplas
+                // raden så titeln får hela bredden och bryter rad i stället
+                // för tre punkter. Från sm som förut.
+                className="flex flex-col items-start sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-3 rounded-xl bg-white border border-gold-200 px-4 py-3 hover:border-gold-400 transition"
               >
-                <span className="min-w-0">
-                  <span className="block truncate font-medium text-espresso-900">{p.title}</span>
+                <span className="min-w-0 w-full sm:w-auto">
+                  <span className="block break-words font-medium text-espresso-900">{p.title}</span>
                   <span className="text-xs text-espresso-500">Högsta bud: {formatSEK(p.topBid)}</span>
                 </span>
                 <span className="shrink-0 text-sm font-medium text-gold-700">Granska budet →</span>

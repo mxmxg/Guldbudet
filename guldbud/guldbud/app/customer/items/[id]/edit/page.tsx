@@ -114,7 +114,8 @@ export default function EditItemPage({ params }: { params: { id: string } }) {
     <div className="min-h-screen flex flex-col bg-cream">
       <Navbar />
       <div className="flex-1 max-w-2xl w-full mx-auto px-4 py-10">
-        <Link href="/customer/my-items" className="text-sm text-espresso-500 hover:text-espresso-800">← Mina föremål</Link>
+        {/* Uppmätt 17 px hög. Vaddering ger 29 px, negativ marginal håller avståndet. */}
+        <Link href="/customer/my-items" className="inline-flex items-center py-1.5 -my-1.5 text-sm text-espresso-500 hover:text-espresso-800">← Mina föremål</Link>
         <h1 className="font-display text-3xl text-espresso-900 mt-2 mb-1">Redigera föremål</h1>
         <p className="text-sm text-espresso-400 mb-6">Du kan ändra uppgifterna så länge föremålet väntar på granskning.</p>
 
@@ -153,7 +154,8 @@ export default function EditItemPage({ params }: { params: { id: string } }) {
           </div>
 
           <label className="flex items-center gap-2 text-sm text-espresso-700">
-            <input type="checkbox" checked={form.hasGem} onChange={(e) => set('hasGem', e.target.checked)} />
+            {/* Uppmätt 13 x 13 px. 24 px på mobil, som förut på skrivbord. */}
+            <input type="checkbox" checked={form.hasGem} onChange={(e) => set('hasGem', e.target.checked)} className="w-6 h-6 sm:w-auto sm:h-auto shrink-0" />
             Föremålet har diamant/ädelsten
           </label>
           {form.hasGem && (
