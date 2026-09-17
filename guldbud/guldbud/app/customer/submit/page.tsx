@@ -516,6 +516,10 @@ export default function SubmitPage() {
                 </select>
               </div>
             </div>
+            <p className="-mt-1 text-xs text-espresso-400">
+              Väg föremålet om du kan. Handlarna budar utifrån vikten, och vi kontrollerar den när
+              föremålet kommit in till oss.
+            </p>
 
             {/* Diamonds / gemstones */}
             <div className="rounded-xl border border-espresso-100 p-4">
