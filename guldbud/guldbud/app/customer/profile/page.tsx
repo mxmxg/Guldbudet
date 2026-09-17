@@ -300,7 +300,9 @@ export default function CustomerProfilePage() {
                   await supabase.auth.signOut()
                   window.location.href = '/'
                 }}
-                className="text-sm text-espresso-400 hover:text-espresso-700 transition"
+                // Uppmätt 20 px hög. Vaddering ger 32 px, negativ marginal
+                // så sidans höjd inte ändras.
+                className="inline-flex items-center px-3 py-1.5 -my-1.5 text-sm text-espresso-400 hover:text-espresso-700 transition"
               >
                 Logga ut
               </button>
@@ -314,8 +316,10 @@ export default function CustomerProfilePage() {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  // Fälten var 264 px breda i en kolumn på 326 (390 px), så namn och adress
+  // klipptes inuti rutan. På mobil fyller de kolumnen, på skrivbord som förut.
   return (
-    <label className="block">
+    <label className="block [&>input]:w-full sm:[&>input]:w-auto">
       <span className="block text-xs font-medium text-espresso-500 mb-1.5">{label}</span>
       {children}
     </label>

@@ -110,7 +110,8 @@ export default function OrderChat({
                   mine ? 'bg-gold-sheen text-espresso-900' : 'bg-espresso-100 text-espresso-800'
                 }`}>
                   <p className="whitespace-pre-wrap break-words">{m.body}</p>
-                  <p className={`text-[10px] mt-1 ${mine ? 'text-espresso-900/50' : 'text-espresso-400'}`}>
+                  {/* 11 px, inte 10: tidsstämplarna var den enda texten under 11 px på affärssidorna. */}
+                  <p className={`text-[11px] mt-1 ${mine ? 'text-espresso-900/50' : 'text-espresso-400'}`}>
                     {time(m.created_at)}
                   </p>
                 </div>
@@ -121,6 +122,8 @@ export default function OrderChat({
       </div>
 
       {sendError && <p className="px-3 pt-2 text-xs text-red-600">{sendError}</p>}
+      {/* min-w-0 på inputen: utan den är radens min-content 349 px i 328 px vid
+          360 px bredd, och hela kortet klipps (scrollWidth 337 > 326). */}
       <div className="p-3 border-t border-espresso-100 flex gap-2">
         <input
           value={text}
@@ -132,7 +135,7 @@ export default function OrderChat({
             }
           }}
           placeholder="Skriv ett meddelande..."
-          className="flex-1 text-sm"
+          className="flex-1 min-w-0 text-sm"
         />
         <button onClick={send} disabled={sending || !text.trim()} className="btn-gold whitespace-nowrap !px-4 !py-2">
           {sending ? '...' : 'Skicka'}

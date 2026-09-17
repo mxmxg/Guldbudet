@@ -69,7 +69,8 @@ export default function DownloadInvoiceButton({
       type="button"
       onClick={download}
       disabled={busy}
-      className={className || 'text-sm text-gold-600 hover:text-gold-700 disabled:opacity-50'}
+      // py-1 ger 28 px klickyta; utan vaddering var knappen 20 px hög i telefonbredd.
+      className={className || 'py-1 text-sm text-gold-600 hover:text-gold-700 disabled:opacity-50'}
     >
       {busy ? 'Hämtar…' : err ? 'Försök igen' : label}
     </button>

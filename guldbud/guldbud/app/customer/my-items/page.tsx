@@ -243,14 +243,19 @@ export default function MyItemsPage() {
                 {docItems.map((item: any) => {
                   const o = orderByItem[item.id]
                   return (
-                    <div key={item.id} className="flex items-center gap-4 p-4">
+                    /* Uppmätt i 390 px: titeln fick 152 px bredvid länkkolumnen
+                       och fyra av fyra rader klipptes med tre punkter. Under sm
+                       får raden bryta: länkarna hamnar på en egen rad under
+                       titeln, indragna så de står under texten, och titeln får
+                       hela bredden. Från sm är layouten som förut. */
+                    <div key={item.id} className="flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-1 p-4">
                       <div className="w-12 h-12 rounded-xl overflow-hidden bg-espresso-100 relative shrink-0">
                         {item.image_urls?.[0] && (
                           <Image src={item.image_urls[0]} alt={item.title} fill sizes="48px" className="object-cover" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-espresso-900 truncate">{item.title}</p>
+                        <p className="font-medium text-espresso-900 line-clamp-2 break-words">{item.title}</p>
                         <p className="text-xs text-espresso-400">
                           {o?.amount ? `${o.amount.toLocaleString('sv-SE')} kr` : ''}
                           {o?.created_at
@@ -258,17 +263,19 @@ export default function MyItemsPage() {
                             : ''}
                         </p>
                       </div>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4 shrink-0">
+                      {/* Länkarna var 16 px höga. Vaddering ger 28 px. Raden är
+                          minst 48 px (bilden), så ingen negativ marginal behövs. */}
+                      <div className="basis-full pl-16 sm:basis-auto sm:pl-0 flex items-center gap-4 shrink-0">
                         <Link
                           href={`/orders/${o.id}/invoice`}
-                          className="text-xs text-gold-600 hover:text-gold-700 whitespace-nowrap"
+                          className="inline-flex items-center py-1.5 text-xs text-gold-600 hover:text-gold-700 whitespace-nowrap"
                         >
                           Visa →
                         </Link>
                         <DownloadInvoiceButton
                           orderId={o.id}
                           label="Ladda ner (PDF)"
-                          className="text-xs text-espresso-500 hover:text-espresso-800 disabled:opacity-50 whitespace-nowrap"
+                          className="inline-flex items-center py-1.5 text-xs text-espresso-500 hover:text-espresso-800 disabled:opacity-50 whitespace-nowrap"
                         />
                       </div>
                     </div>
@@ -323,7 +330,9 @@ export default function MyItemsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h3 className="font-medium text-espresso-900">{item.title}</h3>
-                      <span className={`chip ${s.color}`}>{s.label}</span>
+                      {/* "Väntar på granskning" bröts på två rader i 390 px.
+                          Ett märke ska vara en rad, det får hellre byta rad. */}
+                      <span className={`chip whitespace-nowrap ${s.color}`}>{s.label}</span>
                     </div>
                     <p className="text-xs text-espresso-400 mb-1.5">
                       {item.category ? `${item.category} · ` : ''}{item.weight_grams} g · {item.karat}
@@ -337,6 +346,18 @@ export default function MyItemsPage() {
                     <p className="text-[11px] text-espresso-300 mt-1">
                       {new Date(item.created_at).toLocaleDateString('sv-SE')}
                     </p>
+                    {/* Mobil: länken till höger tog 74 px av 326 och titeln
+                        bröts på upp till fyra rader. Här ligger den under
+                        uppgifterna i stället, 28 px hög. Skrivbordet har kvar
+                        länken till höger nedan. */}
+                    {item.status === 'pending' && (
+                      <Link
+                        href={`/customer/items/${item.id}/edit`}
+                        className="sm:hidden inline-flex items-center min-h-[28px] mt-1 text-sm text-gold-600 hover:text-gold-700 whitespace-nowrap"
+                      >
+                        Redigera →
+                      </Link>
+                    )}
                   </div>
                   {clickable && (
                     <span className="text-sm text-gold-600 shrink-0 hidden sm:inline">
@@ -346,7 +367,7 @@ export default function MyItemsPage() {
                   {item.status === 'pending' && (
                     <Link
                       href={`/customer/items/${item.id}/edit`}
-                      className="text-sm text-gold-600 hover:text-gold-700 shrink-0 whitespace-nowrap"
+                      className="hidden sm:inline-flex items-center py-1 -my-1 text-sm text-gold-600 hover:text-gold-700 shrink-0 whitespace-nowrap"
                     >
                       Redigera →
                     </Link>
@@ -384,7 +405,9 @@ export default function MyItemsPage() {
                     <button
                       onClick={() => relist(item)}
                       disabled={relisting === item.id}
-                      className="text-xs text-gold-600 hover:text-gold-700 disabled:opacity-50"
+                      // Uppmätt 16 px hög. Vaddering till 28 px, negativ
+                      // marginal så avståndet mellan korten är detsamma.
+                      className="inline-flex items-center py-1.5 -my-1.5 text-xs text-gold-600 hover:text-gold-700 disabled:opacity-50"
                     >
                       {relisting === item.id ? 'Lägger ut...' : 'Lägg ut igen →'}
                     </button>
@@ -411,17 +434,18 @@ export default function MyItemsPage() {
                     utan villkor, så den gick att hämta innan utbetalningen var
                     godkänd. Nu följer båda samma regel som ordervyn. */}
                 {hasSellerDoc && orderId && (
-                  <div className="pl-1 flex items-center gap-4">
+                  <div className="pl-1 flex flex-wrap items-center gap-x-4 gap-y-0">
+                    {/* Båda var 16 px höga. Samma vaddering som Lägg ut igen. */}
                     <Link
                       href={`/orders/${orderId}/invoice`}
-                      className="text-xs text-gold-600 hover:text-gold-700"
+                      className="inline-flex items-center py-1.5 -my-1.5 text-xs text-gold-600 hover:text-gold-700"
                     >
                       Visa underlag →
                     </Link>
                     <DownloadInvoiceButton
                       orderId={orderId}
                       label="Ladda ner underlag (PDF)"
-                      className="text-xs text-espresso-500 hover:text-espresso-800 disabled:opacity-50"
+                      className="inline-flex items-center py-1.5 -my-1.5 text-xs text-espresso-500 hover:text-espresso-800 disabled:opacity-50"
                     />
                   </div>
                 )}

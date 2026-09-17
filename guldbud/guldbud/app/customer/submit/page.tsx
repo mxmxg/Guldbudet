@@ -524,7 +524,8 @@ export default function SubmitPage() {
                   type="checkbox"
                   checked={hasGem}
                   onChange={(e) => setHasGem(e.target.checked)}
-                  className="!w-auto !p-0 h-4 w-4 accent-gold-500"
+                  // Uppmätt 13 x 16 px. 24 px på mobil, som förut på skrivbord.
+                  className="!p-0 h-6 w-6 sm:h-4 sm:w-4 shrink-0 accent-gold-500"
                 />
                 <span className="text-sm font-medium text-espresso-800">Innehåller diamant eller ädelsten</span>
               </label>
@@ -619,7 +620,8 @@ export default function SubmitPage() {
                   type="checkbox"
                   checked={ownershipAttested}
                   onChange={(e) => setOwnershipAttested(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 shrink-0"
+                  // Uppmätt 16 px. 24 px på mobil, som förut på skrivbord.
+                  className="mt-0.5 w-6 h-6 sm:w-4 sm:h-4 shrink-0"
                 />
                 <span className="text-sm text-espresso-600 leading-relaxed">
                   Jag intygar att föremålet är min egendom och lagligt införskaffat.
@@ -640,7 +642,8 @@ export default function SubmitPage() {
                   kryssruta behövs, bara att det sägs rakt ut. */}
               <p className="text-xs text-espresso-400 max-w-md">
                 När du publicerar ger du GuldBud i uppdrag att sälja föremålet åt dig enligt{' '}
-                <Link href="/terms" className="underline hover:text-espresso-600">villkoren</Link>.
+                {/* Länken var 15 px hög. Vaddering ger 31 px utan att raden växer. */}
+                <Link href="/terms" className="underline hover:text-espresso-600 inline-block py-2 -my-2">villkoren</Link>.
               </p>
             </div>
           </form>

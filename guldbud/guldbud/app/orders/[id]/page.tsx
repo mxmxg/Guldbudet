@@ -185,7 +185,7 @@ export default function OrderPage({ params }: { params: { id: string } }) {
                 : `Föremålet godkändes inte vid vår äkthetskontroll${order.refund_reason ? ` (${order.refund_reason})` : ''}. Affären återgår och beloppet återbetalas till dig.`}
             </p>
             {party === 'dealer' && (
-              <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
+              <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 py-1 text-sm text-gold-600 hover:text-gold-700">
                 Visa kreditfaktura →
               </Link>
             )}
@@ -381,14 +381,15 @@ function SellerPanel({
               {relisted.status === 'pending' ? (
                 <span className="text-espresso-500">Den nya annonsen väntar på granskning.</span>
               ) : (
-                <Link href={`/auctions/${relisted.id}`} className="text-gold-600 hover:text-gold-700">
+                <Link href={`/auctions/${relisted.id}`} className="inline-block py-1 text-gold-600 hover:text-gold-700">
                   Se den nya auktionen →
                 </Link>
               )}
             </p>
           )}
+          {/* py-1 på textlänkarna: uppmätt 20 px höga, 28 px är minsta klickyta. */}
           {SELLER_DOC_STATES.includes(order.status) && (
-            <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
+            <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 py-1 text-sm text-gold-600 hover:text-gold-700">
               Visa försäljningsunderlag →
             </Link>
           )}
@@ -479,26 +480,28 @@ function DealerPanel({ order }: { order: any }) {
     <>
       <div className={`card p-6 ${live && (!feePaid || !sellerPaid) ? 'ring-2 ring-gold-300' : ''}`}>
         <h2 className="font-display text-lg text-espresso-900 mb-3">Att betala</h2>
+        {/* Beloppen får shrink-0 och whitespace-nowrap så de aldrig bryts eller
+            klipps i 360 px; etiketten får bryta rad i stället. */}
         <div className="flex flex-col gap-1 text-sm">
-          <div className="flex justify-between text-espresso-600">
+          <div className="flex justify-between gap-3 text-espresso-600">
             <span>Vinnande bud, till säljaren</span>
-            <span className="tabular-nums">{formatSEK(order.amount)}</span>
+            <span className="tabular-nums shrink-0 whitespace-nowrap">{formatSEK(order.amount)}</span>
           </div>
-          <div className="flex justify-between text-espresso-600">
+          <div className="flex justify-between gap-3 text-espresso-600">
             <span>Provision {fees.commissionLabel}, till GuldBud</span>
-            <span className="tabular-nums">+{formatSEK(fees.commission(order.amount))}</span>
+            <span className="tabular-nums shrink-0 whitespace-nowrap">+{formatSEK(fees.commission(order.amount))}</span>
           </div>
-          <div className="flex justify-between text-espresso-600">
+          <div className="flex justify-between gap-3 text-espresso-600">
             <span>Frakt (inkl moms), till GuldBud</span>
-            <span className="tabular-nums">+{formatSEK(fees.shippingFee)}</span>
+            <span className="tabular-nums shrink-0 whitespace-nowrap">+{formatSEK(fees.shippingFee)}</span>
           </div>
-          <div className="flex justify-between text-espresso-600">
+          <div className="flex justify-between gap-3 text-espresso-600">
             <span>Moms {fees.vatLabel} på provision</span>
-            <span className="tabular-nums">+{formatSEK(fees.commissionVat(order.amount))}</span>
+            <span className="tabular-nums shrink-0 whitespace-nowrap">+{formatSEK(fees.commissionVat(order.amount))}</span>
           </div>
-          <div className="flex justify-between font-semibold text-espresso-900 pt-2 mt-1 border-t border-espresso-100">
+          <div className="flex justify-between gap-3 font-semibold text-espresso-900 pt-2 mt-1 border-t border-espresso-100">
             <span>Ditt totalpris</span>
-            <span className="tabular-nums">{formatSEK(fees.dealerTotal(order.amount))}</span>
+            <span className="tabular-nums shrink-0 whitespace-nowrap">{formatSEK(fees.dealerTotal(order.amount))}</span>
           </div>
         </div>
         <p className="text-xs text-espresso-500 mt-2 leading-relaxed">
@@ -521,7 +524,7 @@ function DealerPanel({ order }: { order: any }) {
                     <dt className="text-espresso-400">Mottagare</dt>
                     <dd className="m-0 text-espresso-700">{GULDBUD.name}</dd>
                     <dt className="text-espresso-400">{OPERATING_ACCOUNT.label}</dt>
-                    <dd className="m-0 text-espresso-700 tabular-nums">{OPERATING_ACCOUNT.number}</dd>
+                    <dd className="m-0 text-espresso-700 tabular-nums whitespace-nowrap">{OPERATING_ACCOUNT.number}</dd>
                     <dt className="text-espresso-400">Referens</dt>
                     <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{payRef(order.order_no)}</dd>
                   </dl>
@@ -564,7 +567,7 @@ function DealerPanel({ order }: { order: any }) {
                     <dt className="text-espresso-400">Clearing</dt>
                     <dd className="m-0 text-espresso-700 tabular-nums">{account.clearing || '-'}</dd>
                     <dt className="text-espresso-400">Kontonummer</dt>
-                    <dd className="m-0 text-espresso-700 tabular-nums">{account.account || '-'}</dd>
+                    <dd className="m-0 text-espresso-700 tabular-nums whitespace-nowrap">{account.account || '-'}</dd>
                     <dt className="text-espresso-400">Referens</dt>
                     <dd className="m-0 font-semibold text-espresso-900 tabular-nums">{payRef(order.order_no)}</dd>
                   </dl>
@@ -583,7 +586,7 @@ function DealerPanel({ order }: { order: any }) {
         )}
 
         {(!live || feePaid) && (
-          <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 text-sm text-gold-600 hover:text-gold-700">
+          <Link href={`/orders/${order.id}/invoice`} className="inline-block mt-3 py-1 text-sm text-gold-600 hover:text-gold-700">
             Visa faktura →
           </Link>
         )}
