@@ -54,8 +54,7 @@ export default function Page() {
 
       <H2>Försäkrad frakt i hela Skåne</H2>
       <P>
-        Efter godkänt slutpris skickar vi ett kostnadsfritt rekommenderat brev med förbetalt porto, försäkrat upp till
-        100 000 kr. Du lämnar det på närmaste ombud, i Malmö, Lund, Helsingborg eller var du än bor i Skåne. Ingen resa,
+        Efter godkänt slutpris skickar vi ett kostnadsfritt rekommenderat brev med förbetalt porto, försäkrat. Du lämnar det på närmaste ombud, i Malmö, Lund, Helsingborg eller var du än bor i Skåne. Ingen resa,
         ingen parkering.
       </P>
 

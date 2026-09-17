@@ -74,13 +74,14 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner, 
           </div>
         </div>
         <div className="rounded-xl bg-white border border-espresso-100 p-4 mb-4">
-          <p className="font-medium text-espresso-800 mb-3">Skicka in föremålet, gärna redan idag</p>
+          <p className="font-medium text-espresso-800 mb-3">Så går det till härifrån</p>
           <ol className="flex flex-col gap-2 text-sm text-espresso-600">
             {[
-              'Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr.',
-              'Lägg föremålet i det och posta det rekommenderat. Porto och adress är redan klara.',
-              'Vi verifierar äktheten så snart vi mottagit föremålet.',
-              'Du får betalt till ditt bankkonto inom 24 timmar när vi verifierat föremålet.',
+              'Vi skickar dig ett kostnadsfritt, förberett kuvert. Porto och adress är redan klara.',
+              'Lägg föremålet i kuvertet, försegla det och lämna in det på ett postombud.',
+              'Försändelsen är rekommenderad, spårbar och försäkrad hela vägen till oss.',
+              'Vi kontrollerar äktheten när föremålet kommit fram.',
+              'Du får betalt till ditt bankkonto inom 24 timmar efter kontrollen.',
             ].map((t, i) => (
               <li key={i} className="flex gap-2">
                 <span className="text-gold-600 font-semibold">{i + 1}.</span>
@@ -91,13 +92,13 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner, 
         </div>
         <div className="rounded-xl bg-espresso-900 p-4 text-center">
           <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Frakt</p>
-          <p className="text-gold-200 font-medium">Kostnadsfritt rekommenderat brev</p>
-          <p className="text-gold-200/80 text-sm">Förbetalt porto och adress, försäkrat upp till 100 000 kr. Vi skickar det till dig nu, posta så snart du kan.</p>
+          <p className="text-gold-200 font-medium">Kostnadsfritt förberett kuvert</p>
+          <p className="text-gold-200/80 text-sm">Porto och adress är klara, och försändelsen är rekommenderad, spårbar och försäkrad. Vi skickar kuvertet till dig nu.</p>
           <p className="text-gold-500/70 text-xs mt-2">Vid frågor: info@guldbud.com</p>
         </div>
         {orderId && (
           <Link href={`/orders/${orderId}`} className="btn-gold w-full mt-4 justify-center">
-            Följ affären och kontakta oss →
+            Öppna affären →
           </Link>
         )}
       </div>

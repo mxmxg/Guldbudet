@@ -300,15 +300,15 @@ function SellerPanel({
           <h2 className="font-display text-xl text-espresso-900 mb-1">Grattis, ditt föremål är sålt!</h2>
           <p className="text-sm text-espresso-500 mb-5 leading-relaxed">
             Du sålde för {formatSEK(order.amount)}. Handlaren betalar hela beloppet direkt till ditt bankkonto
-            när vi tagit emot och kontrollerat föremålet. Nu skickar vi dig ett kostnadsfritt, rekommenderat
-            brev med förbetalt porto, försäkrat upp till 100 000 kr. Lägg föremålet i det och posta det
-            rekommenderat. Ju snabbare det är på väg, desto snabbare får du betalt.
+            när vi tagit emot och kontrollerat föremålet. Nu skickar vi dig ett kostnadsfritt, förberett
+            kuvert med porto och adress klara. Lägg föremålet i det, försegla och lämna in det på ett
+            postombud. Ju snabbare det är på väg, desto snabbare får du betalt.
           </p>
 
           <ol className="grid gap-3 mb-5">
             {[
-              'Linda in föremålet väl, gärna i bubbelplast, och lägg det i det kostnadsfria rekommenderade brevet vi skickar dig.',
-              'Posta brevet rekommenderat. Porto och adress är redan klara och försändelsen är försäkrad upp till 100 000 kr.',
+              'Linda in föremålet väl, gärna i bubbelplast, och lägg det i det kostnadsfria kuvertet vi skickar dig.',
+              'Försegla kuvertet och lämna in det på ett postombud. Porto och adress är klara, och försändelsen är rekommenderad, spårbar och försäkrad.',
               'Skriv spårningsnumret i meddelandena längst ner så vi kan följa försändelsen.',
             ].map((t, i) => (
               <li key={i} className="flex gap-3 text-sm text-espresso-700">
@@ -322,8 +322,8 @@ function SellerPanel({
 
           <div className="rounded-xl bg-espresso-900 p-4 text-center">
             <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Frakt</p>
-            <p className="text-gold-200 font-medium">Kostnadsfritt rekommenderat brev</p>
-            <p className="text-gold-200/80 text-sm">Förbetalt porto och adress, försäkrat upp till 100 000 kr. Vi skickar det till dig nu, posta så snart du kan.</p>
+            <p className="text-gold-200 font-medium">Kostnadsfritt förberett kuvert</p>
+            <p className="text-gold-200/80 text-sm">Porto och adress är klara, och försändelsen är rekommenderad, spårbar och försäkrad. Vi skickar kuvertet till dig nu.</p>
           </div>
           <p className="text-xs text-espresso-400 mt-3 leading-relaxed">
             Så fort vi tagit emot och äkthetskontrollerat föremålet får handlaren dina kontouppgifter och

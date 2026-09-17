@@ -652,7 +652,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             },
             {
               title: 'Försäkrad transport',
-              desc: 'Efter godkänt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du postar det rekommenderat, porto och adress är redan klara.',
+              desc: 'Efter godkänt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat. Du postar det rekommenderat, porto och adress är redan klara.',
             },
             {
               title: 'Betalt efter äkthetskontroll',

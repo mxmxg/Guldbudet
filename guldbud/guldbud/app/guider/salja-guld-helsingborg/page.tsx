@@ -96,7 +96,7 @@ export default function Page() {
 
       <H2>Frakten, praktiskt i nordvästra Skåne</H2>
       <P>
-        När du accepterat budet skickar vi ett rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du
+        När du accepterat budet skickar vi ett rekommenderat brev med förbetalt porto, försäkrat. Du
         lägger i föremålet och lämnar brevet hos ditt postombud. Vi kontrollerar äktheten när det kommit fram, och sedan
         betalas pengarna ut till ditt bankkonto.
       </P>
