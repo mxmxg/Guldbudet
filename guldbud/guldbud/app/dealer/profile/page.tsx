@@ -236,7 +236,12 @@ export default function DealerProfilePage() {
             ))}
           </div>
         ) : (
-          <div className="grid gap-6">
+          /* minmax(0,1fr): ett grid-barn har min-width auto och vägrar krympa
+             under sitt innehålls min-content. Uppmätt 2026-09-17 i 390 px:
+             kortet Mina affärer krävde 550 px, spåret blev 550 och alla kort i
+             gridet klipptes vid skärmkanten. Med minmax(0,1fr) följer spåret
+             skärmen och korten bryter innehållet i stället. */
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
             {/* Not approved notice */}
             {!profile.approved && (
               <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5">
@@ -344,7 +349,8 @@ export default function DealerProfilePage() {
               <section id="mina-affarer" className="card p-6 scroll-mt-24">
                 <h2 className="font-display text-xl text-espresso-900 mb-1">Mina affärer</h2>
                 <p className="text-xs text-espresso-400 mb-4">Auktioner du vunnit och deras status.</p>
-                <div className="grid gap-3">
+                {/* minmax(0,1fr) av samma skäl som yttre gridet: raderna mätte 500 px i 390. */}
+                <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
                   {orders.map((o) => (
                     <Link
                       key={o.id}
@@ -357,7 +363,8 @@ export default function DealerProfilePage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-espresso-900 truncate">{o.items?.title}</p>
+                        {/* Två rader hellre än tre punkter: i 390 px fick titeln 135 px och "Dammklocka i 18k guld" klipptes. */}
+                        <p className="text-sm font-medium leading-snug text-espresso-900 line-clamp-2">{o.items?.title}</p>
                         <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
                           <span className="chip bg-espresso-100 text-espresso-600">
                             {ORDER_STATUS_LABEL[o.status as OrderStatus]}

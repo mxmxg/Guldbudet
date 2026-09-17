@@ -21,6 +21,8 @@ import DownloadInvoiceButton from '@/components/DownloadInvoiceButton'
 
 const INCREMENTS = [100, 250, 500, 1000]
 
+type AwaitingItem = { id: string; title: string; image_urls: string[]; auction_ends_at: string | null; myBid: number }
+
 export default function DealerDashboard() {
   // 24K-priset per gram, live. Faller tillbaka på riktvärdet i lib/gold
   // tills /api/gold-price svarat.
@@ -41,6 +43,13 @@ export default function DealerDashboard() {
   const [profile, setProfile] = useState<any>(null)
   const [watchedIds, setWatchedIds] = useState<Set<string>>(new Set())
   const [orders, setOrders] = useState<any[]>([])
+  // Avslutade auktioner där handlaren har högsta budet men säljaren ännu
+  // inte accepterat eller avböjt. Föremålet står kvar som active med passerad
+  // sluttid (settle_ended_auctions stänger inte), så active_items_with_stats
+  // tar inte med det. Utan den här listan försvann de ur panelen helt:
+  // kontrollerat 2026-09-17, ett konto hade 14 sådana och panelen visade
+  // "Inga aktiva auktioner just nu".
+  const [awaiting, setAwaiting] = useState<AwaitingItem[]>([])
   const [tab, setTab] = useState<'active' | 'mybids' | 'winning' | 'watched' | 'won'>('active')
 
   useEffect(() => {
@@ -68,7 +77,7 @@ export default function DealerDashboard() {
     }
     setProfile(prof)
 
-    await refreshBids(user.id)
+    const activeCount = await refreshBids(user.id)
 
     const { data: watch } = await supabase.from('watchlist').select('item_id').eq('dealer_id', user.id)
     setWatchedIds(new Set((watch || []).map((w: any) => w.item_id)))
@@ -76,10 +85,13 @@ export default function DealerDashboard() {
     // Vunna auktioner = handlarens ordrar (senast först).
     const { data: myOrders } = await supabase
       .from('orders')
-      .select('id, amount, status, dealer_paid_at, refunded_at, created_at, items(title, image_urls)')
+      .select('id, amount, status, dealer_paid_at, fee_paid_at, refunded_at, created_at, items(title, image_urls)')
       .eq('dealer_id', user.id)
       .order('created_at', { ascending: false })
     setOrders(myOrders || [])
+    // Pågår ingen auktion men finns det vunna affärer ska de synas direkt,
+    // inte ligga bakom en flik som säger "Inga aktiva auktioner just nu".
+    if (activeCount === 0 && (myOrders || []).length > 0) setTab('won')
 
     setLoading(false)
   }
@@ -118,6 +130,31 @@ export default function DealerDashboard() {
       am[a.item_id] = a.max_amount
     })
     setAutoMax(am)
+
+    // Avslutade auktioner som väntar på säljaren, se AwaitingItem.
+    const bidItemIds = Object.keys(my)
+    let waiting: AwaitingItem[] = []
+    if (bidItemIds.length > 0) {
+      const { data: ended } = await supabase
+        .from('items')
+        .select('id, title, image_urls, auction_ends_at')
+        .in('id', bidItemIds)
+        .eq('status', 'active')
+        .lte('auction_ends_at', new Date().toISOString())
+      const endedIds = (ended || []).map((i: any) => i.id)
+      if (endedIds.length > 0) {
+        const { data: endedBids } = await supabase.from('bids').select('item_id, amount').in('item_id', endedIds)
+        const topEnded: Record<string, number> = {}
+        endedBids?.forEach((b: any) => {
+          if (!topEnded[b.item_id] || b.amount > topEnded[b.item_id]) topEnded[b.item_id] = b.amount
+        })
+        waiting = (ended || [])
+          .filter((i: any) => my[i.id] && my[i.id] >= (topEnded[i.id] || 0))
+          .map((i: any) => ({ id: i.id, title: i.title, image_urls: i.image_urls || [], auction_ends_at: i.auction_ends_at, myBid: my[i.id] }))
+      }
+    }
+    setAwaiting(waiting)
+    return list.length
   }
 
   const placeBid = async (itemId: string) => {
@@ -219,6 +256,17 @@ export default function DealerDashboard() {
       ? items.filter((i) => watchedIds.has(i.id))
       : items
 
+  // Vad handlaren själv ska göra i sina affärer under väg C: betala GuldBuds
+  // faktura (fee_paid_at) omgående, och köpeskillingen till säljaren
+  // (dealer_paid_at) när föremålet är mottaget och kontrollerat.
+  const todo: { o: any; label: string }[] = orders.flatMap((o) => {
+    if (o.status === 'cancelled' || o.status === 'completed' || o.refunded_at) return []
+    if (!o.fee_paid_at) return [{ o, label: 'Betala GuldBuds faktura' }]
+    if (['received', 'dealer_paid'].includes(o.status) && !o.dealer_paid_at)
+      return [{ o, label: 'Betala köpeskillingen till säljaren' }]
+    return []
+  })
+
   const tabs: { key: typeof tab; label: string; count?: number }[] = [
     { key: 'active', label: 'Alla auktioner', count: items.length },
     { key: 'mybids', label: 'Mina bud', count: items.filter((i) => myBids[i.id]).length },
@@ -247,6 +295,8 @@ export default function DealerDashboard() {
                 28 bredvid "0 aktiva auktioner" och fliken sa 0. */}
             <HeaderStat value={items.filter((i) => myBids[i.id]).length} label="Mina bud i pågående" />
             <HeaderStat value={winningCount} label="Ledande bud" accent />
+            {awaiting.length > 0 && <HeaderStat value={awaiting.length} label="Väntar på säljarens svar" />}
+            <HeaderStat value={orders.length} label="Vunna auktioner" onClick={() => setTab('won')} />
           </div>
         </div>
       </div>
@@ -273,9 +323,72 @@ export default function DealerDashboard() {
           </div>
         )}
 
-        {/* Tabs, scroll within their own row on small screens */}
-        <div className="-mx-4 px-4 mb-6 overflow-x-auto no-scrollbar">
-        <div className="flex gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-max shadow-soft">
+        {/* Det som kräver handling, överst så det syns direkt efter inloggning:
+            fakturor och köpeskillingar att betala, och auktioner som väntar på
+            säljarens svar. */}
+        {!loading && (todo.length > 0 || awaiting.length > 0) && (
+          <div className="grid gap-4 mb-6">
+            {todo.length > 0 && (
+              <section className="card p-5 ring-2 ring-gold-300">
+                <h2 className="font-display text-lg text-espresso-900 mb-3">Att göra</h2>
+                <div className="grid gap-2">
+                  {todo.map(({ o, label }) => (
+                    <Link
+                      key={o.id}
+                      href={`/orders/${o.id}`}
+                      className="flex items-center gap-3 rounded-xl border border-gold-200 bg-gold-50/50 p-3 hover:border-gold-400 transition min-w-0"
+                    >
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-espresso-900 relative shrink-0">
+                        {o.items?.image_urls?.[0] && (
+                          <Image src={o.items.image_urls[0]} alt="" fill sizes="40px" className="object-contain" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-espresso-900 line-clamp-2">{o.items?.title || 'Föremål'}</p>
+                        <p className="text-xs text-gold-800">{label}</p>
+                      </div>
+                      <span className="btn-gold !py-1.5 !px-3 text-xs shrink-0">Öppna</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+            {awaiting.length > 0 && (
+              <section className="card p-5">
+                <h2 className="font-display text-lg text-espresso-900 mb-1">Väntar på säljarens svar</h2>
+                <p className="text-xs text-espresso-400 mb-3">
+                  Auktioner som är avslutade med ditt bud högst. Säljaren väljer att acceptera eller avböja, och du får besked direkt.
+                </p>
+                <div className="grid gap-2">
+                  {awaiting.map((a) => (
+                    <Link
+                      key={a.id}
+                      href={`/auctions/${a.id}`}
+                      className="flex items-center gap-3 rounded-xl border border-espresso-100 p-3 hover:border-gold-300 transition min-w-0"
+                    >
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-espresso-900 relative shrink-0">
+                        {a.image_urls[0] && <Image src={a.image_urls[0]} alt="" fill sizes="40px" className="object-contain" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-espresso-900 line-clamp-2">{a.title}</p>
+                        <p className="text-xs text-espresso-400">
+                          Avslutad {a.auction_ends_at ? new Date(a.auction_ends_at).toLocaleDateString('sv-SE') : ''}
+                        </p>
+                      </div>
+                      <span className="text-sm font-semibold text-gold-700 tabular-nums shrink-0">{formatSEK(a.myBid)}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        )}
+
+        {/* Flikarna radbryter i stället för att rulla dolt i sidled: på en
+            telefon låg "Bevakade" och "Vunna" utanför skärmen utan att något
+            visade det. */}
+        <div className="mb-6">
+        <div className="flex flex-wrap gap-1 bg-white border border-espresso-100 p-1 rounded-xl w-fit max-w-full shadow-soft">
           {tabs.map((t) => (
             <button
               key={t.key}
@@ -312,7 +425,11 @@ export default function DealerDashboard() {
               <p>Du har inte vunnit någon auktion ännu.</p>
             </div>
           ) : (
-            <div className="grid gap-3">
+            /* minmax(0,1fr): grid-barnen vägrar annars krympa under sin
+               min-content-bredd, se profilen. Raden staplas i telefonbredd:
+               med allt på en rad fick titeln 92 px av 390 (uppmätt 2026-09-17)
+               och klipptes till "Tungt he…". */
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
               {orders.map((o) => {
                 const paid = !!o.dealer_paid_at
                 const refunded = !!o.refunded_at
@@ -320,48 +437,52 @@ export default function DealerDashboard() {
                 return (
                   <div
                     key={o.id}
-                    className={`card overflow-hidden flex items-center gap-4 p-4 ${unpaid ? 'ring-2 ring-gold-300' : ''}`}
+                    className={`card overflow-hidden flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 ${unpaid ? 'ring-2 ring-gold-300' : ''}`}
                   >
-                    <Link
-                      href={`/orders/${o.id}`}
-                      className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0"
-                    >
-                      {o.items?.image_urls?.[0] && (
-                        <Image src={o.items.image_urls[0]} alt="" fill sizes="64px" className="object-contain" />
-                      )}
-                    </Link>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                       <Link
                         href={`/orders/${o.id}`}
-                        className="font-display text-lg text-espresso-900 hover:text-gold-700 transition truncate block"
+                        className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0"
                       >
-                        {o.items?.title || 'Föremål'}
+                        {o.items?.image_urls?.[0] && (
+                          <Image src={o.items.image_urls[0]} alt="" fill sizes="64px" className="object-contain" />
+                        )}
                       </Link>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                        <span className="chip bg-espresso-100 text-espresso-600">
-                          {ORDER_STATUS_LABEL[o.status as OrderStatus]}
-                        </span>
-                        {refunded ? (
-                          <span className="chip bg-amber-100 text-amber-700">Återgått</span>
-                        ) : paid ? (
-                          <span className="chip bg-emerald-100 text-emerald-700">Betald ✓</span>
-                        ) : o.status !== 'cancelled' ? (
-                          <span className="chip bg-gold-100 text-gold-800">Att betala</span>
-                        ) : null}
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          href={`/orders/${o.id}`}
+                          className="font-display text-lg leading-snug text-espresso-900 hover:text-gold-700 transition line-clamp-2 block"
+                        >
+                          {o.items?.title || 'Föremål'}
+                        </Link>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                          <span className="chip bg-espresso-100 text-espresso-600">
+                            {ORDER_STATUS_LABEL[o.status as OrderStatus]}
+                          </span>
+                          {refunded ? (
+                            <span className="chip bg-amber-100 text-amber-700">Återgått</span>
+                          ) : paid ? (
+                            <span className="chip bg-emerald-100 text-emerald-700">Betald ✓</span>
+                          ) : o.status !== 'cancelled' ? (
+                            <span className="chip bg-gold-100 text-gold-800">Att betala</span>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-[11px] text-espresso-400">Ditt totalpris</p>
-                      <p className="font-semibold text-gold-700 tabular-nums">{formatSEK(feesAt(o.created_at).dealerTotal(o.amount))}</p>
-                      <Link
-                        href={`/orders/${o.id}`}
-                        className={`inline-block mt-1.5 text-sm ${
-                          unpaid ? 'btn-gold !py-1.5 !px-4' : 'text-gold-600 hover:text-gold-700'
-                        }`}
-                      >
-                        {unpaid ? 'Betala nu' : 'Visa affär'}
-                      </Link>
-                      <div className="mt-1.5">
+                    <div className="flex items-center justify-between gap-3 border-t border-espresso-100 pt-3 sm:border-0 sm:pt-0 sm:block sm:text-right shrink-0">
+                      <div>
+                        <p className="text-[11px] text-espresso-400">Ditt totalpris</p>
+                        <p className="font-semibold text-gold-700 tabular-nums">{formatSEK(feesAt(o.created_at).dealerTotal(o.amount))}</p>
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5">
+                        <Link
+                          href={`/orders/${o.id}`}
+                          className={`inline-block text-sm ${
+                            unpaid ? 'btn-gold !py-1.5 !px-4' : 'text-gold-600 hover:text-gold-700'
+                          }`}
+                        >
+                          {unpaid ? 'Betala nu' : 'Visa affär'}
+                        </Link>
                         <DownloadInvoiceButton orderId={o.id} label="Ladda ner faktura (PDF)" className="text-xs text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
                       </div>
                     </div>
@@ -542,11 +663,29 @@ export default function DealerDashboard() {
   )
 }
 
-function HeaderStat({ value, label, accent }: { value: number; label: string; accent?: boolean }) {
-  return (
-    <div>
+function HeaderStat({
+  value,
+  label,
+  accent,
+  onClick,
+}: {
+  value: number
+  label: string
+  accent?: boolean
+  onClick?: () => void
+}) {
+  const inner = (
+    <>
       <div className={`font-display text-2xl ${accent ? 'text-emerald-400' : 'text-gold-100'}`}>{value}</div>
-      <div className="text-xs text-gold-500/60">{label}</div>
-    </div>
+      <div className="text-xs text-gold-500/60">{label}{onClick ? ' →' : ''}</div>
+    </>
   )
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className="text-left hover:opacity-80 transition !bg-none !shadow-none !p-0 !rounded-none !block">
+        {inner}
+      </button>
+    )
+  }
+  return <div>{inner}</div>
 }
