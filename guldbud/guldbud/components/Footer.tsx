@@ -7,7 +7,10 @@ export default function Footer() {
   return (
     <footer className="relative bg-espresso-900 text-espresso-100/70 overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-500/40 to-transparent" />
-      <div className="pointer-events-none absolute -bottom-24 left-1/2 -translate-x-1/2 w-[520px] h-[520px] rounded-full bg-gold-500/5 blur-3xl" />
+      {/* Glöden var 520 px bred även i telefonbredd och gav sidfoten scrollWidth
+          455 i en vy på 390 (och 467 i 414). Bredden är nu högst vyns bredd, så
+          den sticker aldrig ut åt höger; på skrivbord är den fortfarande 520 px. */}
+      <div className="pointer-events-none absolute -bottom-24 left-1/2 -translate-x-1/2 w-full max-w-[520px] h-[520px] rounded-full bg-gold-500/5 blur-3xl" />
 
       <div className="relative max-w-6xl mx-auto px-5 py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
@@ -53,7 +56,7 @@ export default function Footer() {
             <li className="text-sm">{GULDBUD.box}</li>
             <li className="text-sm">{GULDBUD.postal}</li>
             <li className="text-sm">
-              <a href="mailto:info@guldbud.com" className="hover:text-gold-300 transition">
+              <a href="mailto:info@guldbud.com" className="inline-block py-1 -my-1 hover:text-gold-300 transition">
                 info@guldbud.com
               </a>
             </li>
@@ -94,9 +97,11 @@ function FooterCol({ title, children }: { title: string; children: React.ReactNo
 }
 
 function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+  // Länkarna mätte 17 px höga. py-1 ger 28 px klickyta, och den negativa
+  // marginalen håller radavståndet oförändrat (samma text, samma gap).
   return (
     <li>
-      <Link href={href} className="text-sm hover:text-gold-300 transition">
+      <Link href={href} className="inline-block py-1 -my-1 text-sm hover:text-gold-300 transition">
         {children}
       </Link>
     </li>

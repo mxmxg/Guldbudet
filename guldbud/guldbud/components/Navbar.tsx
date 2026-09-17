@@ -174,37 +174,38 @@ export default function Navbar() {
   // finns kvar i databasen men skräpar inte i dropdownen efter att man läst dem.
   const visibleNotifs = notifications.filter((n) => !n.read)
 
-  const navLinks = () => {
+  // mobile: raderna i mobilmenyn mätte 36 px höga, de får 44 px och större text.
+  const navLinks = (mobile = false) => {
     // Vänta tills vi vet om/vilken roll användaren har, annars blinkar
     // gäst-länkarna förbi och byts ut → hackig header vid varje sidladdning.
     if (!ready) return null
     if (!user)
       return (
         <>
-          <NavItem href="/how-it-works">Så fungerar det</NavItem>
-          <NavItem href="/auctions">Auktioner</NavItem>
+          <NavItem href="/how-it-works" mobile={mobile}>Så fungerar det</NavItem>
+          <NavItem href="/auctions" mobile={mobile}>Auktioner</NavItem>
         </>
       )
     if (role === 'customer')
       return (
         <>
-          <NavItem href="/customer/my-items">Mina föremål</NavItem>
-          <NavItem href="/customer/submit">Lägg ut föremål</NavItem>
-          <NavItem href="/customer/profile">Min profil</NavItem>
+          <NavItem href="/customer/my-items" mobile={mobile}>Mina föremål</NavItem>
+          <NavItem href="/customer/submit" mobile={mobile}>Lägg ut föremål</NavItem>
+          <NavItem href="/customer/profile" mobile={mobile}>Min profil</NavItem>
         </>
       )
     if (role === 'dealer')
       return (
         <>
-          <NavItem href="/dealer/dashboard">Auktioner</NavItem>
-          <NavItem href="/dealer/profile">Min profil</NavItem>
+          <NavItem href="/dealer/dashboard" mobile={mobile}>Auktioner</NavItem>
+          <NavItem href="/dealer/profile" mobile={mobile}>Min profil</NavItem>
         </>
       )
     if (role === 'admin')
       return (
         <>
-          <NavItem href="/admin/orders">Affärer</NavItem>
-          <NavItem href="/admin">Adminpanel</NavItem>
+          <NavItem href="/admin/orders" mobile={mobile}>Affärer</NavItem>
+          <NavItem href="/admin" mobile={mobile}>Adminpanel</NavItem>
         </>
       )
     return null
@@ -254,7 +255,7 @@ export default function Navbar() {
                 >
                   Meddelanden
                   {msgUnread > 0 && (
-                    <span className="bg-gold-500 text-espresso-900 text-[10px] font-semibold rounded-full min-w-[16px] h-4 px-1 inline-flex items-center justify-center">
+                    <span className="bg-gold-500 text-espresso-900 text-[11px] font-semibold rounded-full min-w-[16px] h-4 px-1 inline-flex items-center justify-center">
                       {msgUnread}
                     </span>
                   )}
@@ -267,7 +268,12 @@ export default function Navbar() {
               {!ready ? null : user ? (
                 <>
                   {/* Notifications */}
-                  <div className="relative" ref={notifRef}>
+                  {/* Rutan var 320 px bred och låg på left=-2 i 390 px och 32 px
+                      utanför i 360 px, eftersom den var placerad mot klockan.
+                      Under sm saknar omslaget position, så rutan placeras mot
+                      nav (relative) och får inset-x-4: hela skärmbredden minus
+                      16 px marginal. På sm och uppåt som förut. */}
+                  <div className="sm:relative" ref={notifRef}>
                     <button
                       onClick={() => setShowNotifs(!showNotifs)}
                       className="relative w-11 h-11 rounded-full flex items-center justify-center text-gold-300 hover:text-gold-100 hover:bg-espresso-800 transition"
@@ -275,18 +281,22 @@ export default function Navbar() {
                     >
                       <BellIcon />
                       {unreadCount > 0 && (
-                        <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center font-semibold ring-2 ring-espresso-900">
+                        <span className="absolute top-1 right-1 bg-red-500 text-white text-[11px] rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center font-semibold ring-2 ring-espresso-900">
                           {unreadCount}
                         </span>
                       )}
                     </button>
 
                     {showNotifs && (
-                      <div className="absolute right-0 top-11 w-80 bg-white rounded-2xl shadow-lift border border-espresso-100 z-50 overflow-hidden animate-scale-in origin-top-right">
+                      <div className="absolute inset-x-4 top-full mt-2 sm:inset-x-auto sm:right-0 sm:top-11 sm:mt-0 sm:w-80 bg-white rounded-2xl shadow-lift border border-espresso-100 z-50 overflow-hidden animate-scale-in origin-top-right">
                         <div className="flex items-center justify-between px-4 py-3 border-b border-espresso-100">
                           <p className="font-semibold text-espresso-900 text-sm">Notifieringar</p>
                           {unreadCount > 0 && (
-                            <button onClick={markAllAsRead} className="text-xs text-gold-600 hover:text-gold-700">
+                            <button
+                              onClick={markAllAsRead}
+                              /* Mätte 16 px hög. py-1.5 ger 28 px klickyta utan att rubriken växer. */
+                              className="text-xs text-gold-600 hover:text-gold-700 py-1.5 -my-1.5 px-1 -mr-1"
+                            >
                               Markera alla lästa
                             </button>
                           )}
@@ -341,7 +351,8 @@ export default function Navbar() {
 
                   <button
                     onClick={handleLogout}
-                    className="hidden sm:inline-flex text-sm text-gold-500/80 hover:text-gold-300 transition"
+                    /* Mätte 20 px hög i 1280. py-2 ger 36 px klickyta, texten är oförändrad. */
+                    className="hidden sm:inline-flex items-center py-2 text-sm text-gold-500/80 hover:text-gold-300 transition"
                   >
                     Logga ut
                   </button>
@@ -381,30 +392,35 @@ export default function Navbar() {
                 className="md:hidden fixed inset-0 top-0 z-40 bg-black/40"
                 onClick={() => setMobileOpen(false)}
               />
-              <div id="mobile-menu" className="md:hidden absolute top-full inset-x-0 z-50 border-t border-espresso-800 bg-espresso-900 shadow-xl px-4 py-4 flex flex-col gap-1 animate-fade-in">
-                <div onClick={() => setMobileOpen(false)} className="flex flex-col gap-1">
-                  {navLinks()}
+              {/* Uppmätt i 390 px: raderna var 36 px höga och texten började
+                  28 px in (px-4 plus px-3) medan loggan står 16 px in. Panelen
+                  har nu px-1 så raderna med px-3 landar i linje med loggan,
+                  varje rad är minst 44 px, och panelen rullar i sig själv om
+                  den blir högre än skärmen. */}
+              <div id="mobile-menu" className="md:hidden absolute top-full inset-x-0 z-50 border-t border-espresso-800 bg-espresso-900 shadow-xl px-1 py-3 flex flex-col gap-0.5 max-h-[calc(100vh-6.25rem)] overflow-y-auto animate-fade-in">
+                <div onClick={() => setMobileOpen(false)} className="flex flex-col gap-0.5">
+                  {navLinks(true)}
                   {ready && user && (
                     <Link
                       href="/meddelanden"
-                      className="relative text-sm text-gold-300/90 hover:text-gold-100 px-3 py-2 rounded-lg transition inline-flex items-center gap-2"
+                      className="relative text-base text-gold-300/90 hover:text-gold-100 px-3 py-2.5 min-h-[44px] rounded-lg transition inline-flex items-center gap-2"
                     >
                       Meddelanden
                       {msgUnread > 0 && (
-                        <span className="bg-gold-500 text-espresso-900 text-[10px] font-semibold rounded-full min-w-[16px] h-4 px-1 inline-flex items-center justify-center">
+                        <span className="bg-gold-500 text-espresso-900 text-[11px] font-semibold rounded-full min-w-[16px] h-4 px-1 inline-flex items-center justify-center">
                           {msgUnread}
                         </span>
                       )}
                     </Link>
                   )}
                 </div>
-                <div className="h-px bg-espresso-800 my-2" />
+                <div className="h-px bg-espresso-800 my-2 mx-3" />
                 {user ? (
-                  <button onClick={handleLogout} className="text-left text-sm text-gold-500/80 hover:text-gold-300 px-3 py-2">
+                  <button onClick={handleLogout} className="text-left text-base text-gold-500/80 hover:text-gold-300 px-3 py-2.5 min-h-[44px]">
                     Logga ut
                   </button>
                 ) : (
-                  <div className="flex gap-2 pt-1">
+                  <div className="flex gap-2 pt-1 px-3 pb-1">
                     <Link href="/auth/login" className="btn-dark flex-1 !py-2.5" onClick={() => setMobileOpen(false)}>
                       Logga in
                     </Link>
@@ -426,11 +442,13 @@ export default function Navbar() {
   )
 }
 
-function NavItem({ href, children }: { href: string; children: React.ReactNode }) {
+function NavItem({ href, children, mobile = false }: { href: string; children: React.ReactNode; mobile?: boolean }) {
   return (
     <Link
       href={href}
-      className="relative text-sm text-gold-300/90 hover:text-gold-100 px-3 py-2 rounded-lg transition group"
+      className={`relative text-gold-300/90 hover:text-gold-100 px-3 rounded-lg transition group ${
+        mobile ? 'text-base py-2.5 min-h-[44px] flex items-center' : 'text-sm py-2'
+      }`}
     >
       {children}
       <span className="absolute left-3 right-3 -bottom-0.5 h-px bg-gold-400 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
