@@ -93,7 +93,10 @@ aldrig gissa.
 - Registrerad e-postadress: info@guldbud.com
 - Säte: Stockholms län, Stockholms kommun
 - Momsregistrerat, SE559291478101, bekräftat mot Skatteverket
-- SNI-koden är ändrad till **47.910, Förmedling**. Klart.
+- SNI-koden i registret är **47.910, Förmedling**. Juristen sa 2026-09-15 att
+  den ska vara **47.920, förmedling avseende specialiserad detaljhandel**,
+  eftersom SCB:s definition av 47.910 uttryckligen undantar specialiserad
+  detaljhandel. Om bytet är gjort hos Bolagsverket är obekräftat. Fråga.
 - Bolagsordningens verksamhetsföremål är **auktionsverksamhet**, senast ändrad
   2026-08-22. Räkenskapsår 1 oktober till 30 september, ingen revisor.
 
@@ -127,13 +130,14 @@ Den gamla registrerade adressen var c/o DIX Revision AB, Kvarnvingevägen 2,
 
 Varje föremål skapas som `pending` och måste godkännas manuellt av admin
 innan det blir aktivt. Användaren är admin och släpper igenom ingenting
-förrän BankID är skarpt. Klientmedelskontot är öppnat 2026-09-01 och namnbytet
-är genomfört 2026-09-11, så BankID är det enda av de tre som återstår.
+förrän lanseringsspärrarna är lösta. Två återstår: **BankID skarpt** och
+**kontoverifiering via öppen bank-API**. Namnbytet och adressbytet är
+genomförda 2026-09-11.
 
 Det betyder att villkor och dokument får beskriva tjänsten som den fungerar
 vid lansering, i presens, utan reservationer. Påpeka alltså **inte** varje
-gång att BankID ligger i testläge eller att kontot inte är öppnat. Det är
-redan hanterat av att ingenting släpps igenom.
+gång att BankID ligger i testläge. Det är redan hanterat av att ingenting
+släpps igenom.
 
 **Adressen, numera bara en**
 
@@ -209,7 +213,6 @@ och innan du påstår något om bolagets status.
   Det finns inga kortbetalningar i GuldBud.
 - Ingen betalleverantör är inkopplad, och under väg C behövs ingen:
   handlaren betalar med banköverföring, till säljaren och till GuldBud.
-  Brite-adaptern togs bort 2026-08-30, se beslutsloggen.
 - Resend (transaktionsmejl), Zoho (mänsklig inkorg)
 - **46elks (sms), valt av användaren 2026-09-15.** Ett enda sms: till
   handlaren när föremålet markeras som mottaget och kontrollerat, utan
@@ -296,8 +299,11 @@ uttalar dig om belopp eller moms.
 - Föremålet: säljarens pris, ingen moms, privatperson säljer begagnat.
 - Provision: 8 procent av budet, plus 25 procent moms.
 - Frakt: 199 kr inklusive moms.
-- Handlaren betalar allt i en summa, omgående vid vunnet bud.
-- Medlen tas emot på klientmedelskonto, avskilt från bolagets egna medel.
+- Handlaren betalar i två delar till två mottagare, se väg C nedan: GuldBuds
+  faktura (provision plus frakt inklusive moms) till rörelsekontot omgående,
+  och köpeskillingen direkt till säljarens bankkonto när föremålet är
+  kontrollerat.
+- GuldBud tar aldrig emot köpeskillingen.
 - Säljaren får hela budet, utan avdrag.
 
 Räkneexempel, bud 30 000 kr, uträknat ur `lib/fees.ts`:
@@ -396,9 +402,6 @@ läspolicy på `orders` hade annars exponerat granskningsanteckningarna.
   Skillnaden är att `dealer_paid` tillkommer, ett utfasat värde.
   Stegkedjan i `lib/orders.ts` har sex steg: `accepted`, `shipped_by_seller`,
   `received`, `verified_paid`, `shipped_to_dealer`, `completed`.
-- `orders.payment_status`: **ingen constraint**. `pending`, `paid`, `failed`,
-  `amount_mismatch`, `null`. Schemakommentaren på rad 839 saknar
-  `amount_mismatch` och är föråldrad.
 - `order_aml.aml_status`: ingen constraint. `clear`, `review`, `approved`,
   `flagged`. Kolumnen heter `aml_status`, inte `status`.
 - `disputes.status`: `open`, `under_review`, `resolved`, `rejected`.
@@ -563,7 +566,6 @@ tomma fält för dokumentägare och fastställandedatum.
 ## Miljövariabler
 
 20 stycken. Namnen står här, aldrig värden. De sätts i Vercel.
-Sju försvann när Brite togs bort: `PAYMENT_PROVIDER` och de sex `BRITE_`.
 
 **Publika**, bakas in i webbläsarbundlen: `NEXT_PUBLIC_SUPABASE_URL`,
 `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`,
@@ -581,18 +583,12 @@ En `NEXT_PUBLIC_`-variabel kan aldrig vara hemlig, och den läses vid bygget.
 `ELKS_API_USERNAME` eller `ELKS_API_PASSWORD` skickas inget sms, tyst, och
 mejlet går som vanligt. Sms:et kan aldrig stoppa mejlet.
 
-**Fyra `STRIPE_`-variabler ligger kvar i Vercel utan att någon kod läser
-dem:** `STRIPE_SECRET_KEY`, `STRIPE_API_BASE`, `STRIPE_WEBHOOK_SECRET` och
-`STRIPE_CURRENCY`. Kortflödet är borttaget 2026-09-15. De ska raderas av
-användaren, tillsammans med de sex `SWISH_`-variablerna nedan.
-
-**Sex `SWISH_`-variabler ligger kvar i Vercel Production utan att någon kod
-läser dem:** `SWISH_TLS_CERT`, `SWISH_TLS_KEY`, `SWISH_SIGNING_CERT`,
-`SWISH_SIGNING_KEY`, `SWISH_PAYER_ALIAS` och `SWISH_PAYOUT_API_BASE`. De
-lades in 2026-09-04 med Swish offentliga testcertifikat för att prova
-adminknappen mot testmiljön. Koden som läste dem är borttagen 2026-09-15, så
-de är rena kvarlevor och ska raderas av användaren. Läs aldrig deras närvaro
-som att Swish-utbetalningar finns.
+**Tio kvarlevor ligger i Vercel utan att någon kod läser dem, och ska
+raderas av användaren:** de fyra `STRIPE_` (`SECRET_KEY`, `API_BASE`,
+`WEBHOOK_SECRET`, `CURRENCY`) och de sex `SWISH_` (`TLS_CERT`, `TLS_KEY`,
+`SIGNING_CERT`, `SIGNING_KEY`, `PAYER_ALIAS`, `PAYOUT_API_BASE`). Koden som
+läste dem är borttagen 2026-09-15. Läs aldrig deras närvaro som att kort
+eller Swish finns.
 
 Det finns ingen `.env.local.example` i repot, trots att `README.md` hänvisar
 till en.
@@ -617,14 +613,6 @@ kontrollerad, se beslutsloggen.
 
 **Vercels bildoptimering används inte alls.** Den slog tidigare i månadskvoten
 och gav 402 och svarta bilder. Därför egen loader.
-
-**`SETTLEMENT_CURRENCY` i betalcallbacken är en konstant, inte
-`STRIPE_CURRENCY`.** Hela poängen med kontrollen är att fånga en felställd
-`STRIPE_CURRENCY`. Jämför man env-värdet mot sig självt passerar det alltid.
-
-**Beloppsavvikelse svarar 200, inte 500.** En retry skickar samma felaktiga
-belopp igen och kan aldrig lösa något. Ärendet kräver en människa. Däremot
-svarar rutten 500 om själva flaggningen misslyckas, för då vill vi ha en retry.
 
 **Handlarens frist är ett dygn, inte tre.** Triggern på rad 930 sätter
 `now() + interval '1 day'`. Raden 847 med tre dagar är en **engångsbackfill**
@@ -740,63 +728,6 @@ Följden: ett gammalt föremål utan `source_type` går inte att återlista med 
 klick längre. Båda återlistningsvägarna fångar det och hänvisar till
 formuläret, i stället för att visa ett databasfel.
 
-**`paymentsConfigured()` kräver både nyckel och webhook-hemlighet.** Utan
-hemligheten bailar `verifyCallback` ut innan den tittar på något, så varje
-callback besvaras 400 och `dealer_paid_at` sätts aldrig. Handlaren hade betalat
-på riktigt in i en session ingenting kan bekräfta, utbetalningsspärren fortsatt
-blockerat, och `process_unpaid_orders` till slut stängt av en handlare som inte
-gjort något fel. Att vägra öppna betalningen alls är den säkra änden av den
-avvägningen. Adminens manuella `dealer_paid_at` skriver rakt mot tabellen och
-berörs inte.
-
-**Brite togs bort 2026-08-30.** Adaptern var aldrig färdig, elva öppna TODO om
-ett obekräftat API-kontrakt, och den returnerade aldrig något belopp. Ändå var
-den standardvalet: `PAYMENT_PROVIDER` behövde vara exakt strängen `stripe`,
-annars föll koden tillbaka på Brite och beloppskontrollen i callbacken slog av
-sig själv. Ett stavfel räckte. Abstraktionen finns kvar, så att koppla in
-direkt banköverföring senare är fortfarande en ändring på ett enda ställe.
-`payment_provider` på ordern skrivs numera från konstanten
-`PAYMENT_PROVIDER_NAME`, inte från en miljövariabel, så bokföringsspåret alltid
-namnger den rail som faktiskt tog pengarna.
-
-**Sena och dubbla callbacks larmar i stället för att skriva.** Två fall i
-`/api/payments/callback` får aldrig röra ordern, men får heller aldrig försvinna
-tyst. De larmar admin via `notifications`, som också går vidare till mejl.
-
-- **Krediterad eller avbruten affär.** Kontrollen ligger *före*
-  idempotenskontrollen, med flit. Krediteringen i `admin/orders/[id]`
-  (`refundOrder`) nollar `dealer_paid_at`, så en sen callback hade mött ett tomt
-  fält och satt betalningen på nytt. Det hade återarmerat utbetalningsspärren på
-  pengar som redan gått tillbaka till handlaren.
-- **Dubbel betalning.** Är ordern redan betald jämförs sessionen som anmäler sig
-  mot `payment_reference`. Samma session är en omleverans och passerar tyst.
-  En annan session betyder att handlaren betalat två gånger. Därför skriver
-  settle-grenen numera `payment_reference` till den session som *faktiskt*
-  betalade, inte den senast skapade.
-
-Ingen av dem skriver `payment_status`, eftersom det värdet är något admin satt
-med avsikt vid kreditering. Båda svarar 200 med `ok: false`, av samma skäl som
-beloppsavvikelsen: en retry levererar samma händelse igen och kan aldrig lösa
-något. Svaret blir 500 bara om själva larmet inte gick att skriva, för då vill
-vi ha en retry.
-
-**Två betalsessioner kan fortfarande vara öppna samtidigt. Det är ett val.**
-En övergiven Stripe-session stängs aldrig av oss, och vi lagrar ingen tidsstämpel
-för när en session skapades. Att blockera på en `pending`-session hade därför
-låst ute varje handlare som råkat stänga betalfönstret, permanent. Luckan är i
-stället stängd i andra änden: en andra betalning kan inte längre passera
-oregistrerad. Vill man stänga den helt krävs antingen `expires_at` på sessionen
-plus en tidsstämpel på ordern, eller ett anrop till leverantören för att se om
-den gamla sessionen fortfarande lever.
-
-**`amount_mismatch` blockerar en ny betalsession.** `/api/payments/create` vägrar
-öppna en session på en flaggad order. Annars hade `payment_status: 'pending'`
-skrivit över flaggan, alltså det enda beständiga spåret av att pengar kommit in
-med fel belopp eller fel valuta. Admin rensar flaggan genom att kreditera eller
-återöppna affären, som båda nollar `payment_status`. Handlaren får en text som
-säger att betalningen granskas, inte "försök igen", eftersom ett nytt försök
-aldrig hjälper.
-
 **Avgifterna daterades i stället för att frysas på ordern.** En faktura ska visa
 samma belopp för alltid. Två vägar fanns.
 
@@ -817,11 +748,6 @@ under de villkor som var publicerade då.
 
 Ett oläsbart datum faller tillbaka på den **äldsta** perioden, aldrig den
 nyaste. En rad vi inte kan datera är per definition inte ny.
-
-**Betalrutterna följde med, och det var inte valfritt.** Hade bara dokumenten
-daterats skulle fakturan visa gamla avgifter medan Stripe drog nya. Då hade
-beloppskontrollen i callbacken flaggat varenda affär som slöts före ändringen
-som `amount_mismatch`. Det hade varit sämre än felet vi rättade.
 
 **Säljarens identitet lämnas ut efter betalning, inte vid vunnen auktion.**
 Handlaren behöver namn, personnummer och adress för sitt inköpsunderlag, alltså
@@ -1079,73 +1005,30 @@ trådar per affär. Det som saknas är bara den anonyme besökaren. Ska något �
 byggas: en egen "fråga oss"-ruta som mejlar `info@guldbud.com`, alltså inget
 tredjepartsskript, inga nya cookies, inget nytt biträdesavtal.
 
-**Lanseringen sker med faktura och banköverföring, inte Stripe. Beslutat
-2026-09-01.** Handlaren faktureras hela summan vid vunnet bud, betalar via
-banköverföring direkt till klientmedelskontot, och märker betalningen med
-ordernumrets referens (GB-XXXXXX). Admin prickar av betalningen manuellt via
-`dealer_paid_at`, som alltid varit byggd för det. Skälen: Stripes 1,5 procent
-på hela summan äter 15 till 20 procent av intäkten, banköverföringar saknar
-chargebacks (viktigt för guldhandel), och köparna är granskade
-B2B-handlare där korträlsens tillit inte behövs.
+**Lanseringen sker med faktura och banköverföring, inte kort. Beslutat
+2026-09-01.** Skälen: Stripes 1,5 procent på hela summan åt 15 till 20
+procent av intäkten, banköverföringar saknar chargebacks (viktigt för
+guldhandel), och köparna är granskade B2B-handlare där korträlsens tillit
+inte behövs. Kortflödet är rivet 2026-09-15, se leverantörsavsnittet.
 
-Så här ligger det i koden:
+Ordersidans betalruta (`BankTransferBox`) visar belopp, mottagare, konto och
+referens. Referensformatet är medvetet en lokal kopia av fakturans `ref()`:
+att importera `lib/pdf/invoiceDoc` i en klientsida hade dragit in react-pdf i
+webbläsarbundlen.
 
-- Kontouppgiften bor i `CLIENT_FUNDS_ACCOUNT` i `lib/company.ts` och är
-  **tom tills klientmedelskontot är öppnat**. Tills dess visar ordersidan att
-  kontouppgifter meddelas i affärens meddelanden, och fakturan utelämnar
-  kontodelen ur betalningsvillkoret. När kontot finns: fyll i numret,
-  committa, deploya.
-- Ordersidans betalknapp (`PayNowButton`) är ersatt av `BankTransferBox` med
-  belopp, mottagare, konto och referens. Referensformatet är medvetet en
-  lokal kopia av fakturans `ref()`: att importera `lib/pdf/invoiceDoc` i en
-  klientsida hade dragit in react-pdf i webbläsarbundlen.
-- Fakturans finstilta har betalningsvillkoret: omgående, via banköverföring,
-  märkt med referensen. Speglad i båda fakturafilerna, ändrade på
-  användarens uttryckliga instruktion (spärrade filer).
-- **Kortflödet var vilande fram till 2026-09-15 och är nu borttaget** på
-  användarens instruktion: `lib/payments/`, båda betalrutterna,
-  beloppskontrollen och de tre kolumnerna. Beslutsposterna nedan om
-  callbacken, dubbla sessioner och `amount_mismatch` är historik.
-- Med manuell avprickning är det admin som är beloppskontrollen. Vid volym
-  över ungefär femtio affärer i månaden bör avprickningen automatiseras
-  via bankkoppling.
+Med manuell avprickning är det admin som är beloppskontrollen. Vid volym över
+ungefär femtio affärer i månaden bör avprickningen automatiseras via
+bankkoppling.
 
-**Swish är struket 2026-09-04 och koden riven 2026-09-15. Läs det här
-innan resten av avsnittet.** Uppgiften kommer från användaren: avtalet
+**Swish är struket 2026-09-04 och koden riven 2026-09-15.** Uppgiften
+kommer från användaren: avtalet
 "Swish utbetalningar" gick inte att koppla till klientmedelskontot, och
 tecknas därför inte. Säljaren får betalt till bankkonto.
 
-Beslutet från 4 september att låta koden ligga kvar vilande är upphävt av
-användaren 2026-09-15: "Swish bort helt, överallt." Borttaget i commit
-`dfcdf95`: `lib/payouts/swishPayout.ts`, `/api/payouts/swish-callback`,
-Swish-grenen i `/api/admin/payouts`, felmeddelandena i adminvyn,
-`payout_swish` ur typer och kundprofil, och Swish-kolumnerna ur `payouts` i
-schemafilen. Databasen kördes samma dag via migreringen
-`remove_swish_payouts`: `payouts_method_check` är nu `method =
-'bank_transfer'`, kolumnerna `payee_alias`, `instruction_uuid` och
-`callback_identifier` är borta ur `payouts`, `payout_swish` är borta ur
-`profiles`, och den enda profilen med `payout_method = 'swish'` (en kund
-utan bankkonto) nollades. Kontrollerat efteråt: noll Swish-kolumner, noll
-villkor, noll funktioner, noll profiler. `payouts` var tom vid körningen.
-
-Kvar av apparaten är `payouts`-tabellen, `/api/admin/payouts` med enbart
-`bank_transfer`, och kortet "Utbetalning till säljaren" i adminvyn. Under
-väg C betalar GuldBud aldrig ut till säljaren, så även de är rester av väg A.
-Om de ska rivas är en öppen fråga till användaren, se nedan.
-
-Beskrivningen nedan av hur Swish-tekniken byggdes och bevisades är
-historik. Ingenting av det finns i koden längre.
-
-**Löftet om Swish är rättat överallt, 2026-09-04, på användarens
-instruktion.** Startsidans hero (Swish-loggan ersatt av ikonankaret
-"Bankutbetalning inom 24h"), sidfoten (loggan borta, filen raderad), FAQ, så
-fungerar det, auktionssidan, acceptvyn, tio guider, inlämningsformuläret,
-mejlrutten och villkoren (spärrad fil, ändrad på uttrycklig instruktion:
-"inom 24 timmar via banköverföring ... till det bankkonto som säljaren
-anger"). Databasens fyra notistexter i `notify_bid_accepted`,
-`notify_order_status` och `settle_ended_auctions` uppdaterades direkt i
-databasen via `pg_get_functiondef` plus `replace`, verifierat: noll
-funktioner med Swish kvar. Schemafilen speglar texterna.
+**Löftet om Swish är borta ur alla texter, 2026-09-04.** Startsidan,
+sidfoten, FAQ, så fungerar det, auktionssidan, acceptvyn, tio guider,
+inlämningsformuläret, mejlrutten, villkoren och databasens fyra notistexter
+säger bankkonto. Verifierat i databasen: noll funktioner med Swish kvar.
 
 Kundprofilen har bara clearing- och kontonummer kvar, validerade (4 till 5
 respektive 6 till 12 siffror) och lagrade som rena siffror. `payout_method`
@@ -1173,44 +1056,6 @@ skrev, inte att numret är rätt eller att kontot är säljarens, och under
 väg C går pengarna till en främling om numret är fel. Rätt svar på frågan
 är alltid leverantören. Tills den finns är kontrollen manuell: admin ser
 kontouppgifterna bredvid BankID-namnet i affärsvyn.
-
-Så här byggdes det, 2026-09-01, mot developer.swish.nu:s tre guider:
-
-- **`payouts`-tabellen**, körd mot databasen och i schemafilen: raden skrivs
-  INNAN pengarna skickas, samma princip som identity_disclosures.
-  `instruction_uuid` är unik så samma instruktion aldrig skickas två gånger.
-  Bara admin läser via RLS, callbacken skriver med servicerollen.
-- **`lib/payouts/swishPayout.ts`**: mTLS med TLS-certifikatet, payload
-  signerad med signeringscertifikatets nyckel (SHA-512-hash av payloadens
-  UTF-8-bytes, därefter SHA512withRSA, Base64, exakt enligt Swish
-  Java-exempel; dubbeldigesten är avsiktlig). Serienumret läses ur
-  certifikatet med X509Certificate, aldrig ur en egen variabel.
-- **`/api/admin/payouts`**: samma admin-auth som settle-auctions. Grindarna
-  speglar utbetalningsspärren: dealer_paid_at krävs, AML clear/approved,
-  ej krediterad/avbruten, och en initiated/paid-rad blockerar nya.
-  `payeeSSN` tas från `verified_ssn` i första hand. method bank_transfer
-  bokför en gjord manuell överföring, method swish anropar API:t.
-- **`/api/payouts/swish-callback`**: litar aldrig på kroppen. Verifierar
-  `callbackIdentifier`-huvudet mot radens sparade hemlighet (Swish egen
-  rekommendation) och slår sedan upp statusen med eget GET innan något
-  skrivs. Svarar 500 när verifieringen inte går att göra, med flit: Swish
-  gör om callbacken upp till tio gånger tills vi svarar 200. En förfalskad
-  callback får 200 direkt så den inte bjuds på fler försök.
-- **Adminvyn** har kortet "Utbetalning till säljaren" med radhistorik och
-  knappen Registrera gjord banköverföring. Swish-knappen togs bort
-  2026-09-04 tillsammans med resten av Swish-löftet; rutten svarar
-  fortfarande på method swish om den anropas, men ingen yta gör det.
-
-**Bevisat mot MSS 2026-09-01, hela kretsloppet:** en signerad utbetalning
-skickades till testmiljön med Swish testcertifikat (samma hash- och
-signeringssteg som `swishPayout.ts`), MSS svarade 201 Created, statusen blev
-PAID, och MSS callback träffade `/api/payouts/swish-callback` i produktion
-som svarade 200 (not_configured, korrekt eftersom miljövariablerna inte är
-satta). Läxan från testet: hela TLS-certifikatkedjan krävs, se
-miljövariabelavsnittet. Det som återstår är skarpa certifikat när
-SEB-avtalet är klart, och en genomklickning av adminknappen med
-miljövariablerna satta. SEB:s standardgräns är 30 000 kr per utbetalning,
-höjd gräns är begärd.
 
 **Fakturan möter handlaren där hen redan är. Byggt 2026-09-01.** Användaren
 ville att fakturan "ploppar upp automatiskt" vid vinst. Löst i två vägar,
@@ -1487,19 +1332,13 @@ ombyggt i kod, databas och mejl. Så här är det gjort och varför:
   handlaren betalar.
 
 **Investerardecken finns, 2026-09-08.** Artifact "GuldBud investerardeck"
-(https://claude.ai/code/artifact/df5ea3a9-733b-468e-b8ce-d9162b04c1b7), femton
-bilder i sajtens mörka espresso-och-guld, Playfair och Inter, plus PDF
-renderad med headless Edge. Varje siffra har källa: livekursen från
-guldbud.com/api/gold-price (1 357 kr/g 24k den 8 september), Dagens Handel
-24 februari 2026 för "mer än fördubblat på fem år", "tiotals miljarder i
-hushållen" (branschbedömning, märkt som uppskattning) och 18 k kring 1 000
-kr/g, räkneexemplet ur lib/fees.ts, 419 commits sedan 16 juni 2026, 30 fynd
-stängda, 21 guider. Inga traktionssiffror: noll riktiga affärer, och de två
-godkända handlarna och testkontona redovisas inte som traktion. Bild 12
-säger öppet att betaltjänstbedömningen pågår. Två platshållare som bara
-användaren kan fylla: beloppet som söks (bild 15) och teamraden (bild 14).
-Regeln för decken är samma som för sajten: inga påhittade siffror, inga
-namngivna konkurrentpriser, uppskattningar märkta som uppskattningar.
+(https://claude.ai/code/artifact/df5ea3a9-733b-468e-b8ce-d9162b04c1b7),
+femton bilder plus PDF. Varje siffra har källa, och inga traktionssiffror
+redovisas eftersom det inte finns några riktiga affärer. Bild 12 säger öppet
+att betaltjänstbedömningen pågår. Två platshållare som bara användaren kan
+fylla: beloppet som söks (bild 15) och teamraden (bild 14). Regeln för decken
+är samma som för sajten: inga påhittade siffror, inga namngivna
+konkurrentpriser, uppskattningar märkta som uppskattningar.
 
 **Google företagsprofil är avskriven 2026-09-04.** Efter flera insända
 verifieringsfilmer avslogs den varje gång. Googles egna texter förklarar
@@ -1600,9 +1439,9 @@ Två följdläxor samma dag:
 **Avbrutna affärer får inte raderas. Beslutat 2026-09-04.** En avbruten affär
 låg kvar och skräpade i adminlistan, och frågan var om en raderingsknapp
 skulle byggas. Svaret blev nej, och skälet är att affären bär mer än sig
-själv: penningtvättsbeslutet (`order_aml`), utbetalningsraderna (`payouts`),
-loggen över utlämnad identitet (`identity_disclosures`) och båda
-meddelandetrådarna hänger i den med `on delete cascade`. Att kunna radera
+själv: penningtvättsbeslutet (`order_aml`), loggen över utlämnad identitet
+(`identity_disclosures`) och båda meddelandetrådarna hänger i den med
+`on delete cascade`. Att kunna radera
 affären är att kunna radera revisionsspåret.
 
 I stället fick `/admin/orders` en tredje flik: Pågående, Slutförda, Avbrutna,
@@ -1615,13 +1454,10 @@ En separat samling för borttaget valdes bort av samma skäl som allt annat i
 det här projektet: två sanningar om samma affär glider isär, och barnraderna
 kan inte följa med utan att dubbleras.
 
-**Två rena testrader raderades ur databasen samma dag**, på användarens
-instruktion: Guldlampa och Kejsar, båda nekade av admin, noll bud, noll
-affärer, noll notiser. De var de enda två i hela databasen utan beroenden.
-Resten av "går inte att återpublicera" lämnades orört, eftersom urvalet visade
-sig innehålla 16 pågående auktioner med bud och 12 sålda föremål med affärer.
-Läxan: kontrollera alltid vad ett urval faktiskt innehåller innan du raderar
-efter ett villkor.
+**Läxa från samma dag:** ett urval som såg ut att vara skräp ("går inte att
+återpublicera") visade sig innehålla 16 pågående auktioner med bud och 12
+sålda föremål med affärer. Kontrollera alltid vad ett urval faktiskt
+innehåller innan du raderar efter ett villkor.
 
 **Återpublicering: vem som får, och vad som följer med. Beslutat 2026-09-04.**
 Att lägga ut ett föremål igen skapar alltid en NY rad i `items`, aldrig en
@@ -1707,137 +1543,3 @@ efter rättningen. Kontrollerat samma dag: `/favicon.ico` 200 med sex lager
 (16 till 256 px), `/icon` 200 som 48x48 PNG, robots blockerar inget. Det som
 återstår är sökresultatens egen uppdatering, som släpar efter favikontjänsten.
 Rör inte ikonfilerna under tiden, varje ändring startar om väntan.
-
-Funna i en genomgång av hela kodbasen 2026-08-30. **Tjugonio är åtgärdade:
-tre i PR #260, en i #262, en i #263, en i #264, två i #269, en i #270, sex i
-#271, två i #273, sex i #274, en i #275 och fem i #283.** Punkt 30 är inget
-fynd längre. **Listan är därmed genomgången.**
-Ta inte tag i något här utan att fråga först, flera rör spärrade filer.
-
-**Rör pengar eller juridik**
-
-1. ~~Juristvarningen i `components/LegalPage.tsx`.~~ **Åtgärdad i PR #260.**
-2. ~~`lib/terms.ts` var inte höjd.~~ **Åtgärdad i PR #260**, versionen är
-   `2026-08-29`, samma dag som villkoren senast ändrades i sak.
-3. ~~Kravet på BankID, ägarintyg och förmedlingsuppdrag fanns bara i klienten.~~
-   **Åtgärdad i PR #264.** `enforce_listing_requirements` är skriven och
-   **körd mot databasen 2026-08-30**, verifierad i `pg_trigger`. Se
-   beslutsloggen för hur den är avgränsad.
-   **Bevisad genom genomklickning samma dag:** ett föremål lades ut via
-   formuläret och gick igenom. Eftersom spärren kräver uppdrag, villkorsversion,
-   ägarintyg, ursprung och identitet är det samtidigt bevisat att
-   `submit/page.tsx` faktiskt skickar alla fem fälten. Mejlet "Nytt föremål att
-   granska" nådde fram, så hela kedjan från trigger via webhook till Resend är
-   verifierad i drift efter rotationen av `EMAIL_WEBHOOK_SECRET`.
-4. ~~Återlistning skapade föremål utan uppdrag.~~ **Åtgärdad i PR #260.**
-   Ursprunget ärvs, medan ägarintyg och uppdrag sätts på nytt eftersom
-   publiceringen är instruktionen.
-5. ~~Beloppskontrollen urkopplad när leverantören inte var Stripe.~~
-   **Åtgärdad i PR #262**, Brite är borttagen och Stripe är enda leverantören.
-6. ~~`paymentsConfigured()` kontrollerade aldrig webhook-hemligheten.~~
-   **Åtgärdad i PR #263.** Båda halvorna krävs nu, så betalningen öppnas aldrig
-   om den inte kan kvitteras.
-7. ~~Callbacken kontrollerar aldrig `order.status` eller `refunded_at`.~~
-   **Åtgärdad i PR #269.** En krediterad eller avbruten affär settlas aldrig.
-   Kontrollen ligger före idempotenskontrollen, eftersom krediteringen nollar
-   `dealer_paid_at`.
-8. ~~`/api/payments/create` skriver över en `amount_mismatch`-flagga, och en
-   andra betalning registreras aldrig.~~ **Åtgärdad i PR #269.** Rutten
-   vägrar öppna en ny session på en flaggad order, och callbacken skiljer nu
-   en omleverans av samma session från en betalning via en annan session.
-   Kvar med avsikt: två sessioner kan fortfarande vara öppna samtidigt, se
-   beslutsloggen.
-9. ~~Fakturorna räknar om beloppen vid varje visning.~~ **Åtgärdad i PR #270.**
-   `lib/fees.ts` är en daterad historik, och allt som rör en befintlig affär
-   läser `feesAt(order.created_at)`. Se affärsmodellen ovan.
-
-**Rör personuppgifter och identitet**
-
-10. ~~`GET /api/orders/[id]/seller` lämnar ut säljarens personnummer och
-    adress så snart ordern finns, utan kontroll och utan loggning.~~
-    **Åtgärdad i PR #271.** Grinden ligger i `lib/identityRelease.ts` och
-    delas med `invoice-pdf`, som hade samma läcka utan att stå i listan.
-    Kräver körd SQL, se nedan.
-11. ~~`verified_ssn` saknar unikt index.~~ **Åtgärdad i PR #271.** Personnumret
-    normaliseras till tolv siffror innan det lagras, och ett partiellt unikt
-    index binder det till ett konto. **Kräver körd SQL.**
-12. ~~`lib/idura.ts` faller tillbaka på `payload.sub` som personnummer.~~
-    **Åtgärdad i PR #271.** Reserven är borttagen och numret måste klara
-    Luhn-kontrollen i `lib/identity.ts`.
-13. ~~`id_token` signaturverifieras inte.~~ **Åtgärdad i PR #271.** RS256 mot
-    leverantörens JWKS, med issuer och nycklar hämtade ur discovery-dokumentet.
-14. ~~`/api/notify-email` litar på POST-body när `record.id` saknas.~~
-    **Åtgärdad i PR #271.** Innehållet läses alltid ur databasen.
-15. ~~`EMAIL_WEBHOOK_SECRET` accepteras som `?secret=` i bildverktyget.~~
-    **Åtgärdad i PR #271.** Bara inloggad admin med Bearer.
-
-**SQL:en för 10 och 11 är körd mot databasen 2026-08-31, och kontrollerad.**
-Ligger sist i `supabase-schema.sql`: det unika indexet på `verified_ssn` och
-tabellen `identity_disclosures`. Båda är bekräftade genom att fråga
-`pg_indexes` och `pg_tables` efteråt: indexet `profiles_verified_ssn_unique`
-finns, och `identity_disclosures` finns med `rowsecurity = true`.
-
-Att tabellen finns är inte en formalitet. Utan den svarar utlämnandet 500 och
-handlaren får "Privatperson" i stället för säljarens namn på inköpsunderlaget,
-eftersom loggen skrivs före utlämnandet och stoppar det om den misslyckas.
-
-**Trasig funktion**
-
-16. ~~`dealer_paid` är ett återvändsgränd-tillstånd.~~ **Åtgärdad i PR #274.**
-    `stepIndex` mappar det utfasade värdet till `received`, steget det
-    historiskt kom efter, så nästa steg blir `verified_paid`.
-17. ~~Ordervyn hämtar inte `seal_number` eller `cancel_reason` men läser dem.~~
-    **Åtgärdad i PR #274.** Båda är med i select:en nu.
-18. ~~Adminpanelen anropar `settle_ended_auctions` men rätten är återkallad.~~
-    **Åtgärdad i PR #274.** Går via `/api/admin/settle-auctions` med
-    servicerollen. Återkallandet i schemat står kvar, det är djupförsvar.
-19. ~~Sjätte bilden är osynlig.~~ **Åtgärdad i PR #274.** Galleriet har sex
-    kolumner och kapar inte längre.
-20. ~~Sidfotens länk "Bli guldhandlare" landar på inloggningsfliken.~~
-    **Åtgärdad i PR #274.** Länken bär `mode=register`, som sidan redan läser.
-21. ~~Personnummerfältet kräver tio siffror men ber om tolv.~~ **Åtgärdad i
-    PR #274.** Båda formerna godtas, kontrollsiffran kontrolleras, och numret
-    lagras normaliserat precis som från BankID.
-
-**Rör löftet om ärliga siffror**
-
-22. ~~`LiveGoldPrice.tsx` lägger på tre sinusvågor och visar en påhittad
-    dagsförändring.~~ **Åtgärdad i PR #273.** Vågorna och sparklinen är borta,
-    och komponenten visar leverantörens verkliga `changePct`, eller ingenting
-    när den saknas.
-23. ~~"Metallvärde vid dagens kurs" använder konstanten 1295 kr per gram.~~
-    **Åtgärdad i PR #273.** Samtliga sju anropsställen skickar nu in
-    live-kursen. Konstanten finns kvar enbart som reservvärde i `lib/gold.ts`
-    och som startvärde i `useGoldPrice`.
-24. ~~`components/HomeContent.tsx:344` säger "BankID-verifierade handlare".~~
-    **Åtgärdad i PR #275**, genom att göra påståendet sant i stället för att ta
-    bort det. Handlaren måste nu legitimera sig, spärrat i `dealer_may_bid`.
-    Texten får stå i presens av samma skäl som villkoren: inga riktiga affärer
-    släpps igenom före lansering, och kravet skärps samma dag som BankID.
-
-**Städning**
-
-25. ~~180 tankstreck i 54 filer.~~ **Åtgärdad i PR #283.** Noll kvar i koden.
-    Två av dem satt i SQL-strängar, se nedan.
-26. ~~`README.md` och `ATT-GORA.md` är kraftigt föråldrade.~~ **Åtgärdad i
-    PR #283.** README beskriver koden som den ser ut, och ATT-GORA speglar det
-    verkliga läget med två punkter uttryckligen märkta som obekräftade.
-27. ~~Död kod.~~ **Åtgärdad i PR #283.** `CountUp.tsx` och `HeroButtons.tsx`
-    borttagna, `totalWithCommission` och `PAYMENT_WINDOW_LABEL` ur `lib/fees.ts`.
-28. ~~Bolagsuppgifterna kopierade till tre ställen.~~ **Åtgärdad i PR #283.**
-    Källan är `lib/company.ts`. De två villkorstexterna är orörda, de är
-    spärrade filer och har numret i löptext.
-29. ~~`lib/types.ts` ur synk med databasen.~~ **Åtgärdad i PR #283.** Fjorton
-    kolumner på `profiles` och sju på `items` saknades. Nullable skrivs nu som
-    `| null`, vilket direkt fångade tre ställen där en nullbar kolumn skickades
-    till en prop som inte tillät null.
-
-**Två tankstreck satt i SQL-strängar och är därför inte borta i databasen.**
-`process_unpaid_orders` skriver `cancel_reason` och `notify_bidders_ending_soon`
-sätter en notistitel. Filen är rättad, men de gamla strängarna ligger kvar i
-databasen tills funktionerna körs om. Det är rent kosmetiskt: mejlrutten filtrerar
-på delsträngarna "överbjuden" och "snart slut", som båda finns kvar.
-30. ~~`docs/aml-policy.md` använder GuldBud AB.~~ **Inte längre ett fynd.**
-    Ändrades i PR #281 och revertades i PR #282. Sedan 2026-09-11 är frågan
-    slutgiltigt ur världen: bolaget heter Guldbud Sverige AB i registret, och
-    varje dokument är omskrivet för det namnet. Se affärsfakta.
