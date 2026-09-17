@@ -400,13 +400,14 @@ export default function AdminPage() {
                 <span className="font-medium text-espresso-800">{sellers[item.owner_id].full_name || '-'}</span>
                 {sellers[item.owner_id].city ? ` · ${sellers[item.owner_id].city}` : ''}
               </span>
+              {/* Klickytorna var 16 px höga. py ger 28 px. */}
               {sellers[item.owner_id].email && (
-                <a href={`mailto:${sellers[item.owner_id].email}`} className="text-gold-700 hover:underline">
+                <a href={`mailto:${sellers[item.owner_id].email}`} className="py-1.5 text-gold-700 hover:underline break-all">
                   {sellers[item.owner_id].email}
                 </a>
               )}
               {sellers[item.owner_id].phone && (
-                <a href={`tel:${sellers[item.owner_id].phone}`} className="text-gold-700 hover:underline">
+                <a href={`tel:${sellers[item.owner_id].phone}`} className="py-1.5 text-gold-700 hover:underline">
                   {sellers[item.owner_id].phone}
                 </a>
               )}
@@ -675,7 +676,7 @@ export default function AdminPage() {
                 <div className="relative h-2 rounded-full bg-espresso-100 overflow-hidden">
                   <div className={`h-full rounded-full transition-all ${h.bar}`} style={{ width: `${fill}%` }} />
                 </div>
-                <div className="relative mt-1 h-3 text-[10px] text-espresso-300">
+                <div className="relative mt-1 h-3 text-[11px] text-espresso-300">
                   <span className="absolute left-0">0</span>
                   <span className="absolute -translate-x-1/2" style={{ left: '36%' }}>1,8</span>
                   <span className="absolute -translate-x-1/2" style={{ left: '64%' }}>3,2</span>
@@ -723,8 +724,10 @@ export default function AdminPage() {
         {/* Orders */}
         <Link
           href="/admin/orders"
-          className="card card-hover p-5 mb-10 flex items-center justify-between gap-4"
+          className="card card-hover p-5 mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
         >
+          {/* Under sm staplas texten över chippen; texten fick annars en kolumn
+              på 190 px bredvid "6 pågående" och "Öppna". */}
           <div>
             <p className="font-display text-lg text-espresso-900">Affärer</p>
             <p className="text-sm text-espresso-400">Hantera vunna auktioner: status, spårning och meddelanden.</p>
@@ -738,7 +741,7 @@ export default function AdminPage() {
         {/* Marknadsövervakning (anti-samverkan) */}
         <Link
           href="/admin/overvakning"
-          className="card card-hover p-5 mb-10 flex items-center justify-between gap-4"
+          className="card card-hover p-5 mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
         >
           <div>
             <p className="font-display text-lg text-espresso-900">Marknadsövervakning</p>
@@ -770,7 +773,9 @@ export default function AdminPage() {
                       {(dealer.company_name || dealer.full_name || '?').charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-espresso-900 truncate">
+                      {/* Namnet klipptes till "Nystartade Guld & Silver Handel…"
+                          (437 px i 260 px). Det får bryta rad i stället. */}
+                      <p className="font-medium text-espresso-900 break-words">
                         {dealer.company_name || dealer.full_name || 'Handlare'}
                       </p>
                       <p className="text-xs text-espresso-400">
@@ -806,23 +811,25 @@ export default function AdminPage() {
                     />
                   </dl>
 
+                  {/* nowrap så "Visa dokument" går ner på egen rad i stället för
+                      att brytas på två rader inne i knappen (sett i 390 px). */}
                   <div className="flex gap-2 mt-5 flex-wrap">
                     <button
                       onClick={() => approveDealer(dealer.id)}
-                      className="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition"
+                      className="flex-1 sm:flex-initial whitespace-nowrap bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition"
                     >
                       Godkänn
                     </button>
                     <button
                       onClick={() => rejectDealer(dealer.id)}
-                      className="flex-1 sm:flex-initial bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium px-5 py-2.5 rounded-xl transition"
+                      className="flex-1 sm:flex-initial whitespace-nowrap bg-red-50 hover:bg-red-100 text-red-600 text-sm font-medium px-5 py-2.5 rounded-xl transition"
                     >
                       Neka
                     </button>
                     {dealer.verification_doc_path && (
                       <button
                         onClick={() => viewDoc(dealer.verification_doc_path)}
-                        className="flex-1 sm:flex-initial bg-espresso-100 hover:bg-espresso-200 text-espresso-700 text-sm font-medium px-5 py-2.5 rounded-xl transition"
+                        className="flex-1 sm:flex-initial whitespace-nowrap bg-espresso-100 hover:bg-espresso-200 text-espresso-700 text-sm font-medium px-5 py-2.5 rounded-xl transition"
                       >
                         Visa dokument
                       </button>
@@ -858,7 +865,7 @@ export default function AdminPage() {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={item.image_urls[0]} alt={item.title} className="w-24 h-24 object-contain transition group-hover:opacity-80" />
                         {item.image_urls.length > 1 && (
-                          <span className="block text-[10px] text-espresso-400 mt-0.5">{item.image_urls.length} bilder</span>
+                          <span className="block text-[11px] text-espresso-400 mt-0.5">{item.image_urls.length} bilder</span>
                         )}
                       </button>
                     )}
@@ -884,7 +891,9 @@ export default function AdminPage() {
                         <p className="text-xs text-espresso-400 mt-1 line-clamp-2">{item.description}</p>
                       )}
                     </div>
-                    <div className="flex sm:flex-col gap-2 shrink-0">
+                    {/* Under sm ligger knapparna på rad och får radbryta, i
+                        stället för att klämmas när tre inte får plats. */}
+                    <div className="flex flex-wrap sm:flex-nowrap sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
                       <button
                         onClick={() => approveItem(item.id)}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition"

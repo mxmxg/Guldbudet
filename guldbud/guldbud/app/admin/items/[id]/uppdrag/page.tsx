@@ -106,8 +106,11 @@ export default function AdminMandatePage({ params }: { params: { id: string } })
       <style>{`@media print { .no-print { display:none !important; } body { background:#fff; } }`}</style>
 
       <div className="max-w-3xl mx-auto px-4 py-10">
-        <div className="flex justify-between items-center mb-4 no-print">
-          <Link href="/admin" className="text-sm text-espresso-500 hover:text-espresso-800">
+        {/* I 390 px bröts både länken och knappen på två rader bredvid
+            varandra. flex-wrap lägger knappen under länken när de inte får
+            plats; py på länken ger 32 px klickyta. */}
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-4 no-print">
+          <Link href="/admin" className="inline-block py-1.5 text-sm text-espresso-500 hover:text-espresso-800">
             Tillbaka till adminpanelen
           </Link>
           <button onClick={() => window.print()} className="btn-gold !py-2">
@@ -115,9 +118,9 @@ export default function AdminMandatePage({ params }: { params: { id: string } })
           </button>
         </div>
 
-        <div className="bg-white border border-espresso-100 rounded-2xl p-8 sm:p-10 print:border-0 print:rounded-none">
+        <div className="bg-white border border-espresso-100 rounded-2xl p-5 sm:p-10 print:border-0 print:rounded-none">
           {/* Sidhuvud */}
-          <div className="flex justify-between items-start mb-8">
+          <div className="flex flex-wrap justify-between items-start gap-x-6 gap-y-4 mb-8">
             <div>
               <p className="font-sans font-semibold tracking-tight text-2xl text-espresso-900">GuldBud</p>
               <p className="text-xs text-espresso-400 mt-1">{GULDBUD.name}</p>
@@ -199,7 +202,7 @@ export default function AdminMandatePage({ params }: { params: { id: string } })
             hela den köpeskilling som tillkommer denne enligt köpeavtalet mellan säljaren och
             handlaren. GuldBuds ersättning betalas av handlaren och är ekonomiskt skild från
             säljarens köpeskilling. Fullständiga villkor finns på{' '}
-            <Link href="/terms" className="underline">
+            <Link href="/terms" className="inline-block py-1.5 -my-1.5 underline">
               guldbud.com/terms
             </Link>
             .

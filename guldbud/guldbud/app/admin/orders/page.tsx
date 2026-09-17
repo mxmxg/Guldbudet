@@ -94,7 +94,8 @@ export default function AdminOrdersPage() {
       <div className="relative overflow-hidden bg-espresso-900 px-4 py-8">
         <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
         <div className="relative max-w-4xl mx-auto">
-          <Link href="/admin" className="text-gold-500/80 text-sm hover:text-gold-300 transition">← Adminpanel</Link>
+          {/* Klickytan var 17 px hög. py med negativ marginal ger 29 px utan att sidhuvudet växer. */}
+          <Link href="/admin" className="inline-block py-1.5 -my-1.5 text-gold-500/80 text-sm hover:text-gold-300 transition">← Adminpanel</Link>
           <h1 className="font-display text-2xl text-gold-100 mt-2">Affärer</h1>
           <p className="text-gold-200/70 text-sm mt-1">{openCount} pågående affärer att hantera.</p>
         </div>
@@ -121,7 +122,7 @@ export default function AdminOrdersPage() {
         ) : shown.length === 0 ? (
           <div className="card p-16 text-center text-espresso-400">Inga affärer här.</div>
         ) : (
-          <div className="grid gap-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
             {shown.map((o) => {
               const idx = stepIndex(o.status as OrderStatus)
               const pct = o.status === 'cancelled' ? 0 : Math.round(((idx + 1) / ORDER_STEPS.length) * 100)
@@ -133,19 +134,29 @@ export default function AdminOrdersPage() {
                 // skärm, vilket sköt ut beloppet och "Öppna" utanför skärmen på
                 // varje rad, även när titeln var kort. Med min-w-0 blir golvet
                 // noll och kortet följer spåret.
+                //
+                // I telefonbredd staplas raden: bild och text överst, belopp och
+                // Öppna på en egen rad under. Uppmätt före: titeln fick 112 px i
+                // 360 och 142 px i 390 ("Tungt herrhalsb…") medan beloppet och
+                // parterna trängdes i högerkanten. Från sm ligger beloppet till
+                // höger som förut.
                 <Link
                   key={o.id}
                   href={`/admin/orders/${o.id}`}
-                  className="card card-hover p-4 flex gap-4 items-center min-w-0"
+                  className="card card-hover p-4 grid grid-cols-[4rem,minmax(0,1fr)] sm:grid-cols-[4rem,minmax(0,1fr),auto] gap-x-4 gap-y-3 items-center min-w-0"
                 >
                   <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
                     {o.items?.image_urls?.[0] && (
                       <Image src={o.items.image_urls[0]} alt="" fill sizes="64px" className="object-contain" />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-medium text-espresso-900 truncate">{o.items?.title}</p>
+                      {/* Titeln får bryta rad i stället för att klippas. Ingen
+                          flex-1 från sm: den sköt chipparna till högerkanten
+                          (91 till 374 px efter titeln i 1280) i stället för
+                          8 px efter, som före. */}
+                      <p className="font-medium text-espresso-900 line-clamp-2 basis-full sm:basis-auto min-w-0">{o.items?.title}</p>
                       <span className="chip bg-espresso-100 text-espresso-600">{ORDER_STATUS_LABEL[o.status as OrderStatus]}</span>
                       {disputedIds.has(o.id) && (
                         <span className="chip bg-amber-100 text-amber-800 border border-amber-200">Ärende</span>
@@ -157,16 +168,18 @@ export default function AdminOrdersPage() {
                         <span className="chip bg-red-100 text-red-700 border border-red-200">Flaggad</span>
                       )}
                     </div>
-                    <p className="text-xs text-espresso-400 mt-0.5">
+                    <p className="text-xs text-espresso-400 mt-0.5 break-words">
                       {o.seller?.full_name} → {o.dealer?.company_name || o.dealer?.full_name}
                     </p>
                     <div className="mt-2 h-1.5 rounded-full bg-espresso-100 overflow-hidden max-w-xs">
                       <div className="h-full bg-emerald-400" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="font-semibold text-gold-700 tabular-nums">{formatSEK(o.amount)}</p>
-                    <span className="text-sm text-gold-600">Öppna →</span>
+                  {/* Beloppet får aldrig brytas eller klippas (109 000 kr visades
+                      som "109" på telefon). Egen rad under sm, höger från sm. */}
+                  <div className="col-span-2 sm:col-span-1 flex items-center justify-between gap-3 sm:block sm:text-right shrink-0">
+                    <p className="font-semibold text-gold-700 tabular-nums whitespace-nowrap">{formatSEK(o.amount)}</p>
+                    <span className="text-sm text-gold-600 whitespace-nowrap">Öppna →</span>
                   </div>
                 </Link>
               )
