@@ -71,7 +71,10 @@ export default function LegalPage({
         <div className="mt-12 rounded-2xl bg-espresso-50 border border-espresso-200 p-5">
           <p className="text-xs text-espresso-600 leading-relaxed">
             Har du frågor om villkoren når du oss på{' '}
-            <a href="mailto:info@guldbud.com" className="underline hover:text-espresso-800">
+            {/* py-2 på inline-länken: uppmätt 27 px med py-1.5 (text-xs ger
+                15 px innehållshöjd), med py-2 blir klickytan 31 px. Inline
+                vaddering ändrar inte radhöjden. */}
+            <a href="mailto:info@guldbud.com" className="py-2 underline hover:text-espresso-800">
               info@guldbud.com
             </a>
             .

@@ -81,7 +81,8 @@ export default function ValueEstimator({ loggedIn }: { loggedIn: boolean }) {
             onChange={(e) => setWeight(Number(e.target.value))}
             className="gold-range w-full"
           />
-          <div className="flex justify-between text-[10px] text-espresso-100/75 mt-1">
+          {/* 11 px: 10 px räknas som för liten text. */}
+          <div className="flex justify-between text-[11px] text-espresso-100/75 mt-1">
             <span>0,5 g</span>
             <span>200 g</span>
           </div>

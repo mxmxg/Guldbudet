@@ -115,7 +115,9 @@ export default function GuideShell({
               ))}
             </div>
             <p className="mt-4 text-sm">
-              <Link href="/guider" className="text-gold-700 underline underline-offset-2 hover:text-gold-800">
+              {/* py-1.5 på en inline-länk: klickytan blir 29 px hög utan att
+                  radhöjden ändras. Länken var 17 px. */}
+              <Link href="/guider" className="py-1.5 text-gold-700 underline underline-offset-2 hover:text-gold-800">
                 Alla guider om att sälja guld
               </Link>
             </p>
@@ -156,7 +158,10 @@ export function UL({ children }: { children: React.ReactNode }) {
 }
 export function A({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="text-gold-700 underline underline-offset-2 hover:text-gold-800">
+    // py-1.5 på inline-länken: i brödtextens 16 px gav py-1 28 px, men i
+    // text-sm (rutan högst upp i skatteguiden) bara 25. Med py-1.5 mäter
+    // länken 29 px i 14 px och 32 i 16 px. Radhöjden ändras inte.
+    <Link href={href} className="py-1.5 text-gold-700 underline underline-offset-2 hover:text-gold-800">
       {children}
     </Link>
   )

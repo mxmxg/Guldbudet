@@ -83,7 +83,7 @@ export default async function ResultsPage() {
             {rows.map((r: any) => {
               const perGram = r.weight_grams ? Math.round(r.price / r.weight_grams) : 0
               return (
-                <div key={r.id} className="flex items-center gap-4 p-4">
+                <div key={r.id} className="flex items-start sm:items-center gap-3 sm:gap-4 p-4">
                   {/* Föremålets egen bild, inte en kategoriikon. En lista med
                       identiska ikoner och siffror bredvid läser sig som
                       påhittad statistik, medan fotot visar att det är riktiga
@@ -106,17 +106,24 @@ export default async function ResultsPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-espresso-900 truncate">{r.title}</p>
-                    <p className="text-xs text-espresso-400">
-                      {r.category ? `${r.category} · ` : ''}{r.weight_grams} g · {r.karat}
-                      {r.gemstone ? ` · ${r.gemstone}` : ''}
-                      {r.accepted_at ? ` · ${new Date(r.accepted_at).toLocaleDateString('sv-SE')}` : ''}
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="font-semibold text-gold-700 tabular-nums">{formatSEK(r.price)}</p>
-                    {perGram > 0 && <p className="text-[11px] text-espresso-400">{perGram.toLocaleString('sv-SE')} kr/g</p>}
+                  {/* Under sm staplas titel och pris: uppmätt i 390 px fick
+                      titeln 150 px bredvid priset och klipptes efter cirka 18
+                      tecken (393 > 150). Nu får titeln hela bredden och bryter
+                      rad, och priset står på egen rad under. Från sm som förut,
+                      titeln på en rad och priset till höger. */}
+                  <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-espresso-900 break-words sm:truncate">{r.title}</p>
+                      <p className="text-xs text-espresso-400">
+                        {r.category ? `${r.category} · ` : ''}{r.weight_grams} g · {r.karat}
+                        {r.gemstone ? ` · ${r.gemstone}` : ''}
+                        {r.accepted_at ? ` · ${new Date(r.accepted_at).toLocaleDateString('sv-SE')}` : ''}
+                      </p>
+                    </div>
+                    <div className="shrink-0 flex items-baseline gap-2 sm:block sm:text-right">
+                      <p className="font-semibold text-gold-700 tabular-nums">{formatSEK(r.price)}</p>
+                      {perGram > 0 && <p className="text-[11px] text-espresso-400">{perGram.toLocaleString('sv-SE')} kr/g</p>}
+                    </div>
                   </div>
                 </div>
               )

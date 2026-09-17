@@ -68,15 +68,17 @@ export default function BidHistory({ itemId }: { itemId: string }) {
               i > 0 ? 'border-t border-espresso-50' : ''
             } ${i === 0 ? 'bg-gold-50/50' : ''}`}
           >
-            <div className="flex items-center gap-3">
+            {/* Beloppet bröts på två rader i telefonbredd (uppmätt 30 000 kr som
+                59 x 40 px i 390): namnkolumnen får min-w-0 och beloppet nowrap. */}
+            <div className="flex items-center gap-3 min-w-0">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
                   i === 0 ? 'bg-gold-sheen text-espresso-900' : 'bg-espresso-100 text-espresso-500'
                 }`}
               >
                 {dealerCode(bid.dealer_id).slice(-2)}
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className={i === 0 ? 'font-medium text-espresso-900' : 'text-espresso-600'}>
                   Kund {dealerCode(bid.dealer_id)}
                   {i === 0 && <span className="ml-2 chip bg-emerald-100 text-emerald-700">Vinnande bud</span>}
@@ -84,7 +86,7 @@ export default function BidHistory({ itemId }: { itemId: string }) {
                 <p className="text-[11px] text-espresso-300">{relTime(bid.created_at)}</p>
               </div>
             </div>
-            <span className={`tabular-nums ${i === 0 ? 'font-semibold text-gold-700' : 'text-espresso-600'}`}>
+            <span className={`tabular-nums whitespace-nowrap shrink-0 ml-3 ${i === 0 ? 'font-semibold text-gold-700' : 'text-espresso-600'}`}>
               {bid.amount.toLocaleString('sv-SE')} kr
             </span>
           </div>

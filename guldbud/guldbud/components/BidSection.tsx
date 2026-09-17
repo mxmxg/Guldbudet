@@ -287,7 +287,9 @@ export default function BidSection({
               <span className="font-medium">Autobud aktivt</span> · vi budar åt dig upp till{' '}
               <span className="tabular-nums font-medium">{myAutoMax.toLocaleString('sv-SE')} kr</span>
             </p>
-            <button onClick={removeAutoBid} disabled={autoLoading} className="text-xs text-espresso-400 hover:text-red-500 shrink-0">
+            {/* Klickytan var 40 x 16 px. Vaddering plus negativ marginal ger
+                32 px höjd utan att raden växer. */}
+            <button onClick={removeAutoBid} disabled={autoLoading} className="text-xs text-espresso-400 hover:text-red-500 shrink-0 px-2 py-2 -my-2 -mr-2">
               Ta bort
             </button>
           </div>
@@ -297,7 +299,9 @@ export default function BidSection({
             <p className="text-xs text-espresso-400 mb-2">
               Vi budar automatiskt åt dig, ett steg i taget, upp till ditt max. Andra ser aldrig ditt maxbelopp.
             </p>
-            <div className="flex gap-2">
+            {/* I 360 fick fältet 88 px innehållsbredd bredvid knappen och klippte
+                platshållaren (119 px). Staplas därför i telefonbredd. */}
+            <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
                 <input
                   type="number"
@@ -309,7 +313,7 @@ export default function BidSection({
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-espresso-300 text-sm">kr</span>
               </div>
-              <button onClick={saveAutoBid} disabled={autoLoading} className="btn-ghost-gold whitespace-nowrap !py-2">
+              <button onClick={saveAutoBid} disabled={autoLoading} className="btn-ghost-gold whitespace-nowrap !py-2 w-full sm:w-auto">
                 {autoLoading ? '...' : 'Sätt maxbud'}
               </button>
             </div>

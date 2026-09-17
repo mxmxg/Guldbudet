@@ -114,7 +114,8 @@ export default function InvoicePage({ params }: { params: { id: string } }) {
       <style>{`@media print { .no-print { display:none !important; } body { background:#fff; } .doc { page-break-inside: avoid; } .doc + .doc { page-break-before: always; } }`}</style>
 
       <div className="max-w-2xl mx-auto mb-4 flex justify-between items-center no-print">
-        <Link href={`/orders/${order.id}`} className="text-sm text-espresso-500 hover:text-espresso-800">← Tillbaka till affären</Link>
+        {/* inline-block py-1: länken var 20 px hög, under gränsen för en tumme. */}
+        <Link href={`/orders/${order.id}`} className="inline-block py-1 text-sm text-espresso-500 hover:text-espresso-800">← Tillbaka till affären</Link>
         <button onClick={() => window.print()} className="btn-gold !py-2">Skriv ut / Spara som PDF</button>
       </div>
 
@@ -279,7 +280,11 @@ function Row({ label, value, plain }: { label: string; value: string; plain?: bo
   return (
     <tr className={plain ? '' : 'border-b border-espresso-100'}>
       <td className="py-2.5 text-espresso-700">{label}</td>
-      <td className="py-2.5 text-right tabular-nums text-espresso-800">{value}</td>
+      {/* whitespace-nowrap: beskrivningen tog hela bredden och beloppet fick
+          122 px, så "2 400,00 kr" bröts på tre rader i 390 px (uppmätt
+          2026-09-17). Med nowrap tar beloppet sin bredd och beskrivningen
+          bryter rad i stället. Bara layout, beloppen är oförändrade. */}
+      <td className="py-2.5 text-right tabular-nums whitespace-nowrap text-espresso-800">{value}</td>
     </tr>
   )
 }
@@ -288,7 +293,7 @@ function Total({ label, value }: { label: string; value: string }) {
   return (
     <tr className="border-t border-espresso-200">
       <td className="py-3 font-semibold text-espresso-900">{label}</td>
-      <td className="py-3 text-right font-semibold tabular-nums text-espresso-900">{value}</td>
+      <td className="py-3 text-right font-semibold tabular-nums whitespace-nowrap text-espresso-900">{value}</td>
     </tr>
   )
 }

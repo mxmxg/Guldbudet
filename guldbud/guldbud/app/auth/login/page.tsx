@@ -250,14 +250,18 @@ function LoginForm() {
 
           {/* Logo */}
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <Link href="/">
+            {/* Länken var inline och mätte 143 x 20 px runt en 36 px logga.
+                inline-block ger klickytan loggans egen höjd. */}
+            <Link href="/" className="inline-block">
               <Logo className="text-[36px] text-[#D4AF37] leading-none" />
             </Link>
-            <p style={{ color: '#c9a24a', fontSize: '10px', letterSpacing: '4px', marginTop: '4px' }}>SVERIGES GULDAUKTION</p>
+            {/* 10 px föll under gränsen för liten text, 11 px räcker. */}
+            <p style={{ color: '#c9a24a', fontSize: '11px', letterSpacing: '4px', marginTop: '4px' }}>SVERIGES GULDAUKTION</p>
           </div>
 
-          {/* Kort */}
-          <div style={{ background: '#1a1208', border: '1px solid #3d2d0f', borderRadius: '16px', padding: '32px' }}>
+          {/* Kort. 32 px vaddering lämnade 264 px åt innehållet i 360 px. Telefon får 20 px,
+              skrivbord behåller 32 px. */}
+          <div className="p-5 sm:p-8" style={{ background: '#1a1208', border: '1px solid #3d2d0f', borderRadius: '16px' }}>
 
             {/* Flikar */}
             {!forgot && (
@@ -323,11 +327,14 @@ function LoginForm() {
                         Personnummer för firmatecknaren behövs för identitetskontroll och regler mot penningtvätt. Det delas aldrig publikt.
                       </p>
                       <Field label="Adress" name="address" value={fields.address} onChange={set('address')} onBlur={blur('address')} error={err('address')} placeholder="Gatuadress" />
-                      <div style={{ display: 'flex', gap: '12px' }}>
-                        <div style={{ width: '35%' }}>
+                      {/* Postnummer fick 35 procent av 294 px i 390 och klippte sin egen
+                          platshållare ("Postnumme"). I telefonbredd staplas fälten, från sm
+                          ligger de bredvid varandra som förut. */}
+                      <div className="flex flex-col gap-4 sm:flex-row sm:gap-3">
+                        <div className="sm:w-[35%]">
                           <Field label="Postnummer" name="postalCode" value={fields.postalCode} onChange={set('postalCode')} onBlur={blur('postalCode')} error={err('postalCode')} placeholder="Postnummer" />
                         </div>
-                        <div style={{ flex: 1 }}>
+                        <div className="sm:flex-1">
                           <Field label="Stad" name="city" value={fields.city} onChange={set('city')} onBlur={blur('city')} error={err('city')} placeholder="Stad" />
                         </div>
                       </div>
@@ -347,12 +354,15 @@ function LoginForm() {
                 <Field label="Lösenord" name="password" type="password" value={fields.password} onChange={set('password')} onBlur={blur('password')} error="" placeholder="Minst 6 tecken" autoComplete={mode === 'register' ? 'new-password' : 'current-password'} />
               )}
 
+              {/* Textknapparna mätte 92 x 18 px utan vaddering. 8 px upptill och nedtill
+                  ger 34 px klickyta, och marginalen ovanför minskas lika mycket så att
+                  texten sitter kvar på samma rad som förut. */}
               {mode === 'login' && !forgot && (
-                <div style={{ textAlign: 'right', marginTop: '-6px' }}>
+                <div style={{ textAlign: 'right', marginTop: '-14px', marginBottom: '-8px' }}>
                   <button
                     type="button"
                     onClick={() => { setForgot(true); setSubmitError(''); setResetMsg('') }}
-                    style={{ background: 'none', border: 'none', color: '#B8860B', fontSize: '12px', cursor: 'pointer', padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: '#B8860B', fontSize: '12px', cursor: 'pointer', padding: '8px 0' }}
                   >
                     Glömt lösenord?
                   </button>
@@ -360,11 +370,11 @@ function LoginForm() {
               )}
 
               {forgot && (
-                <div style={{ textAlign: 'left', marginTop: '-6px' }}>
+                <div style={{ textAlign: 'left', marginTop: '-14px', marginBottom: '-8px' }}>
                   <button
                     type="button"
                     onClick={() => { setForgot(false); setSubmitError(''); setResetMsg('') }}
-                    style={{ background: 'none', border: 'none', color: '#c9a24a', fontSize: '12px', cursor: 'pointer', padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: '#c9a24a', fontSize: '12px', cursor: 'pointer', padding: '8px 0' }}
                   >
                     ← Tillbaka till inloggning
                   </button>
@@ -389,17 +399,21 @@ function LoginForm() {
                 </p>
               )}
 
+              {/* Kryssrutan mätte 16 x 16 px. 22 px är så stor den kan vara utan att se
+                  klumpig ut bredvid 12 px text; hela raden är en label, så texten
+                  bredvid är också klickyta. Länkarna i löptexten mätte 15 px höga och får
+                  vaddering med lika stor negativ marginal, så radhöjden inte ändras. */}
               {mode === 'register' && role === 'dealer' && (
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={e => setTermsAccepted(e.target.checked)}
-                    style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0, accentColor: '#B8860B', colorScheme: 'dark' }}
+                    style={{ marginTop: '0px', width: '22px', height: '22px', flexShrink: 0, accentColor: '#B8860B', colorScheme: 'dark' }}
                   />
-                  <span style={{ color: '#c9a84c', fontSize: '12px', lineHeight: 1.5 }}>
+                  <span style={{ color: '#c9a84c', fontSize: '12px', lineHeight: 1.5, paddingTop: '2px' }}>
                     Jag har läst och godkänner{' '}
-                    <Link href="/handlarvillkor" target="_blank" style={{ color: '#D4AF37', textDecoration: 'underline' }}>
+                    <Link href="/handlarvillkor" target="_blank" style={{ color: '#D4AF37', textDecoration: 'underline', display: 'inline-block', padding: '7px 0', margin: '-7px 0' }}>
                       handlarvillkoren
                     </Link>
                     , inklusive skyldigheten att betala vunna auktioner omgående, slagavgift på 8 %, fraktavgift och
@@ -414,15 +428,15 @@ function LoginForm() {
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={e => setTermsAccepted(e.target.checked)}
-                    style={{ marginTop: '2px', width: '16px', height: '16px', flexShrink: 0, accentColor: '#B8860B', colorScheme: 'dark' }}
+                    style={{ marginTop: '0px', width: '22px', height: '22px', flexShrink: 0, accentColor: '#B8860B', colorScheme: 'dark' }}
                   />
-                  <span style={{ color: '#c9a84c', fontSize: '12px', lineHeight: 1.5 }}>
+                  <span style={{ color: '#c9a84c', fontSize: '12px', lineHeight: 1.5, paddingTop: '2px' }}>
                     Jag har läst och godkänner{' '}
-                    <Link href="/terms" target="_blank" style={{ color: '#D4AF37', textDecoration: 'underline' }}>
+                    <Link href="/terms" target="_blank" style={{ color: '#D4AF37', textDecoration: 'underline', display: 'inline-block', padding: '7px 0', margin: '-7px 0' }}>
                       användarvillkoren
                     </Link>{' '}
                     och{' '}
-                    <Link href="/privacy" target="_blank" style={{ color: '#D4AF37', textDecoration: 'underline' }}>
+                    <Link href="/privacy" target="_blank" style={{ color: '#D4AF37', textDecoration: 'underline', display: 'inline-block', padding: '7px 0', margin: '-7px 0' }}>
                       integritetspolicyn
                     </Link>
                     .
@@ -433,7 +447,8 @@ function LoginForm() {
               {mode === 'register' && (
                 <p style={{ color: '#b89a63', fontSize: '11px' }}>
                   Dina personuppgifter hanteras säkert enligt vår integritetspolicy och delas bara med din motpart när en affär genomförs.{' '}
-                  <Link href="/privacy" style={{ color: '#B8860B' }}>Integritetspolicy</Link>
+                  {/* Länken mätte 83 x 14 px, samma vadderingsknep som villkorslänkarna. */}
+                  <Link href="/privacy" style={{ color: '#B8860B', display: 'inline-block', padding: '7px 0', margin: '-7px 0' }}>Integritetspolicy</Link>
                 </p>
               )}
 

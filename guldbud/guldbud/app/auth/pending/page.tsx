@@ -56,12 +56,15 @@ export default function PendingPage() {
         >
           Du behöver också legitimera dig med BankID innan du kan lägga bud. Säljarna hos oss är
           privatpersoner, och vi lovar dem att varje handlare är legitimerad. Det gör du under{' '}
-          <Link href="/verifiering" style={{ color: '#D4AF37', fontWeight: 500 }}>
+          {/* Länken i löptext mätte 65 x 16 px. Vaddering med lika stor negativ marginal
+              ger 30 px klickyta utan att radhöjden ändras. */}
+          <Link href="/verifiering" style={{ color: '#D4AF37', fontWeight: 500, display: 'inline-block', padding: '7px 0', margin: '-7px 0' }}>
             Verifiering
           </Link>{' '}
           när du loggat in.
         </p>
-        <Link href="/" style={{ color: '#B8860B', fontSize: '14px', fontWeight: 500 }}>
+        {/* Länken mätte 142 x 17 px, vadderingen ger 33 px. */}
+        <Link href="/" style={{ color: '#B8860B', fontSize: '14px', fontWeight: 500, display: 'inline-block', padding: '8px 12px' }}>
           Tillbaka till startsidan
         </Link>
       </div>

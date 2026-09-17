@@ -224,7 +224,10 @@ export default function Navbar() {
         >
           <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 shrink-0 group">
+            {/* py-1 -my-1: logotyplänken mätte 27,5 px hög, strax under gränsen
+                för en tumme. Vadderingen tas ut av marginalen, så sidhuvudets
+                höjd är oförändrad. */}
+            <Link href="/" className="flex items-center gap-3 shrink-0 group py-1 -my-1">
               <Logo className="text-gold-300 text-[26px] leading-none transition-transform group-hover:scale-105" />
               {/* Visas även på mobil. Låg tidigare bakom hidden sm:block, alltså
                   dold under 640 px. Två skäl att visa den: en besökare på mobil

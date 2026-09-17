@@ -32,9 +32,11 @@ export default function RecentlySold({ rows }: { rows: SoldRow[] }) {
               Riktiga slutpriser från avslutad budgivning. Konkurrensen mellan handlare avgör priset.
             </p>
           </div>
+          {/* py-1 och -my-1: länken var 20 px hög, klickytan är nu 28 px utan
+              att raden blir högre. */}
           <Link
             href="/resultat"
-            className="text-sm font-medium text-gold-700 hover:text-gold-800 shrink-0 whitespace-nowrap"
+            className="inline-block py-1 -my-1 text-sm font-medium text-gold-700 hover:text-gold-800 shrink-0 whitespace-nowrap"
           >
             Se alla resultat →
           </Link>
@@ -74,12 +76,17 @@ export default function RecentlySold({ rows }: { rows: SoldRow[] }) {
                 </div>
 
                 <div className="p-3.5">
-                  <p className="text-sm font-medium text-espresso-900 truncate group-hover:text-gold-700 transition">
+                  {/* Uppmätt i 390 px: titeln fick 141 px och klipptes efter
+                      cirka 18 tecken (344 > 141). Två rader i stället, med
+                      min-höjd för två rader så priset hamnar på samma höjd i
+                      korten bredvid varandra. */}
+                  <p className="text-sm font-medium text-espresso-900 line-clamp-2 min-h-[2.5rem] group-hover:text-gold-700 transition">
                     {r.title}
                   </p>
                   {specs && <p className="text-xs text-espresso-400 mt-0.5">{specs}</p>}
                   <div className="mt-2.5 pt-2.5 border-t border-espresso-100">
-                    <p className="text-[10px] uppercase tracking-wider text-espresso-400">Slutpris</p>
+                    {/* 11 px: 10 px räknas som för liten text. */}
+                    <p className="text-[11px] uppercase tracking-wider text-espresso-400">Slutpris</p>
                     <p className="font-display text-xl sm:text-2xl text-gradient-gold tabular-nums leading-tight mt-0.5">
                       {formatSEK(r.price)}
                     </p>

@@ -150,7 +150,9 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
           <section className="mb-12">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display text-2xl text-espresso-900">Mina föremål</h2>
-              <Link href="/customer/my-items" className="text-sm text-gold-600 hover:text-gold-700 transition">
+              {/* Länken var 20 px hög. Vaddering ger 28 px klickyta, negativ
+                  marginal håller raden lika hög som förut. */}
+              <Link href="/customer/my-items" className="inline-block py-1 -my-1 text-sm text-gold-600 hover:text-gold-700 transition">
                 Se alla →
               </Link>
             </div>
@@ -188,7 +190,10 @@ export default function HomeContent({ items, sold = [] }: { items: EnrichedItem[
                         )}
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        {/* flex-wrap: i 390 px bröts en lång titel på sex rader
+                            i en smal spalt bredvid statuschipen. Nu får chipen
+                            gå ner under titeln när utrymmet inte räcker. */}
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
                           <h3 className="font-medium text-espresso-900">{capitalize(item.title)}</h3>
                           <span className={`chip ${s.color}`}>{s.label}</span>
                         </div>
@@ -272,7 +277,11 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
         <div className="pointer-events-none absolute -bottom-48 -right-24 w-[420px] h-[420px] rounded-full bg-gold-400/8 blur-3xl" />
         <div className="pointer-events-none absolute inset-0 noise opacity-[0.04]" />
 
-        <div className="relative max-w-6xl mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28 grid lg:grid-cols-2 gap-14 items-center">
+        {/* grid-cols-1 uttryckligen: utan den är spalten under lg en auto-kolumn
+            som växer till innehållets min-content. Uppmätt i 390 px: kortets
+            nowrap-titel gjorde kortet 705 px brett och hela hero-texten sträckte
+            sig till 528 px, klippt av sektionens overflow-hidden. */}
+        <div className="relative max-w-6xl mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
           {/* Left */}
           <div>
             <Reveal>
@@ -501,7 +510,8 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             skickar in stora mängder. Hos GuldBud finns ingen dold värdetrappa. Priset sätts av att flera
             verifierade handlare budar mot varandra, i realtid, framför dina ögon.
           </p>
-          <Link href="/resultat" className="inline-block mt-4 text-sm text-gold-700 hover:text-gold-800 font-medium">
+          {/* py-1: länken var 20 px hög, nu 28. */}
+          <Link href="/resultat" className="inline-block mt-3 py-1 text-sm text-gold-700 hover:text-gold-800 font-medium">
             Se vad andra fått betalt →
           </Link>
         </Reveal>
@@ -856,7 +866,9 @@ function FeaturedAuction({ items }: { items: EnrichedItem[] }) {
             <CategoryIcon category={item.category} size={70} className="text-gold-500/40" strokeWidth={1} />
           )}
         </div>
-        <p className="font-display text-lg text-gold-100 leading-tight mb-3 truncate">{item.title}</p>
+        {/* Två rader i stället för truncate: i 390 px klipptes långa titlar
+            efter cirka 40 tecken, och nowrap var det som sprängde gridet ovan. */}
+        <p className="font-display text-lg text-gold-100 leading-tight mb-3 line-clamp-2">{item.title}</p>
         <div className="flex items-end justify-between">
           <div>
             <p className="text-xs text-espresso-200/60 uppercase tracking-wide">Högsta bud</p>
@@ -876,14 +888,21 @@ function FeaturedAuction({ items }: { items: EnrichedItem[] }) {
       {list.length > 1 && (
         <div className="flex justify-center gap-1.5 mt-5">
           {list.map((_, i) => (
+            /* Knappen var 6 px hög (bara pricken). Klickytan är nu 30 px hög
+               genom vaddering, och pricken ritas av en span inuti. Negativ
+               marginal håller radens höjd som förut. */
             <button
               key={i}
               onClick={() => setIdx(i)}
               aria-label={`Visa auktion ${i + 1}`}
-              className={`h-1.5 rounded-full transition-all ${
-                i === idx ? 'w-5 bg-gold-400' : 'w-1.5 bg-gold-500/30 hover:bg-gold-500/60'
-              }`}
-            />
+              className="group flex items-center py-3 -my-3 px-0.5"
+            >
+              <span
+                className={`block h-1.5 rounded-full transition-all ${
+                  i === idx ? 'w-5 bg-gold-400' : 'w-1.5 bg-gold-500/30 group-hover:bg-gold-500/60'
+                }`}
+              />
+            </button>
           ))}
         </div>
       )}
