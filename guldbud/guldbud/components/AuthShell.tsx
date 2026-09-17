@@ -19,14 +19,19 @@ export default function AuthShell({ children }: { children: React.ReactNode }) {
       >
         <div style={{ width: '100%', maxWidth: '440px' }}>
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <Link href="/">
+            {/* Länken var inline och mätte 143 x 20 px runt en 36 px logga.
+                inline-block ger klickytan loggans egen höjd. */}
+            <Link href="/" className="inline-block">
               <Logo className="text-[36px] text-[#D4AF37] leading-none" />
             </Link>
-            <p style={{ color: '#8B6914', fontSize: '10px', letterSpacing: '4px', marginTop: '4px' }}>
+            {/* 10 px föll under gränsen för liten text, 11 px räcker. */}
+            <p style={{ color: '#8B6914', fontSize: '11px', letterSpacing: '4px', marginTop: '4px' }}>
               SVERIGES GULDAUKTION
             </p>
           </div>
-          <div style={{ background: '#1a1208', border: '1px solid #3d2d0f', borderRadius: '16px', padding: '32px' }}>
+          {/* 32 px vaddering lämnade 264 px åt innehållet i 360 px. Telefon får 20 px,
+              skrivbord behåller 32 px. */}
+          <div className="p-5 sm:p-8" style={{ background: '#1a1208', border: '1px solid #3d2d0f', borderRadius: '16px' }}>
             {children}
           </div>
         </div>

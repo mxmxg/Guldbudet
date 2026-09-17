@@ -41,7 +41,8 @@ export default function TrustpilotWidget() {
         data-style-width="100%"
         data-theme="light"
       >
-        <a href={TRUSTPILOT_PROFILE_URL} target="_blank" rel="noopener noreferrer">
+        {/* Reservlänken (syns bara när skriptet inte laddat) var 20 px hög. */}
+        <a href={TRUSTPILOT_PROFILE_URL} target="_blank" rel="noopener noreferrer" className="inline-block py-1">
           Trustpilot
         </a>
       </div>

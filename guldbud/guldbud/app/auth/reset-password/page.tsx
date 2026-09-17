@@ -73,7 +73,9 @@ export default function ResetPasswordPage() {
           }}
         >
           Vi hittar ingen aktiv återställningslänk. Öppna länken från mejlet igen, eller begär en ny via{' '}
-          <Link href="/auth/login" style={{ color: '#D4AF37', textDecoration: 'underline' }}>
+          {/* Länken i löptext mätte 100 x 16 px. Vaddering med lika stor negativ marginal
+              ger 30 px klickyta utan att radhöjden ändras. */}
+          <Link href="/auth/login" style={{ color: '#D4AF37', textDecoration: 'underline', display: 'inline-block', padding: '7px 0', margin: '-7px 0' }}>
             Glömt lösenord?
           </Link>{' '}
           på inloggningssidan.

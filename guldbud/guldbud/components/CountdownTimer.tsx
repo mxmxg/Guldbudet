@@ -107,8 +107,10 @@ export default function CountdownTimer({
             >
               {pad(val)}
             </div>
+            {/* Etiketten var 9 px i telefonbredd, under gränsen 11 px. Höjs bara
+                där; skrivbordet behåller sin storlek. */}
             <div
-              className={`text-[9px] uppercase tracking-widest mt-1 ${
+              className={`text-[11px] sm:text-[9px] uppercase tracking-widest mt-1 ${
                 urgent ? 'text-red-400' : 'text-espresso-200/70'
               }`}
             >

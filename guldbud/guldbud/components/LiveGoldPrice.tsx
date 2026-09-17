@@ -110,7 +110,8 @@ export default function LiveGoldPrice({
 
       {/* Karat breakdown */}
       <div className="mt-3 pt-3 border-t border-gold-500/15">
-        <p className="text-[10px] uppercase tracking-widest text-espresso-200/50 mb-2">Pris per gram och karat</p>
+        {/* 11 px: 10 px räknas som för liten text. */}
+        <p className="text-[11px] uppercase tracking-widest text-espresso-200/50 mb-2">Pris per gram och karat</p>
         <div className="grid grid-cols-5 gap-1.5">
           {karats.map((k) => (
             <div

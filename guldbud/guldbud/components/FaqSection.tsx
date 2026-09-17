@@ -86,7 +86,8 @@ export default function FaqSection() {
       </div>
       <p className="text-center text-sm text-espresso-500 mt-8">
         Har du en annan fråga?{' '}
-        <Link href="/how-it-works" className="text-gold-700 hover:text-gold-800 font-medium">
+        {/* inline-block py-1: länken var 17 px hög, nu 28. */}
+        <Link href="/how-it-works" className="inline-block py-1 text-gold-700 hover:text-gold-800 font-medium">
           Läs mer om hur det fungerar
         </Link>
       </p>

@@ -255,7 +255,9 @@ export default function AuctionDetails({
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="mb-6 text-sm text-espresso-400">
-          <Link href="/auctions" className="hover:text-gold-600 transition">
+          {/* Länken var 64 x 17 px, för låg för tumme. Vaddering plus negativ
+              marginal ger 32 px höjd utan att raden flyttar sig. */}
+          <Link href="/auctions" className="inline-block py-1.5 -my-1.5 hover:text-gold-600 transition">
             Auktioner
           </Link>
           <span className="mx-2">/</span>
@@ -592,15 +594,17 @@ export default function AuctionDetails({
                         i > 0 ? 'border-t border-espresso-50' : ''
                       } ${i === 0 ? 'bg-gold-50/50' : ''}`}
                     >
-                      <div className="flex items-center gap-3">
+                      {/* Beloppet bröts på två rader i 360 (uppmätt 1 250 000 kr som
+                          87 x 40 px): namnkolumnen får min-w-0 och beloppet nowrap. */}
+                      <div className="flex items-center gap-3 min-w-0">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
                             i === 0 ? 'bg-gold-sheen text-espresso-900' : 'bg-espresso-100 text-espresso-500'
                           }`}
                         >
                           {dealerCode(bid.dealer_id).slice(-2)}
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p className={`${i === 0 ? 'font-medium text-espresso-900' : 'text-espresso-600'}`}>
                             {dealerLabel(bid)}
                             {i === 0 && <span className="ml-2 chip bg-emerald-100 text-emerald-700">Ledande</span>}
@@ -608,7 +612,7 @@ export default function AuctionDetails({
                           <p className="text-[11px] text-espresso-300">{relTime(bid.created_at)}</p>
                         </div>
                       </div>
-                      <span className={`tabular-nums ${i === 0 ? 'font-semibold text-gold-700' : 'text-espresso-600'}`}>
+                      <span className={`tabular-nums whitespace-nowrap shrink-0 ml-3 ${i === 0 ? 'font-semibold text-gold-700' : 'text-espresso-600'}`}>
                         {bid.amount.toLocaleString('sv-SE')} kr
                       </span>
                     </div>

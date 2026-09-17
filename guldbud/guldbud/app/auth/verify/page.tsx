@@ -96,8 +96,10 @@ export default function VerifyPage() {
           <p style={{ color: note.ok ? '#7bc47f' : '#e57373', fontSize: '13px', marginTop: '14px' }}>{note.text}</p>
         )}
 
-        <div style={{ marginTop: '24px' }}>
-          <Link href="/auth/login" style={{ color: '#B8860B', fontSize: '14px', fontWeight: 500 }}>
+        {/* Länken mätte 110 x 17 px, vadderingen ger 33 px. Marginalen minskas lika mycket
+            som vadderingen lägger till upptill. */}
+        <div style={{ marginTop: '16px' }}>
+          <Link href="/auth/login" style={{ color: '#B8860B', fontSize: '14px', fontWeight: 500, display: 'inline-block', padding: '8px 12px' }}>
             Till inloggningen
           </Link>
         </div>
