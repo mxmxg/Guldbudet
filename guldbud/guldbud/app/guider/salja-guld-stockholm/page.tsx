@@ -57,7 +57,7 @@ export default function Page() {
       <H2>Slipp resan in till stan</H2>
       <P>
         Ingen trängselskatt, ingen jakt på parkering, ingen kö. Efter godkänt slutpris får du ett rekommenderat brev med
-        förbetalt porto, försäkrat upp till 100 000 kr. Du lämnar det på närmaste postombud, oavsett om det är i
+        förbetalt porto, försäkrat. Du lämnar det på närmaste postombud, oavsett om det är i
         Bromma, på Kungsholmen eller i Täby.
       </P>
 

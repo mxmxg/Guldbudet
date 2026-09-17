@@ -15,7 +15,7 @@ const faq = [
   },
   {
     q: 'Hur skickar jag guldet säkert?',
-    a: 'När du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Du lägger föremålet i det och postar det rekommenderat, porto och adress är redan klara.',
+    a: 'När du godkänt ditt slutpris skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat. Du lägger föremålet i det och postar det rekommenderat, porto och adress är redan klara.',
   },
   {
     q: 'Får jag mer betalt online än i butik?',
@@ -50,7 +50,7 @@ export default function Page() {
         <li>Vi granskar och öppnar auktionen, oftast inom ett par timmar.</li>
         <li>Handlarna budar mot varandra i realtid, du följer det live.</li>
         <li>Du accepterar det högsta budet, helt utan förpliktelser.</li>
-        <li>Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr.</li>
+        <li>Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto, försäkrat.</li>
         <li>Vi äkthetskontrollerar, och du får betalt till ditt bankkonto inom 24 timmar.</li>
       </UL>
 

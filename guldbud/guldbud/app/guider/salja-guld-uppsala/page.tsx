@@ -55,8 +55,7 @@ export default function Page() {
 
       <H2>Försäkrad frakt i hela Uppland</H2>
       <P>
-        Efter godkänt slutpris skickar vi ett kostnadsfritt rekommenderat brev med förbetalt porto, försäkrat upp till
-        100 000 kr. Du lämnar det på närmaste ombud, i Uppsala, Knivsta, Enköping eller var du än bor i Uppland. Ingen
+        Efter godkänt slutpris skickar vi ett kostnadsfritt rekommenderat brev med förbetalt porto, försäkrat. Du lämnar det på närmaste ombud, i Uppsala, Knivsta, Enköping eller var du än bor i Uppland. Ingen
         cykeltur in till centrum, ingen kö.
       </P>
 

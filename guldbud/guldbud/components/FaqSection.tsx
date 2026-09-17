@@ -16,7 +16,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Är det säkert att skicka in mitt guld?',
-    a: 'Ja. Du postar det i ett rekommenderat brev med förbetalt porto, försäkrat upp till 100 000 kr. Försändelsen är spårbar hela vägen, och porto och adress är redan klara när du fått brevet.',
+    a: 'Ja. Du postar det i ett rekommenderat brev med förbetalt porto, försäkrat. Försändelsen är spårbar hela vägen, och porto och adress är redan klara när du fått brevet.',
   },
   {
     q: 'Vad händer om jag inte är nöjd med buden?',

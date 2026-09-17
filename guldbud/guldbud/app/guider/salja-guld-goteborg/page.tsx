@@ -55,8 +55,7 @@ export default function Page() {
 
       <H2>Försäkrad frakt i hela Västsverige</H2>
       <P>
-        När du godkänt ditt slutpris skickar vi ett kostnadsfritt rekommenderat brev med förbetalt porto, försäkrat upp
-        till 100 000 kr. Du lämnar det på närmaste ombud, vare sig du bor i Göteborg, Partille, Kungälv eller Kungsbacka.
+        När du godkänt ditt slutpris skickar vi ett kostnadsfritt rekommenderat brev med förbetalt porto, försäkrat. Du lämnar det på närmaste ombud, vare sig du bor i Göteborg, Partille, Kungälv eller Kungsbacka.
         Ingen bilresa in till city, ingen parkering vid Nordstan.
       </P>
 

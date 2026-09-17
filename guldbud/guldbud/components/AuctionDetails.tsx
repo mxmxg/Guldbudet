@@ -462,7 +462,7 @@ export default function AuctionDetails({
                 <p className="text-amber-800 text-sm font-medium">Auktionen är avslutad</p>
                 <p className="text-amber-700 text-xs mt-1">
                   {topBid
-                    ? 'Välj det bud du vill acceptera nedan.'
+                    ? 'Du kan acceptera det högsta budet eller tacka nej.'
                     : 'Inga bud kom in den här gången.'}
                 </p>
               </div>
@@ -666,7 +666,7 @@ function ShippingCard() {
       <div className="relative">
         <p className="eyebrow text-gold-500/70 mb-1">Frakt</p>
         <p className="text-gold-200 font-medium">Kostnadsfritt rekommenderat brev</p>
-        <p className="text-gold-500/80 text-sm">Förbetalt porto och adress, försäkrat upp till 100 000 kr.</p>
+        <p className="text-gold-500/80 text-sm">Porto och adress klara, rekommenderat och försäkrat.</p>
         <p className="text-gold-500/80 text-sm">Skickas när du godkänt ditt slutpris.</p>
         <p className="text-gold-500/60 text-xs mt-2">Vid frågor: info@guldbud.com</p>
       </div>

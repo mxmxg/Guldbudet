@@ -81,7 +81,7 @@ export default function Page() {
       <P>
         Nej. Du behöver inte längre åka runt och jämföra butiker. På <A href="/">GuldBud</A> lägger du ut ditt guld
         hemifrån, handlare i hela Sverige budar, och du skickar in föremålet i ett kostnadsfritt, rekommenderat brev med
-        förbetalt porto, försäkrat upp till 100 000 kr. Se hur det fungerar med att{' '}
+        förbetalt porto, försäkrat. Se hur det fungerar med att{' '}
         <A href="/guider/salja-guld-online">sälja guld online</A>.
       </P>
 
