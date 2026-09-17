@@ -301,14 +301,14 @@ function SellerPanel({
           <p className="text-sm text-espresso-500 mb-5 leading-relaxed">
             Du sålde för {formatSEK(order.amount)}. Handlaren betalar hela beloppet direkt till ditt bankkonto
             när vi tagit emot och kontrollerat föremålet. Nu skickar vi dig ett kostnadsfritt, förberett
-            kuvert med porto och adress klara. Lägg föremålet i det, försegla och lämna in det på ett
-            postombud. Ju snabbare det är på väg, desto snabbare får du betalt.
+            rekommenderat brev med förbetalt porto och adress. Lägg föremålet i det, försegla och lämna
+            in det på ett postombud. Ju snabbare det är på väg, desto snabbare får du betalt.
           </p>
 
           <ol className="grid gap-3 mb-5">
             {[
-              'Linda in föremålet väl, gärna i bubbelplast, och lägg det i det kostnadsfria kuvertet vi skickar dig.',
-              'Försegla kuvertet och lämna in det på ett postombud. Porto och adress är klara, och försändelsen är rekommenderad, spårbar och försäkrad.',
+              'Linda in föremålet väl, gärna i bubbelplast, och lägg det i det kostnadsfria brevet vi skickar dig.',
+              'Försegla brevet och lämna in det på ett postombud. Porto och adress är klara, och försändelsen är spårbar och försäkrad.',
               'Skriv spårningsnumret i meddelandena längst ner så vi kan följa försändelsen.',
             ].map((t, i) => (
               <li key={i} className="flex gap-3 text-sm text-espresso-700">
@@ -323,8 +323,8 @@ function SellerPanel({
           {/* Ljus ruta, se kommentaren i AuctionDetails om kontrasten. */}
           <div className="rounded-xl bg-gold-50 border border-gold-200 p-4 text-center">
             <p className="text-gold-700 text-xs tracking-widest uppercase mb-1">Frakt</p>
-            <p className="text-espresso-900 font-medium">Kostnadsfritt förberett kuvert</p>
-            <p className="text-espresso-600 text-sm">Porto och adress är klara, och försändelsen är rekommenderad, spårbar och försäkrad. Vi skickar kuvertet till dig nu.</p>
+            <p className="text-espresso-900 font-medium">Kostnadsfritt rekommenderat brev</p>
+            <p className="text-espresso-600 text-sm">Porto och adress är klara, och försändelsen är spårbar och försäkrad. Vi skickar brevet till dig nu.</p>
           </div>
           <p className="text-xs text-espresso-400 mt-3 leading-relaxed">
             Så fort vi tagit emot och äkthetskontrollerat föremålet får handlaren dina kontouppgifter och

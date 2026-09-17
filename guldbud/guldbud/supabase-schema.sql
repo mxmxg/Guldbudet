@@ -982,7 +982,7 @@ begin
 
     insert into public.notifications (user_id, title, message, item_id, link)
     values (new.owner_id, 'Grattis, ditt föremål är sålt!',
-            'Du sålde "' || new.title || '" för ' || replace(to_char(v_amount, 'FM999,999,999'), ',', ' ') || ' kr. Nu skickar vi dig ett kostnadsfritt, förberett kuvert med porto och adress klara. Lägg föremålet i det, försegla och lämna in det på ett postombud. Försändelsen är rekommenderad, spårbar och försäkrad. Så snart vi tagit emot och kontrollerat föremålet betalar handlaren hela budet direkt till ditt bankkonto, och du bekräftar i affären när pengarna kommit.',
+            'Du sålde "' || new.title || '" för ' || replace(to_char(v_amount, 'FM999,999,999'), ',', ' ') || ' kr. Nu skickar vi dig ett kostnadsfritt, rekommenderat brev med förbetalt porto och adress. Lägg föremålet i det, försegla och lämna in det på ett postombud. Försändelsen är spårbar och försäkrad. Så snart vi tagit emot och kontrollerat föremålet betalar handlaren hela budet direkt till ditt bankkonto, och du bekräftar i affären när pengarna kommit.',
             new.id, '/orders/' || v_order);
 
     if v_dealer is not null then

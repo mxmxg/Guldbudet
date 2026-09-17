@@ -668,7 +668,7 @@ function ShippingCard() {
     // morkt block inuti en gron ruta i en ljus sida, vilket gjorde vyn orolig.
     <div className="rounded-xl bg-gold-50 border border-gold-200 p-5 text-center">
       <p className="eyebrow text-gold-700 mb-1">Frakt</p>
-      <p className="text-espresso-900 font-medium">Kostnadsfritt förberett kuvert</p>
+      <p className="text-espresso-900 font-medium">Kostnadsfritt rekommenderat brev</p>
       <p className="text-espresso-600 text-sm">Porto och adress klara, rekommenderat och försäkrat.</p>
       <p className="text-espresso-600 text-sm">Skickas när du godkänt ditt slutpris.</p>
       <p className="text-espresso-400 text-xs mt-2">Vid frågor: info@guldbud.com</p>
