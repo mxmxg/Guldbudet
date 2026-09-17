@@ -391,7 +391,8 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
       <div className="relative overflow-hidden bg-espresso-900 px-4 py-8">
         <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
         <div className="relative max-w-4xl mx-auto">
-          <Link href="/admin/orders" className="text-gold-500/80 text-sm hover:text-gold-300 transition">
+          {/* Klickytan var 17 px hög. py med negativ marginal ger 29 px utan att sidhuvudet växer. */}
+          <Link href="/admin/orders" className="inline-block py-1.5 -my-1.5 text-gold-500/80 text-sm hover:text-gold-300 transition">
             ← Alla affärer
           </Link>
           <h1 className="font-display text-2xl text-gold-100 mt-2">{item?.title}</h1>
@@ -421,7 +422,8 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
               <div className="text-sm text-espresso-500">
                 <p>{item?.category ? `${item.category} · ` : ''}{item?.weight_grams} g · {item?.karat}</p>
                 {item?.gemstone && <p>{item.gemstone}{item.diamond_carat ? ` ${item.diamond_carat} ct` : ''}</p>}
-                <Link href={`/auctions/${item?.id}`} className="text-gold-600 hover:text-gold-700 transition">
+                {/* Klickytan var 17 px. inline-block med py ger 32 px. */}
+                <Link href={`/auctions/${item?.id}`} className="inline-block py-1.5 text-gold-600 hover:text-gold-700 transition">
                   Visa auktionen →
                 </Link>
               </div>
@@ -482,7 +484,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 {!showRefund ? (
                   <button
                     onClick={() => setShowRefund(true)}
-                    className="text-sm text-amber-700 hover:text-amber-800 font-medium"
+                    className="text-sm text-amber-700 hover:text-amber-800 font-medium py-1 text-left"
                   >
                     Äkthet ej godkänd: returnera &amp; kreditera
                   </button>
@@ -499,7 +501,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                       placeholder="Orsak, t.ex. lägre karat än uppgivet"
                       className="mb-2"
                     />
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => refundOrder(refundReason)}
                         disabled={saving}
@@ -521,7 +523,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 {order.refunded_at ? (
                   <p className="text-sm text-amber-700 mb-2">
                     Returnerad & krediterad{order.refund_reason ? `: ${order.refund_reason}` : ''}.{' '}
-                    <Link href={`/orders/${order.id}/invoice`} className="text-gold-600 hover:underline">
+                    <Link href={`/orders/${order.id}/invoice`} className="inline-block py-1.5 -my-1.5 text-gold-600 hover:underline">
                       Visa kreditfaktura →
                     </Link>
                   </p>
@@ -544,10 +546,10 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                   {republishedId ? (
                     <p className="text-sm text-emerald-700">
                       Föremålet är utlagt igen.{' '}
-                      <Link href={`/auctions/${republishedId}`} className="text-gold-600 hover:underline">
+                      <Link href={`/auctions/${republishedId}`} className="inline-block py-1.5 -my-1.5 text-gold-600 hover:underline">
                         Visa den nya annonsen →
                       </Link>{' '}
-                      <Link href="/admin" className="text-gold-600 hover:underline">
+                      <Link href="/admin" className="inline-block py-1.5 -my-1.5 text-gold-600 hover:underline">
                         Adminpanelen →
                       </Link>
                     </p>
@@ -595,44 +597,50 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
           {/* Economy */}
           <div className="card p-6">
             <h2 className="font-display text-lg text-espresso-900 mb-4">Ekonomi</h2>
+            {/* Beloppen bröts på två rader i telefonbredd ("27 500" och "kr" på
+                var sin rad). Beloppet får aldrig brytas: nowrap och shrink-0,
+                etiketten tar radbrytningen. */}
             <div className="flex flex-col gap-1.5 text-sm">
-              <div className="flex justify-between text-espresso-600">
-                <span>Handlaren betalar till säljaren (köpeskillingen, direkt)</span>
-                <span className="tabular-nums font-medium">{formatSEK(order.amount)}</span>
+              <div className="flex justify-between gap-3 text-espresso-600">
+                <span className="min-w-0">Handlaren betalar till säljaren (köpeskillingen, direkt)</span>
+                <span className="tabular-nums font-medium whitespace-nowrap shrink-0">{formatSEK(order.amount)}</span>
               </div>
-              <div className="flex justify-between text-espresso-600">
-                <span>Handlaren betalar till GuldBud (provision + frakt + moms)</span>
-                <span className="tabular-nums font-medium">{formatSEK(fees.guldbudServiceTotal(order.amount))}</span>
+              <div className="flex justify-between gap-3 text-espresso-600">
+                <span className="min-w-0">Handlaren betalar till GuldBud (provision + frakt + moms)</span>
+                <span className="tabular-nums font-medium whitespace-nowrap shrink-0">{formatSEK(fees.guldbudServiceTotal(order.amount))}</span>
               </div>
-              <div className="flex justify-between text-espresso-400">
-                <span>Frakt exkl moms (genomströmning)</span>
-                <span className="tabular-nums">{formatSEK(fees.shippingFeeExVat)}</span>
+              <div className="flex justify-between gap-3 text-espresso-400">
+                <span className="min-w-0">Frakt exkl moms (genomströmning)</span>
+                <span className="tabular-nums whitespace-nowrap shrink-0">{formatSEK(fees.shippingFeeExVat)}</span>
               </div>
-              <div className="flex justify-between text-espresso-400">
-                <span>Moms att redovisa ({fees.vatLabel})</span>
-                <span className="tabular-nums">{formatSEK(fees.totalVat(order.amount))}</span>
+              <div className="flex justify-between gap-3 text-espresso-400">
+                <span className="min-w-0">Moms att redovisa ({fees.vatLabel})</span>
+                <span className="tabular-nums whitespace-nowrap shrink-0">{formatSEK(fees.totalVat(order.amount))}</span>
               </div>
-              <div className="flex justify-between font-semibold text-emerald-700 pt-2 mt-1 border-t border-espresso-100">
-                <span>GuldBuds provision exkl moms ({fees.commissionLabel})</span>
-                <span className="tabular-nums">{formatSEK(fees.commission(order.amount))}</span>
+              <div className="flex justify-between gap-3 font-semibold text-emerald-700 pt-2 mt-1 border-t border-espresso-100">
+                <span className="min-w-0">GuldBuds provision exkl moms ({fees.commissionLabel})</span>
+                <span className="tabular-nums whitespace-nowrap shrink-0">{formatSEK(fees.commission(order.amount))}</span>
               </div>
             </div>
             {/* De tre dokumenten. Handlarens länk visar två av dem på samma
                 sida, inköpsunderlaget och GuldBuds faktura, eftersom det är så
                 handlaren ska se dem. Säljarens underlag är det tredje och nås
                 med ?doc=receipt, som bara admin får skicka med. */}
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center gap-4">
-                <Link href={`/orders/${order.id}/invoice`} className="text-sm text-gold-600 hover:text-gold-700">
+            {/* Klickytorna var 20 px höga och raden bröt mitt i länktexten i
+                telefonbredd. flex-wrap låter PDF-knappen gå ner på egen rad,
+                py-1 ger 28 px. */}
+            <div className="mt-4 space-y-1">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <Link href={`/orders/${order.id}/invoice`} className="inline-block py-1 text-sm text-gold-600 hover:text-gold-700">
                   Handlarens underlag och faktura →
                 </Link>
-                <DownloadInvoiceButton orderId={order.id} label="Ladda ner PDF" className="text-sm text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
+                <DownloadInvoiceButton orderId={order.id} label="Ladda ner PDF" className="py-1 text-sm text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
               </div>
-              <div className="flex items-center gap-4">
-                <Link href={`/orders/${order.id}/invoice?doc=receipt`} className="text-sm text-gold-600 hover:text-gold-700">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <Link href={`/orders/${order.id}/invoice?doc=receipt`} className="inline-block py-1 text-sm text-gold-600 hover:text-gold-700">
                   Säljarens underlag →
                 </Link>
-                <DownloadInvoiceButton orderId={order.id} doc="receipt" label="Ladda ner PDF" className="text-sm text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
+                <DownloadInvoiceButton orderId={order.id} doc="receipt" label="Ladda ner PDF" className="py-1 text-sm text-espresso-500 hover:text-espresso-800 disabled:opacity-50" />
               </div>
             </div>
           </div>
@@ -650,7 +658,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 <button
                   onClick={() => setFeePaid(false)}
                   disabled={saving}
-                  className="mt-3 text-xs text-espresso-400 hover:text-red-500 transition"
+                  className="mt-2 py-1.5 text-xs text-espresso-400 hover:text-red-500 transition"
                 >
                   Ångra (markera som obetald)
                 </button>
@@ -694,7 +702,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                 <button
                   onClick={() => setDealerPaid(false)}
                   disabled={saving}
-                  className="mt-3 text-xs text-espresso-400 hover:text-red-500 transition"
+                  className="mt-2 py-1.5 text-xs text-espresso-400 hover:text-red-500 transition"
                 >
                   Ångra (markera som obekräftad)
                 </button>
@@ -726,7 +734,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
             const needsReview = amlStatus === 'review' || amlStatus === 'flagged'
             return (
               <div className={`card p-5 ${needsReview ? 'border border-amber-200' : ''}`}>
-                <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 mb-3">
                   <p className="font-display text-lg text-espresso-900">Ursprung & granskning</p>
                   {amlStatus && (
                     <span className={`chip text-xs ${AML_STATUS_STYLE[amlStatus]}`}>
@@ -794,7 +802,7 @@ export default function AdminOrderPage({ params }: { params: { id: string } }) {
                     )}
                     <button
                       onClick={() => setAmlEditing(true)}
-                      className="text-xs text-espresso-500 hover:text-espresso-800 underline mt-2 transition"
+                      className="text-xs text-espresso-500 hover:text-espresso-800 underline mt-1 py-1.5 transition"
                     >
                       Ändra beslut
                     </button>

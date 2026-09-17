@@ -24,7 +24,8 @@ export default function GoldTicker() {
         <span className="absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-70 animate-pulse-ring" />
         <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold-400" />
       </span>
-      <span className="font-semibold tracking-wide uppercase text-[10px]">
+      {/* Etiketten låg på 10 px, under gränsen 11 px för läsbar text. */}
+      <span className="font-semibold tracking-wide uppercase text-[11px]">
         {live ? 'Guldpris live' : 'Guldpris riktvärde'}
       </span>
     </span>

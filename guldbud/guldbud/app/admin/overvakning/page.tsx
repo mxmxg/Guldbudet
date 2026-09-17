@@ -146,7 +146,8 @@ export default function OvervakningPage() {
       <div className="relative overflow-hidden bg-espresso-900 px-4 py-8">
         <div className="pointer-events-none absolute inset-0 bg-espresso-glow" />
         <div className="relative max-w-4xl mx-auto">
-          <Link href="/admin" className="text-gold-500/80 text-sm hover:text-gold-300 transition">← Adminpanel</Link>
+          {/* Klickytan var 17 px hög. py med negativ marginal ger 29 px utan att sidhuvudet växer. */}
+          <Link href="/admin" className="inline-block py-1.5 -my-1.5 text-gold-500/80 text-sm hover:text-gold-300 transition">← Adminpanel</Link>
           <h1 className="font-display text-2xl text-gold-100 mt-2">Marknadsövervakning</h1>
           <p className="text-gold-200/70 text-sm mt-1">
             Mönster som kan tyda på samordnad budgivning. Beslutsstöd, inte en anklagelse.
@@ -159,8 +160,9 @@ export default function OvervakningPage() {
           <div className="h-64 rounded-2xl skeleton" />
         ) : (
           <>
-            {/* Nyckeltal */}
-            <div className="grid grid-cols-3 gap-3 mb-8">
+            {/* Nyckeltal. Tre kolumner i 390 px gav 100 px breda kort med
+                etiketter på tre rader, därför en kolumn under sm. */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
               <div className="card p-4">
                 <p className="font-display text-2xl text-espresso-900 tabular-nums">{totals.closed}</p>
                 <p className="text-xs text-espresso-400 mt-0.5">Avslutade auktioner</p>
@@ -186,7 +188,52 @@ export default function OvervakningPage() {
               <strong> lågt snitt antal budgivare</strong> i de auktioner de vinner, det kan tyda på att konkurrensen
               hålls tillbaka.
             </p>
-            <div className="card overflow-hidden mb-10">
+            {/* Tabellen mätte 503 px i en yta på 356 och rullade i sidled utan
+                att det syntes. Under sm visas raderna som kort i stället, så
+                alla sex värden är läsbara utan rullning. Tabellen är kvar från
+                sm och uppåt, oförändrad. */}
+            <div className="sm:hidden grid gap-3 mb-10">
+              {dealers.length === 0 ? (
+                <div className="card p-6 text-center text-espresso-300 text-sm">Ingen data än.</div>
+              ) : (
+                dealers.map((d) => {
+                  const winRate = d.participated ? Math.round((d.wins / d.participated) * 100) : 0
+                  const avgW = d.wins ? Math.round((d.sumBiddersWhenWon / d.wins) * 10) / 10 : 0
+                  const flag = d.wins >= 3 && winRate >= 60 && avgW <= 1.5
+                  return (
+                    <div key={d.id} className={`card p-4 text-sm ${flag ? 'bg-amber-50' : ''}`}>
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <p className="font-medium text-espresso-800 break-words">{d.name}</p>
+                        {flag && <span className="chip bg-amber-100 text-amber-800 border border-amber-200 text-xs">Se över</span>}
+                      </div>
+                      <dl className="grid grid-cols-3 gap-x-3 gap-y-2">
+                        <div>
+                          <dt className="text-[11px] uppercase tracking-wide text-espresso-400">Bud</dt>
+                          <dd className="tabular-nums text-espresso-600">{d.bids}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-[11px] uppercase tracking-wide text-espresso-400">Deltagit</dt>
+                          <dd className="tabular-nums text-espresso-600">{d.participated}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-[11px] uppercase tracking-wide text-espresso-400">Vinster</dt>
+                          <dd className="tabular-nums text-espresso-600">{d.wins}</dd>
+                        </div>
+                        <div>
+                          <dt className="text-[11px] uppercase tracking-wide text-espresso-400">Vinstandel</dt>
+                          <dd className="tabular-nums text-espresso-800">{winRate}%</dd>
+                        </div>
+                        <div className="col-span-2">
+                          <dt className="text-[11px] uppercase tracking-wide text-espresso-400">Snitt budgivare / vinst</dt>
+                          <dd className="tabular-nums text-espresso-600">{avgW || '-'}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+            <div className="hidden sm:block card overflow-hidden mb-10">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -234,7 +281,29 @@ export default function OvervakningPage() {
               Avslutade auktioner som vunnits utan att någon annan handlare budade emot. Enstaka fall är helt normala,
               men en handlare som återkommer här är värd en närmare titt.
             </p>
-            <div className="card overflow-hidden">
+            {/* Samma sak här: 459 px i 356. Kort under sm, tabell från sm. */}
+            <div className="sm:hidden grid gap-3">
+              {lowComp.length === 0 ? (
+                <div className="card p-6 text-center text-espresso-300 text-sm">Inga lågkonkurrens-auktioner. Bra tecken.</div>
+              ) : (
+                lowComp.map((r) => (
+                  <div key={r.itemId} className="card p-4 text-sm">
+                    <Link href={`/auctions/${r.itemId}`} className="block py-1 font-medium text-gold-700 hover:text-gold-800 break-words">
+                      {r.title}
+                    </Link>
+                    <dl className="grid grid-cols-[auto,minmax(0,1fr)] gap-x-4 gap-y-1 mt-1">
+                      <dt className="text-espresso-400">Vinnare</dt>
+                      <dd className="text-espresso-700 text-right break-words">{r.winnerName}</dd>
+                      <dt className="text-espresso-400">Slutpris</dt>
+                      <dd className="tabular-nums text-espresso-800 text-right whitespace-nowrap">{formatSEK(r.price)}</dd>
+                      <dt className="text-espresso-400">Uppskattat</dt>
+                      <dd className="tabular-nums text-espresso-500 text-right whitespace-nowrap">{r.estLow ? formatSEK(r.estLow) : '-'}</dd>
+                    </dl>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="hidden sm:block card overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -252,7 +321,7 @@ export default function OvervakningPage() {
                       lowComp.map((r) => (
                         <tr key={r.itemId} className="border-b border-espresso-50">
                           <td className="p-3">
-                            <Link href={`/auctions/${r.itemId}`} className="text-gold-700 hover:text-gold-800">{r.title}</Link>
+                            <Link href={`/auctions/${r.itemId}`} className="inline-block py-1.5 -my-1.5 text-gold-700 hover:text-gold-800">{r.title}</Link>
                           </td>
                           <td className="p-3 text-espresso-700">{r.winnerName}</td>
                           <td className="p-3 tabular-nums text-espresso-800">{formatSEK(r.price)}</td>
