@@ -242,7 +242,10 @@ export default function DealerDashboard() {
           </h1>
           <div className="mt-4 flex flex-wrap gap-6 text-sm">
             <HeaderStat value={items.length} label="Aktiva auktioner" />
-            <HeaderStat value={Object.keys(myBids).length} label="Dina bud" />
+            {/* Samma tal som fliken Mina bud: bud i auktioner som pågår. Tidigare
+                räknades alla föremål handlaren någonsin budat på, så rutan sa
+                28 bredvid "0 aktiva auktioner" och fliken sa 0. */}
+            <HeaderStat value={items.filter((i) => myBids[i.id]).length} label="Mina bud i pågående" />
             <HeaderStat value={winningCount} label="Ledande bud" accent />
           </div>
         </div>

@@ -13,7 +13,7 @@ import { ORDER_STATUS_LABEL, OrderStatus } from '@/lib/orders'
 import { formatSEK } from '@/lib/gold'
 import VerifiedBadge from '@/components/VerifiedBadge'
 
-type Stats = { bids: number; items: number; leading: number; won: number }
+type Stats = { bids: number; items: number; leading: number; awaiting: number; won: number }
 
 export default function DealerProfilePage() {
   const router = useRouter()
@@ -22,7 +22,7 @@ export default function DealerProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
-  const [stats, setStats] = useState<Stats>({ bids: 0, items: 0, leading: 0, won: 0 })
+  const [stats, setStats] = useState<Stats>({ bids: 0, items: 0, leading: 0, awaiting: 0, won: 0 })
   const [orders, setOrders] = useState<any[]>([])
   const [docUploading, setDocUploading] = useState(false)
   const [docMsg, setDocMsg] = useState('')
@@ -102,7 +102,19 @@ export default function DealerProfilePage() {
       if (!myMax[b.item_id] || b.amount > myMax[b.item_id]) myMax[b.item_id] = b.amount
     })
 
+    // Tre olika lägen för ett föremål handlaren har högsta budet på, och de
+    // ska aldrig blandas ihop i en siffra. Tidigare räknades "Ledande nu" på
+    // allt som inte var sålt, så avslutade auktioner där säljaren ännu inte
+    // svarat räknades som ledande: kontrollerat 2026-09-17 mot databasen,
+    // 14 sådana föremål gav "Ledande nu 14" medan panelen samtidigt visade
+    // 0 pågående auktioner.
+    //   leading: auktionen pågår och handlaren har högsta budet
+    //   awaiting: sluttiden har passerat, föremålet står kvar som active,
+    //             säljaren har inte accepterat eller avböjt än
+    //   won: säljaren har accepterat handlarens bud (föremålet är closed
+    //        med ett accepterat bud)
     let leading = 0
+    let awaiting = 0
     let won = 0
     if (itemIds.length > 0) {
       const { data: allBids } = await supabase.from('bids').select('item_id, amount').in('item_id', itemIds)
@@ -110,24 +122,25 @@ export default function DealerProfilePage() {
       allBids?.forEach((b: any) => {
         if (!top[b.item_id] || b.amount > top[b.item_id]) top[b.item_id] = b.amount
       })
-      itemIds.forEach((id) => {
-        if (myMax[id] && myMax[id] >= top[id]) leading += 1
-      })
-      const { data: closedItems } = await supabase
+      const { data: bidItems } = await supabase
         .from('items')
-        .select('id, status, accepted_at, accepted_bid_id')
+        .select('id, status, auction_ends_at, accepted_bid_id')
         .in('id', itemIds)
-        .eq('status', 'closed')
-        .not('accepted_bid_id', 'is', null)
-      // A SOLD item (accepterat bud) som vi ledde på räknas som vunnen. Ett
-      // avböjt föremål är stängt utan accepterat bud och räknas inte.
-      closedItems?.forEach((it: any) => {
-        if (myMax[it.id] && myMax[it.id] >= top[it.id]) won += 1
+      const now = Date.now()
+      bidItems?.forEach((it: any) => {
+        if (!myMax[it.id] || myMax[it.id] < top[it.id]) return
+        if (it.status === 'closed') {
+          // Ett avböjt föremål är stängt utan accepterat bud och räknas inte.
+          if (it.accepted_bid_id) won += 1
+          return
+        }
+        if (it.status !== 'active') return
+        const ended = it.auction_ends_at && new Date(it.auction_ends_at).getTime() <= now
+        if (ended) awaiting += 1
+        else leading += 1
       })
-      leading -= won // don't double-count closed ones as "leading"
-      if (leading < 0) leading = 0
     }
-    setStats({ bids: myBids.length, items: itemIds.length, leading, won })
+    setStats({ bids: myBids.length, items: itemIds.length, leading, awaiting, won })
 
     const { data: myOrders } = await supabase
       .from('orders')
@@ -204,7 +217,8 @@ export default function DealerProfilePage() {
           <div className="mt-5 flex flex-wrap gap-6 text-sm">
             <HeaderStat value={stats.bids} label="Bud lagda" />
             <HeaderStat value={stats.items} label="Auktioner budat på" />
-            <HeaderStat value={stats.leading} label="Ledande nu" accent />
+            <HeaderStat value={stats.leading} label="Ledande i pågående" accent />
+            {stats.awaiting > 0 && <HeaderStat value={stats.awaiting} label="Väntar på säljarens svar" />}
             <HeaderStat
               value={stats.won}
               label="Vunna auktioner"
