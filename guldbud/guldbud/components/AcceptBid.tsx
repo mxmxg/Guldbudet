@@ -90,11 +90,13 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner, 
             ))}
           </ol>
         </div>
-        <div className="rounded-xl bg-espresso-900 p-4 text-center">
-          <p className="text-gold-500/70 text-xs tracking-widest uppercase mb-1">Frakt</p>
-          <p className="text-gold-200 font-medium">Kostnadsfritt förberett kuvert</p>
-          <p className="text-gold-200/80 text-sm">Porto och adress är klara, och försändelsen är rekommenderad, spårbar och försäkrad. Vi skickar kuvertet till dig nu.</p>
-          <p className="text-gold-500/70 text-xs mt-2">Vid frågor: info@guldbud.com</p>
+        {/* Ljus ruta, se kommentaren i AuctionDetails: den svarta gav for lag
+            kontrast och blev ett morkt block inuti den grona rutan. */}
+        <div className="rounded-xl bg-gold-50 border border-gold-200 p-4 text-center">
+          <p className="text-gold-700 text-xs tracking-widest uppercase mb-1">Frakt</p>
+          <p className="text-espresso-900 font-medium">Kostnadsfritt förberett kuvert</p>
+          <p className="text-espresso-600 text-sm">Porto och adress är klara, och försändelsen är rekommenderad, spårbar och försäkrad. Vi skickar kuvertet till dig nu.</p>
+          <p className="text-espresso-400 text-xs mt-2">Vid frågor: info@guldbud.com</p>
         </div>
         {orderId && (
           <Link href={`/orders/${orderId}`} className="btn-gold w-full mt-4 justify-center">
