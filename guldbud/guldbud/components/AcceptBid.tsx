@@ -77,8 +77,8 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner, 
           <p className="font-medium text-espresso-800 mb-3">Så går det till härifrån</p>
           <ol className="flex flex-col gap-2 text-sm text-espresso-600">
             {[
-              'Vi skickar dig ett kostnadsfritt, förberett kuvert. Porto och adress är redan klara.',
-              'Lägg föremålet i kuvertet, försegla det och lämna in det på ett postombud.',
+              'Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto. Adressen är redan klar.',
+              'Lägg föremålet i brevet, försegla det och lämna in det på ett postombud.',
               'Försändelsen är rekommenderad, spårbar och försäkrad hela vägen till oss.',
               'Vi kontrollerar äktheten när föremålet kommit fram.',
               'Du får betalt till ditt bankkonto inom 24 timmar efter kontrollen.',
@@ -94,8 +94,8 @@ export default function AcceptBid({ itemId, bidId, amount, dealerName, isOwner, 
             kontrast och blev ett morkt block inuti den grona rutan. */}
         <div className="rounded-xl bg-gold-50 border border-gold-200 p-4 text-center">
           <p className="text-gold-700 text-xs tracking-widest uppercase mb-1">Frakt</p>
-          <p className="text-espresso-900 font-medium">Kostnadsfritt förberett kuvert</p>
-          <p className="text-espresso-600 text-sm">Porto och adress är klara, och försändelsen är rekommenderad, spårbar och försäkrad. Vi skickar kuvertet till dig nu.</p>
+          <p className="text-espresso-900 font-medium">Kostnadsfritt rekommenderat brev</p>
+          <p className="text-espresso-600 text-sm">Porto och adress är klara, och försändelsen är spårbar och försäkrad. Vi skickar brevet till dig nu.</p>
           <p className="text-espresso-400 text-xs mt-2">Vid frågor: info@guldbud.com</p>
         </div>
         {orderId && (

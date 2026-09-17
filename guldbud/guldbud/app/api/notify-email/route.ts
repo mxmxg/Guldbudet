@@ -95,8 +95,8 @@ function instructionsFor(title: string): string {
     return stepsBox(
       'Så här slutför du affären',
       [
-        'Så fort du godkänt ditt slutpris skickar vi dig ett <strong style="color:#f5e6c8">kostnadsfritt, förberett kuvert</strong> med porto och adress klara.',
-        'Lägg föremålet i kuvertet, <strong style="color:#f5e6c8">försegla</strong> det och lämna in det på ett postombud. Försändelsen är rekommenderad, spårbar och försäkrad.',
+        'Så fort du godkänt ditt slutpris skickar vi dig ett <strong style="color:#f5e6c8">kostnadsfritt, rekommenderat brev</strong> med förbetalt porto och adress.',
+        'Lägg föremålet i brevet, <strong style="color:#f5e6c8">försegla</strong> det och lämna in det på ett postombud. Försändelsen är spårbar och försäkrad.',
         'Vi kontrollerar äktheten så snart vi tagit emot föremålet.',
         `Handlaren betalar sedan hela beloppet <strong style="color:#f5e6c8">direkt till ditt bankkonto</strong>. Du bekräftar i affären när pengarna kommit, och först då skickar vi föremålet vidare.`,
       ],

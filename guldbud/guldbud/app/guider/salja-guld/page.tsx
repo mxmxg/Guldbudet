@@ -80,7 +80,7 @@ export default function Page() {
         <li>Sälj aldrig efter ett enda muntligt bud. Jämför alltid.</li>
         <li>Väg guldet och kolla stämpeln så du vet ungefär vad det borde ge.</li>
         <li>Välj en köpare som äkthetskontrollerar och betalar spårbart, inte kontant i handen.</li>
-        <li>Se till att transporten är försäkrad. På GuldBud skickar vi dig efter godkänt slutpris ett kostnadsfritt, förberett kuvert, och försändelsen är rekommenderad och försäkrad.</li>
+        <li>Se till att transporten är försäkrad. På GuldBud skickar vi dig efter godkänt slutpris ett kostnadsfritt, rekommenderat brev med förbetalt porto, spårbart och försäkrat.</li>
       </UL>
 
       <H2>Steg för steg på GuldBud</H2>
