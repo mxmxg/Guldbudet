@@ -141,14 +141,20 @@ export default function MessagesPage() {
                 href={t.href}
                 // Samma sak här: kortet är ett grid-barn och behöver min-w-0
                 // för att kunna krympa till spårets bredd. Se adminvyn.
-                className="card card-hover p-4 flex items-center gap-4 min-w-0"
+                // Uppmätt i 390 px: titeln fick 173 px av 390 och klipptes
+                // ("Tungt herrhalsband 24 karat..." 393 > 173) eftersom
+                // tidsstämpeln låg på samma rad. Under sm får raden bryta, och
+                // tidsstämpeln blir en egen rad under texten, indragen så den
+                // står under titeln. Från sm är layouten som förut.
+                className="card card-hover p-4 flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-1 min-w-0"
               >
                 <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-espresso-900 to-espresso-800 relative shrink-0">
                   {t.image && <Image src={t.image} alt="" fill sizes="48px" className="object-contain" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className={`truncate ${t.unread ? 'font-semibold text-espresso-900' : 'font-medium text-espresso-800'}`}>
+                    {/* Två rader hellre än tre punkter när titeln är lång. */}
+                    <p className={`line-clamp-2 break-words ${t.unread ? 'font-semibold text-espresso-900' : 'font-medium text-espresso-800'}`}>
                       {t.title}
                     </p>
                     {t.unread && <span className="w-2 h-2 rounded-full bg-gold-500 shrink-0" />}
@@ -158,7 +164,7 @@ export default function MessagesPage() {
                     {t.preview}
                   </p>
                 </div>
-                <span className="text-xs text-espresso-300 shrink-0">{time(t.at)}</span>
+                <span className="basis-full pl-16 sm:basis-auto sm:pl-0 text-xs text-espresso-300 shrink-0">{time(t.at)}</span>
               </Link>
             ))}
           </div>
