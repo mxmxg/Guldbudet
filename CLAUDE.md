@@ -1653,16 +1653,28 @@ vet var något står innan det letar:
 | GuldBud investerardeck | Femton bilder plus PDF. Två platshållare kvar: beloppet och teamraden | Decken ska skickas |
 | Förtroendegranskning av säljflödet | Tio rollspelade säljare, åtta rangordnade invändningar. Ligger som Claude Docs, inte som artifact | Säljflödet ska förbättras |
 
-**Fyra artifacts är föreslagna för radering och väntar på ditt ja:**
-Swish-utbetalningarna och Klientmedelskontot, som båda beskriver rivna system;
-Villkor, sammanslaget utkast, som är ett utkast från augusti medan
-`app/terms/page.tsx` är det som gäller; och Säljuppdraget, som säger
-"ej byggt i produkten" om något som är byggt i `/admin/items/[id]/uppdrag`.
-Det enda ur dem som inte fanns någon annanstans är frågan om betalningsfristen
-ska räknas i kalenderdygn eller bankdagar, och den står nu i statusdokumentet.
+**Sex artifacts är raderade 2026-09-20, på användarens uttryckliga ja.**
+Radering går inte att ångra, så det här är listan över vad som fanns i dem och
+var innehållet tog vägen. Skapa dem aldrig på nytt.
 
-**Två artifacts är ersatta av det sammanslagna driftdokumentet** och väntar
-också på ditt ja: GuldBud go-live och GuldBud · Leverantörer & stack. Allt
-unikt ur dem är flyttat: DNS-uppdelningen mellan Loopia och Cloudflare,
-bevakningen på guldbud.se, varumärkesansökan hos PRV, Photoroom som parkerad,
-Resends SMTP-uppgifter och hela ordningen för lanseringsdagen.
+- **Swish-utbetalningarna** och **Klientmedelskontot**, båda underlag till SEB
+  för system som är rivna. Kontonumren och att kontots framtid är obesvarad
+  står i avsnittet Pengar ovan.
+- **Villkor, sammanslaget utkast**, ett utkast från augusti. `app/terms/page.tsx`
+  är det som gäller. Det enda unika i utkastet var frågan om betalningsfristen
+  ska räknas i kalenderdygn eller bankdagar, och den står nu i statusdokumentet.
+- **Säljuppdraget**, som sa "ej byggt i produkten" om något som är byggt.
+  Kontrollerat före raderingen: `app/admin/items/[id]/uppdrag/page.tsx` är
+  232 rader med samma sakinnehåll.
+- **GuldBud go-live** och **GuldBud · Leverantörer & stack**, vars innehåll nu
+  bor i GuldBud drift och lansering. Flyttat därifrån: DNS-uppdelningen mellan
+  Loopia och Cloudflare, bevakningen på guldbud.se, varumärkesansökan hos PRV
+  i klass 14 och 36, Photoroom som parkerad, Resends SMTP-uppgifter och hela
+  ordningen för lanseringsdagen.
+
+**Varför de togs bort och inte bara lämnades.** Samtliga stod på "GuldBud AB",
+ett namn som aldrig funnits, och beskrev Stripe, Swish och klientmedelskontot
+som levande. Tre dokument som sa olika saker om samma leverantörer var själva
+skälet att slå ihop dem. Ett dokument som låter auktoritativt och är osant på
+varje punkt som betyder något är sämre än inget dokument, och det är regel 1
+i den här filen tillämpad på våra egna handlingar.
