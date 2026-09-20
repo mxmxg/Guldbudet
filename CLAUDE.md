@@ -346,12 +346,12 @@ Läs det här innan du börjar leta i koden. Allt nedan är läst i repot.
 
 | Katalog | Vad som finns där |
 |---|---|
-| `app/` | 50 sidor plus 12 API-rutter. App Router |
+| `app/` | 49 sidor plus 10 API-rutter. App Router |
 | `app/api/` | bankid, notify-email, gold-price, suggest-listing, orders, admin, share-image |
 | `app/guider/` | 20 SEO-artiklar, alla byggda på `components/GuideShell.tsx` |
-| `components/` | 40 komponenter |
+| `components/` | 39 komponenter |
 | `lib/` | `fees`, `orders`, `aml`, `terms`, `identityRelease`, `loginUrl`, `pdf/`, `idura` |
-| `supabase-schema.sql` | 1694 rader. Tabeller, RLS, triggers, spärrar, cron |
+| `supabase-schema.sql` | 2075 rader. Tabeller, RLS, triggers, spärrar, cron |
 
 **Var behörigheten faktiskt sitter**
 
@@ -1543,3 +1543,97 @@ efter rättningen. Kontrollerat samma dag: `/favicon.ico` 200 med sex lager
 (16 till 256 px), `/icon` 200 som 48x48 PNG, robots blockerar inget. Det som
 återstår är sökresultatens egen uppdatering, som släpar efter favikontjänsten.
 Rör inte ikonfilerna under tiden, varje ändring startar om väntan.
+
+**Mobilanpassningen är gjord mätt, inte gissad, 2026-09-17.** Sajten mättes i
+riktig Chromium mot en lokal kopia med testdata, i 360, 390 och 414 px, plus
+1280 px som skydd för skrivbordet. Mätbänken ligger i scratchpad, inte i repot:
+en låtsas-Supabase med syntetisk testdata, `next dev` mot den, och ett skript
+som laddar varje rutt i varje roll och mäter vågrätt överspill, klippt text,
+dolda rullytor, text under 11 px och klickytor under 28 px.
+
+Tre vågor, PR #319 till #321. Det som hittades och som inte hade synts genom
+att titta:
+
+- **Startsidans hero-rubrik klipptes vid 528 px på varje telefon.** Hero-gridet
+  hade en implicit kolumn som växte med karusellens längsta titel, så texten
+  klipptes oavsett skärmbredd.
+- **Adminlistans belopp visades som "109" i stället för 109 000 kr**, eftersom
+  titeln tog 112 px av 360 och beloppet trängdes ut.
+- **Handlarprofilens kort var 550 px breda i en vy på 390** och klipptes vid
+  skärmkanten. Orsaken är mönstret som redan är dokumenterat: ett grid-barn har
+  `min-width: auto` och vägrar krympa under sitt innehålls min-content.
+  Rättningen är `grid-cols-[minmax(0,1fr)]` på gridet.
+- **Sidfoten var 455 px bred i en vy på 390 på varje sida.** Den dekorativa
+  glöden hade fast bredd 520 px.
+- **Notisrutan låg 32 px utanför vänsterkanten i 360 px.**
+
+Falska träffar värda att känna igen: en sektion med `overflow-hidden`
+rapporteras som klippt när dekorativa glödcirklar (`blur-2xl`, `blur-3xl`)
+sticker utanför med avsikt. Kontrollera alltid vad som faktiskt är bredare än
+rutan innan något ändras.
+
+**Kontrast mäts, den bedöms inte.** Kravet är 4,5 mot bakgrunden. Den svarta
+fraktrutan hade FRAKT-etiketten på 3,86 och e-postraden på 3,10, båda under, och
+brödtexten på 4,71, alltså på gränsen. Rutan är därför ljus sedan 2026-09-17,
+`bg-gold-50` med `gold-200`-kant, uppmätt 5,57 till 18,87 på varje textnivå.
+
+Två regler ur det: **en mörk ruta inuti en färgad ruta gör vyn orolig** och ska
+undvikas, och **`text-espresso-300` klarar aldrig kontrastkravet på ljus
+botten**. Den används fortfarande som textfärg på cirka 18 ställen, bland annat
+i notislistan, meddelandelistan och adminpanelen. De är inte rättade.
+
+**Ordet är "rekommenderat brev", inte "kuvert".** Beslutat av användaren
+2026-09-17 efter att jag bytt ordet på eget initiativ. Förseglingen är däremot
+rätt och står kvar: säljaren får ett rekommenderat brev med förbetalt porto,
+lägger i föremålet, förseglar och lämnar in det på ett postombud.
+
+**Försäkringsbeloppet är borttaget överallt, 2026-09-17, på användarens
+uttryckliga instruktion:** "vi ska inte prata belopp någonstans på hela sidan".
+Det satt på 21 ställen i koden, i mejlrutten, i databasfunktionen
+`notify_bid_accepted` och i sex redan skickade notiser. Texterna säger nu att
+försändelsen är rekommenderad, spårbar och försäkrad, utan belopp. Villkoren är
+en spärrad fil och ändrades på den instruktionen.
+
+**Det finns en motsättning här som inte är löst.** Artefakten
+"Förtroendegranskning av säljflödet" (2026-09-20) vill tvärtom att beloppet
+skrivs ut, med argumentet att ett armband sålts för 36 500 kr medan
+ersättningstaket för rekommenderat brev sannolikt ligger under det. Frågan är
+alltså inte vad sajten ska skriva, utan vilken fraktprodukt som faktiskt gäller
+och vad PostNord ersätter. **Lägg inte tillbaka beloppet utan att fråga
+användaren**, och lägg aldrig in en siffra som inte är läst i ett avtal.
+
+**Handlarpanelen visar vad handlaren ska göra, 2026-09-17.** Användaren loggade
+in och såg "0 aktiva auktioner, Dina bud 28, Ledande 0" plus "Inga aktiva
+auktioner just nu", medan profilen sa "Ledande nu 14" och de vunna auktionerna
+låg bakom en flik utanför skärmen. Båda sidorna hade rätt siffror men olika
+definitioner.
+
+Tre lägen som aldrig får blandas ihop i en siffra: **ledande** (auktionen pågår
+och handlaren har högsta budet), **väntar på säljarens svar** (sluttiden har
+passerat, föremålet står kvar som `active` eftersom `settle_ended_auctions`
+inte stänger det, och säljaren har inte svarat), och **vunna** (föremålet är
+`closed` med accepterat bud). Panelen har nu ett "Att göra"-block överst med
+GuldBuds faktura och köpeskillingen, en lista över auktioner som väntar på
+säljaren, och Vunna som standardflik när ingen auktion pågår.
+
+**Tre fynd ur förtroendegranskningen, 2026-09-20.** Artefakten är rollspel: tio
+påhittade säljarprofiler mot sajtens egen text, och den säger själv att
+siffrorna inte är mätdata. Invändningarna delar sig i påståenden om sajten, som
+går att kontrollera, och gissningar om beteende, som inte gör det. Tre av de
+första var sanna och är åtgärdade:
+
+- **Auktionstiden stod ingenstans där den behövs.** 48 timmar fanns i
+  stadsguiderna men noll gånger på startsidan och noll gånger på
+  "Så fungerar det".
+- **Startsidan sa "Inga aktiva auktioner just nu"** när inget pågick. Hela
+  sektionen utelämnas nu när listan är tom, och Sålda resultat tar över
+  platsen. Motsvarande text i inloggat läge står kvar med avsikt: där är den
+  status, inte marknadsföring.
+- **"Auktoriserade" byttes mot "verifierade" på 99 ställen i 27 filer.** Det
+  finns ingen auktorisation för guldhandlare i Sverige, och verifierade är både
+  sant och det som faktiskt görs. Handlarvillkoren berördes bara i söktexten.
+
+Kvar ur granskningen, inte åtgärdat: att det inte framgår vem som tar emot
+föremålet och hur kontrollen går till, att Trustpilot-sektionen lovar omdömen
+den inte visar, att kalkylatorn bara räknar metall så den med en diamantring
+inte vet vad som gäller, och att toleransen vid viktavvikelse inte beskrivs.
