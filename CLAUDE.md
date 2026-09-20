@@ -1331,14 +1331,49 @@ ombyggt i kod, databas och mejl. Så här är det gjort och varför:
   bredvid BankID-namnet i affärsvyn med en uppmaning att kontrollera innan
   handlaren betalar.
 
-**Investerardecken finns, 2026-09-08.** Artifact "GuldBud investerardeck"
-(https://claude.ai/code/artifact/df5ea3a9-733b-468e-b8ce-d9162b04c1b7),
-femton bilder plus PDF. Varje siffra har källa, och inga traktionssiffror
-redovisas eftersom det inte finns några riktiga affärer. Bild 12 säger öppet
-att betaltjänstbedömningen pågår. Två platshållare som bara användaren kan
-fylla: beloppet som söks (bild 15) och teamraden (bild 14). Regeln för decken
-är samma som för sajten: inga påhittade siffror, inga namngivna
-konkurrentpriser, uppskattningar märkta som uppskattningar.
+**Investerardecken finns, omarbetad till elva bilder 2026-09-20.** Artifact
+"GuldBud investerardeck"
+(https://claude.ai/code/artifact/df5ea3a9-733b-468e-b8ce-d9162b04c1b7).
+Varje siffra har källa, och inga traktionssiffror redovisas eftersom det inte
+finns några riktiga affärer. Regeln för decken är samma som för sajten: inga
+påhittade siffror, inga namngivna konkurrentpriser, uppskattningar märkta som
+uppskattningar.
+
+**Grundaren heter Max Güntert.** Uppgiften kom från användaren 2026-09-20 och
+rättade "Max Gun" i decken.
+
+**Femton bilder blev elva, på användarens kritik** att decken var lång, upprepade
+sig och innehöll interna saker som lät oproffsiga i en pitch. Det som gjordes,
+och varför, så att ingen bygger tillbaka det:
+
+- **Det viktigaste säljargumentet stod på sex bilder.** "Säljaren betalar
+  ingenting och får hela budet" fanns på 1, 3, 5, 6, 8 och 10. Regeln nu är att
+  **varje påstående står på en bild**: det på lösningsbilden, 8 procent på
+  affärsmodellen, BankID på trygghetsbilden, och att handlaren aldrig får guldet
+  före betalning på affärsbilden.
+- **Tre bilder sa samma sak som en annan bild.** Problemet och marknaden slogs
+  ihop, de delade både källa och innehåll. Jämförelsen och alternativen slogs
+  ihop, det var samma argument två gånger. "Varför nu" ströks helt, den var
+  omblandning av tre andra bilder, och dess enda egna punkt, öppen bank-API,
+  flyttade till trygghetsbilden.
+- **Milstolpsbilden ströks.** Den hade namnbytet och juristens besked som
+  milstolpar, alltså bolagsadministration presenterad som framsteg.
+  Pre-seed- och seed-milstolparna flyttade till "Vad vi söker", som är där en
+  investerare letar efter dem.
+- **Commit-antalet är borttaget.** Ett mått som den tekniske investeraren
+  avfärdar och den icke-tekniske inte förstår. Ersatt med schemats omfattning,
+  som säger något om var logiken faktiskt ligger.
+
+**Bild 6, Kontrollen, är ny och byggd på villkoren avsnitt 7 ordagrant**, plus
+`seal_number`, `weight_grams` och `karat` som admin registrerar på affären.
+Den tillkom på användarens iakttagelse att en investerare garanterat frågar hur
+föremålen verifieras. Förtroendegranskningen hade flaggat samma lucka.
+
+**Tre platshållare kan bara användaren fylla**, och de är gulmarkerade i decken:
+beloppet som söks, teamraden, och **vem som utför den fysiska kontrollen och
+var**. Den sista är inte en formalitet: Box 6007 är en postbox och inte en
+lokal, så frågan "var gör ni det här" har inget svar i något dokument vi har.
+Hitta aldrig på ett svar där.
 
 **Google företagsprofil är avskriven 2026-09-04.** Efter flera insända
 verifieringsfilmer avslogs den varje gång. Googles egna texter förklarar
