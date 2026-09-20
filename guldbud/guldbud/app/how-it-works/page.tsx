@@ -24,8 +24,8 @@ const STEPS = [
   {
     step: '3',
     time: 'Under budgivningen',
-    title: 'Auktoriserade handlare budar',
-    desc: 'Endast verifierade och godkända guldhandlare ser ditt föremål och budar mot varandra. Du ser buden i realtid och kan följa auktionen.',
+    title: 'Verifierade handlare budar',
+    desc: 'Endast verifierade och godkända guldhandlare ser ditt föremål och budar mot varandra. Auktionen är öppen i 48 timmar från att vi godkänt föremålet, och kommer ett bud under de sista två minuterna förlängs den så budgivningen hinner avslutas. Du ser buden i realtid.',
   },
   {
     step: '4',

@@ -4,14 +4,14 @@ import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 export const metadata: Metadata = {
   title: 'Sälja guld i Uppsala, bäst betalt hemifrån',
   description:
-    'Sälja guld i Uppsala? Slipp jämföra guldsmeder i centrum en efter en. Lägg ut hemifrån och låt auktoriserade handlare buda mot varandra om ditt guld. Gratis, tryggt och försäkrat.',
+    'Sälja guld i Uppsala? Slipp jämföra guldsmeder i centrum en efter en. Lägg ut hemifrån och låt verifierade handlare buda mot varandra om ditt guld. Gratis, tryggt och försäkrat.',
   alternates: { canonical: '/guider/salja-guld-uppsala' },
 }
 
 const faq = [
   {
     q: 'Var säljer jag guld bäst i Uppsala?',
-    a: 'I Uppsala finns guldsmeder och pantbanker, men hos var och en får du bara ett bud. På GuldBud budar flera auktoriserade handlare mot varandra om ditt guld, så du får marknadens pris. Allt sker hemifrån, oavsett om du bor i Luthagen, Fålhagen eller ute i Sävja.',
+    a: 'I Uppsala finns guldsmeder och pantbanker, men hos var och en får du bara ett bud. På GuldBud budar flera verifierade handlare mot varandra om ditt guld, så du får marknadens pris. Allt sker hemifrån, oavsett om du bor i Luthagen, Fålhagen eller ute i Sävja.',
   },
   {
     q: 'Fungerar det även utanför stan?',
@@ -42,7 +42,7 @@ export default function Page() {
 
       <H2>Så gör du hemifrån</H2>
       <P>
-        På <A href="/">GuldBud</A> lägger du ut föremålet en gång, och auktoriserade handlare budar mot varandra om det.
+        På <A href="/">GuldBud</A> lägger du ut föremålet en gång, och verifierade handlare budar mot varandra om det.
         Bor du i Uppsala spelar det ingen roll om du är i Gamla Uppsala, på Luthagen eller i studentkorridoren, hela
         processen sker online:
       </P>

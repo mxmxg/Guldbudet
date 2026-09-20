@@ -292,7 +292,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
                 </span>
                 {items.length > 0
                   ? `${items.length} auktioner pågår just nu`
-                  : 'Auktoriserade handlare redo att buda'}
+                  : 'Verifierade handlare redo att buda'}
               </span>
             </Reveal>
 
@@ -307,7 +307,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
             <Reveal delay={160}>
               <p className="mt-6 text-lg text-espresso-100/75 max-w-lg leading-relaxed">
                 Sälj ditt guld utan att gissa vem som betalar mest. Lägg ut föremålet så budar
-                Sveriges auktoriserade guldhandlare mot varandra i realtid, och du väljer det
+                Sveriges verifierade guldhandlare mot varandra i realtid, och du väljer det
                 högsta budet. Bäst betalt för ditt guld, helt kostnadsfritt.
               </p>
             </Reveal>
@@ -418,7 +418,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {
                 Icon: ScaleIcon,
                 title: 'Handlare budar mot varandra',
-                desc: 'Auktoriserade guldhandlare ser ditt föremål och tävlar om att ge dig det högsta budet. Du följer allt i realtid.',
+                desc: 'Verifierade guldhandlare ser ditt föremål och tävlar om att ge dig det högsta budet. Auktionen är öppen i 48 timmar, och du följer buden i realtid.',
               },
               {
                 Icon: CoinsIcon,
@@ -449,7 +449,11 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
         </div>
       </section>
 
-      {/* LIVE AUCTIONS */}
+      {/* LIVE AUCTIONS. Hela sektionen utelamnas nar ingen auktion pagar:
+          en rubrik med texten "Inga aktiva auktioner just nu" sager rakt ut att
+          platsen ar tom, och da faller pastaendet om handlare som star redo att
+          buda. Salda resultat ligger direkt under och tar over platsen. */}
+      {items.length > 0 && (
       <section id="auctions" className="max-w-6xl mx-auto px-4 py-20 scroll-mt-28">
         <Reveal className="flex items-end justify-between mb-10 gap-4 flex-wrap">
           <div>
@@ -481,19 +485,9 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               </Link>
             </div>
           </>
-        ) : (
-          <div className="card p-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-gold-50 text-gold-500 flex items-center justify-center mx-auto mb-4 animate-float">
-              <GemIcon size={30} strokeWidth={1.2} />
-            </div>
-            <p className="font-display text-xl text-espresso-800 mb-2">Inga aktiva auktioner just nu</p>
-            <p className="text-espresso-500 text-sm mb-6">Bli den första att lägga ut ett föremål idag.</p>
-            <Link href="/auth/login?mode=register" className="btn-gold">
-              Lägg ut ett föremål
-            </Link>
-          </div>
-        )}
+        ) : null}
       </section>
+      )}
 
       {/* Avslutade auktioner (social proof) direkt efter pågående, för att lyfta
           "andra har fått betalt" högt upp. Renderar inget om det saknas sålt. */}
@@ -579,7 +573,7 @@ function GuestLanding({ items, loggedIn, sold = [] }: { items: EnrichedItem[]; l
               {
                 icon: <ScaleIcon />,
                 title: 'Handlare budar mot varandra',
-                desc: 'I stället för ett lågt engångsbud får du flera auktoriserade guldköpare att tävla om ditt föremål. Konkurrensen driver priset uppåt, ofta långt över vad butiken på hörnet erbjuder.',
+                desc: 'I stället för ett lågt engångsbud får du flera verifierade guldköpare att tävla om ditt föremål. Konkurrensen driver priset uppåt, ofta långt över vad butiken på hörnet erbjuder.',
               },
               {
                 icon: <ShieldIcon />,

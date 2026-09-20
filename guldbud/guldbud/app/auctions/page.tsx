@@ -11,7 +11,7 @@ import RecentlySold, { SoldRow } from '@/components/RecentlySold'
 export const revalidate = 30
 export const metadata = {
   title: 'Auktioner',
-  description: 'Pågående guldauktioner just nu. Auktoriserade handlare budar mot varandra om guld och smycken.',
+  description: 'Pågående guldauktioner just nu. Verifierade handlare budar mot varandra om guld och smycken.',
   alternates: { canonical: '/auctions' },
 }
 

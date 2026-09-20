@@ -65,7 +65,7 @@ export default function Page() {
           köparprovision runt 15 %, och du konkurrerar med deras egna objekt.
         </li>
         <li>
-          <strong>Guldauktion (GuldBud):</strong> flera auktoriserade handlare budar mot varandra om just ditt föremål.
+          <strong>Guldauktion (GuldBud):</strong> flera verifierade handlare budar mot varandra om just ditt föremål.
           Gratis för dig som säljer, hela budet går till dig, och du bestämmer själv om du accepterar.
         </li>
       </UL>

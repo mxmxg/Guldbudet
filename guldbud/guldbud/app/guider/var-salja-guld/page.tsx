@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const faq = [
   {
     q: 'Var får man mest betalt för guld?',
-    a: 'Du får normalt mest där flera köpare konkurrerar om ditt guld. En pantbank eller guldsmed ger ett enda bud, medan en auktion låter flera auktoriserade handlare buda mot varandra, vilket driver upp priset. Därför ger budgivning oftast bäst betalt.',
+    a: 'Du får normalt mest där flera köpare konkurrerar om ditt guld. En pantbank eller guldsmed ger ett enda bud, medan en auktion låter flera verifierade handlare buda mot varandra, vilket driver upp priset. Därför ger budgivning oftast bäst betalt.',
   },
   {
     q: 'Är det bättre att sälja guld på nätet eller i butik?',
@@ -65,7 +65,7 @@ export default function Page() {
         flera köpare tävlar, och du binder dig ibland innan du sett budet.
       </P>
       <P>
-        <strong>Auktion med budgivning.</strong> Flera auktoriserade handlare budar mot varandra om just ditt föremål.
+        <strong>Auktion med budgivning.</strong> Flera verifierade handlare budar mot varandra om just ditt föremål.
         Konkurrensen sätter priset, och du bestämmer själv om du accepterar. Det är oftast här du får mest.
       </P>
 

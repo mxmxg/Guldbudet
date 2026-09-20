@@ -4,14 +4,14 @@ import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 export const metadata: Metadata = {
   title: 'Sälja guld i Göteborg, låt handlarna tävla',
   description:
-    'Sälja guld i Göteborg? I stället för ett enda bud hos en guldsmed på Avenyn låter du auktoriserade handlare buda mot varandra om ditt guld. Hemifrån, gratis och med försäkrad frakt.',
+    'Sälja guld i Göteborg? I stället för ett enda bud hos en guldsmed på Avenyn låter du verifierade handlare buda mot varandra om ditt guld. Hemifrån, gratis och med försäkrad frakt.',
   alternates: { canonical: '/guider/salja-guld-goteborg' },
 }
 
 const faq = [
   {
     q: 'Var får jag mest för mitt guld i Göteborg?',
-    a: 'Hos en enskild guldsmed eller pantbank i Göteborg får du ett bud från en köpare. På GuldBud budar flera auktoriserade handlare mot varandra, så konkurrensen driver priset. Du säljer hemifrån, oavsett om du bor i centrum, på Hisingen eller i Mölndal.',
+    a: 'Hos en enskild guldsmed eller pantbank i Göteborg får du ett bud från en köpare. På GuldBud budar flera verifierade handlare mot varandra, så konkurrensen driver priset. Du säljer hemifrån, oavsett om du bor i centrum, på Hisingen eller i Mölndal.',
   },
   {
     q: 'Fungerar det om jag bor utanför Göteborg?',
@@ -42,7 +42,7 @@ export default function Page() {
 
       <H2>Låt handlarna komma till dig</H2>
       <P>
-        På <A href="/">GuldBud</A> lägger du ut föremålet en gång, och auktoriserade guldhandlare från hela landet budar
+        På <A href="/">GuldBud</A> lägger du ut föremålet en gång, och verifierade guldhandlare från hela landet budar
         mot varandra om det. Bor du i Göteborg spelar det ingen roll om du är i Majorna, på Hisingen eller ute i Mölndal,
         allt sker online:
       </P>

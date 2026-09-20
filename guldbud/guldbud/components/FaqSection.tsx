@@ -24,7 +24,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Vilka är det som budar på mitt föremål?',
-    a: 'Bara auktoriserade guldhandlare som vi verifierat med organisationsnummer och legitimation. Inga anonyma köpare. Flera handlare budar mot varandra, vilket pressar priset uppåt.',
+    a: 'Bara verifierade guldhandlare som vi verifierat med organisationsnummer och legitimation. Inga anonyma köpare. Flera handlare budar mot varandra, vilket pressar priset uppåt.',
   },
   {
     q: 'Behöver jag kvitto på guldet?',

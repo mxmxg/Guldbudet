@@ -4,14 +4,14 @@ import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 export const metadata: Metadata = {
   title: 'Guldauktion: så säljer du guld på auktion',
   description:
-    'Vad är en guldauktion och hur fungerar budgivningen? Så låter du auktoriserade guldhandlare tävla om ditt guld och får marknadens pris i stället för en enda uppköpares första bud.',
+    'Vad är en guldauktion och hur fungerar budgivningen? Så låter du verifierade guldhandlare tävla om ditt guld och får marknadens pris i stället för en enda uppköpares första bud.',
   alternates: { canonical: '/guider/guldauktion' },
 }
 
 const faq = [
   {
     q: 'Vad är en guldauktion?',
-    a: 'En guldauktion är en marknadsplats där flera köpare budar mot varandra om samma guldföremål. I stället för att en enda uppköpare sätter priset låter du marknaden göra det. På GuldBud är köparna auktoriserade guldhandlare som konkurrerar om ditt guld, och du väljer själv om du accepterar det högsta budet.',
+    a: 'En guldauktion är en marknadsplats där flera köpare budar mot varandra om samma guldföremål. I stället för att en enda uppköpare sätter priset låter du marknaden göra det. På GuldBud är köparna verifierade guldhandlare som konkurrerar om ditt guld, och du väljer själv om du accepterar det högsta budet.',
   },
   {
     q: 'Hur fungerar budgivningen?',
@@ -44,7 +44,7 @@ export default function Page() {
         sätter priset. På en auktion är det <strong>marknaden</strong> som gör det, eftersom köparna tävlar.
       </P>
       <P>
-        På <A href="/">GuldBud</A> är köparna auktoriserade guldhandlare från hela Sverige. Du lägger ut ditt föremål
+        På <A href="/">GuldBud</A> är köparna verifierade guldhandlare från hela Sverige. Du lägger ut ditt föremål
         gratis, handlarna budar, och du bestämmer själv om du accepterar det högsta budet.
       </P>
 

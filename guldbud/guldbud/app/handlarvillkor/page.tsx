@@ -4,7 +4,7 @@ import { TERMS_UPDATED_LABEL } from '@/lib/terms'
 export const metadata = {
   title: 'Handlarvillkor',
   description:
-    'Villkor för auktoriserade handlare på GuldBud: budgivning, betalning, avgifter, processen efter vunnet bud, regelefterlevnad, samt avstängning vid misskötsamhet.',
+    'Villkor för verifierade handlare på GuldBud: budgivning, betalning, avgifter, processen efter vunnet bud, regelefterlevnad, samt avstängning vid misskötsamhet.',
   alternates: { canonical: '/handlarvillkor' },
 }
 
