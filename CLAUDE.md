@@ -1369,11 +1369,19 @@ och varför, så att ingen bygger tillbaka det:
 Den tillkom på användarens iakttagelse att en investerare garanterat frågar hur
 föremålen verifieras. Förtroendegranskningen hade flaggat samma lucka.
 
-**Tre platshållare kan bara användaren fylla**, och de är gulmarkerade i decken:
-beloppet som söks, teamraden, och **vem som utför den fysiska kontrollen och
-var**. Den sista är inte en formalitet: Box 6007 är en postbox och inte en
-lokal, så frågan "var gör ni det här" har inget svar i något dokument vi har.
-Hitta aldrig på ett svar där.
+**Kontrollen utförs av GuldBuds eget team, och boxadressen är ett
+säkerhetsval.** Användarens uppgift 2026-09-20. Adressen till den plats där
+guldet hanteras publiceras inte, eftersom en publik gatuadress dit
+privatpersoner skickar guld är en inbjudan till stöld. Det är alltså inte ett
+hinder att förklara bort, det är ett argument.
+
+Användaren sa också att de flesta i branschen arbetar med boxadress av samma
+skäl. **Det står inte i decken**, eftersom ett påstående om hela branschen inte
+går att belägga härifrån och en investerare kan pröva det. Säkerhetsskälet bär
+sig självt utan det. Lägg inte in "branschstandard" utan en källa.
+
+**Två platshållare kan bara användaren fylla**, och de är gulmarkerade i
+decken: beloppet som söks och teamraden.
 
 **Google företagsprofil är avskriven 2026-09-04.** Efter flera insända
 verifieringsfilmer avslogs den varje gång. Googles egna texter förklarar
