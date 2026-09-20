@@ -56,7 +56,7 @@ export default function Page() {
       <H2>Så får du bäst betalt oavsett färg</H2>
       <P>
         Eftersom färgen inte styr metallvärdet ska du aldrig nöja dig med ett lågt bud bara för att ett smycke är "omodernt"
-        i färgen. Låt i stället flera handlare tävla. På <A href="/">GuldBud</A> budar auktoriserade handlare mot
+        i färgen. Låt i stället flera handlare tävla. På <A href="/">GuldBud</A> budar verifierade handlare mot
         varandra, så priset sätts av guldhalten och marknaden, inte av en enskild uppköpares tycke om vitt eller rött.
       </P>
       <P>

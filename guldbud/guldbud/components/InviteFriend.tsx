@@ -6,7 +6,7 @@ import { useState } from 'react'
 // Ingen databas, ingen inloggning, bara spridning.
 const SITE = 'https://guldbud.com'
 const SHARE_TEXT =
-  'Jag säljer mitt guld via GuldBud, auktoriserade guldköpare budar mot varandra så priset drivs upp. Kostnadsfritt att lägga ut. Kolla:'
+  'Jag säljer mitt guld via GuldBud, verifierade guldköpare budar mot varandra så priset drivs upp. Kostnadsfritt att lägga ut. Kolla:'
 
 export default function InviteFriend({ compact = false }: { compact?: boolean }) {
   const [copied, setCopied] = useState(false)

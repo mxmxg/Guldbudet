@@ -4,14 +4,14 @@ import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 export const metadata: Metadata = {
   title: 'Sälja guld i Stockholm, få bäst betalt hemifrån',
   description:
-    'Sälja guld i Stockholm? Slipp springa mellan guldsmeder på Drottninggatan. Lägg ut hemifrån och låt auktoriserade handlare buda mot varandra om ditt guld. Gratis, tryggt och försäkrat.',
+    'Sälja guld i Stockholm? Slipp springa mellan guldsmeder på Drottninggatan. Lägg ut hemifrån och låt verifierade handlare buda mot varandra om ditt guld. Gratis, tryggt och försäkrat.',
   alternates: { canonical: '/guider/salja-guld-stockholm' },
 }
 
 const faq = [
   {
     q: 'Var säljer jag guld bäst i Stockholm?',
-    a: 'Stockholm har gott om guldsmeder och pantbanker, men hos var och en får du bara ett enda bud. På GuldBud budar flera auktoriserade handlare mot varandra om ditt guld, så priset sätts av marknaden i stället för en enskild uppköpare. Du gör allt hemifrån, oavsett om du bor på Södermalm, i Vasastan eller ute i Nacka.',
+    a: 'Stockholm har gott om guldsmeder och pantbanker, men hos var och en får du bara ett enda bud. På GuldBud budar flera verifierade handlare mot varandra om ditt guld, så priset sätts av marknaden i stället för en enskild uppköpare. Du gör allt hemifrån, oavsett om du bor på Södermalm, i Vasastan eller ute i Nacka.',
   },
   {
     q: 'Måste jag åka in till stan för att sälja?',
@@ -43,7 +43,7 @@ export default function Page() {
 
       <H2>Så gör du i stället, marknaden budar</H2>
       <P>
-        På <A href="/">GuldBud</A> lägger du ut ditt guld en gång, och flera auktoriserade handlare budar mot varandra i
+        På <A href="/">GuldBud</A> lägger du ut ditt guld en gång, och flera verifierade handlare budar mot varandra i
         realtid. Det spelar ingen roll om du bor i innerstan eller i förorterna runt Stockholm, hela processen sker
         online:
       </P>

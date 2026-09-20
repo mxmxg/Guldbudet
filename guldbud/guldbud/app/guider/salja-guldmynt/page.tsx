@@ -61,7 +61,7 @@ export default function Page() {
       <H2>Så säljer du guldmynt tryggt</H2>
       <P>
         Sälj aldrig ett samlarmynt till första bästa smältpris, då riskerar du att missa samlarvärdet. Poängen med en{' '}
-        <A href="/guider/guldauktion">guldauktion</A> är att flera auktoriserade handlare budar mot varandra, så att både
+        <A href="/guider/guldauktion">guldauktion</A> är att flera verifierade handlare budar mot varandra, så att både
         guldet och ett eventuellt samlarvärde prissätts av marknaden.
       </P>
       <UL>

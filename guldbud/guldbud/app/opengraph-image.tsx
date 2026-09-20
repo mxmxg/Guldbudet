@@ -28,7 +28,7 @@ export default function OpengraphImage() {
           GuldBud
         </div>
         <div style={{ fontSize: 38, color: '#c9a84c', marginTop: 30, maxWidth: 880, textAlign: 'center', display: 'flex' }}>
-          Låt auktoriserade guldhandlare buda mot varandra om ditt guld
+          Låt verifierade guldhandlare buda mot varandra om ditt guld
         </div>
       </div>
     ),

@@ -130,7 +130,7 @@ export default function GuideShell({
           <div className="relative">
             <h2 className="font-display text-2xl text-gold-100">Redo att sälja ditt guld?</h2>
             <p className="mt-2 text-espresso-100/70 max-w-md mx-auto">
-              Lägg ut på under fem minuter och låt auktoriserade handlare tävla om att ge dig bäst pris. Gratis och
+              Lägg ut på under fem minuter och låt verifierade handlare tävla om att ge dig bäst pris. Gratis och
               utan förpliktelser.
             </p>
             <div className="mt-6 flex flex-wrap gap-3 justify-center">

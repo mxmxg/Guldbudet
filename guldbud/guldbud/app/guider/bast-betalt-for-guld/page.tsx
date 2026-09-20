@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const faq = [
   {
     q: 'Vem ger bäst betalt för guld?',
-    a: 'Ingen enskild aktör ger alltid bäst betalt, priset varierar från dag till dag och mellan uppköpare. Det säkraste sättet att få mest är att låta flera auktoriserade handlare buda mot varandra om samma föremål, så att marknaden sätter priset i stället för en enda köpares förstabud. Det är precis så GuldBud fungerar.',
+    a: 'Ingen enskild aktör ger alltid bäst betalt, priset varierar från dag till dag och mellan uppköpare. Det säkraste sättet att få mest är att låta flera verifierade handlare buda mot varandra om samma föremål, så att marknaden sätter priset i stället för en enda köpares förstabud. Det är precis så GuldBud fungerar.',
   },
   {
     q: 'Hur mycket under guldpriset är normalt att få?',
@@ -63,7 +63,7 @@ export default function Page() {
 
       <H2>Så får du bäst betalt: låt handlarna tävla</H2>
       <P>
-        Det säkraste sättet att få mest är att låta flera <strong>auktoriserade handlare buda mot varandra</strong> om
+        Det säkraste sättet att få mest är att låta flera <strong>verifierade handlare buda mot varandra</strong> om
         just ditt föremål. Då är det konkurrensen, inte en enskild uppköpare, som sätter priset, och budet klättrar tills
         ingen vill betala mer.
       </P>

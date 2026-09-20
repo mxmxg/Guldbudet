@@ -570,7 +570,7 @@ export default function AuctionDetails({
                 <div className="relative">
                   <p className="text-gold-100 font-medium mb-1">Vill du buda på det här föremålet?</p>
                   <p className="text-espresso-100/60 text-sm mb-4">
-                    Endast auktoriserade guldhandlare kan lägga bud.
+                    Endast verifierade guldhandlare kan lägga bud.
                   </p>
                   <Link href="/auth/login" className="btn-gold">
                     Logga in som handlare

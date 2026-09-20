@@ -161,7 +161,7 @@ export default function BidSection({
   if (role === 'customer' || role === 'admin') {
     return (
       <div className="rounded-2xl bg-espresso-50 border border-espresso-100 p-4">
-        <p className="text-espresso-500 text-sm">Endast auktoriserade guldhandlare kan lägga bud.</p>
+        <p className="text-espresso-500 text-sm">Endast verifierade guldhandlare kan lägga bud.</p>
       </div>
     )
   }

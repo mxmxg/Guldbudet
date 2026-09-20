@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const faq = [
   {
     q: 'Är det tryggt att sälja guld online?',
-    a: 'Ja, om du väljer en seriös tjänst. Titta efter att köparen är en auktoriserad handlare, att transporten är försäkrad, att guldet äkthetskontrolleras och att betalningen sker spårbart till ditt konto, inte kontant. På GuldBud är alla handlare auktoriserade och försändelsen är försäkrad.',
+    a: 'Ja, om du väljer en seriös tjänst. Titta efter att köparen är en verifierad handlare, att transporten är försäkrad, att guldet äkthetskontrolleras och att betalningen sker spårbart till ditt konto, inte kontant. På GuldBud är alla handlare verifierade och försändelsen är försäkrad.',
   },
   {
     q: 'Hur skickar jag guldet säkert?',
@@ -40,7 +40,7 @@ export default function Page() {
       <H2>Varför sälja guld online?</H2>
       <P>
         I en fysisk butik pratar du med en enda köpare och får ett enda bud. Online kan flera{' '}
-        <strong>auktoriserade handlare buda mot varandra</strong> om ditt guld, och konkurrensen driver upp priset. Du
+        <strong>verifierade handlare buda mot varandra</strong> om ditt guld, och konkurrensen driver upp priset. Du
         slipper också prutning öga mot öga och kan i lugn och ro jämföra innan du bestämmer dig.
       </P>
 
@@ -59,7 +59,7 @@ export default function Page() {
         Skillnaden mellan en seriös och en oseriös tjänst syns på några punkter. Se till att:
       </P>
       <UL>
-        <li>Köparna är auktoriserade handlare, inte anonyma privatpersoner.</li>
+        <li>Köparna är verifierade handlare, inte anonyma privatpersoner.</li>
         <li>Transporten är försäkrad, så du är skyddad om något händer på vägen.</li>
         <li>Guldet äkthetskontrolleras innan pengarna betalas ut.</li>
         <li>Betalningen sker spårbart till ditt bankkonto, aldrig kontant i handen.</li>
@@ -74,7 +74,7 @@ export default function Page() {
         <A href="/guider/salja-guld">hela guiden om att sälja guld</A>.
       </P>
       <P>
-        På <A href="/">GuldBud</A> lägger du ut ditt guld gratis och låter Sveriges auktoriserade guldhandlare tävla om
+        På <A href="/">GuldBud</A> lägger du ut ditt guld gratis och låter Sveriges verifierade guldhandlare tävla om
         att ge dig mest. Se <A href="/resultat">tidigare sålda resultat</A> för vad andra fått.
       </P>
     </GuideShell>

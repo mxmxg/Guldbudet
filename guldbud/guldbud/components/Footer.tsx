@@ -23,7 +23,7 @@ export default function Footer() {
                 i Navbar.tsx är det den ena som är fel, inte ett designval. */}
             <p className="mt-2 text-[11px] text-gold-500 tracking-[3px] uppercase">Sveriges guldauktion</p>
             <p className="text-sm mt-3 max-w-xs leading-relaxed text-espresso-100/60">
-              Vi får guldköparna att konkurrera om ditt guld. Auktoriserade handlare budar mot
+              Vi får guldköparna att konkurrera om ditt guld. Verifierade handlare budar mot
               varandra i realtid, och du säljer till bäst betalt, tryggt och kostnadsfritt.
             </p>
             <div className="flex items-center gap-6 mt-6">

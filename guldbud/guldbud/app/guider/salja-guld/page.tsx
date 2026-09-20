@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const faq = [
   {
     q: 'Vad får jag betalt när jag säljer guld?',
-    a: 'Priset styrs av vikten, karaten (guldhalten) och dagens guldpris. På GuldBud budar flera auktoriserade handlare mot varandra, vilket ofta ger mer än en enskild uppköpares första bud. Använd värderingskalkylatorn för en indikation innan du lägger ut.',
+    a: 'Priset styrs av vikten, karaten (guldhalten) och dagens guldpris. På GuldBud budar flera verifierade handlare mot varandra, vilket ofta ger mer än en enskild uppköpares första bud. Använd värderingskalkylatorn för en indikation innan du lägger ut.',
   },
   {
     q: 'Är det gratis att sälja guld på GuldBud?',
@@ -65,7 +65,7 @@ export default function Page() {
       <H2>Var får du bäst betalt?</H2>
       <P>
         Guldsmeder och pantbanker ger ofta ett lågt förstabud eftersom du bara pratar med <em>en</em> köpare. Då är det
-        svårt att veta om budet är rimligt. Poängen med en auktion är att flera <strong>auktoriserade handlare budar
+        svårt att veta om budet är rimligt. Poängen med en auktion är att flera <strong>verifierade handlare budar
         mot varandra</strong> om samma föremål, då är det marknaden, inte en enskild uppköpare, som sätter priset.
       </P>
       <P>
@@ -87,7 +87,7 @@ export default function Page() {
       <UL>
         <li>Fotografera föremålet och fyll i vikt och karat.</li>
         <li>Vi granskar och öppnar auktionen, oftast inom ett par timmar.</li>
-        <li>Auktoriserade handlare budar mot varandra i realtid.</li>
+        <li>Verifierade handlare budar mot varandra i realtid.</li>
         <li>Du accepterar det högsta budet. Vi skickar dig ett kostnadsfritt, rekommenderat brev med förbetalt porto (försäkrat) och du postar det rekommenderat.</li>
         <li>Vi kontrollerar äktheten, och du får betalt inom 24 timmar.</li>
       </UL>

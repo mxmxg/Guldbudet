@@ -372,7 +372,7 @@ export default function SubmitPage() {
           <h1 className="font-display text-3xl sm:text-4xl text-espresso-900">Lägg ut ett föremål</h1>
           <p className="text-espresso-500 mt-2 max-w-xl">
             Kostnadsfritt och klart på fem minuter. Fyll i uppgifter och ladda upp foton,
-            auktoriserade guldhandlare budar direkt, och du väljer själv det bud du är nöjd med.
+            verifierade guldhandlare budar direkt, och du väljer själv det bud du är nöjd med.
           </p>
         </div>
 
