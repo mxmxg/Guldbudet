@@ -1400,6 +1400,28 @@ den här miljön. Räknat därifrån är det drygt tre månader, inte tolv vecko
 Skriv hellre "drygt tre månader" än ett veckotal, eftersom ett veckotal blir
 fel igen om en månad.
 
+**Så renderas decken till PDF härifrån, 2026-09-20.** Chromium finns
+(`/opt/pw-browsers/chromium-1194`, med en `--no-sandbox`-wrapper i scratchpad)
+och klarar `--headless=new --print-to-pdf`. Två saker måste vara på plats,
+och båda kostade en omrendering att upptäcka:
+
+- **Decken är mörk, så utskrifts-CSS:en behöver
+  `print-color-adjust: exact`.** Utan den slänger Chrome bakgrunderna och
+  trycker ljus text på vitt papper. Egenskapen ärvs, så den på `html` räcker.
+  Den ligger numera i decken och gäller även när användaren skriver ut ur
+  webbläsaren.
+- **Chromium når inte Google Fonts härifrån.** Proxyns certifikat är inte
+  betrott av webbläsaren, så typsnitten faller tillbaka på Liberation.
+  `curl` går däremot igenom. Hämta därför CSS och woff2 med curl, peka om
+  `url()` mot lokala filer, och rendera en kopia av sidan. Publicera inte den
+  kopian: i en riktig webbläsare hämtas typsnitten som vanligt.
+
+**Läxa om att kontrollera en PDF:** att leta `/BaseFont` i filen, även efter
+att strömmarna packats upp, ger fel svar. Chromiums struktur döljer namnen.
+Det som faktiskt avgör är att rendera en gång till **utan** typsnittslänken och
+jämföra storleken. Med typsnitt 503 kB, utan 223 kB. Jag hann påstå att PDF:en
+saknade typsnitt innan jag gjorde den jämförelsen, och det var fel.
+
 **Google företagsprofil är avskriven 2026-09-04.** Efter flera insända
 verifieringsfilmer avslogs den varje gång. Googles egna texter förklarar
 varför, och det går inte att lösa: ett företag som bara verkar online och
