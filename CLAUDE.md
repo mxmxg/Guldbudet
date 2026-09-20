@@ -359,7 +359,7 @@ Det här är den viktigaste arkitektoniska punkten i projektet. `middleware.ts`
 skyddar **ingen** rutt. Den gör bara `getUser()` för att förnya sessionen.
 Alla rollgrindar på sidnivå är klientkod i `useEffect`.
 
-Klienten pratar dessutom med Supabase direkt i 28 filer. Skrivningar går rakt
+Klienten pratar dessutom med Supabase direkt i 31 filer. Skrivningar går rakt
 mot tabellerna, inte via API-rutter. **All verklig auktorisering ligger därför
 i RLS-policyerna i schemat.** Ändrar du en policy ändrar du säkerheten. Ändrar
 du en klientgrind ändrar du bara bekvämligheten.
@@ -1637,3 +1637,32 @@ Kvar ur granskningen, inte åtgärdat: att det inte framgår vem som tar emot
 föremålet och hur kontrollen går till, att Trustpilot-sektionen lovar omdömen
 den inte visar, att kalkylatorn bara räknar metall så den med en diamantring
 inte vet vad som gäller, och att toleransen vid viktavvikelse inte beskrivs.
+
+**Artifactsen är genomgångna och sammanslagna 2026-09-20.** Fjorton blev nio,
+och tre operativa dokument blev ett. Det här är kartan, så att nästa fönster
+vet var något står innan det letar:
+
+| Artifact | Vad den är | Läs den när |
+|---|---|---|
+| GuldBud status och att-göra | Det styrande dokumentet. Registrerade bolagsuppgifter, vad som är byggt, juristens besked, tolv återstående punkter, investerarmilstolpar | Du vill veta var bygget står |
+| GuldBud drift och lansering | En sida per tjänst: var du loggar in, vad du gör, vad du inte ska göra. **Ersätter driftmanualen, go-live-checklistan och leverantörslistan**, som slogs ihop samma dag | Något ska sättas hos en leverantör |
+| GuldBud arkitektur | Teknisk karta läst ur koden: RLS, triggers, cron, filindex | Du ska ändra något i systemet |
+| GuldBud granskning | Avsluten logg från 30 augusti, trettio fynd. Bär en läsanvisning: fyra fynd gällde Stripe-kod som sedan revs | Du undrar vad som redan är granskat |
+| Betaltjänstfrågan för GuldBud | Underlaget juristen läste, med svaret inlagt överst. Fråga 9 och 10 står kvar | Betaltjänstfrågan kommer upp igen |
+| Förmedling i annans namn | Underlag till revisor om moms och förmedlarroll, omarbetat för väg C | Revisorn ska svara |
+| GuldBud investerardeck | Femton bilder plus PDF. Två platshållare kvar: beloppet och teamraden | Decken ska skickas |
+| Förtroendegranskning av säljflödet | Tio rollspelade säljare, åtta rangordnade invändningar. Ligger som Claude Docs, inte som artifact | Säljflödet ska förbättras |
+
+**Fyra artifacts är föreslagna för radering och väntar på ditt ja:**
+Swish-utbetalningarna och Klientmedelskontot, som båda beskriver rivna system;
+Villkor, sammanslaget utkast, som är ett utkast från augusti medan
+`app/terms/page.tsx` är det som gäller; och Säljuppdraget, som säger
+"ej byggt i produkten" om något som är byggt i `/admin/items/[id]/uppdrag`.
+Det enda ur dem som inte fanns någon annanstans är frågan om betalningsfristen
+ska räknas i kalenderdygn eller bankdagar, och den står nu i statusdokumentet.
+
+**Två artifacts är ersatta av det sammanslagna driftdokumentet** och väntar
+också på ditt ja: GuldBud go-live och GuldBud · Leverantörer & stack. Allt
+unikt ur dem är flyttat: DNS-uppdelningen mellan Loopia och Cloudflare,
+bevakningen på guldbud.se, varumärkesansökan hos PRV, Photoroom som parkerad,
+Resends SMTP-uppgifter och hela ordningen för lanseringsdagen.
