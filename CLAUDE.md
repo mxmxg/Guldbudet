@@ -208,9 +208,9 @@ och innan du påstår något om bolagets status.
   åt 15 till 20 procent av intäkten, och banköverföring saknar
   chargebacks) och är nu rivet: `lib/payments/`, båda betalrutterna och de
   tre kolumnerna `payment_provider`, `payment_reference`, `payment_status`.
-  Stripe-kontot finns kvar hos Stripe och de fyra `STRIPE_`-variablerna
-  ligger kvar i Vercel utan läsare; båda är användarens att avveckla.
-  Det finns inga kortbetalningar i GuldBud.
+  De fyra `STRIPE_`-variablerna är raderade ur Vercel 2026-09-20.
+  **Stripe-kontot finns fortfarande kvar hos Stripe** och är användarens att
+  avveckla. Det finns inga kortbetalningar i GuldBud.
 - Ingen betalleverantör är inkopplad, och under väg C behövs ingen:
   handlaren betalar med banköverföring, till säljaren och till GuldBud.
 - Resend (transaktionsmejl), Zoho (mänsklig inkorg)
@@ -583,12 +583,12 @@ En `NEXT_PUBLIC_`-variabel kan aldrig vara hemlig, och den läses vid bygget.
 `ELKS_API_USERNAME` eller `ELKS_API_PASSWORD` skickas inget sms, tyst, och
 mejlet går som vanligt. Sms:et kan aldrig stoppa mejlet.
 
-**Tio kvarlevor ligger i Vercel utan att någon kod läser dem, och ska
-raderas av användaren:** de fyra `STRIPE_` (`SECRET_KEY`, `API_BASE`,
-`WEBHOOK_SECRET`, `CURRENCY`) och de sex `SWISH_` (`TLS_CERT`, `TLS_KEY`,
-`SIGNING_CERT`, `SIGNING_KEY`, `PAYER_ALIAS`, `PAYOUT_API_BASE`). Koden som
-läste dem är borttagen 2026-09-15. Läs aldrig deras närvaro som att kort
-eller Swish finns.
+**De tio kvarlevorna är raderade ur Vercel 2026-09-20**, enligt användaren.
+Det gällde de fyra `STRIPE_` (`SECRET_KEY`, `API_BASE`, `WEBHOOK_SECRET`,
+`CURRENCY`) och de sex `SWISH_` (`TLS_CERT`, `TLS_KEY`, `SIGNING_CERT`,
+`SIGNING_KEY`, `PAYER_ALIAS`, `PAYOUT_API_BASE`). Koden som läste dem revs
+2026-09-15. Lägg aldrig tillbaka dem, och läs aldrig ett sådant variabelnamn
+som att kort eller Swish finns i GuldBud.
 
 Det finns ingen `.env.local.example` i repot, trots att `README.md` hänvisar
 till en.
