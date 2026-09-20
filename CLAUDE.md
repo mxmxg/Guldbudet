@@ -1383,6 +1383,23 @@ sig självt utan det. Lägg inte in "branschstandard" utan en källa.
 **Två platshållare kan bara användaren fylla**, och de är gulmarkerade i
 decken: beloppet som söks och teamraden.
 
+**Tiden och timmarna måste stå i samma mening, annars motsäger de varandra.**
+Användaren fångade det 2026-09-20: produktbilden sa "tolv veckor från första
+commit" medan teambilden sa "cirka 1 600 utvecklingstimmar". En investerare
+räknar 1 600 delat med fjorton veckor och får 116 timmar i veckan, och slutar
+tro på båda talen.
+
+De mäter olika saker, och det måste skrivas ut. **1 600 timmar är uppskattad
+konventionell insats för samma omfattning. Drygt tre månader är den faktiska
+kalendertiden med AI-assisterad utveckling.** Skillnaden mellan talen är
+poängen, alltså kapitaleffektiviteten, men bara om båda står i samma mening.
+Det lösa tidspåståendet är därför borta från produktbilden.
+
+**Startdatumet är 2026-06-16**, läst som `created_at` på Supabase-projektet i
+den här miljön. Räknat därifrån är det drygt tre månader, inte tolv veckor.
+Skriv hellre "drygt tre månader" än ett veckotal, eftersom ett veckotal blir
+fel igen om en månad.
+
 **Google företagsprofil är avskriven 2026-09-04.** Efter flera insända
 verifieringsfilmer avslogs den varje gång. Googles egna texter förklarar
 varför, och det går inte att lösa: ett företag som bara verkar online och
