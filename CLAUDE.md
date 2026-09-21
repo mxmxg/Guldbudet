@@ -1047,6 +1047,26 @@ under namnet Account checks och står under Finansinspektionens tillsyn.
 Leverantör är inte vald och inget avtal finns. Inget av det ovan är läst på
 leverantörernas egna sidor, proxyn blockerar dem; det kommer ur sökträffar.
 
+**Tredje kandidaten: Open Payments Europe AB, 2026-09-21.** Användaren
+skickade länken. **Proxyn blockerar både openpayments.io, docs.openpayments.io
+och EU:s fintech-register, så ingenting är läst i källan.** Det som följer
+kommer ur sökträffar och ska behandlas därefter: svenskt bolag i Stockholm,
+grundat 2017, uppges vara licensierat av Finansinspektionen, med både
+kontoinformation och betalinitiering, och marknadsför kontoverifiering med
+BankID uttryckligen för KYC- och penningtvättsändamål.
+
+**Skälet Ping avböjde gäller sannolikt inte en kontoverifiering.** Ping måste
+göra egen kundkännedom på varje privatperson som tar emot pengar, till en fast
+kostnad per person. En kontoverifiering tar varken emot eller betalar ut
+pengar, säljaren legitimerar sig själv mot sin egen bank, så den skyldigheten
+uppstår inte. Tröskeln bör därför vara mycket lägre än för en betaltjänst.
+
+**Tre frågor avgör, i den ordningen:** om verifieringen returnerar
+**kontohavarens namn** och inte bara bekräftar att kontot finns, vilket är hela
+kravet; vad **månadsgolvet** är, eftersom Ping-läxan är att golvet var hela
+kostnaden och inte procentsatsen; och vilka svenska banker som täcks, eftersom
+en säljare vars bank saknas inte kan sälja.
+
 **Föreslå aldrig en improviserad väg runt detta.** Användaren har sagt ifrån
 två gånger, sist 2026-09-15 med orden "aldrig mer sånt trams". Det gäller
 öresöverföringar, att säljaren skickar en krona till oss, att säljaren
