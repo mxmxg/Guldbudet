@@ -714,6 +714,33 @@ create trigger on_new_dealer_registered
   after insert on public.profiles
   for each row execute procedure public.notify_admins_new_dealer();
 
+-- ============================================================
+-- Notifiering: när en ny kund registrerar sig -> alla admins
+-- Kunden kräver ingen åtgärd, till skillnad från handlaren, men admin vill
+-- se att kontot skapats. Notisen går vidare till mejl som alla andra.
+-- ============================================================
+create or replace function public.notify_admins_new_customer()
+returns trigger language plpgsql security definer
+  set search_path = public as $$
+begin
+  if new.role = 'customer' then
+    insert into public.notifications (user_id, title, message, link)
+    select p.id,
+           'Ny kund registrerad',
+           coalesce(new.full_name, 'En kund') || ' (' || new.email || ') har skapat ett konto.',
+           '/admin'
+    from public.profiles p
+    where p.role = 'admin';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_new_customer_registered on public.profiles;
+create trigger on_new_customer_registered
+  after insert on public.profiles
+  for each row execute procedure public.notify_admins_new_customer();
+
 -- Notis till alla admins när en kund lämnar in ett föremål (status 'pending').
 create or replace function public.notify_admins_new_item()
 returns trigger language plpgsql security definer
