@@ -11,7 +11,25 @@ import CountdownTimer from '@/components/CountdownTimer'
 import { estimateRange, formatSEK } from '@/lib/gold'
 import { useGoldPrice } from '@/lib/useGoldPrice'
 import { feesAt } from '@/lib/fees'
+import { sourceLabel } from '@/lib/aml'
 import { OPEN_ORDER_STATES } from '@/lib/orders'
+
+// Datum i granskningsvyn. Tomt fält ska synas som tomt, inte som "Invalid Date".
+function fmtDateTime(iso?: string | null) {
+  if (!iso) return ''
+  return new Date(iso).toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' })
+}
+
+// En rad i den uppfällda granskningen. Etikett till vänster, värde till höger,
+// och ett streck när uppgiften saknas så att luckan syns.
+function Field({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div className="flex gap-2">
+      <span className="text-espresso-400 shrink-0">{label}</span>
+      <span className="text-espresso-700 break-words">{value || '-'}</span>
+    </div>
+  )
+}
 
 function toLocalInput(iso?: string | null) {
   if (!iso) return ''
@@ -45,6 +63,9 @@ export default function AdminPage() {
   const [acceptId, setAcceptId] = useState<string | null>(null)
   const [acceptingId, setAcceptingId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  // Vilket väntande föremål som är uppfällt i granskningslistan. Ett i taget:
+  // listan ska gå att skumma, och det uppfällda ska vara det man arbetar med.
+  const [openItem, setOpenItem] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
   const router = useRouter()
@@ -133,7 +154,9 @@ export default function AdminPage() {
       if (ownerIds.length) {
         const { data: sellers } = await supabase
           .from('profiles')
-          .select('id, full_name, email, phone, city')
+          .select(
+            'id, full_name, email, phone, city, address, postal_code, personal_number, identity_verified, verified_name, created_at'
+          )
           .in('id', ownerIds)
         const smap: Record<string, any> = {}
         sellers?.forEach((s: any) => (smap[s.id] = s))
@@ -853,6 +876,8 @@ export default function AdminPage() {
             <div className="space-y-3">
               {pendingItems.map((item) => {
                 const est = estimateRange(item.weight_grams || 0, item.karat || '', spot)
+                const isOpen = openItem === item.id
+                const seller = sellers[item.owner_id]
                 return (
                   <div key={item.id} className="card p-5 flex gap-4 flex-wrap sm:flex-nowrap">
                     {item.image_urls?.[0] && (
@@ -884,11 +909,110 @@ export default function AdminPage() {
                         </p>
                       )}
                       <p className="text-xs text-espresso-400 mt-1">
-                        {sellers[item.owner_id]?.full_name || '-'}
-                        {sellers[item.owner_id]?.email ? ` · ${sellers[item.owner_id].email}` : ''}
+                        {seller?.full_name || '-'}
+                        {seller?.email ? ` · ${seller.email}` : ''}
                       </p>
-                      {item.description && (
+                      {item.description && !isOpen && (
                         <p className="text-xs text-espresso-400 mt-1 line-clamp-2">{item.description}</p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setOpenItem(isOpen ? null : item.id)}
+                        className="mt-2 text-xs font-medium text-gold-700 hover:text-gold-800 underline underline-offset-2"
+                      >
+                        {isOpen ? 'Dölj detaljerna' : 'Visa allt'}
+                      </button>
+
+                      {isOpen && (
+                        <div className="mt-3 border-t border-espresso-100 pt-3 space-y-4">
+                          {item.description && (
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wide text-espresso-400 mb-1">
+                                Beskrivning
+                              </p>
+                              <p className="text-sm text-espresso-700 whitespace-pre-wrap">
+                                {item.description}
+                              </p>
+                            </div>
+                          )}
+
+                          <div>
+                            <p className="text-[11px] uppercase tracking-wide text-espresso-400 mb-1">
+                              Föremålet
+                            </p>
+                            <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2 text-xs">
+                              <Field label="Ursprung" value={sourceLabel(item.source_type)} />
+                              <Field label="Ägarintyg" value={fmtDateTime(item.ownership_attested_at)} />
+                              <Field label="Uppdrag godkänt" value={fmtDateTime(item.mandate_accepted_at)} />
+                              <Field label="Villkorsversion" value={item.terms_version} />
+                              <Field label="Inlämnat" value={fmtDateTime(item.created_at)} />
+                              {item.relisted_from && <Field label="Återpublicerat" value="Ja" />}
+                            </div>
+                            {item.source_note && (
+                              <p className="text-xs text-espresso-500 mt-1">
+                                <span className="text-espresso-400">Säljarens notering: </span>
+                                {item.source_note}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <p className="text-[11px] uppercase tracking-wide text-espresso-400 mb-1">
+                              Säljaren
+                            </p>
+                            <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2 text-xs">
+                              <Field label="Namn" value={seller?.full_name} />
+                              <Field label="E-post" value={seller?.email} />
+                              <Field label="Telefon" value={seller?.phone} />
+                              <Field label="Personnummer" value={seller?.personal_number} />
+                              <Field
+                                label="Adress"
+                                value={[seller?.address, [seller?.postal_code, seller?.city].filter(Boolean).join(' ')]
+                                  .filter(Boolean)
+                                  .join(', ')}
+                              />
+                              <Field label="Kund sedan" value={fmtDateTime(seller?.created_at)} />
+                            </div>
+                            {/* BankID-namnet skiljer sig ibland från det kunden skrev själv.
+                                Står de olika är det värt att titta på innan godkännande. */}
+                            <p className="text-xs mt-1">
+                              {seller?.identity_verified ? (
+                                <span className="text-emerald-700">
+                                  Legitimerad med BankID
+                                  {seller?.verified_name ? ` som ${seller.verified_name}` : ''}
+                                </span>
+                              ) : (
+                                <span className="text-amber-700">Ej legitimerad med BankID</span>
+                              )}
+                            </p>
+                          </div>
+
+                          {item.image_urls?.length > 1 && (
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wide text-espresso-400 mb-1">
+                                Bilder
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {item.image_urls.map((url: string, i: number) => (
+                                  <button
+                                    key={url}
+                                    type="button"
+                                    onClick={() => openLightbox(item.image_urls, i)}
+                                    className="rounded-lg overflow-hidden cursor-zoom-in"
+                                    title="Visa stort"
+                                  >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={url}
+                                      alt={`${item.title} bild ${i + 1}`}
+                                      className="w-16 h-16 object-contain bg-espresso-50 transition hover:opacity-80"
+                                    />
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                     {/* Under sm ligger knapparna på rad och får radbryta, i
