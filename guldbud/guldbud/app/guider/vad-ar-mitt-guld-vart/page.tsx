@@ -125,7 +125,9 @@ export default function Page() {
       <UL>
         <li>Guldsmycken, ringar, halsband, armband, örhängen</li>
         <li>Trasiga eller omoderna smycken (guldvärdet finns kvar ändå)</li>
-        <li>Guldmynt och tackor</li>
+        <li>
+          <A href="/guider/salja-guldmynt">Guldmynt</A> och tackor
+        </li>
         <li>Tandguld och arvegods</li>
       </UL>
       <P>

@@ -41,7 +41,10 @@ export default function Page() {
       <H2>Vanliga karat och stämplar</H2>
       <UL>
         <li><strong>24K (999)</strong>, rent guld, 99,9 %. Mjukt, mest i mynt och tackor.</li>
-        <li><strong>22K (916)</strong>, 91,6 % guld. Vanligt i mynt och en del smycken.</li>
+        <li>
+          <strong>22K (916)</strong>, 91,6 % guld. Vanligt i <A href="/guider/salja-guldmynt">guldmynt</A> och en
+          del smycken.
+        </li>
         <li><strong>18K (750)</strong>, 75 % guld. Klassiskt för kvalitetssmycken.</li>
         <li><strong>14K (585)</strong>, 58,5 % guld. Hårdare, tål slitage.</li>
         <li><strong>9K (375)</strong>, 37,5 % guld. Vanligt i äldre och brittiska smycken.</li>
