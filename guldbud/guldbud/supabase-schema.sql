@@ -559,7 +559,7 @@ begin
   if new.status = 'active' and coalesce(old.status, '') <> 'active' then
     -- Säljaren: din auktion är live.
     insert into public.notifications (user_id, title, message, item_id)
-    values (new.owner_id, 'Din auktion är live',
+    values (new.owner_id, 'Ditt föremål är nu publicerat',
             'Budgivningen på "' || new.title || '" har öppnat.', new.id);
 
     -- Alla godkända, ej avstängda handlare: nytt föremål att buda på.
