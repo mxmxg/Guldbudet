@@ -583,6 +583,41 @@ create trigger on_item_activated
   for each row execute procedure public.notify_auction_live();
 
 -- ============================================================
+-- Notifiering: admin avbryter en publicerad auktion
+-- Fritexten admin skriver innan utskicket bor i items.cancel_note, så att
+-- notisen och mejlet kan sättas ihop ur en enda rad i triggern.
+-- ============================================================
+alter table public.items add column if not exists cancel_note text;
+
+create or replace function public.notify_auction_cancelled()
+returns trigger language plpgsql security definer
+  set search_path = public as $$
+begin
+  -- Bara en LIVE auktion som avbryts. Att neka ett väntande föremål går
+  -- fortfarande tyst, det har aldrig varit publicerat för säljaren.
+  if new.status = 'rejected' and coalesce(old.status, '') = 'active' then
+    insert into public.notifications (user_id, title, message, item_id, link)
+    values (
+      new.owner_id,
+      'Din auktion har avbrutits',
+      'Våra granskare har sett att "' || new.title ||
+      '" ligger utlagt i fel kategori, så auktionen har avbrutits.' ||
+      case when coalesce(new.cancel_note, '') <> '' then ' ' || new.cancel_note else '' end ||
+      ' Rätta uppgifterna och lägg ut föremålet igen från Mina föremål.',
+      new.id,
+      '/customer/my-items'
+    );
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auction_cancelled on public.items;
+create trigger on_auction_cancelled
+  after update on public.items
+  for each row execute procedure public.notify_auction_cancelled();
+
+-- ============================================================
 -- Notifiering: vid nytt bud
 --  - ägaren får "nytt bud"
 --  - den tidigare ledande handlaren får "du är överbjuden"

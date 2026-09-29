@@ -291,6 +291,11 @@ export async function POST(req: NextRequest) {
     ? 'Godkänn budet →'
     : t.includes('välkommen')
     ? 'Kom igång →'
+    // En avbruten auktion har ett item_id för bilden i mejlet, men auktionen
+    // finns inte kvar att öppna. Knappen går till Mina föremål, dit länken
+    // pekar, så säljaren kan rätta uppgifterna och lägga ut föremålet igen.
+    : t.includes('auktion har avbrutits')
+    ? 'Mina föremål →'
     : isOrder
     ? 'Öppna affären →'
     : record.item_id
