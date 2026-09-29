@@ -50,7 +50,8 @@ export default function Page() {
           som kapital.
         </li>
         <li>
-          <strong>Investeringsguld</strong>, tackor och mynt du köpt som ren placering. Räknas oftast inte som
+          <strong>Investeringsguld</strong>, tackor och <A href="/guider/salja-guldmynt">guldmynt</A> du köpt som
+          ren placering. Räknas oftast inte som
           personligt lösöre, och vinsten är då skattepliktig fullt ut.
         </li>
       </UL>

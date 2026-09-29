@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import GuideShell, { H2, P, UL, A } from '@/components/GuideShell'
 
 export const metadata: Metadata = {
-  title: 'Sälja guldmynt: så får du rätt betalt',
+  title: 'Sälja guldmynt: få betalt för samlarvärdet',
   description:
-    'Ska du sälja guldmynt som Krugerrand, dukater eller sovereigns? Så värderas mynt på både guldvikt och samlarvärde, och så låter du handlare buda mot varandra för bäst pris.',
+    'Krugerrand, sovereign, dukat eller 20-kronor? Se guldvikten per mynt och låt verifierade handlare buda, så får du betalt för både guld och samlarvärde.',
   alternates: { canonical: '/guider/salja-guldmynt' },
 }
 
@@ -32,6 +32,19 @@ export default function Page() {
       intro="Guldmynt är en egen värld, värdet sitter inte bara i guldet utan ibland också i myntet självt. Här går vi igenom hur guldmynt värderas och hur du får betalt för både metallen och ett eventuellt samlarvärde."
       updated="2026"
       faq={faq}
+      answer={
+        <>
+          <p className="mb-2">
+            Sälj aldrig ett guldmynt för bara smältvärdet innan du vet om det har ett samlarvärde.
+            Ta reda på myntets typ och årtal, räkna ut guldvärdet från finvikten, och se om det är ett
+            vanligt bullionmynt eller något ovanligare.
+          </p>
+          <p>
+            Låt sedan flera handlare buda mot varandra. Då prissätts både guldet och ett eventuellt
+            samlarvärde av marknaden, och på GuldBud får du hela slutbudet utan avdrag.
+          </p>
+        </>
+      }
     >
       <H2>Två sorters värde i ett mynt</H2>
       <P>
@@ -70,6 +83,10 @@ export default function Page() {
         <li>Handlarna tävlar, och du accepterar det högsta budet, helt utan förpliktelser.</li>
         <li>Efter accept skickar du in myntet i vårt kostnadsfria, försäkrade rekommenderade brev.</li>
       </UL>
+      <P>
+        Har du köpt mynten som investering kan skattereglerna vara andra än för smycken, se{' '}
+        <A href="/guider/skatt-pa-salt-guld">guiden om skatt på sålt guld</A>.
+      </P>
       <P>
         Läs mer om <A href="/guider/bast-betalt-for-guld">hur du får bäst betalt för guld</A> eller{' '}
         <A href="/#estimator">räkna ut ett ungefärligt värde</A> utifrån vikt och halt.
