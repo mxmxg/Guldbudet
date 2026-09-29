@@ -31,6 +31,66 @@ function Field({ label, value }: { label: string; value?: string | null }) {
   )
 }
 
+// Avbrytpanelen håller fritexten i EGEN state, och det är inte en detalj.
+// Låg den i AdminPage renderades hela sidan om vid varje tangenttryck, och
+// eftersom auktionslistans Group-komponent definieras inuti renderingen får
+// den ny identitet varje gång. React river då ner raden och bygger upp den på
+// nytt, textrutan förstörs mitt i skrivandet och sidan hoppar. Med egen state
+// renderas bara den här panelen om.
+function CancelAuctionPanel({
+  title,
+  saving,
+  onClose,
+  onConfirm,
+}: {
+  title: string
+  saving: boolean
+  onClose: () => void
+  onConfirm: (note: string) => void
+}) {
+  const [note, setNote] = useState('')
+  const trimmed = note.trim()
+  return (
+    <div className="w-full border-t border-espresso-100 pt-4 mt-1">
+      <p className="text-sm font-medium text-espresso-900 mb-1">Avbryt auktionen</p>
+      <p className="text-xs text-espresso-500 mb-3">
+        Säljaren får detta som notis i tjänsten och som mejl. Alla som budat får besked om att
+        auktionen avbrutits.
+      </p>
+      <div className="rounded-xl bg-espresso-50 border border-espresso-100 p-3 mb-3">
+        <p className="text-xs text-espresso-700">
+          Våra granskare har sett att &quot;{title}&quot; ligger utlagt i fel kategori, så auktionen
+          har avbrutits.{trimmed ? ` ${trimmed}` : ''} Rätta uppgifterna och lägg ut föremålet igen
+          från Mina föremål.
+        </p>
+      </div>
+      <textarea
+        value={note}
+        onChange={(e) => setNote(e.target.value.slice(0, 300))}
+        rows={2}
+        placeholder="Valfri rad till säljaren, till exempel vilken kategori föremålet hör hemma i…"
+        className="w-full text-sm px-3 py-2 rounded-xl border border-espresso-200"
+      />
+      <p className="text-xs text-espresso-400 mt-1 mb-3 tabular-nums">{note.length}/300</p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => onConfirm(note)}
+          disabled={saving}
+          className="text-sm font-medium px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition disabled:opacity-50"
+        >
+          {saving ? 'Avbryter…' : 'Avbryt och meddela'}
+        </button>
+        <button
+          onClick={onClose}
+          className="text-sm font-medium px-4 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
+        >
+          Ångra
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function toLocalInput(iso?: string | null) {
   if (!iso) return ''
   const d = new Date(iso)
@@ -71,7 +131,6 @@ export default function AdminPage() {
   // Avbryt en pågående auktion, med plats för en kort rad till säljaren innan
   // notisen och mejlet går iväg.
   const [cancelId, setCancelId] = useState<string | null>(null)
-  const [cancelNote, setCancelNote] = useState('')
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   // Vilket väntande föremål som är uppfällt i granskningslistan. Ett i taget:
   // listan ska gå att skumma, och det uppfällda ska vara det man arbetar med.
@@ -279,11 +338,11 @@ export default function AdminPage() {
   // notisen och mejlet ur samma rad, så här sätts bara status och fritexten.
   // Status 'rejected' är med flit samma som ett nekat föremål: det är den
   // status som ger säljaren knappen att lägga ut föremålet igen.
-  const cancelAuction = async (item: any) => {
+  const cancelAuction = async (item: any, rawNote: string) => {
     setAdminError('')
     setAdminNotice('')
     setCancellingId(item.id)
-    const note = cancelNote.trim()
+    const note = rawNote.trim()
     const { data, error } = await supabase
       .from('items')
       .update({ status: 'rejected', cancel_note: note || null })
@@ -300,8 +359,9 @@ export default function AdminPage() {
     }
     setLiveItems((prev) => prev.filter((i) => i.id !== item.id))
     setCancelId(null)
-    setCancelNote('')
-    setAdminNotice(`"${item.title}" är avbruten. Säljaren har fått notis och mejl.`)
+    setAdminNotice(
+      `"${item.title}" är avbruten. Säljaren och alla som budat har fått notis och mejl.`
+    )
   }
 
   const applyEnd = async (item: any, iso: string, notice: string) => {
@@ -556,10 +616,7 @@ export default function AdminPage() {
           {item.status === 'active' && confirmId !== item.id && acceptId !== item.id && cancelId !== item.id && (
             <>
               <button
-                onClick={() => {
-                  setCancelNote('')
-                  setCancelId(item.id)
-                }}
+                onClick={() => setCancelId(item.id)}
                 className="w-full sm:w-auto text-sm text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 px-3 py-2 rounded-xl transition"
               >
                 Avbryt auktionen
@@ -647,47 +704,12 @@ export default function AdminPage() {
             fritexten behöver full bredd, och admin ska se exakt vilken text
             säljaren får innan den går iväg. */}
         {cancelId === item.id && (
-          <div className="w-full border-t border-espresso-100 pt-4 mt-1">
-            <p className="text-sm font-medium text-espresso-900 mb-1">Avbryt auktionen</p>
-            <p className="text-xs text-espresso-500 mb-3">
-              Säljaren får detta som notis i tjänsten och som mejl:
-            </p>
-            <div className="rounded-xl bg-espresso-50 border border-espresso-100 p-3 mb-3">
-              <p className="text-xs text-espresso-700">
-                Våra granskare har sett att &quot;{item.title}&quot; ligger utlagt i fel kategori, så
-                auktionen har avbrutits.{cancelNote.trim() ? ` ${cancelNote.trim()}` : ''} Rätta
-                uppgifterna och lägg ut föremålet igen från Mina föremål.
-              </p>
-            </div>
-            <textarea
-              value={cancelNote}
-              onChange={(e) => setCancelNote(e.target.value.slice(0, 300))}
-              rows={2}
-              placeholder="Valfri rad till säljaren, till exempel vilken kategori föremålet hör hemma i…"
-              className="w-full text-sm px-3 py-2 rounded-xl border border-espresso-200"
-            />
-            <p className="text-xs text-espresso-400 mt-1 mb-3 tabular-nums">
-              {cancelNote.length}/300
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => cancelAuction(item)}
-                disabled={cancellingId === item.id}
-                className="text-sm font-medium px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition disabled:opacity-50"
-              >
-                {cancellingId === item.id ? 'Avbryter…' : 'Avbryt och meddela säljaren'}
-              </button>
-              <button
-                onClick={() => {
-                  setCancelId(null)
-                  setCancelNote('')
-                }}
-                className="text-sm font-medium px-4 py-2 rounded-xl bg-espresso-100 hover:bg-espresso-200 text-espresso-600 transition"
-              >
-                Ångra
-              </button>
-            </div>
-          </div>
+          <CancelAuctionPanel
+            title={item.title}
+            saving={cancellingId === item.id}
+            onClose={() => setCancelId(null)}
+            onConfirm={(note) => cancelAuction(item, note)}
+          />
         )}
       </div>
     )

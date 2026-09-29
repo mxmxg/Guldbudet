@@ -294,8 +294,12 @@ export async function POST(req: NextRequest) {
     // En avbruten auktion har ett item_id för bilden i mejlet, men auktionen
     // finns inte kvar att öppna. Knappen går till Mina föremål, dit länken
     // pekar, så säljaren kan rätta uppgifterna och lägga ut föremålet igen.
-    : t.includes('auktion har avbrutits')
+    : t.includes('din auktion har avbrutits')
     ? 'Mina föremål →'
+    // Handlarens motsvarighet: auktionen är borta, så knappen går till listan
+    // med de auktioner som faktiskt pågår.
+    : t.includes('budat på har avbrutits')
+    ? 'Se pågående auktioner →'
     : isOrder
     ? 'Öppna affären →'
     : record.item_id
