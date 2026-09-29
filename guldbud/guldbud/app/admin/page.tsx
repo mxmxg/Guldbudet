@@ -63,6 +63,11 @@ export default function AdminPage() {
   const [acceptId, setAcceptId] = useState<string | null>(null)
   const [acceptingId, setAcceptingId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  // Alla registrerade handlare och säljare, för användarsektionen.
+  const [users, setUsers] = useState<any[]>([])
+  const [userSearch, setUserSearch] = useState('')
+  const [userFilter, setUserFilter] = useState<'alla' | 'dealer' | 'customer'>('alla')
+  const [savingUser, setSavingUser] = useState<string | null>(null)
   // Vilket väntande föremål som är uppfällt i granskningslistan. Ett i taget:
   // listan ska gå att skumma, och det uppfällda ska vara det man arbetar med.
   const [openItem, setOpenItem] = useState<string | null>(null)
@@ -146,6 +151,17 @@ export default function AdminPage() {
       setPendingItems(items || [])
       setLiveItems(active || [])
 
+      // Alla användare utom admin. Adminraden utelämnas med flit: den enda
+      // knappen här stänger av, och att kunna stänga av sig själv är en fälla.
+      const { data: allUsers } = await supabase
+        .from('profiles')
+        .select(
+          'id, full_name, company_name, email, phone, city, role, approved, suspended, identity_verified, verified_name, org_number, created_at'
+        )
+        .in('role', ['dealer', 'customer'])
+        .order('created_at', { ascending: false })
+      setUsers(allUsers || [])
+
       // Säljar-info för både pending och aktiva föremål, hämtad separat (inte
       // som join) så en RLS-hicka på kopplingen aldrig kan tömma listorna.
       const ownerIds = Array.from(
@@ -226,6 +242,32 @@ export default function AdminPage() {
     setPendingItems((prev) => prev.filter((i) => i.id !== id))
     setDeletingId(null)
     setConfirmId(null)
+  }
+
+  // Stäng av eller släpp på ett konto. RLS-blockering ger noll rader utan
+  // felmeddelande, så utfallet avgörs på antalet returnerade rader och inte
+  // bara på att error saknas.
+  const toggleSuspended = async (user: any, next: boolean) => {
+    setAdminError('')
+    setAdminNotice('')
+    setSavingUser(user.id)
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ suspended: next })
+      .eq('id', user.id)
+      .select('id, suspended')
+    setSavingUser(null)
+    const who = user.company_name || user.full_name || user.email
+    if (error) {
+      setAdminError('Kunde inte ändra kontot: ' + error.message)
+      return
+    }
+    if (!data || data.length === 0) {
+      setAdminError(`Ingen rad uppdaterades för ${who}. Är du kvar som inloggad admin?`)
+      return
+    }
+    setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, suspended: next } : u)))
+    setAdminNotice(next ? `${who} är avstängd.` : `${who} är påsläppt igen.`)
   }
 
   const applyEnd = async (item: any, iso: string, notice: string) => {
@@ -601,6 +643,10 @@ export default function AdminPage() {
               <div className="font-display text-2xl text-emerald-400 group-hover:text-emerald-300 transition">{openOrders}</div>
               <div className="text-xs text-gold-500/60 group-hover:text-gold-400">Pågående affärer</div>
             </Link>
+            <a href="#anvandare" className="group rounded-lg -m-1 p-1 transition hover:bg-white/5">
+              <div className="font-display text-2xl text-gold-100 group-hover:text-gold-300 transition">{users.length}</div>
+              <div className="text-xs text-gold-500/60 group-hover:text-gold-400">Användare</div>
+            </a>
           </div>
         </div>
       </div>
@@ -863,6 +909,136 @@ export default function AdminPage() {
             </div>
           )}
         </section>
+
+        {/* Alla registrerade konton, med avstängning. Ligger här och inte längst
+            ner eftersom det hör ihop med handlargranskningen ovanför. */}
+        {(() => {
+          const q = userSearch.trim().toLowerCase()
+          const shown = users
+            .filter((u) => userFilter === 'alla' || u.role === userFilter)
+            .filter(
+              (u) =>
+                !q ||
+                (u.full_name || '').toLowerCase().includes(q) ||
+                (u.company_name || '').toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q)
+            )
+          const dealers = users.filter((u) => u.role === 'dealer').length
+          const customers = users.filter((u) => u.role === 'customer').length
+          const suspendedCount = users.filter((u) => u.suspended).length
+          const tabs: { key: 'alla' | 'dealer' | 'customer'; label: string; n: number }[] = [
+            { key: 'alla', label: 'Alla', n: users.length },
+            { key: 'dealer', label: 'Handlare', n: dealers },
+            { key: 'customer', label: 'Säljare', n: customers },
+          ]
+          return (
+            <section id="anvandare" className="mb-12 scroll-mt-24">
+              <h2 className="font-display text-xl text-espresso-900 mb-1 flex items-center gap-2 flex-wrap">
+                Användare
+                <span className="chip bg-espresso-100 text-espresso-600">{users.length}</span>
+                {suspendedCount > 0 && (
+                  <span className="chip bg-red-100 text-red-700">{suspendedCount} avstängda</span>
+                )}
+              </h2>
+              <p className="text-xs text-espresso-400 mb-3">
+                Avstängning stoppar handlaren från att buda. Den går att häva här när som helst.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                {tabs.map((t) => (
+                  <button
+                    key={t.key}
+                    type="button"
+                    onClick={() => setUserFilter(t.key)}
+                    className={`text-sm px-3 py-1.5 rounded-xl border transition ${
+                      userFilter === t.key
+                        ? 'bg-espresso-900 text-gold-100 border-espresso-900'
+                        : 'bg-white text-espresso-600 border-espresso-200 hover:border-gold-300'
+                    }`}
+                  >
+                    {t.label} <span className="tabular-nums opacity-70">{t.n}</span>
+                  </button>
+                ))}
+              </div>
+
+              <input
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                placeholder="Sök namn, företag eller e-post…"
+                className="text-sm px-3 py-2 rounded-xl border border-espresso-200 w-full mb-3"
+              />
+
+              {shown.length === 0 ? (
+                <div className="card p-8 text-center text-espresso-400 text-sm">
+                  {users.length === 0 ? 'Inga registrerade användare.' : 'Ingen träff.'}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {shown.map((u) => (
+                    <div
+                      key={u.id}
+                      className={`card p-4 grid grid-cols-[minmax(0,1fr)] gap-3 sm:flex sm:items-start sm:justify-between ${
+                        u.suspended ? 'border-red-200 bg-red-50/40' : ''
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <p className="font-medium text-espresso-900 break-words">
+                          {u.company_name || u.full_name || 'Namn saknas'}
+                        </p>
+                        {u.company_name && u.full_name && (
+                          <p className="text-xs text-espresso-500 break-words">{u.full_name}</p>
+                        )}
+                        <p className="text-xs text-espresso-500 break-words">
+                          {u.email}
+                          {u.phone ? ` · ${u.phone}` : ''}
+                          {u.city ? ` · ${u.city}` : ''}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          <span className="chip bg-espresso-100 text-espresso-600">
+                            {u.role === 'dealer' ? 'Handlare' : 'Säljare'}
+                          </span>
+                          {u.role === 'dealer' && (
+                            <span
+                              className={`chip ${
+                                u.approved ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                              }`}
+                            >
+                              {u.approved ? 'Godkänd' : 'Väntar på godkännande'}
+                            </span>
+                          )}
+                          <span
+                            className={`chip ${
+                              u.identity_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-espresso-100 text-espresso-500'
+                            }`}
+                          >
+                            {u.identity_verified ? 'BankID' : 'Ej BankID'}
+                          </span>
+                          {u.suspended && <span className="chip bg-red-100 text-red-700">Avstängd</span>}
+                        </div>
+                        <p className="text-xs text-espresso-400 mt-2">
+                          Registrerad {new Date(u.created_at).toLocaleDateString('sv-SE')}
+                          {u.org_number ? ` · org.nr ${u.org_number}` : ''}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => toggleSuspended(u, !u.suspended)}
+                        disabled={savingUser === u.id}
+                        className={`text-sm font-medium px-4 py-2 rounded-xl transition shrink-0 disabled:opacity-50 ${
+                          u.suspended
+                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            : 'bg-red-50 hover:bg-red-100 text-red-600'
+                        }`}
+                      >
+                        {savingUser === u.id ? 'Sparar…' : u.suspended ? 'Släpp på' : 'Stäng av'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )
+        })()}
 
         {/* Items */}
         <section id="granska-foremal" className="scroll-mt-24">
