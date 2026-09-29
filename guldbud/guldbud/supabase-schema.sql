@@ -607,6 +607,27 @@ begin
       new.id,
       '/customer/my-items'
     );
+
+    -- Varje handlare som lagt bud, en notis per handlare oavsett antal bud.
+    -- Admins fritext går inte med här: den är skriven till säljaren och kan
+    -- innehålla instruktioner som inte hör hemma hos motparten.
+    insert into public.notifications (user_id, title, message, item_id, link)
+    select distinct b.dealer_id,
+           'Auktionen du budat på har avbrutits',
+           'Auktionen på "' || new.title ||
+           '" har avbrutits av GuldBud, eftersom föremålet låg utlagt i fel kategori. ' ||
+           'Ditt bud gäller inte längre och auktionen är nollställd. Rättar säljaren ' ||
+           'uppgifterna kommer föremålet tillbaka som en ny auktion, och då får du buda på nytt.',
+           new.id,
+           '/auctions'
+    from public.bids b
+    where b.item_id = new.id;
+
+    -- Autobuden är stående instruktioner, inte historik. De måste bort, annars
+    -- ligger de kvar beväpnade på ett föremål som inte längre är till salu.
+    -- Buden i bids lämnas orörda: de är historik och läses av nyckeltalen och
+    -- av övervakningsvyn.
+    delete from public.auto_bids where item_id = new.id;
   end if;
   return new;
 end;
