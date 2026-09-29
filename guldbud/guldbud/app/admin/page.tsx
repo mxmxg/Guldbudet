@@ -31,6 +31,27 @@ function Field({ label, value }: { label: string; value?: string | null }) {
   )
 }
 
+// Skälen admin kan välja när en auktion avbryts.
+// VARNING: meningarna i clause måste vara ORDAGRANT samma som i
+// notify_auction_cancelled i supabase-schema.sql. Den funktionen är det som
+// faktiskt skickar texten, den här listan är bara förhandsvisningen. Ändrar du
+// den ena utan den andra visar panelen en annan text än säljaren får.
+const CANCEL_REASONS: { key: string; label: string; clause: string | null }[] = [
+  { key: 'kategori', label: 'Fel kategori', clause: 'ligger utlagt i fel kategori' },
+  {
+    key: 'metall',
+    label: 'Fel metall eller halt',
+    clause: 'inte stämmer med den metall eller halt som angetts',
+  },
+  {
+    key: 'bilder',
+    label: 'Bristfälliga bilder',
+    clause: 'har bilder som inte räcker för att bedöma det',
+  },
+  { key: 'uppgifter', label: 'Uppgifterna stämmer inte', clause: 'har uppgifter som inte stämmer' },
+  { key: 'annat', label: 'Annat, se min text', clause: null },
+]
+
 // Avbrytpanelen håller fritexten i EGEN state, och det är inte en detalj.
 // Låg den i AdminPage renderades hela sidan om vid varje tangenttryck, och
 // eftersom auktionslistans Group-komponent definieras inuti renderingen får
@@ -46,10 +67,18 @@ function CancelAuctionPanel({
   title: string
   saving: boolean
   onClose: () => void
-  onConfirm: (note: string) => void
+  onConfirm: (note: string, reason: string) => void
 }) {
   const [note, setNote] = useState('')
+  const [reason, setReason] = useState('kategori')
   const trimmed = note.trim()
+  const chosen = CANCEL_REASONS.find((r) => r.key === reason) || CANCEL_REASONS[0]
+  const opening = chosen.clause
+    ? `Våra granskare har sett att "${title}" ${chosen.clause}, så auktionen har avbrutits.`
+    : `Auktionen på "${title}" har avbrutits efter vår granskning.`
+  // Skälet "Annat" säger ingenting i sig, så då måste admin skriva raden själv.
+  const needsNote = chosen.clause === null && !trimmed
+
   return (
     <div className="w-full border-t border-espresso-100 pt-4 mt-1">
       <p className="text-sm font-medium text-espresso-900 mb-1">Avbryt auktionen</p>
@@ -57,25 +86,44 @@ function CancelAuctionPanel({
         Säljaren får detta som notis i tjänsten och som mejl. Alla som budat får besked om att
         auktionen avbrutits.
       </p>
+
+      <label className="block text-xs text-espresso-500 mb-1">Skäl</label>
+      <select
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        className="w-full text-sm px-3 py-2 rounded-xl border border-espresso-200 bg-white mb-3"
+      >
+        {CANCEL_REASONS.map((r) => (
+          <option key={r.key} value={r.key}>
+            {r.label}
+          </option>
+        ))}
+      </select>
+
       <div className="rounded-xl bg-espresso-50 border border-espresso-100 p-3 mb-3">
         <p className="text-xs text-espresso-700">
-          Våra granskare har sett att &quot;{title}&quot; ligger utlagt i fel kategori, så auktionen
-          har avbrutits.{trimmed ? ` ${trimmed}` : ''} Rätta uppgifterna och lägg ut föremålet igen
-          från Mina föremål.
+          {opening}
+          {trimmed ? ` ${trimmed}` : ''} Rätta uppgifterna och lägg ut föremålet igen från Mina
+          föremål.
         </p>
       </div>
+
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value.slice(0, 300))}
         rows={2}
-        placeholder="Valfri rad till säljaren, till exempel vilken kategori föremålet hör hemma i…"
+        placeholder="Valfri rad till säljaren, till exempel vad som behöver rättas…"
         className="w-full text-sm px-3 py-2 rounded-xl border border-espresso-200"
       />
-      <p className="text-xs text-espresso-400 mt-1 mb-3 tabular-nums">{note.length}/300</p>
+      <p className="text-xs text-espresso-400 mt-1 mb-3 tabular-nums">
+        {note.length}/300
+        {needsNote ? ' · skriv en rad, skälet Annat säger inget i sig' : ''}
+      </p>
+
       <div className="flex flex-wrap gap-2">
         <button
-          onClick={() => onConfirm(note)}
-          disabled={saving}
+          onClick={() => onConfirm(note, reason)}
+          disabled={saving || needsNote}
           className="text-sm font-medium px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition disabled:opacity-50"
         >
           {saving ? 'Avbryter…' : 'Avbryt och meddela'}
@@ -338,14 +386,14 @@ export default function AdminPage() {
   // notisen och mejlet ur samma rad, så här sätts bara status och fritexten.
   // Status 'rejected' är med flit samma som ett nekat föremål: det är den
   // status som ger säljaren knappen att lägga ut föremålet igen.
-  const cancelAuction = async (item: any, rawNote: string) => {
+  const cancelAuction = async (item: any, rawNote: string, reason: string) => {
     setAdminError('')
     setAdminNotice('')
     setCancellingId(item.id)
     const note = rawNote.trim()
     const { data, error } = await supabase
       .from('items')
-      .update({ status: 'rejected', cancel_note: note || null })
+      .update({ status: 'rejected', cancel_reason: reason, cancel_note: note || null })
       .eq('id', item.id)
       .select('id')
     setCancellingId(null)
@@ -708,7 +756,7 @@ export default function AdminPage() {
             title={item.title}
             saving={cancellingId === item.id}
             onClose={() => setCancelId(null)}
-            onConfirm={(note) => cancelAuction(item, note)}
+            onConfirm={(note, reason) => cancelAuction(item, note, reason)}
           />
         )}
       </div>

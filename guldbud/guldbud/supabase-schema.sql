@@ -588,20 +588,56 @@ create trigger on_item_activated
 -- notisen och mejlet kan sättas ihop ur en enda rad i triggern.
 -- ============================================================
 alter table public.items add column if not exists cancel_note text;
+alter table public.items add column if not exists cancel_reason text;
 
 create or replace function public.notify_auction_cancelled()
 returns trigger language plpgsql security definer
   set search_path = public as $$
+declare
+  v_reason text;
+  v_seller_clause text;
+  v_dealer_clause text;
+  v_seller_msg text;
 begin
   -- Bara en LIVE auktion som avbryts. Att neka ett väntande föremål går
   -- fortfarande tyst, det har aldrig varit publicerat för säljaren.
   if new.status = 'rejected' and coalesce(old.status, '') = 'active' then
+    -- Null betyder fel kategori, så rader avbrutna före skälvalet behåller
+    -- sin ursprungliga innebörd.
+    v_reason := coalesce(nullif(new.cancel_reason, ''), 'kategori');
+
+    -- OBS: samma formuleringar finns i CANCEL_REASONS i app/admin/page.tsx,
+    -- som visar förhandsgranskningen för admin. Ändra aldrig den ena utan
+    -- den andra, annars visar panelen en annan text än den som skickas.
+    v_seller_clause := case v_reason
+      when 'kategori'  then 'ligger utlagt i fel kategori'
+      when 'metall'    then 'inte stämmer med den metall eller halt som angetts'
+      when 'bilder'    then 'har bilder som inte räcker för att bedöma det'
+      when 'uppgifter' then 'har uppgifter som inte stämmer'
+      else null
+    end;
+
+    v_dealer_clause := case v_reason
+      when 'kategori'  then 'föremålet låg utlagt i fel kategori'
+      when 'metall'    then 'uppgifterna om metall eller halt inte stämde'
+      when 'bilder'    then 'bilderna inte räckte för att bedöma föremålet'
+      when 'uppgifter' then 'uppgifterna om föremålet inte stämde'
+      else 'föremålet inte klarade vår granskning'
+    end;
+
+    if v_seller_clause is null then
+      v_seller_msg := 'Auktionen på "' || new.title || '" har avbrutits efter vår granskning.';
+    else
+      v_seller_msg := 'Våra granskare har sett att "' || new.title || '" ' ||
+                      v_seller_clause || ', så auktionen har avbrutits.';
+    end if;
+
+    -- Säljaren: varför auktionen avbröts och vad som gäller nu.
     insert into public.notifications (user_id, title, message, item_id, link)
     values (
       new.owner_id,
       'Din auktion har avbrutits',
-      'Våra granskare har sett att "' || new.title ||
-      '" ligger utlagt i fel kategori, så auktionen har avbrutits.' ||
+      v_seller_msg ||
       case when coalesce(new.cancel_note, '') <> '' then ' ' || new.cancel_note else '' end ||
       ' Rätta uppgifterna och lägg ut föremålet igen från Mina föremål.',
       new.id,
@@ -614,10 +650,10 @@ begin
     insert into public.notifications (user_id, title, message, item_id, link)
     select distinct b.dealer_id,
            'Auktionen du budat på har avbrutits',
-           'Auktionen på "' || new.title ||
-           '" har avbrutits av GuldBud, eftersom föremålet låg utlagt i fel kategori. ' ||
-           'Ditt bud gäller inte längre och auktionen är nollställd. Rättar säljaren ' ||
-           'uppgifterna kommer föremålet tillbaka som en ny auktion, och då får du buda på nytt.',
+           'Auktionen på "' || new.title || '" har avbrutits av GuldBud, eftersom ' ||
+           v_dealer_clause || '. Ditt bud gäller inte längre och auktionen är nollställd. ' ||
+           'Rättar säljaren uppgifterna kommer föremålet tillbaka som en ny auktion, ' ||
+           'och då får du buda på nytt.',
            new.id,
            '/auctions'
     from public.bids b
