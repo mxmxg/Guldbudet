@@ -34,6 +34,19 @@ export default function Page() {
       eyebrow="Guide · Trasigt guld & tandguld"
       title="Sälja trasigt guld, tandguld och guld utan stämpel"
       intro="Trasiga kedjor, ensamma örhängen, gamla tandkronor eller smycken utan stämpel, mycket som ligger i byrålådan är värt mer än man tror. Guldvärdet sitter i metallen, inte i skicket. Här är vad du behöver veta."
+      answer={
+        <>
+          <p className="mb-2">
+            Ja. Guldvärdet sitter i metallen, inte i skicket. En trasig 18K-kedja är värd lika
+            mycket som en hel med samma vikt, och det gäller även ensamma örhängen, böjda ringar
+            och tandguld.
+          </p>
+          <p>
+            Du behöver inte laga, rengöra eller veta karaten. Saknas stämpel kontrolleras
+            guldhalten när föremålet kommit fram.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

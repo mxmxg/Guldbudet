@@ -34,6 +34,18 @@ export default function Page() {
       eyebrow="Guide · Guldauktion"
       title="Guldauktion: låt guldköparna tävla om ditt guld"
       intro="En guldauktion vänder på maktförhållandet: i stället för att du jagar det bästa budet kommer buden till dig. Här förklarar vi vad en guldauktion är, hur budgivningen fungerar och varför den ofta slår både pantbank och guldsmed."
+      answer={
+        <>
+          <p className="mb-2">
+            En guldauktion är en marknadsplats där flera köpare budar mot varandra om samma
+            föremål, i stället för att en enda uppköpare sätter priset.
+          </p>
+          <p>
+            På GuldBud budar verifierade guldhandlare i realtid. Det är gratis för dig som
+            säljer, hela budet går till dig och du väljer själv om du accepterar.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

@@ -34,6 +34,18 @@ export default function Page() {
       eyebrow="Guide · Sälja guld"
       title="Så får du bäst betalt när du säljer guld"
       intro="Ska du sälja guld men vet inte vad det är värt, eller hur du undviker att bli lurad? Här går vi igenom hela processen, från värdering till utbetalning, och varför konkurrensen mellan handlare ger dig mest."
+      answer={
+        <>
+          <p className="mb-2">
+            Priset styrs av vikten, karaten och dagens guldpris. Räkna ut metallvärdet innan du
+            säljer, så vet du vad ett bud ska mätas mot.
+          </p>
+          <p>
+            Sälj aldrig efter ett enda bud. Låt flera verifierade handlare buda mot varandra, då
+            sätter marknaden priset och inte en enskild uppköpare.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

@@ -30,6 +30,20 @@ export default function Page() {
       eyebrow="Guide · Skatt"
       title="Skatt på sålt guld, det här gäller (i korthet)"
       intro="Måste man skatta när man säljer guld? För de flesta som säljer gamla eller ärvda smycken blir svaret ofta nej, men det finns gränser och undantag. Här är principerna, med reservationen att detta är allmän information och inte skatterådgivning."
+      answer={
+        <>
+          <p className="mb-2">
+            För de flesta som säljer gamla eller ärvda smycken blir det ingen skatt. Smycken du
+            haft för eget bruk räknas som personligt lösöre, och vinsten är normalt skattefri
+            upp till 50 000 kr per år sammanlagt. Investeringsguld som tackor och mynt köpta som
+            placering beskattas i stället fullt ut.
+          </p>
+          <p>
+            Det här är allmän information, inte skatterådgivning. Kontrollera alltid med
+            Skatteverket för din situation.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

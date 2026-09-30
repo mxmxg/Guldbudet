@@ -30,6 +30,18 @@ export default function Page() {
       eyebrow="Guide · Karat"
       title="Vad betyder 18K, 14K och 9K?"
       intro="Karat anger hur mycket rent guld ett föremål innehåller. Här är vad stämplarna betyder och hur de påverkar värdet när du säljer."
+      answer={
+        <>
+          <p className="mb-2">
+            Karat anger hur stor del av guldet som är rent. Stämpeln står i tusendelar: 999 är
+            24K, 750 är 18K, 585 är 14K och 375 är 9K.
+          </p>
+          <p>
+            Värdet per gram följer guldhalten. Ett 18K-smycke innehåller dubbelt så mycket rent
+            guld som ett lika tungt 9K-smycke.
+          </p>
+        </>
+      }
       faq={faq}
     >
       <H2>Karat = renhet</H2>

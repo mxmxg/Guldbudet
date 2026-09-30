@@ -31,6 +31,18 @@ export default function Page() {
       eyebrow="Värdering"
       title="Vad är mitt guld värt?"
       intro="Fyll i vikt och karat så räknar vi ut ett indikativt värde utifrån dagens guldpris. Gratis, direkt och utan att du behöver skapa konto."
+      answer={
+        <>
+          <p className="mb-2">
+            Värdet är vikten i gram gånger guldhalten gånger dagens pris på ett gram rent guld.
+            18 karat är 75 procent guld, 14 karat 58,5 procent och 9 karat 37,5 procent.
+          </p>
+          <p>
+            Ett bud landar alltid något under metallvärdet. Hur nära du kommer avgörs av hur
+            många handlare som budar mot varandra.
+          </p>
+        </>
+      }
       faq={faq}
     >
       <div className="mb-10">

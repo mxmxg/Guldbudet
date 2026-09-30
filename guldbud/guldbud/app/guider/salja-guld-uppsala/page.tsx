@@ -30,6 +30,18 @@ export default function Page() {
       eyebrow="Sälja guld · Uppsala"
       title="Sälja guld i Uppsala, låt handlarna tävla om ditt guld"
       intro="Uppsala är en stad där mycket byter ägare, inte minst bland studenter och i gamla familjehem. Men det bästa priset på ditt guld får du sällan hos den första guldsmeden du besöker. Låt köparna komma till dig i stället."
+      answer={
+        <>
+          <p className="mb-2">
+            I Uppsala får du hos varje guldsmed eller pantbank ett bud från en enda köpare, och
+            utan något att jämföra med vet du inte om det är rimligt.
+          </p>
+          <p>
+            På GuldBud budar flera verifierade handlare mot varandra om ditt guld, hemifrån och
+            i hela Uppland, helt utan förpliktelser.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

@@ -30,6 +30,18 @@ export default function Page() {
       eyebrow="Guide · Utan kvitto"
       title="Sälja guld utan kvitto, det går alldeles utmärkt"
       intro="Ärvda ringar, en present för 20 år sedan, en gammal kedja i byrålådan, nästan ingen har kvar kvittot. Här reder vi ut vad som faktiskt gäller när du vill sälja guld utan originalkvitto."
+      answer={
+        <>
+          <p className="mb-2">
+            Ja. De flesta som säljer guld har ärvt det, fått det i present eller ägt det länge,
+            och har inget kvitto kvar. Att sakna kvitto sänker inte värdet.
+          </p>
+          <p>
+            I stället gör du en kort ägarbekräftelse när du lägger ut föremålet, där du anger
+            hur du kom över det och intygar att det är ditt.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >
