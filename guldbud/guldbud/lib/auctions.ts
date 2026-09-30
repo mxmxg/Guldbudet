@@ -1,6 +1,14 @@
 import { Item } from '@/lib/types'
 
-export type EnrichedItem = Item & { top_bid: number; bid_count: number }
+// has_reserve och reserve_met räknas i databasfunktionen, som skalar bort
+// min_price. Själva reservationsnivån ska aldrig nå en handlares webbläsare,
+// bara om den är uppnådd eller inte.
+export type EnrichedItem = Item & {
+  top_bid: number
+  bid_count: number
+  has_reserve?: boolean
+  reserve_met?: boolean
+}
 
 /**
  * Hämtar aktiva auktioner med budstatistik (top_bid + bid_count).
@@ -61,5 +69,12 @@ export async function loadActiveItemsWithStats(supabase: any): Promise<EnrichedI
     count[b.item_id] = (count[b.item_id] || 0) + 1
     if (!top[b.item_id] || b.amount > top[b.item_id]) top[b.item_id] = b.amount
   })
-  return list.map((i) => ({ ...i, top_bid: top[i.id] || 0, bid_count: count[i.id] || 0 }))
+  // Samma form som databasfunktionen: status ut, nivån bort.
+  return list.map((i: any) => {
+    const topBid = top[i.id] || 0
+    const has_reserve = i.min_price != null
+    const reserve_met = has_reserve && topBid >= i.min_price
+    const { min_price, ...rest } = i
+    return { ...rest, top_bid: topBid, bid_count: count[i.id] || 0, has_reserve, reserve_met }
+  })
 }

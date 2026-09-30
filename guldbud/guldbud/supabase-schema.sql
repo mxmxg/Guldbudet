@@ -1859,8 +1859,11 @@ create index if not exists watchlist_item_id_idx on public.watchlist (item_id);
 -- databasen via lateral join (träffar bids_item_amount_idx).
 -- SECURITY INVOKER (default) så RLS gäller fullt ut: anon får redan läsa aktiva
 -- items och deras bud, så funktionen är trygg att exponera. Returnerar hela
--- item-raden som jsonb + top_bid + bid_count. min_price ingår (RLS är radnivå);
--- servern skalar bort den innan payloaden når klienten, precis som tidigare.
+-- item-raden som jsonb + top_bid + bid_count + reservationsstatus.
+-- min_price skalas bort HÄR och inte i sidorna. Antagandet att servern alltid
+-- skalar bort den höll inte: handlarpanelen är en klientkomponent och anropar
+-- funktionen direkt från webbläsaren, så nivån nådde handlaren. Nu går bara
+-- has_reserve och reserve_met ut. Rättat 2026-09-30.
 -- ============================================================
 create or replace function public.active_items_with_stats()
 returns setof jsonb
@@ -1869,9 +1872,11 @@ set search_path = public
 as $$
   -- source_note (fritext om ursprung, kan innehålla personligt) skalas bort ur
   -- den publika payloaden. Bara admin/ägare ska se den.
-  select (to_jsonb(i) - 'source_note') || jsonb_build_object(
+  select (to_jsonb(i) - 'source_note' - 'min_price') || jsonb_build_object(
            'top_bid', coalesce(b.top_bid, 0),
-           'bid_count', coalesce(b.bid_count, 0)
+           'bid_count', coalesce(b.bid_count, 0),
+           'has_reserve', i.min_price is not null,
+           'reserve_met', i.min_price is not null and coalesce(b.top_bid, 0) >= i.min_price
          )
   from public.items i
   left join lateral (

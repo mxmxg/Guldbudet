@@ -565,6 +565,22 @@ export default function DealerDashboard() {
                           Est. utbetalning {formatSEK(est.low)}-{formatSEK(est.high)}
                         </span>
                       </div>
+                      {/* Bara status, aldrig nivån: active_items_with_stats skalar
+                          bort min_price och skickar has_reserve och reserve_met. */}
+                      {(item as any).has_reserve && (
+                        <p
+                          className={`mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${
+                            (item as any).reserve_met ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              (item as any).reserve_met ? 'bg-emerald-500' : 'bg-red-500'
+                            }`}
+                          />
+                          {(item as any).reserve_met ? 'Reservationspris uppnått' : 'Reservationspris ej uppnått'}
+                        </p>
+                      )}
                     </div>
 
                     <div className="lg:w-auto lg:min-w-[19rem]">

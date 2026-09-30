@@ -56,8 +56,10 @@ export default async function AuctionsPage() {
 
   // Skala bort reservationsnivån (min_price) ur klient-payloaden, bara status ut.
   const publicItems = enriched.map((i: any) => {
-    const has_reserve = i.min_price != null
-    const reserve_met = has_reserve && (i.top_bid || 0) >= i.min_price
+    // Databasfunktionen levererar statusen färdig och utan min_price. Reserven
+    // nedan gäller bara om ett äldre svar med min_price skulle komma tillbaka.
+    const has_reserve = i.has_reserve ?? i.min_price != null
+    const reserve_met = i.reserve_met ?? (has_reserve && (i.top_bid || 0) >= i.min_price)
     const { min_price, ...rest } = i
     return { ...rest, has_reserve, reserve_met }
   })
