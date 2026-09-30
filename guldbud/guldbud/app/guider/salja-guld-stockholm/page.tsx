@@ -30,6 +30,18 @@ export default function Page() {
       eyebrow="Sälja guld · Stockholm"
       title="Sälja guld i Stockholm utan att lämna hemmet"
       intro="I Stockholm är det aldrig långt till en guldsmed, men det betyder inte att du får bäst betalt. I stället för att gå från butik till butik på Drottninggatan kan du låta handlarna komma till dig och tävla om ditt guld."
+      answer={
+        <>
+          <p className="mb-2">
+            Stockholm har många guldköpare, men i varje butik pratar du med en enda köpare som
+            sätter priset.
+          </p>
+          <p>
+            På GuldBud lägger du ut guldet en gång och flera verifierade handlare budar mot
+            varandra i realtid. Du gör allt hemifrån, var du än bor i Stockholm.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

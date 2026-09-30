@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar'
 import HomeContent from '@/components/HomeContent'
 import JsonLd from '@/components/JsonLd'
 import { SoldRow } from '@/components/RecentlySold'
+import { GULDBUD } from '@/lib/company'
 
 // Cacha startsidan i 30 s (ISR) i stället för att bygga om den från databasen
 // vid varje besök. Serverns HTML är ändå samma publika sida för alla (inloggade
@@ -14,10 +15,27 @@ export const revalidate = 30
 const SITE = 'https://guldbud.com'
 export const metadata = { alternates: { canonical: '/' } }
 
+// Postnummer och ort ur samma källa som fakturorna, så att strukturdatan och
+// handlingarna aldrig kan säga olika saker. "102 31 Stockholm" delas i två.
+const POSTAL = GULDBUD.postal.match(/^(\d{3} \d{2}) (.+)$/)
+
 const orgLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'GuldBud',
+  // Registrerat firmanamn, org.nr och adress, så att en maskinell jämförelse
+  // mot Bolagsverket stämmer. Momsnumret är utelämnat med flit: det visas bara
+  // på GuldBuds egen faktura, se lib/company.ts.
+  legalName: GULDBUD.name,
+  taxID: GULDBUD.org,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: GULDBUD.box,
+    postOfficeBoxNumber: GULDBUD.box.replace(/^Box\s*/, ''),
+    postalCode: POSTAL?.[1],
+    addressLocality: POSTAL?.[2],
+    addressCountry: 'SE',
+  },
   url: SITE,
   logo: `${SITE}/icon`,
   description: 'Sveriges guldauktion, verifierade guldhandlare budar mot varandra om ditt guld.',

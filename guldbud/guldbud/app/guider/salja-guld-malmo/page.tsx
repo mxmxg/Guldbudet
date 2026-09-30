@@ -30,6 +30,18 @@ export default function Page() {
       eyebrow="Sälja guld · Malmö"
       title="Sälja guld i Malmö, låt köparna tävla om ditt guld"
       intro="I Malmö och övriga Skåne finns gott om guldköpare, men det bästa priset får du sällan hos den första du frågar. I stället för att jämföra butik för butik kan du låta flera handlare buda mot varandra, hemifrån."
+      answer={
+        <>
+          <p className="mb-2">
+            I Malmö får du hos varje guldsmed eller pantbank bara ett bud, och utan konkurrens
+            är det svårt att veta om det är bra.
+          </p>
+          <p>
+            På GuldBud budar flera verifierade handlare mot varandra om ditt guld, hemifrån och
+            i hela Skåne. Det är kostnadsfritt för dig som säljer och hela budet går till dig.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

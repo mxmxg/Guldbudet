@@ -30,6 +30,19 @@ export default function Page() {
       eyebrow="Guide · Arvguld"
       title="Sälja arvguld och gamla smycken"
       intro="Ligger det ärvda smycken i byrålådan som ingen använder? Guldvärdet finns kvar oavsett ålder och skick. Så värderar och säljer du arvguld tryggt."
+      answer={
+        <>
+          <p className="mb-2">
+            Arvguld är värt sin vikt och sin karat, inte sin ålder eller modell. Äldre smycken
+            är ofta 18K eller högre, och trasiga eller omoderna smycken har kvar hela sitt
+            guldvärde.
+          </p>
+          <p>
+            Låt flera handlare buda mot varandra, så får varje del sitt marknadsvärde i stället
+            för ett samlat lågt bud från en enda uppköpare.
+          </p>
+        </>
+      }
       faq={faq}
     >
       <H2>Gammalt guld har ofta ett högt värde</H2>

@@ -34,6 +34,19 @@ export default function Page() {
       eyebrow="Guide · Sälja guld online"
       title="Sälja guld online, tryggt, enkelt och ofta mer lönsamt"
       intro="Att sälja guld på nätet känns nytt för många, men gjort rätt är det både tryggare och mer lönsamt än att gå till en butik. Här går vi igenom hur det fungerar, hur du skickar guldet säkert och hur du får bäst betalt."
+      answer={
+        <>
+          <p className="mb-2">
+            Att sälja guld online är tryggt om köparna är verifierade handlare, transporten är
+            försäkrad, guldet äkthetskontrolleras och betalningen sker spårbart till ditt
+            bankkonto.
+          </p>
+          <p>
+            Online kan dessutom flera handlare buda mot varandra om samma föremål, något en
+            butik med ett enda bud inte kan. På GuldBud är det gratis att sälja.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

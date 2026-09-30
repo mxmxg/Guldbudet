@@ -30,6 +30,18 @@ export default function Page() {
       eyebrow="Guide · Färgat guld"
       title="Sälja vitguld och rödguld: färgen spelar mindre roll än du tror"
       intro="Vitguld, rödguld, rosaguld eller klassiskt gult, färgen känns viktig men avgör sällan värdet. Här förklarar vi vad som faktiskt styr priset på färgat guld och hur du får rätt betalt."
+      answer={
+        <>
+          <p className="mb-2">
+            Nej, färgen avgör inte värdet. Det gör karaten och vikten: 18K vitguld, 18K rödguld
+            och 18K gult guld innehåller alla 75 procent rent guld.
+          </p>
+          <p>
+            Färgen kommer från legeringen, så nöj dig aldrig med ett lägre bud för att färgen
+            känns omodern.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

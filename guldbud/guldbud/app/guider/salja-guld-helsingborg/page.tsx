@@ -34,6 +34,18 @@ export default function Page() {
       eyebrow="Sälja guld · Helsingborg"
       title="Sälja guld i Helsingborg, så går budgivningen till"
       intro="I Helsingborg är det lätt att få ett bud på sitt guld. Det svåra är att veta om budet var bra. Den här guiden går igenom exakt hur budgivningen fungerar hos GuldBud, från att du fotar smycket till att pengarna är på kontot."
+      answer={
+        <>
+          <p className="mb-2">
+            En guldsmed eller pantbank i Helsingborg ger dig ett förstabud från en enda köpare,
+            som inte har någon anledning att bjuda över sig själv.
+          </p>
+          <p>
+            På GuldBud pågår budgivningen i 48 timmar, varje bud höjer med minst 100 kr och sena
+            bud förlänger tiden. Du får hela slutbudet utan avdrag och kan tacka nej.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >

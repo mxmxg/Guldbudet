@@ -31,6 +31,18 @@ export default function Page() {
       eyebrow="Guldpris"
       title="Guldpris idag"
       intro="Aktuellt guldpris per gram, uppdaterat löpande. Se vad 24K, 18K, 14K och 9K är värt vid dagens kurs, och räkna ut vad just ditt guld skulle ge."
+      answer={
+        <>
+          <p className="mb-2">
+            Guldpriset sätts på världsmarknaden och ändras löpande under dygnet. Dagens pris per
+            gram för rent guld, 24K, visas nedan.
+          </p>
+          <p>
+            Dina smycken är oftast legerade: 18K är 75 procent av 24K-priset, 14K 58,5 procent
+            och 9K 37,5 procent.
+          </p>
+        </>
+      }
     >
       <div className="mb-8">
         <LiveGoldPrice variant="card" className="max-w-md" />

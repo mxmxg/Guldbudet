@@ -30,6 +30,19 @@ export default function Page() {
       eyebrow="Sälja guld · Göteborg"
       title="Sälja guld i Göteborg, marknaden sätter priset"
       intro="Från Avenyns guldsmeder till pantbanker på Hisingen, Göteborg har många guldköpare. Men i stället för att nöja dig med ett bud kan du låta flera handlare tävla om ditt guld, utan att lämna hemmet."
+      answer={
+        <>
+          <p className="mb-2">
+            Hos en guldsmed eller pantbank i Göteborg får du ett bud från en enda köpare, och
+            inget att jämföra med.
+          </p>
+          <p>
+            På GuldBud budar flera verifierade handlare mot varandra om ditt guld. Allt sker
+            online, så det spelar ingen roll om du bor på Hisingen, i Mölndal eller i
+            Kungsbacka.
+          </p>
+        </>
+      }
       updated="2026"
       faq={faq}
     >
