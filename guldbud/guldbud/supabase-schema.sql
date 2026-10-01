@@ -536,7 +536,7 @@ begin
   else
     insert into public.notifications (user_id, title, message, link)
     values (new.id, 'Välkommen till GuldBud 👋',
-            'Kul att ha dig här! Nu kan du sälja ditt guld och låta auktoriserade handlare buda mot varandra om bästa priset, helt gratis och tryggt.',
+            'Kul att ha dig här! Nu kan du sälja ditt guld och låta verifierade handlare buda mot varandra om bästa priset, helt gratis och tryggt.',
             '/customer/submit');
   end if;
 
@@ -919,13 +919,15 @@ begin
       -- Reservationspris ej uppnått
       insert into public.notifications (user_id, title, message, item_id, link)
       values (r.owner_id, 'Högsta bud: ' || v_top.amount || ' kr på "' || r.title || '"',
-              'Budgivningen landade på ' || v_top.amount || ' kr, strax under ditt reservationspris på ' ||
-              r.min_price || ' kr. Du kan ändå välja att godkänna budet och få betalt. ' ||
-              'Att sälja är helt kostnadsfritt för dig.',
+              'Budgivningen slutade på ' || v_top.amount || ' kr. Det är under ditt reservationspris på ' ||
+              r.min_price || ' kr, så föremålet är inte sålt än. Du kan ändå godkänna budet och få betalt, ' ||
+              'eller tacka nej. Att sälja är helt kostnadsfritt för dig.',
               r.id, '/auctions/' || r.id);
       insert into public.notifications (user_id, title, message, item_id, link)
-      values (v_top.dealer_id, 'Auktionen är avslutad',
-              'Du hade det högsta budet på "' || r.title || '". Inväntar säljarens besked.',
+      values (v_top.dealer_id, 'Reservationspris ej uppnått',
+              'Du har det högsta budet på "' || r.title || '", men budet når inte upp till säljarens reservationspris. ' ||
+              'Affären är därför inte klar. Säljaren kan ändå välja att godkänna budet eller tacka nej. ' ||
+              'Du får besked så fort säljaren har svarat.',
               r.id, '/auctions/' || r.id);
     else
       -- Vinnare korad, inväntar säljarens bekräftelse
@@ -937,7 +939,8 @@ begin
               r.id, '/auctions/' || r.id);
       insert into public.notifications (user_id, title, message, item_id, link)
       values (v_top.dealer_id, 'Du hade det högsta budet',
-              'Auktionen på "' || r.title || '" är avslutad. Inväntar säljarens bekräftelse.',
+              'Auktionen på "' || r.title || '" är avslutad och du hade det högsta budet. ' ||
+              'Nu väntar vi på att säljaren godkänner budet. Du får besked så fort säljaren har svarat.',
               r.id, '/auctions/' || r.id);
     end if;
 
@@ -1733,7 +1736,7 @@ begin
     insert into public.notifications (user_id, title, message, item_id, link)
     select p.id,
            'Affär att granska (rutinkontroll)',
-           'Affären för "' || coalesce(v_title, 'föremål') || '" behöver en snabb granskning innan utbetalning: ' ||
+           'Affären för "' || coalesce(v_title, 'föremål') || '" behöver en snabb granskning innan föremålet skickas vidare: ' ||
              coalesce(v_reason, 'högre belopp') || '.',
            new.item_id,
            '/admin/orders/' || new.id

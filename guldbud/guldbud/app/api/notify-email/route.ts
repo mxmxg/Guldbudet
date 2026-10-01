@@ -82,7 +82,7 @@ function instructionsFor(title: string): string {
       'Så kommer du igång',
       [
         'Fotografera ditt föremål och fyll i vikt och karat.',
-        'Auktoriserade guldhandlare budar mot varandra om ditt guld.',
+        'Verifierade guldhandlare budar mot varandra om ditt guld.',
         'Du väljer om du accepterar högsta budet och får betalt. Helt gratis för dig.',
       ],
       'Det tar under fem minuter att lägga ut ditt första föremål.'
